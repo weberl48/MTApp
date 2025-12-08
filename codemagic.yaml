@@ -22,19 +22,24 @@ workflows:
       - name: Sync Capacitor
         script: |
           npx cap sync ios
-      - name: Build iOS
+      - name: Build iOS Simulator
         script: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
-            -configuration Release \
-            -archivePath build/App.xcarchive \
-            archive \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
+      - name: Zip app for Appetize
+        script: |
+          cd ios/App/build/Build/Products/Debug-iphonesimulator
+          zip -r $CM_BUILD_DIR/MCAManager-simulator.zip App.app
     artifacts:
-      - ios/App/build/**/*
+      - MCAManager-simulator.zip
 
   android-capacitor:
     name: Android Build
