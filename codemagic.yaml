@@ -1,0 +1,63 @@
+workflows:
+  ios-capacitor:
+    name: iOS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      xcode: latest
+      cocoapods: default
+      groups:
+        - env_vars  # Add your env vars in Codemagic UI
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Build Next.js
+        script: |
+          npm run build
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios/App && pod install
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
+      - name: Build iOS
+        script: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+    artifacts:
+      - ios/App/build/**/*
+
+  android-capacitor:
+    name: Android Build
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      node: 20
+      java: 17
+      groups:
+        - env_vars  # Add your env vars in Codemagic UI
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Build Next.js
+        script: |
+          npm run build
+      - name: Sync Capacitor
+        script: |
+          npx cap sync android
+      - name: Build Android APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk
