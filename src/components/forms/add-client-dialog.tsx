@@ -26,6 +26,7 @@ import {
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PaymentMethod } from '@/types/database'
+import { useOrganization } from '@/contexts/organization-context'
 
 const paymentMethods: { value: PaymentMethod; label: string }[] = [
   { value: 'private_pay', label: 'Private Pay (Cash/Check)' },
@@ -37,6 +38,7 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
 export function AddClientDialog() {
   const router = useRouter()
   const supabase = createClient()
+  const { organization } = useOrganization()
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -71,6 +73,7 @@ export function AddClientDialog() {
         contact_phone: phone.trim() || null,
         payment_method: paymentMethod,
         notes: notes.trim() || null,
+        organization_id: organization!.id,
       })
 
       if (error) throw error

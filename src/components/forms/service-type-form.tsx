@@ -24,6 +24,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import type { ServiceType, ServiceCategory, LocationType } from '@/types/database'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface ServiceTypeFormProps {
   serviceType?: ServiceType | null
@@ -46,6 +47,7 @@ const LOCATION_TYPES: { value: LocationType; label: string }[] = [
 ]
 
 export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: ServiceTypeFormProps) {
+  const { organization } = useOrganization()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: serviceType?.name || '',
@@ -89,7 +91,10 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
         if (error) throw error
         toast.success('Service type updated')
       } else {
-        const { error } = await supabase.from('service_types').insert(data)
+        const { error } = await supabase.from('service_types').insert({
+          ...data,
+          organization_id: organization!.id,
+        })
 
         if (error) throw error
         toast.success('Service type created')

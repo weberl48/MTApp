@@ -23,6 +23,7 @@ import { calculateSessionPricing, formatCurrency, getPricingDescription } from '
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { addWeeks, format, parseISO } from 'date-fns'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface SessionFormProps {
   serviceTypes: ServiceType[]
@@ -33,6 +34,7 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const { organization } = useOrganization()
 
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -130,6 +132,7 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
             contractor_id: contractorId,
             status,
             notes: notes || null,
+            organization_id: organization!.id,
           })
           .select()
           .single()
@@ -160,6 +163,7 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
             rent_amount: pricing.rentAmount / selectedClients.length,
             payment_method: client.payment_method,
             status: 'pending' as const,
+            organization_id: organization!.id,
           }))
 
           const { error: invoicesError } = await supabase
