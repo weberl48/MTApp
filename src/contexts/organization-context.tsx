@@ -36,6 +36,8 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
     duration_options: [30, 45, 60, 90],
     require_notes: false,
     auto_submit: false,
+    reminder_hours: 24,
+    send_reminders: true,
   },
   notification: {
     email_on_session_submit: true,

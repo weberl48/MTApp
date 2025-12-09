@@ -6,9 +6,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle } from 'lucide-react'
+import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle, Receipt } from 'lucide-react'
 import { ContractorPaymentsTable } from '@/components/tables/contractor-payments-table'
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
+import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
 
 interface InvoiceData {
   id: string
@@ -306,6 +307,10 @@ export default function PaymentsPage() {
             <Users className="w-4 h-4" />
             Payment History
           </TabsTrigger>
+          <TabsTrigger value="reconciliation" className="flex items-center gap-2">
+            <Receipt className="w-4 h-4" />
+            Invoice Reconciliation
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="payroll" className="mt-4">
@@ -340,6 +345,20 @@ export default function PaymentsPage() {
             </CardHeader>
             <CardContent>
               <ContractorPaymentsTable contractors={contractors} invoices={invoices} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reconciliation" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Invoice Reconciliation</CardTitle>
+              <CardDescription>
+                Track invoice status and Square payment integration
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PaymentReconciliationTable onRefresh={loadPayments} />
             </CardContent>
           </Card>
         </TabsContent>

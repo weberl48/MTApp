@@ -30,9 +30,11 @@ import {
   Palette,
   Globe,
   Clock,
+  History,
 } from 'lucide-react'
 import { LogoUpload } from '@/components/forms/logo-upload'
 import { ColorPicker } from '@/components/ui/color-picker'
+import { AuditLogTable } from '@/components/tables/audit-log-table'
 import { toast } from 'sonner'
 import type {
   User as UserType,
@@ -294,6 +296,10 @@ export default function SettingsPage() {
               <TabsTrigger value="notifications" className="flex items-center gap-2">
                 <Bell className="w-4 h-4" />
                 Notifications
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="flex items-center gap-2">
+                <History className="w-4 h-4" />
+                Audit Log
               </TabsTrigger>
             </>
           )}
@@ -949,6 +955,46 @@ export default function SettingsPage() {
                     }
                   />
                 </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Send Session Reminders</Label>
+                    <p className="text-xs text-gray-500">Email contractors before their sessions</p>
+                  </div>
+                  <Switch
+                    checked={localSettings.session.send_reminders ?? true}
+                    onCheckedChange={(checked) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        session: { ...localSettings.session, send_reminders: checked },
+                      })
+                    }
+                  />
+                </div>
+                {localSettings.session.send_reminders !== false && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="reminder_hours">Reminder Lead Time (hours)</Label>
+                    <Input
+                      id="reminder_hours"
+                      type="number"
+                      min="1"
+                      max="72"
+                      value={localSettings.session.reminder_hours ?? 24}
+                      onChange={(e) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          session: {
+                            ...localSettings.session,
+                            reminder_hours: parseInt(e.target.value) || 24,
+                          },
+                        })
+                      }
+                    />
+                    <p className="text-xs text-gray-500">
+                      Reminders will be sent this many hours before the session
+                    </p>
+                  </div>
+                )}
                 <Button onClick={() => saveSettings('session')} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
@@ -1019,6 +1065,23 @@ export default function SettingsPage() {
                   <Save className="mr-2 h-4 w-4" />
                   Save Notification Settings
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Audit Log Tab */}
+        {isAdmin && (
+          <TabsContent value="audit">
+            <Card>
+              <CardHeader>
+                <CardTitle>Audit Log</CardTitle>
+                <CardDescription>
+                  Track all changes to sessions, invoices, clients, and other data for compliance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AuditLogTable />
               </CardContent>
             </Card>
           </TabsContent>

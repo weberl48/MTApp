@@ -29,6 +29,8 @@ export interface OrganizationSettings {
     duration_options: number[]
     require_notes: boolean
     auto_submit: boolean
+    reminder_hours: number
+    send_reminders: boolean
   }
   notification: {
     email_on_session_submit: boolean
