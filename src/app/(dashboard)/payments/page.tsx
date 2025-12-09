@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { DollarSign, Users, Calendar, TrendingUp, Loader2 } from 'lucide-react'
+import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle } from 'lucide-react'
 import { ContractorPaymentsTable } from '@/components/tables/contractor-payments-table'
+import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 
 interface InvoiceData {
   id: string
@@ -36,98 +38,173 @@ interface ContractorPayment {
   invoices: InvoiceData[]
 }
 
+interface SessionWithInvoices {
+  id: string
+  date: string
+  duration_minutes: number
+  contractor_id: string
+  contractor_paid_date: string | null
+  service_type: { name: string } | null
+  contractor: { id: string; name: string; email: string } | null
+  invoices: { contractor_pay: number }[]
+  session_attendees: { client: { name: string } | null }[]
+}
+
 export default function PaymentsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [invoices, setInvoices] = useState<InvoiceData[]>([])
   const [contractors, setContractors] = useState<ContractorPayment[]>([])
+  const [unpaidContractors, setUnpaidContractors] = useState<ContractorPayout[]>([])
+  const [activeTab, setActiveTab] = useState('payroll')
 
-  useEffect(() => {
-    async function loadPayments() {
-      const supabase = createClient()
+  const loadPayments = useCallback(async () => {
+    const supabase = createClient()
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-      if (!user) {
-        router.push('/login/')
-        return
-      }
-
-      // Check if user is admin
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single<{ role: string }>()
-
-      if (userProfile?.role !== 'admin') {
-        router.push('/dashboard/')
-        return
-      }
-
-      // Fetch all invoices with contractor information
-      const { data: invoicesData } = await supabase
-        .from('invoices')
-        .select(`
-          id,
-          amount,
-          mca_cut,
-          contractor_pay,
-          status,
-          created_at,
-          paid_date,
-          session:sessions(
-            id,
-            date,
-            contractor:users(id, name, email),
-            service_type:service_types(name)
-          ),
-          client:clients(name)
-        `)
-        .order('created_at', { ascending: false })
-
-      const typedInvoices = (invoicesData as unknown as InvoiceData[]) || []
-      setInvoices(typedInvoices)
-
-      // Group by contractor
-      const contractorPayments: Record<string, ContractorPayment> = {}
-
-      typedInvoices.forEach((invoice) => {
-        const contractor = invoice.session?.contractor
-        if (!contractor?.id) return
-
-        if (!contractorPayments[contractor.id]) {
-          contractorPayments[contractor.id] = {
-            id: contractor.id,
-            name: contractor.name || 'Unknown',
-            email: contractor.email || '',
-            totalEarned: 0,
-            totalPaid: 0,
-            totalPending: 0,
-            sessionCount: 0,
-            invoices: [],
-          }
-        }
-
-        contractorPayments[contractor.id].totalEarned += Number(invoice.contractor_pay)
-        contractorPayments[contractor.id].sessionCount += 1
-        contractorPayments[contractor.id].invoices.push(invoice)
-
-        if (invoice.status === 'paid') {
-          contractorPayments[contractor.id].totalPaid += Number(invoice.contractor_pay)
-        } else {
-          contractorPayments[contractor.id].totalPending += Number(invoice.contractor_pay)
-        }
-      })
-
-      setContractors(Object.values(contractorPayments))
-      setLoading(false)
+    if (!user) {
+      router.push('/login/')
+      return
     }
 
-    loadPayments()
+    // Check if user is admin
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single<{ role: string }>()
+
+    if (userProfile?.role !== 'admin') {
+      router.push('/dashboard/')
+      return
+    }
+
+    // Fetch all invoices with contractor information (for the history tab)
+    const { data: invoicesData } = await supabase
+      .from('invoices')
+      .select(`
+        id,
+        amount,
+        mca_cut,
+        contractor_pay,
+        status,
+        created_at,
+        paid_date,
+        session:sessions(
+          id,
+          date,
+          contractor:users(id, name, email),
+          service_type:service_types(name)
+        ),
+        client:clients(name)
+      `)
+      .order('created_at', { ascending: false })
+
+    const typedInvoices = (invoicesData as unknown as InvoiceData[]) || []
+    setInvoices(typedInvoices)
+
+    // Group by contractor for history view
+    const contractorPayments: Record<string, ContractorPayment> = {}
+
+    typedInvoices.forEach((invoice) => {
+      const contractor = invoice.session?.contractor
+      if (!contractor?.id) return
+
+      if (!contractorPayments[contractor.id]) {
+        contractorPayments[contractor.id] = {
+          id: contractor.id,
+          name: contractor.name || 'Unknown',
+          email: contractor.email || '',
+          totalEarned: 0,
+          totalPaid: 0,
+          totalPending: 0,
+          sessionCount: 0,
+          invoices: [],
+        }
+      }
+
+      contractorPayments[contractor.id].totalEarned += Number(invoice.contractor_pay)
+      contractorPayments[contractor.id].sessionCount += 1
+      contractorPayments[contractor.id].invoices.push(invoice)
+
+      if (invoice.status === 'paid') {
+        contractorPayments[contractor.id].totalPaid += Number(invoice.contractor_pay)
+      } else {
+        contractorPayments[contractor.id].totalPending += Number(invoice.contractor_pay)
+      }
+    })
+
+    setContractors(Object.values(contractorPayments))
+
+    // Fetch unpaid sessions for payroll hub
+    const { data: unpaidSessions } = await supabase
+      .from('sessions')
+      .select(`
+        id,
+        date,
+        duration_minutes,
+        contractor_id,
+        contractor_paid_date,
+        service_type:service_types(name),
+        contractor:users(id, name, email),
+        invoices(contractor_pay),
+        session_attendees(client:clients(name))
+      `)
+      .is('contractor_paid_date', null)
+      .eq('status', 'submitted')
+      .order('date', { ascending: false })
+
+    const typedSessions = (unpaidSessions as unknown as SessionWithInvoices[]) || []
+
+    // Group unpaid sessions by contractor
+    const unpaidByContractor: Record<string, ContractorPayout> = {}
+
+    typedSessions.forEach((session) => {
+      const contractor = session.contractor
+      if (!contractor?.id) return
+
+      // Calculate contractor pay from invoices
+      const contractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+
+      if (!unpaidByContractor[contractor.id]) {
+        unpaidByContractor[contractor.id] = {
+          id: contractor.id,
+          name: contractor.name || 'Unknown',
+          email: contractor.email || '',
+          unpaidSessions: [],
+          totalPending: 0,
+          sessionCount: 0,
+        }
+      }
+
+      const clients = session.session_attendees
+        .map((a) => a.client?.name)
+        .filter((name): name is string => !!name)
+
+      const unpaidSession: UnpaidSession = {
+        id: session.id,
+        date: session.date,
+        service_type: session.service_type,
+        duration_minutes: session.duration_minutes,
+        contractor_pay: contractorPay,
+        clients,
+      }
+
+      unpaidByContractor[contractor.id].unpaidSessions.push(unpaidSession)
+      unpaidByContractor[contractor.id].totalPending += contractorPay
+      unpaidByContractor[contractor.id].sessionCount += 1
+    })
+
+    setUnpaidContractors(Object.values(unpaidByContractor))
+    setLoading(false)
   }, [router])
+
+  useEffect(() => {
+    loadPayments()
+  }, [loadPayments])
 
   if (loading) {
     return (
@@ -137,10 +214,10 @@ export default function PaymentsPage() {
     )
   }
 
-  // Calculate totals
+  // Calculate totals for history view
   const totalContractorPay = contractors.reduce((sum, c) => sum + c.totalEarned, 0)
   const totalPaidOut = contractors.reduce((sum, c) => sum + c.totalPaid, 0)
-  const totalPending = contractors.reduce((sum, c) => sum + c.totalPending, 0)
+  const totalPending = unpaidContractors.reduce((sum, c) => sum + c.totalPending, 0)
   const totalMcaCut = invoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
 
   return (
@@ -148,7 +225,7 @@ export default function PaymentsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Contractor Payments</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Track and export contractor payment reports
+          Manage contractor payouts and view payment history
         </p>
       </div>
 
@@ -163,9 +240,7 @@ export default function PaymentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalContractorPay)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              All time
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">All time</p>
           </CardContent>
         </Card>
 
@@ -178,23 +253,25 @@ export default function PaymentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaidOut)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Completed payments
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Completed payments</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={totalPending > 0 ? 'border-amber-200 dark:border-amber-800' : ''}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Pending Payouts
             </CardTitle>
-            <Calendar className="w-4 h-4 text-amber-500" />
+            {totalPending > 0 ? (
+              <AlertCircle className="w-4 h-4 text-amber-500" />
+            ) : (
+              <Calendar className="w-4 h-4 text-gray-400" />
+            )}
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Awaiting payment
+              {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)} sessions awaiting payment
             </p>
           </CardContent>
         </Card>
@@ -208,25 +285,65 @@ export default function PaymentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalMcaCut)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Total commission
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total commission</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Contractor Payments Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Contractor Summary</CardTitle>
-          <CardDescription>
-            {contractors.length} contractor{contractors.length !== 1 ? 's' : ''} with payment activity
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ContractorPaymentsTable contractors={contractors} invoices={invoices} />
-        </CardContent>
-      </Card>
+      {/* Tabs for Payroll Hub vs History */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="payroll" className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4" />
+            Payroll Hub
+            {unpaidContractors.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Payment History
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="payroll" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Unpaid Sessions</CardTitle>
+              <CardDescription>
+                {unpaidContractors.length === 0
+                  ? 'All contractors have been paid!'
+                  : `${unpaidContractors.length} contractor${
+                      unpaidContractors.length !== 1 ? 's' : ''
+                    } with unpaid sessions`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PayrollHubTable
+                contractors={unpaidContractors}
+                onPayoutComplete={loadPayments}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contractor Summary</CardTitle>
+              <CardDescription>
+                {contractors.length} contractor{contractors.length !== 1 ? 's' : ''} with payment
+                activity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ContractorPaymentsTable contractors={contractors} invoices={invoices} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

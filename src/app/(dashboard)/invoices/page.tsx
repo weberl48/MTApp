@@ -27,6 +27,7 @@ interface Invoice {
   rent_amount: number
   status: 'pending' | 'sent' | 'paid'
   payment_method: 'private_pay' | 'self_directed' | 'group_home' | 'scholarship'
+  organization_id: string
   created_at: string
   updated_at: string
   due_date: string | null

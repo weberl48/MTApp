@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# May Creative Arts App
+
+A mobile-first practice management system for May Creative Arts (MCA). This application handles session tracking, invoicing, and contractor payments.
+
+## Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Mobile**: [Capacitor](https://capacitorjs.com/) (Android & iOS)
+- **State Management**: React Server Components + React Hook Form
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (v18+)
+- npm or pnpm
+- Supabase project (or local instance)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd mca-app
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3.  **Environment Setup:**
+    Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+    ```bash
+    cp .env.example .env.local
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+4.  **Run Development Server:**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The database schema is managed via SQL files in the `supabase/` directory.
+1.  `supabase/schema.sql`: Contains the table definitions and RLS policies.
+2.  `supabase/seed.sql`: Contains initial data (service types).
 
-## Deploy on Vercel
+You can apply these using the Supabase Dashboard or CLI.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Mobile Development (Capacitor)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project uses Capacitor to wrap the Next.js web app into a native mobile app.
+
+### Android
+
+1.  **Sync config:**
+    ```bash
+    npx cap sync
+    ```
+2.  **Open Android Studio:**
+    ```bash
+    npx cap open android
+    ```
+
+### iOS
+
+1.  **Sync config:**
+    ```bash
+    npx cap sync
+    ```
+2.  **Open Xcode:**
+    ```bash
+    npx cap open ios
+    ```
+
+## Project Structure
+
+- `src/app`: Next.js App Router pages and layouts.
+- `src/components`: Reusable UI components.
+- `src/lib`: Utility functions and clients (Supabase, Square, Pricing).
+- `src/types`: TypeScript type definitions (Database).
+- `supabase`: Database schema and seeds.
+
+## Testing
+
+(Coming soon: Vitest + React Testing Library)

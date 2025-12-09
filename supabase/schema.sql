@@ -61,6 +61,8 @@ CREATE TABLE sessions (
     contractor_id UUID NOT NULL REFERENCES users(id),
     status session_status NOT NULL DEFAULT 'draft',
     notes TEXT,
+    contractor_paid_date DATE,
+    contractor_paid_amount DECIMAL(10,2),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

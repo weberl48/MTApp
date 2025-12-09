@@ -6,7 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type UserRole = 'admin' | 'contractor'
+export type UserRole = 'developer' | 'owner' | 'admin' | 'contractor'
+export type PlanType = 'free' | 'starter' | 'professional'
 export type SessionStatus = 'draft' | 'submitted' | 'approved'
 export type InvoiceStatus = 'pending' | 'sent' | 'paid'
 export type PaymentMethod = 'private_pay' | 'self_directed' | 'group_home' | 'scholarship'
@@ -14,9 +15,130 @@ export type GoalStatus = 'active' | 'met' | 'not_met'
 export type LocationType = 'in_home' | 'matts_music' | 'other'
 export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individual' | 'art_group'
 
+// Organization settings structure
+export interface OrganizationSettings {
+  invoice: {
+    footer_text: string
+    payment_instructions: string
+    due_days: number
+    send_reminders: boolean
+    reminder_days: number[]
+  }
+  session: {
+    default_duration: number
+    duration_options: number[]
+    require_notes: boolean
+    auto_submit: boolean
+  }
+  notification: {
+    email_on_session_submit: boolean
+    email_on_invoice_paid: boolean
+    admin_email: string
+  }
+}
+
+// Social links structure
+export interface SocialLinks {
+  facebook?: string
+  instagram?: string
+  twitter?: string
+  linkedin?: string
+  youtube?: string
+  tiktok?: string
+}
+
+// Business hours structure
+export interface DayHours {
+  open: string
+  close: string
+  closed: boolean
+}
+
+export interface BusinessHours {
+  monday: DayHours
+  tuesday: DayHours
+  wednesday: DayHours
+  thursday: DayHours
+  friday: DayHours
+  saturday: DayHours
+  sunday: DayHours
+}
+
 export interface Database {
   public: {
     Tables: {
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          email: string | null
+          phone: string | null
+          address: string | null
+          website: string | null
+          logo_url: string | null
+          primary_color: string
+          secondary_color: string
+          tagline: string | null
+          description: string | null
+          tax_id: string | null
+          social_links: SocialLinks
+          business_hours: BusinessHours
+          timezone: string
+          currency: string
+          plan: PlanType
+          trial_ends_at: string | null
+          settings: OrganizationSettings
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          email?: string | null
+          phone?: string | null
+          address?: string | null
+          website?: string | null
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tagline?: string | null
+          description?: string | null
+          tax_id?: string | null
+          social_links?: SocialLinks
+          business_hours?: BusinessHours
+          timezone?: string
+          currency?: string
+          plan?: PlanType
+          trial_ends_at?: string | null
+          settings?: OrganizationSettings
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          name?: string
+          slug?: string
+          email?: string | null
+          phone?: string | null
+          address?: string | null
+          website?: string | null
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tagline?: string | null
+          description?: string | null
+          tax_id?: string | null
+          social_links?: SocialLinks
+          business_hours?: BusinessHours
+          timezone?: string
+          currency?: string
+          plan?: PlanType
+          trial_ends_at?: string | null
+          settings?: OrganizationSettings
+          updated_at?: string
+        }
+      }
       users: {
         Row: {
           id: string
@@ -25,6 +147,7 @@ export interface Database {
           name: string
           phone: string | null
           payment_info: Json | null
+          organization_id: string
           created_at: string
           updated_at: string
         }
@@ -35,6 +158,7 @@ export interface Database {
           name: string
           phone?: string | null
           payment_info?: Json | null
+          organization_id: string
           created_at?: string
           updated_at?: string
         }
@@ -45,6 +169,7 @@ export interface Database {
           name?: string
           phone?: string | null
           payment_info?: Json | null
+          organization_id?: string
           updated_at?: string
         }
       }
@@ -56,6 +181,7 @@ export interface Database {
           contact_phone: string | null
           payment_method: PaymentMethod
           notes: string | null
+          organization_id: string
           created_at: string
           updated_at: string
         }
@@ -66,6 +192,7 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           notes?: string | null
+          organization_id: string
           created_at?: string
           updated_at?: string
         }
@@ -75,6 +202,7 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           notes?: string | null
+          organization_id?: string
           updated_at?: string
         }
       }
@@ -89,6 +217,9 @@ export interface Database {
           mca_percentage: number
           contractor_cap: number | null
           rent_percentage: number
+          is_active: boolean
+          display_order: number
+          organization_id: string
           created_at: string
           updated_at: string
         }
@@ -102,6 +233,9 @@ export interface Database {
           mca_percentage: number
           contractor_cap?: number | null
           rent_percentage?: number
+          is_active?: boolean
+          display_order?: number
+          organization_id: string
           created_at?: string
           updated_at?: string
         }
@@ -114,6 +248,9 @@ export interface Database {
           mca_percentage?: number
           contractor_cap?: number | null
           rent_percentage?: number
+          is_active?: boolean
+          display_order?: number
+          organization_id?: string
           updated_at?: string
         }
       }
@@ -126,6 +263,9 @@ export interface Database {
           contractor_id: string
           status: SessionStatus
           notes: string | null
+          contractor_paid_date: string | null
+          contractor_paid_amount: number | null
+          organization_id: string
           created_at: string
           updated_at: string
         }
@@ -137,6 +277,9 @@ export interface Database {
           contractor_id: string
           status?: SessionStatus
           notes?: string | null
+          contractor_paid_date?: string | null
+          contractor_paid_amount?: number | null
+          organization_id: string
           created_at?: string
           updated_at?: string
         }
@@ -147,6 +290,9 @@ export interface Database {
           contractor_id?: string
           status?: SessionStatus
           notes?: string | null
+          contractor_paid_date?: string | null
+          contractor_paid_amount?: number | null
+          organization_id?: string
           updated_at?: string
         }
       }
@@ -184,6 +330,7 @@ export interface Database {
           payment_method: PaymentMethod
           due_date: string | null
           paid_date: string | null
+          organization_id: string
           created_at: string
           updated_at: string
         }
@@ -199,6 +346,7 @@ export interface Database {
           payment_method: PaymentMethod
           due_date?: string | null
           paid_date?: string | null
+          organization_id: string
           created_at?: string
           updated_at?: string
         }
@@ -213,6 +361,7 @@ export interface Database {
           payment_method?: PaymentMethod
           due_date?: string | null
           paid_date?: string | null
+          organization_id?: string
           updated_at?: string
         }
       }
@@ -222,6 +371,7 @@ export interface Database {
           client_id: string
           description: string
           status: GoalStatus
+          organization_id: string
           created_at: string
           completed_at: string | null
         }
@@ -230,6 +380,7 @@ export interface Database {
           client_id: string
           description: string
           status?: GoalStatus
+          organization_id: string
           created_at?: string
           completed_at?: string | null
         }
@@ -237,6 +388,7 @@ export interface Database {
           client_id?: string
           description?: string
           status?: GoalStatus
+          organization_id?: string
           completed_at?: string | null
         }
       }
@@ -249,6 +401,7 @@ export interface Database {
     }
     Enums: {
       user_role: UserRole
+      plan_type: PlanType
       session_status: SessionStatus
       invoice_status: InvoiceStatus
       payment_method: PaymentMethod
@@ -260,6 +413,7 @@ export interface Database {
 }
 
 // Convenience types for working with the database
+export type Organization = Database['public']['Tables']['organizations']['Row']
 export type User = Database['public']['Tables']['users']['Row']
 export type Client = Database['public']['Tables']['clients']['Row']
 export type ServiceType = Database['public']['Tables']['service_types']['Row']
@@ -267,6 +421,43 @@ export type Session = Database['public']['Tables']['sessions']['Row']
 export type SessionAttendee = Database['public']['Tables']['session_attendees']['Row']
 export type Invoice = Database['public']['Tables']['invoices']['Row']
 export type ClientGoal = Database['public']['Tables']['client_goals']['Row']
+
+// App Settings types
+export interface BusinessInfo {
+  name: string
+  email: string
+  phone: string
+  address: string
+  website: string
+}
+
+export interface InvoiceSettings {
+  footer_text: string
+  payment_instructions: string
+  due_days: number
+  send_reminders: boolean
+  reminder_days: number[]
+}
+
+export interface SessionSettings {
+  default_duration: number
+  duration_options: number[]
+  require_notes: boolean
+  auto_submit: boolean
+}
+
+export interface NotificationSettings {
+  email_on_session_submit: boolean
+  email_on_invoice_paid: boolean
+  admin_email: string
+}
+
+export interface AppSettings {
+  business_info: BusinessInfo
+  invoice_settings: InvoiceSettings
+  session_settings: SessionSettings
+  notification_settings: NotificationSettings
+}
 
 // Extended types with relations
 export type SessionWithDetails = Session & {

@@ -12,7 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User as UserIcon, Settings } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2 } from 'lucide-react'
+import { useOrganization } from '@/contexts/organization-context'
 import type { User } from '@/types/database'
 
 interface HeaderProps {
@@ -22,6 +24,7 @@ interface HeaderProps {
 export function Header({ user }: HeaderProps) {
   const router = useRouter()
   const supabase = createClient()
+  const { organization, isDeveloper, allOrganizations, switchOrganization } = useOrganization()
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -43,8 +46,46 @@ export function Header({ user }: HeaderProps) {
       {/* Spacer for mobile menu button */}
       <div className="w-10 lg:hidden" />
 
-      {/* Page title placeholder */}
-      <div className="flex-1" />
+      {/* Developer badge and org switcher */}
+      <div className="flex-1 flex items-center gap-4">
+        {isDeveloper && (
+          <>
+            <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700">
+              <Code2 className="w-3 h-3 mr-1" />
+              Developer
+            </Badge>
+
+            {/* Organization Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  <span className="max-w-[150px] truncate">{organization?.name || 'Select Org'}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="start">
+                <DropdownMenuLabel>Switch Organization</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="max-h-[300px] overflow-y-auto">
+                  {allOrganizations.map((org) => (
+                    <DropdownMenuItem
+                      key={org.id}
+                      onClick={() => switchOrganization(org.id)}
+                      className={org.id === organization?.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">{org.name}</span>
+                        <span className="text-xs text-gray-500">{org.slug}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        )}
+      </div>
 
       {/* User menu */}
       <DropdownMenu>

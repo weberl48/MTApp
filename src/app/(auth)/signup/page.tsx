@@ -1,19 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Building2, UserPlus } from 'lucide-react'
 
 export default function SignupPage() {
+  const searchParams = useSearchParams()
+  const inviteOrgId = searchParams.get('org') // For joining existing org via invite link
+
+  const [signupType, setSignupType] = useState<'new-org' | 'join-org'>(inviteOrgId ? 'join-org' : 'new-org')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [organizationName, setOrganizationName] = useState('')
+  const [inviteCode, setInviteCode] = useState(inviteOrgId || '')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -37,15 +45,38 @@ export default function SignupPage() {
       return
     }
 
+    if (signupType === 'new-org' && !organizationName.trim()) {
+      setError('Please enter your practice name')
+      setLoading(false)
+      return
+    }
+
+    if (signupType === 'join-org' && !inviteCode.trim()) {
+      setError('Please enter an invite code or organization ID')
+      setLoading(false)
+      return
+    }
+
     try {
+      // Build metadata based on signup type
+      const metadata: Record<string, string> = {
+        name,
+      }
+
+      if (signupType === 'new-org') {
+        // Creating new organization - will become owner
+        metadata.organization_name = organizationName.trim()
+      } else {
+        // Joining existing organization - will become contractor
+        metadata.organization_id = inviteCode.trim()
+        metadata.role = 'contractor'
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-            role: 'contractor', // Default role for new signups
-          },
+          data: metadata,
         },
       })
 
@@ -83,11 +114,11 @@ export default function SignupPage() {
   }
 
   return (
-    <Card>
+    <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Create an account</CardTitle>
+        <CardTitle>Get Started</CardTitle>
         <CardDescription>
-          Sign up to start tracking your sessions
+          Create a new practice or join an existing one
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -97,6 +128,60 @@ export default function SignupPage() {
               {error}
             </div>
           )}
+
+          {/* Signup Type Toggle */}
+          {!inviteOrgId && (
+            <Tabs value={signupType} onValueChange={(v) => setSignupType(v as 'new-org' | 'join-org')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="new-org" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  New Practice
+                </TabsTrigger>
+                <TabsTrigger value="join-org" className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Join Team
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+
+          {/* Organization Name (for new org) */}
+          {signupType === 'new-org' && (
+            <div className="space-y-2">
+              <Label htmlFor="organizationName">Practice Name</Label>
+              <Input
+                id="organizationName"
+                type="text"
+                placeholder="e.g., Harmony Music Therapy"
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.target.value)}
+                required={signupType === 'new-org'}
+              />
+              <p className="text-xs text-gray-500">This will be your organization&apos;s name</p>
+            </div>
+          )}
+
+          {/* Invite Code (for joining org) */}
+          {signupType === 'join-org' && (
+            <div className="space-y-2">
+              <Label htmlFor="inviteCode">Invite Code</Label>
+              <Input
+                id="inviteCode"
+                type="text"
+                placeholder="Enter invite code from your admin"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                required={signupType === 'join-org'}
+                disabled={!!inviteOrgId}
+              />
+              <p className="text-xs text-gray-500">Get this from your practice administrator</p>
+            </div>
+          )}
+
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium mb-3">Your Information</p>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input
@@ -148,7 +233,7 @@ export default function SignupPage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Creating account...' : signupType === 'new-org' ? 'Create Practice' : 'Join Practice'}
           </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}

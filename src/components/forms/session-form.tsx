@@ -16,10 +16,13 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { X, Plus, Calculator } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { X, Plus, Calculator, Repeat } from 'lucide-react'
 import { calculateSessionPricing, formatCurrency, getPricingDescription } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
+import { addWeeks, format, parseISO } from 'date-fns'
 
 interface SessionFormProps {
   serviceTypes: ServiceType[]
@@ -39,6 +42,12 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
   const [notes, setNotes] = useState('')
   const [status, setStatus] = useState<'draft' | 'submitted'>('submitted')
 
+  // Recurring session state
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [repeatMode, setRepeatMode] = useState<'weeks' | 'until'>('weeks')
+  const [repeatWeeks, setRepeatWeeks] = useState('4')
+  const [endDate, setEndDate] = useState('')
+
   // Get selected service type for pricing calculation
   const selectedServiceType = serviceTypes.find((st) => st.id === serviceTypeId)
 
@@ -57,6 +66,33 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
   }
 
+  // Calculate all session dates for recurring sessions
+  function getSessionDates(): string[] {
+    const startDate = parseISO(date)
+    const dates: string[] = [date]
+
+    if (!isRecurring) return dates
+
+    if (repeatMode === 'weeks') {
+      const numWeeks = parseInt(repeatWeeks)
+      for (let i = 1; i < numWeeks; i++) {
+        dates.push(format(addWeeks(startDate, i), 'yyyy-MM-dd'))
+      }
+    } else if (repeatMode === 'until' && endDate) {
+      const end = parseISO(endDate)
+      let nextDate = addWeeks(startDate, 1)
+      while (nextDate <= end) {
+        dates.push(format(nextDate, 'yyyy-MM-dd'))
+        nextDate = addWeeks(nextDate, 1)
+      }
+    }
+
+    return dates
+  }
+
+  // Calculate number of sessions for preview
+  const sessionCount = isRecurring ? getSessionDates().length : 1
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -73,64 +109,74 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
     setLoading(true)
 
     try {
-      // Create the session
-      const { data: session, error: sessionError } = await supabase
-        .from('sessions')
-        .insert({
-          date,
-          duration_minutes: parseInt(duration),
-          service_type_id: serviceTypeId,
-          contractor_id: contractorId,
-          status,
-          notes: notes || null,
-        })
-        .select()
-        .single()
+      // Get all session dates (single or recurring)
+      const sessionDates = getSessionDates()
 
-      if (sessionError) throw sessionError
+      // Get client payment methods for invoicing
+      const clientData = await supabase
+        .from('clients')
+        .select('id, payment_method')
+        .in('id', selectedClients)
 
-      // Add attendees
-      const attendees = selectedClients.map((clientId) => ({
-        session_id: session.id,
-        client_id: clientId,
-        individual_cost: pricing?.perPersonCost || 0,
-      }))
+      // Create each session
+      for (const sessionDate of sessionDates) {
+        // Create the session
+        const { data: session, error: sessionError } = await supabase
+          .from('sessions')
+          .insert({
+            date: sessionDate,
+            duration_minutes: parseInt(duration),
+            service_type_id: serviceTypeId,
+            contractor_id: contractorId,
+            status,
+            notes: notes || null,
+          })
+          .select()
+          .single()
 
-      const { error: attendeesError } = await supabase
-        .from('session_attendees')
-        .insert(attendees)
+        if (sessionError) throw sessionError
 
-      if (attendeesError) throw attendeesError
-
-      // If submitted, create invoices for each client
-      if (status === 'submitted' && pricing) {
-        const clientData = await supabase
-          .from('clients')
-          .select('id, payment_method')
-          .in('id', selectedClients)
-
-        const invoices = (clientData.data || []).map((client) => ({
+        // Add attendees
+        const attendees = selectedClients.map((clientId) => ({
           session_id: session.id,
-          client_id: client.id,
-          amount: pricing.perPersonCost,
-          mca_cut: pricing.mcaCut / selectedClients.length,
-          contractor_pay: pricing.contractorPay / selectedClients.length,
-          rent_amount: pricing.rentAmount / selectedClients.length,
-          payment_method: client.payment_method,
-          status: 'pending' as const,
+          client_id: clientId,
+          individual_cost: pricing?.perPersonCost || 0,
         }))
 
-        const { error: invoicesError } = await supabase
-          .from('invoices')
-          .insert(invoices)
+        const { error: attendeesError } = await supabase
+          .from('session_attendees')
+          .insert(attendees)
 
-        if (invoicesError) {
-          console.error('Error creating invoices:', invoicesError)
-          // Don't fail the whole submission, just log the error
+        if (attendeesError) throw attendeesError
+
+        // If submitted, create invoices for each client
+        if (status === 'submitted' && pricing) {
+          const invoices = (clientData.data || []).map((client) => ({
+            session_id: session.id,
+            client_id: client.id,
+            amount: pricing.perPersonCost,
+            mca_cut: pricing.mcaCut / selectedClients.length,
+            contractor_pay: pricing.contractorPay / selectedClients.length,
+            rent_amount: pricing.rentAmount / selectedClients.length,
+            payment_method: client.payment_method,
+            status: 'pending' as const,
+          }))
+
+          const { error: invoicesError } = await supabase
+            .from('invoices')
+            .insert(invoices)
+
+          if (invoicesError) {
+            console.error('Error creating invoices:', invoicesError)
+            // Don't fail the whole submission, just log the error
+          }
         }
       }
 
-      toast.success('Session logged successfully!')
+      const message = sessionDates.length > 1
+        ? `${sessionDates.length} sessions logged successfully!`
+        : 'Session logged successfully!'
+      toast.success(message)
       router.push('/sessions')
       router.refresh()
     } catch (error) {
@@ -166,6 +212,67 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
               onChange={(e) => setDate(e.target.value)}
               required
             />
+          </div>
+
+          {/* Recurring Session */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="recurring"
+                checked={isRecurring}
+                onCheckedChange={setIsRecurring}
+              />
+              <Label htmlFor="recurring" className="flex items-center gap-2 cursor-pointer">
+                <Repeat className="w-4 h-4" />
+                Repeat Weekly
+              </Label>
+            </div>
+
+            {isRecurring && (
+              <div className="ml-8 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <RadioGroup value={repeatMode} onValueChange={(v) => setRepeatMode(v as 'weeks' | 'until')}>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="weeks" id="weeks" />
+                    <Label htmlFor="weeks" className="flex items-center gap-2 cursor-pointer">
+                      For
+                      <Select value={repeatWeeks} onValueChange={setRepeatWeeks} disabled={repeatMode !== 'weeks'}>
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4">4</SelectItem>
+                          <SelectItem value="6">6</SelectItem>
+                          <SelectItem value="8">8</SelectItem>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="12">12</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      weeks
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="until" id="until" />
+                    <Label htmlFor="until" className="flex items-center gap-2 cursor-pointer">
+                      Until
+                      <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        min={date}
+                        disabled={repeatMode !== 'until'}
+                        className="w-40"
+                      />
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+                {sessionCount > 1 && (
+                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                    This will create {sessionCount} sessions
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Duration */}
@@ -335,7 +442,13 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
             Cancel
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : status === 'submitted' ? 'Submit Session' : 'Save Draft'}
+            {loading
+              ? `Creating ${sessionCount > 1 ? sessionCount + ' sessions' : 'session'}...`
+              : sessionCount > 1
+                ? `Submit ${sessionCount} Sessions`
+                : status === 'submitted'
+                  ? 'Submit Session'
+                  : 'Save Draft'}
           </Button>
         </CardFooter>
       </Card>
