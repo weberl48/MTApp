@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Download, ArrowUpDown, Search, FileSpreadsheet } from 'lucide-react'
+import { ArrowUpDown, Search, FileSpreadsheet } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import * as XLSX from 'xlsx'
 

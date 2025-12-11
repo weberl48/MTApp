@@ -80,94 +80,43 @@ const paymentMethodLabels: Record<string, string> = {
   scholarship: 'Scholarship',
 }
 
-export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([])
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadInvoices()
-  }, [])
-
-  async function loadInvoices() {
-    const supabase = createClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      setLoading(false)
-      return
-    }
-
-    // Check if user is admin
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single<{ role: string }>()
-
-    const admin = userProfile?.role === 'admin'
-    setIsAdmin(admin)
-
-    // Fetch invoices with related data
-    const { data } = await supabase
-      .from('invoices')
-      .select(`
-        *,
-        client:clients(id, name, contact_email),
-        session:sessions(
-          id,
-          date,
-          contractor:users(id, name),
-          service_type:service_types(name)
-        )
-      `)
-      .order('created_at', { ascending: false })
-
-    setInvoices((data as unknown as Invoice[]) || [])
-    setLoading(false)
+// Moved outside the component to avoid re-creating during render
+function InvoiceTable({
+  invoices,
+  showActions = false,
+  isAdmin
+}: {
+  invoices: Invoice[]
+  showActions?: boolean
+  isAdmin: boolean
+}) {
+  if (invoices.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <p>No invoices in this category</p>
+      </div>
+    )
   }
 
-  // Group invoices by status
-  const pendingInvoices = invoices?.filter((inv) => inv.status === 'pending') || []
-  const sentInvoices = invoices?.filter((inv) => inv.status === 'sent') || []
-  const paidInvoices = invoices?.filter((inv) => inv.status === 'paid') || []
-  const overdueInvoices = sentInvoices.filter((inv) => getInvoiceStatus(inv).isOverdue)
-
-  // Calculate totals
-  const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const sentTotal = sentInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const paidTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-
-  function InvoiceTable({ invoices, showActions = false }: { invoices: Invoice[]; showActions?: boolean }) {
-    if (invoices.length === 0) {
-      return (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No invoices in this category</p>
-        </div>
-      )
-    }
-
-    return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Client</TableHead>
-            <TableHead>Service</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Payment Method</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead></TableHead>
-            {showActions && isAdmin && <TableHead>Actions</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {invoices.map((invoice) => (
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Client</TableHead>
+          <TableHead>Service</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Payment Method</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead></TableHead>
+          {showActions && isAdmin && <TableHead>Actions</TableHead>}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {invoices.map((invoice) => {
+          const { status, isOverdue, daysOverdue } = getInvoiceStatus(invoice)
+          return (
             <TableRow key={invoice.id}>
               <TableCell className="font-medium">{invoice.client?.name}</TableCell>
               <TableCell>{invoice.session?.service_type?.name}</TableCell>
@@ -189,21 +138,16 @@ export default function InvoicesPage() {
                 {formatCurrency(invoice.amount)}
               </TableCell>
               <TableCell>
-                {(() => {
-                  const { status, isOverdue, daysOverdue } = getInvoiceStatus(invoice)
-                  return (
-                    <div className="flex flex-col gap-1">
-                      <Badge className={statusColors[status]}>
-                        {isOverdue ? 'overdue' : invoice.status}
-                      </Badge>
-                      {isOverdue && (
-                        <span className="text-xs text-red-600 dark:text-red-400">
-                          {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} late
-                        </span>
-                      )}
-                    </div>
-                  )
-                })()}
+                <div className="flex flex-col gap-1">
+                  <Badge className={statusColors[status]}>
+                    {isOverdue ? 'overdue' : invoice.status}
+                  </Badge>
+                  {isOverdue && (
+                    <span className="text-xs text-red-600 dark:text-red-400">
+                      {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} late
+                    </span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <Link href={`/invoices/${invoice.id}`}>
@@ -218,11 +162,74 @@ export default function InvoicesPage() {
                 </TableCell>
               )}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    )
-  }
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+}
+
+export default function InvoicesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadInvoices() {
+      const supabase = createClient()
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      // Check if user is admin
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single<{ role: string }>()
+
+      const admin = userProfile?.role === 'admin'
+      setIsAdmin(admin)
+
+      // Fetch invoices with related data
+      const { data } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          client:clients(id, name, contact_email),
+          session:sessions(
+            id,
+            date,
+            contractor:users(id, name),
+            service_type:service_types(name)
+          )
+        `)
+        .order('created_at', { ascending: false })
+
+      setInvoices((data as unknown as Invoice[]) || [])
+      setLoading(false)
+    }
+
+    loadInvoices()
+  }, [])
+
+  // Group invoices by status
+  const pendingInvoices = invoices?.filter((inv) => inv.status === 'pending') || []
+  const sentInvoices = invoices?.filter((inv) => inv.status === 'sent') || []
+  const paidInvoices = invoices?.filter((inv) => inv.status === 'paid') || []
+  const overdueInvoices = sentInvoices.filter((inv) => getInvoiceStatus(inv).isOverdue)
+
+  // Calculate totals
+  const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  const sentTotal = sentInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  const paidTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
   if (loading) {
     return (
@@ -337,20 +344,20 @@ export default function InvoicesPage() {
             </TabsList>
             {overdueInvoices.length > 0 && (
               <TabsContent value="overdue">
-                <InvoiceTable invoices={overdueInvoices} showActions />
+                <InvoiceTable invoices={overdueInvoices} showActions isAdmin={isAdmin} />
               </TabsContent>
             )}
             <TabsContent value="pending">
-              <InvoiceTable invoices={pendingInvoices} showActions />
+              <InvoiceTable invoices={pendingInvoices} showActions isAdmin={isAdmin} />
             </TabsContent>
             <TabsContent value="sent">
-              <InvoiceTable invoices={sentInvoices} showActions />
+              <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} />
             </TabsContent>
             <TabsContent value="paid">
-              <InvoiceTable invoices={paidInvoices} />
+              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} />
             </TabsContent>
             <TabsContent value="all">
-              <InvoiceTable invoices={invoices || []} showActions />
+              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} />
             </TabsContent>
           </Tabs>
         </CardContent>

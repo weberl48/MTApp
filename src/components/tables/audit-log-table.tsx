@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
 import {
@@ -94,47 +94,47 @@ export function AuditLogTable() {
 
   const pageSize = 20
 
-  const loadLogs = useCallback(async () => {
+  useEffect(() => {
     if (!organization) return
 
-    setLoading(true)
-    const supabase = createClient()
+    const loadLogs = async () => {
+      setLoading(true)
+      const supabase = createClient()
 
-    let query = supabase
-      .from('audit_logs')
-      .select('*', { count: 'exact' })
-      .eq('organization_id', organization.id)
-      .order('created_at', { ascending: false })
-      .range(page * pageSize, (page + 1) * pageSize - 1)
+      let query = supabase
+        .from('audit_logs')
+        .select('*', { count: 'exact' })
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false })
+        .range(page * pageSize, (page + 1) * pageSize - 1)
 
-    if (tableFilter !== 'all') {
-      query = query.eq('table_name', tableFilter)
+      if (tableFilter !== 'all') {
+        query = query.eq('table_name', tableFilter)
+      }
+
+      if (actionFilter !== 'all') {
+        query = query.eq('action', actionFilter)
+      }
+
+      if (searchTerm) {
+        query = query.or(`user_email.ilike.%${searchTerm}%,record_id.ilike.%${searchTerm}%`)
+      }
+
+      const { data, count, error } = await query
+
+      if (error) {
+        console.error('Error loading audit logs:', error)
+        setLogs([])
+      } else {
+        setLogs(data || [])
+        setTotalCount(count || 0)
+      }
+
+      setLoading(false)
     }
 
-    if (actionFilter !== 'all') {
-      query = query.eq('action', actionFilter)
-    }
-
-    if (searchTerm) {
-      query = query.or(`user_email.ilike.%${searchTerm}%,record_id.ilike.%${searchTerm}%`)
-    }
-
-    const { data, count, error } = await query
-
-    if (error) {
-      console.error('Error loading audit logs:', error)
-      setLogs([])
-    } else {
-      setLogs(data || [])
-      setTotalCount(count || 0)
-    }
-
-    setLoading(false)
+    void loadLogs()
   }, [organization, page, tableFilter, actionFilter, searchTerm])
-
-  useEffect(() => {
-    loadLogs()
-  }, [loadLogs])
 
   function viewDetails(log: AuditLog) {
     setSelectedLog(log)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useSyncExternalStore } from 'react'
 import { isNativePlatform, getPlatform, isIOS, isAndroid } from '@/lib/capacitor/platform'
 
 interface MobileInfo {
@@ -12,27 +12,42 @@ interface MobileInfo {
   isLoading: boolean
 }
 
-export function useMobile(): MobileInfo {
-  const [info, setInfo] = useState<MobileInfo>({
-    isNative: false,
-    platform: 'web',
-    isIOS: false,
-    isAndroid: false,
-    isWeb: true,
-    isLoading: true,
-  })
+// Server snapshot (default values for SSR)
+const serverSnapshot: MobileInfo = {
+  isNative: false,
+  platform: 'web',
+  isIOS: false,
+  isAndroid: false,
+  isWeb: true,
+  isLoading: true,
+}
 
-  useEffect(() => {
-    // Capacitor needs to be checked after mount
-    setInfo({
+// Client snapshot (computed once on client)
+let clientSnapshot: MobileInfo | null = null
+
+function getClientSnapshot(): MobileInfo {
+  if (clientSnapshot === null) {
+    clientSnapshot = {
       isNative: isNativePlatform(),
       platform: getPlatform(),
       isIOS: isIOS(),
       isAndroid: isAndroid(),
       isWeb: !isNativePlatform(),
       isLoading: false,
-    })
-  }, [])
+    }
+  }
+  return clientSnapshot
+}
 
-  return info
+function getServerSnapshot(): MobileInfo {
+  return serverSnapshot
+}
+
+// Empty subscribe since platform info doesn't change
+function subscribe(_callback: () => void): () => void {
+  return () => {}
+}
+
+export function useMobile(): MobileInfo {
+  return useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot)
 }

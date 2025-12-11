@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { renderToBuffer } from '@react-pdf/renderer'
+import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
-import { createElement } from 'react'
+import { createElement, ReactElement } from 'react'
 
 export async function GET(
   request: NextRequest,
@@ -44,9 +44,8 @@ export async function GET(
     }
 
     // Generate PDF
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfBuffer = await renderToBuffer(
-      createElement(InvoicePDF, { invoice }) as any
+      createElement(InvoicePDF, { invoice }) as ReactElement<DocumentProps>
     )
 
     // Return PDF response

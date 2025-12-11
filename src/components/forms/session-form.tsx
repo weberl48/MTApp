@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X, Plus, Calculator, Repeat } from 'lucide-react'
+import { X, Calculator, Repeat } from 'lucide-react'
 import { calculateSessionPricing, formatCurrency, getPricingDescription } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'

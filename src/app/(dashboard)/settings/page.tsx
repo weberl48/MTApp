@@ -29,7 +29,6 @@ import {
   Check,
   Palette,
   Globe,
-  Clock,
   History,
 } from 'lucide-react'
 import { LogoUpload } from '@/components/forms/logo-upload'
@@ -148,7 +147,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function saveSettings(section: keyof OrganizationSettings) {
+  async function saveSettings(_section: keyof OrganizationSettings) {
     if (!localSettings) return
     setSaving(true)
     try {

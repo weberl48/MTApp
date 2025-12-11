@@ -17,7 +17,7 @@ import {
 } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+// Badge import removed - not currently used but may be needed for session status display
 
 interface Session {
   id: string
@@ -99,7 +99,7 @@ export function SessionsCalendar({ sessions, isAdmin }: SessionsCalendarProps) {
 
         {/* Days grid */}
         <div className="grid grid-cols-7 auto-rows-fr bg-gray-200 dark:bg-gray-800 gap-px">
-          {calendarDays.map((day, dayIdx) => {
+          {calendarDays.map((day) => {
             const daySessions = getSessionsForDay(day)
             const isCurrentMonth = isSameMonth(day, monthStart)
             const isToday = isSameDay(day, today)

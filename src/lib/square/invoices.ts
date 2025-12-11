@@ -1,4 +1,4 @@
-import { squareClient, getDefaultLocationId, dollarsToCents } from './client'
+import { squareClient, getDefaultLocationId } from './client'
 import { randomUUID } from 'crypto'
 
 interface CreateSquareInvoiceParams {

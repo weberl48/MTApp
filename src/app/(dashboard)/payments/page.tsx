@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,7 +59,7 @@ export default function PaymentsPage() {
   const [unpaidContractors, setUnpaidContractors] = useState<ContractorPayout[]>([])
   const [activeTab, setActiveTab] = useState('payroll')
 
-  const loadPayments = useCallback(async () => {
+  const loadPayments = async () => {
     const supabase = createClient()
 
     const {
@@ -201,11 +201,12 @@ export default function PaymentsPage() {
 
     setUnpaidContractors(Object.values(unpaidByContractor))
     setLoading(false)
-  }, [router])
+  }
 
   useEffect(() => {
-    loadPayments()
-  }, [loadPayments])
+    void loadPayments()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (loading) {
     return (

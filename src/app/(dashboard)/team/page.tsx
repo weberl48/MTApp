@@ -84,7 +84,7 @@ export default async function TeamPage() {
   })
 
   invoices?.forEach(inv => {
-    const contractorId = (inv.session as any)?.contractor_id
+    const contractorId = (inv.session as { contractor_id?: string } | null)?.contractor_id
     if (contractorId && userStats[contractorId]) {
       userStats[contractorId].totalEarnings += Number(inv.contractor_pay)
       if (inv.status !== 'paid') {
