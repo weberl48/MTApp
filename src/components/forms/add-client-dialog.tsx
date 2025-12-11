@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -23,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus } from 'lucide-react'
+import { Plus, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
-import type { PaymentMethod } from '@/types/database'
+import type { PaymentMethod, Client } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
 
 const paymentMethods: { value: PaymentMethod; label: string }[] = [
@@ -35,10 +35,17 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
   { value: 'scholarship', label: 'Scholarship Fund' },
 ]
 
-export function AddClientDialog() {
+interface ClientDialogProps {
+  client?: Client
+  trigger?: React.ReactNode
+  onSuccess?: () => void
+}
+
+export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) {
   const router = useRouter()
   const supabase = createClient()
   const { organization } = useOrganization()
+  const isEditMode = !!client
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -47,6 +54,17 @@ export function AddClientDialog() {
   const [phone, setPhone] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('private_pay')
   const [notes, setNotes] = useState('')
+
+  // Populate form when editing
+  useEffect(() => {
+    if (client && open) {
+      setName(client.name)
+      setEmail(client.contact_email || '')
+      setPhone(client.contact_phone || '')
+      setPaymentMethod(client.payment_method)
+      setNotes(client.notes || '')
+    }
+  }, [client, open])
 
   function resetForm() {
     setName('')
@@ -67,43 +85,73 @@ export function AddClientDialog() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.from('clients').insert({
-        name: name.trim(),
-        contact_email: email.trim() || null,
-        contact_phone: phone.trim() || null,
-        payment_method: paymentMethod,
-        notes: notes.trim() || null,
-        organization_id: organization!.id,
-      })
+      if (isEditMode) {
+        // Update existing client
+        const { error } = await supabase
+          .from('clients')
+          .update({
+            name: name.trim(),
+            contact_email: email.trim() || null,
+            contact_phone: phone.trim() || null,
+            payment_method: paymentMethod,
+            notes: notes.trim() || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', client.id)
 
-      if (error) throw error
+        if (error) throw error
+        toast.success('Client updated successfully!')
+      } else {
+        // Create new client
+        const { error } = await supabase.from('clients').insert({
+          name: name.trim(),
+          contact_email: email.trim() || null,
+          contact_phone: phone.trim() || null,
+          payment_method: paymentMethod,
+          notes: notes.trim() || null,
+          organization_id: organization!.id,
+        })
 
-      toast.success('Client added successfully!')
+        if (error) throw error
+        toast.success('Client added successfully!')
+      }
+
       resetForm()
       setOpen(false)
+      onSuccess?.()
       router.refresh()
     } catch (error) {
-      console.error('Error adding client:', error)
-      toast.error('Failed to add client')
+      console.error('Error saving client:', error)
+      toast.error(isEditMode ? 'Failed to update client' : 'Failed to add client')
     } finally {
       setLoading(false)
     }
   }
 
+  const defaultTrigger = isEditMode ? (
+    <Button variant="ghost" size="sm">
+      <Pencil className="w-4 h-4" />
+    </Button>
+  ) : (
+    <Button>
+      <Plus className="w-4 h-4 mr-2" />
+      Add Client
+    </Button>
+  )
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Client
-        </Button>
+        {trigger || defaultTrigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add New Client</DialogTitle>
+            <DialogTitle>{isEditMode ? 'Edit Client' : 'Add New Client'}</DialogTitle>
             <DialogDescription>
-              Add a new client to your practice. You can add their contact and billing information.
+              {isEditMode
+                ? 'Update client information.'
+                : 'Add a new client to your practice. You can add their contact and billing information.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -176,11 +224,18 @@ export function AddClientDialog() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Client'}
+              {loading
+                ? isEditMode ? 'Updating...' : 'Adding...'
+                : isEditMode ? 'Update Client' : 'Add Client'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
+}
+
+// Backward-compatible alias for existing imports
+export function AddClientDialog() {
+  return <ClientDialog />
 }

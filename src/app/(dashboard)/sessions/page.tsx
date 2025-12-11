@@ -1,19 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Loader2 } from 'lucide-react'
+import { Plus, Calendar, List, Loader2, Search, X, Filter } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 
 interface Session {
   id: string
   date: string
+  time: string | null
   duration_minutes: number
   status: string
   notes: string | null
@@ -27,17 +36,41 @@ interface Session {
   }[]
 }
 
+interface Contractor {
+  id: string
+  name: string
+}
+
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
   submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
+
+const statusLabels: Record<string, string> = {
+  draft: 'Draft',
+  submitted: 'Submitted',
+  approved: 'Approved',
+  no_show: 'No Show',
+  cancelled: 'Cancelled',
 }
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
+  const [contractors, setContractors] = useState<Contractor[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [contractorFilter, setContractorFilter] = useState<string>('all')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     async function loadSessions() {
@@ -59,7 +92,7 @@ export default function SessionsPage() {
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      const admin = userProfile?.role === 'admin'
+      const admin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
       setIsAdmin(admin)
 
       // Fetch sessions with related data
@@ -68,6 +101,7 @@ export default function SessionsPage() {
         .select(`
           id,
           date,
+          time,
           duration_minutes,
           status,
           notes,
@@ -88,11 +122,70 @@ export default function SessionsPage() {
 
       const { data } = await query
       setSessions((data as unknown as Session[]) || [])
+
+      // Fetch contractors for filter (admin only)
+      if (admin) {
+        const { data: contractorData } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('role', ['contractor', 'admin', 'owner'])
+          .order('name')
+        setContractors(contractorData || [])
+      }
+
       setLoading(false)
     }
 
     loadSessions()
   }, [])
+
+  // Filter sessions based on current filters
+  const filteredSessions = useMemo(() => {
+    return sessions.filter((session) => {
+      // Search filter - search in service type, client names, contractor name
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesServiceType = session.service_type?.name.toLowerCase().includes(query)
+        const matchesContractor = session.contractor?.name.toLowerCase().includes(query)
+        const matchesClient = session.attendees?.some(
+          (a) => a.client?.name.toLowerCase().includes(query)
+        )
+        if (!matchesServiceType && !matchesContractor && !matchesClient) {
+          return false
+        }
+      }
+
+      // Status filter
+      if (statusFilter !== 'all' && session.status !== statusFilter) {
+        return false
+      }
+
+      // Contractor filter
+      if (contractorFilter !== 'all' && session.contractor?.id !== contractorFilter) {
+        return false
+      }
+
+      // Date range filter
+      if (dateFrom && session.date < dateFrom) {
+        return false
+      }
+      if (dateTo && session.date > dateTo) {
+        return false
+      }
+
+      return true
+    })
+  }, [sessions, searchQuery, statusFilter, contractorFilter, dateFrom, dateTo])
+
+  const hasActiveFilters = searchQuery || statusFilter !== 'all' || contractorFilter !== 'all' || dateFrom || dateTo
+
+  function clearFilters() {
+    setSearchQuery('')
+    setStatusFilter('all')
+    setContractorFilter('all')
+    setDateFrom('')
+    setDateTo('')
+  }
 
   if (loading) {
     return (
@@ -133,18 +226,119 @@ export default function SessionsPage() {
         </div>
       </div>
 
+      {/* Filters */}
+      {view === 'list' && (
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex flex-col gap-4">
+              {/* Search and filter toggle */}
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by service, client, or contractor..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Button
+                  variant={showFilters ? 'secondary' : 'outline'}
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2">
+                      Active
+                    </Badge>
+                  )}
+                </Button>
+                {hasActiveFilters && (
+                  <Button variant="ghost" onClick={clearFilters}>
+                    <X className="w-4 h-4 mr-2" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {/* Expanded filters */}
+              {showFilters && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Status</label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="submitted">Submitted</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="no_show">No Show</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {isAdmin && contractors.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Contractor</label>
+                      <Select value={contractorFilter} onValueChange={setContractorFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All contractors" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All contractors</SelectItem>
+                          {contractors.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">From date</label>
+                    <Input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">To date</label>
+                    <Input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {view === 'list' ? (
         <Card>
           <CardHeader>
             <CardTitle>All Sessions</CardTitle>
             <CardDescription>
-              {sessions?.length || 0} sessions total
+              {filteredSessions.length === sessions.length
+                ? `${sessions.length} sessions total`
+                : `${filteredSessions.length} of ${sessions.length} sessions`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {sessions && sessions.length > 0 ? (
+            {filteredSessions.length > 0 ? (
               <div className="space-y-4">
-                {sessions.map((session) => {
+                {filteredSessions.map((session) => {
                   const totalCost = session.attendees?.reduce(
                     (sum, a) => sum + (a.individual_cost || 0),
                     0
@@ -163,7 +357,7 @@ export default function SessionsPage() {
                               {session.service_type?.name || 'Unknown Service'}
                             </span>
                             <Badge className={statusColors[session.status]}>
-                              {session.status}
+                              {statusLabels[session.status] || session.status}
                             </Badge>
                           </div>
                           <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">
@@ -206,10 +400,21 @@ export default function SessionsPage() {
             ) : (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-4">No sessions found</p>
-                <Link href="/sessions/new/">
-                  <Button>Log your first session</Button>
-                </Link>
+                {hasActiveFilters ? (
+                  <>
+                    <p className="mb-4">No sessions match your filters</p>
+                    <Button variant="outline" onClick={clearFilters}>
+                      Clear filters
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-4">No sessions found</p>
+                    <Link href="/sessions/new/">
+                      <Button>Log your first session</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </CardContent>

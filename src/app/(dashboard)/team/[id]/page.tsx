@@ -16,7 +16,15 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2 } from 'lucide-react'
+import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { toast } from 'sonner'
 import Link from 'next/link'
 
 interface TeamMember {
@@ -60,6 +68,9 @@ export default function TeamMemberPage() {
   const [member, setMember] = useState<TeamMember | null>(null)
   const [sessions, setSessions] = useState<Session[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [editingRole, setEditingRole] = useState(false)
+  const [newRole, setNewRole] = useState('')
+  const [savingRole, setSavingRole] = useState(false)
 
   useEffect(() => {
     async function loadMemberData() {
@@ -140,6 +151,44 @@ export default function TeamMemberPage() {
     loadMemberData()
   }, [id, router])
 
+  async function handleSaveRole() {
+    if (!member || !newRole || newRole === member.role) {
+      setEditingRole(false)
+      return
+    }
+
+    setSavingRole(true)
+    const supabase = createClient()
+
+    const { error } = await supabase
+      .from('users')
+      .update({ role: newRole, updated_at: new Date().toISOString() })
+      .eq('id', member.id)
+
+    if (error) {
+      console.error('Error updating role:', error)
+      toast.error('Failed to update role')
+    } else {
+      setMember({ ...member, role: newRole })
+      toast.success('Role updated successfully')
+    }
+
+    setSavingRole(false)
+    setEditingRole(false)
+  }
+
+  function startEditingRole() {
+    if (member) {
+      setNewRole(member.role)
+      setEditingRole(true)
+    }
+  }
+
+  function cancelEditingRole() {
+    setEditingRole(false)
+    setNewRole('')
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -162,6 +211,16 @@ export default function TeamMemberPage() {
     draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  }
+
+  const statusLabels: Record<string, string> = {
+    draft: 'Draft',
+    submitted: 'Submitted',
+    approved: 'Approved',
+    no_show: 'No Show',
+    cancelled: 'Cancelled',
   }
 
   const invoiceStatusColors: Record<string, string> = {
@@ -184,9 +243,50 @@ export default function TeamMemberPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {member.name || 'Unnamed User'}
             </h1>
-            <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
-              {member.role}
-            </Badge>
+            {editingRole ? (
+              <div className="flex items-center gap-2">
+                <Select value={newRole} onValueChange={setNewRole}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contractor">Contractor</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="owner">Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleSaveRole}
+                  disabled={savingRole}
+                >
+                  {savingRole ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-green-600" />}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={cancelEditingRole}
+                  disabled={savingRole}
+                >
+                  <X className="w-4 h-4 text-red-600" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Badge variant={member.role === 'admin' || member.role === 'owner' ? 'default' : 'secondary'}>
+                  {member.role}
+                </Badge>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={startEditingRole}
+                  className="h-6 w-6"
+                >
+                  <Pencil className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
           </div>
           <p className="text-gray-500 dark:text-gray-400">{member.email}</p>
         </div>
@@ -315,7 +415,7 @@ export default function TeamMemberPage() {
                         <TableCell>{session.duration_minutes} min</TableCell>
                         <TableCell>
                           <Badge className={statusColors[session.status]}>
-                            {session.status}
+                            {statusLabels[session.status] || session.status}
                           </Badge>
                         </TableCell>
                       </TableRow>

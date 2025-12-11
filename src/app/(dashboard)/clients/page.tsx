@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -10,8 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, Mail, Phone } from 'lucide-react'
+import { Users, Mail, Phone } from 'lucide-react'
 import { AddClientDialog } from '@/components/forms/add-client-dialog'
+import { ClientActions } from '@/components/clients/client-actions'
+import type { Client } from '@/types/database'
 
 const paymentMethodLabels: Record<string, string> = {
   private_pay: 'Private Pay',
@@ -70,6 +71,7 @@ export default async function ClientsPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Payment Method</TableHead>
                   <TableHead>Notes</TableHead>
+                  {isAdmin && <TableHead className="w-20">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -113,6 +115,11 @@ export default async function ClientsPage() {
                     <TableCell className="max-w-xs truncate">
                       {client.notes || '-'}
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell>
+                        <ClientActions client={client as Client} />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

@@ -13,6 +13,9 @@ describe('calculateSessionPricing', () => {
     mca_percentage: 23,
     contractor_cap: null,
     rent_percentage: 0,
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
     created_at: '',
     updated_at: '',
   }
@@ -70,6 +73,26 @@ describe('calculateSessionPricing', () => {
     expect(result.rentAmount).toBe(5.5)
     expect(result.mcaCut).toBe(16.5)
     expect(result.contractorPay).toBe(33)
+  })
+
+  it('scales pricing by duration', () => {
+    // 30 min (default): $50
+    const result30 = calculateSessionPricing(mockServiceType, 1, 30)
+    expect(result30.totalAmount).toBe(50)
+
+    // 60 min: $100 (2x)
+    const result60 = calculateSessionPricing(mockServiceType, 1, 60)
+    expect(result60.totalAmount).toBe(100)
+    expect(result60.mcaCut).toBe(23) // 23% of 100
+    expect(result60.contractorPay).toBe(77) // 100 - 23
+
+    // 45 min: $75 (1.5x)
+    const result45 = calculateSessionPricing(mockServiceType, 1, 45)
+    expect(result45.totalAmount).toBe(75)
+
+    // 90 min: $150 (3x)
+    const result90 = calculateSessionPricing(mockServiceType, 1, 90)
+    expect(result90.totalAmount).toBe(150)
   })
 })
 

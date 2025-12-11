@@ -85,16 +85,27 @@ export async function GET(request: NextRequest) {
           continue
         }
 
-        const session = reminder.session as {
+        // Supabase returns single relations as arrays, extract first element
+        const sessionData = reminder.session as unknown as {
           date: string
           duration_minutes: number
           notes: string | null
-          service_type: { name: string } | null
-          contractor: { name: string } | null
-          session_attendees: { client: { name: string } | null }[]
-        } | null
+          service_type: { name: string }[]
+          contractor: { name: string }[]
+          session_attendees: { client: { name: string }[] }[]
+        }[] | null
 
-        const org = reminder.organization as { name: string; email: string | null } | null
+        const session = sessionData?.[0] ? {
+          ...sessionData[0],
+          service_type: sessionData[0].service_type?.[0] || null,
+          contractor: sessionData[0].contractor?.[0] || null,
+          session_attendees: sessionData[0].session_attendees?.map(a => ({
+            client: a.client?.[0] || null
+          })) || []
+        } : null
+
+        const orgData = reminder.organization as unknown as { name: string; email: string | null }[] | null
+        const org = orgData?.[0] || null
 
         if (!session) {
           await supabaseAdmin

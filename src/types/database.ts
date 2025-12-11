@@ -8,7 +8,7 @@ export type Json =
 
 export type UserRole = 'developer' | 'owner' | 'admin' | 'contractor'
 export type PlanType = 'free' | 'starter' | 'professional'
-export type SessionStatus = 'draft' | 'submitted' | 'approved'
+export type SessionStatus = 'draft' | 'submitted' | 'approved' | 'no_show' | 'cancelled'
 export type InvoiceStatus = 'pending' | 'sent' | 'paid'
 export type PaymentMethod = 'private_pay' | 'self_directed' | 'group_home' | 'scholarship'
 export type GoalStatus = 'active' | 'met' | 'not_met'
@@ -260,6 +260,7 @@ export interface Database {
         Row: {
           id: string
           date: string
+          time: string | null
           duration_minutes: number
           service_type_id: string
           contractor_id: string
@@ -274,6 +275,7 @@ export interface Database {
         Insert: {
           id?: string
           date: string
+          time?: string | null
           duration_minutes: number
           service_type_id: string
           contractor_id: string
@@ -287,6 +289,7 @@ export interface Database {
         }
         Update: {
           date?: string
+          time?: string | null
           duration_minutes?: number
           service_type_id?: string
           contractor_id?: string

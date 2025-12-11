@@ -9,7 +9,7 @@ export interface PricingCalculation {
 }
 
 /**
- * Calculate pricing for a session based on service type and number of attendees
+ * Calculate pricing for a session based on service type, number of attendees, and duration
  *
  * Pricing rules from project_notes.md:
  * - In-Home Individual: $50/30min, 23% MCA
@@ -18,19 +18,26 @@ export interface PricingCalculation {
  * - Matt's Music Group: $50 flat + $20/person
  * - Individual Art: $40, 20% MCA
  * - Group Art: $40 flat + $15/person, 30% MCA
+ *
+ * Duration multiplier: base rates are for 30 minutes, scale proportionally
  */
 export function calculateSessionPricing(
   serviceType: ServiceType,
-  attendeeCount: number
+  attendeeCount: number,
+  durationMinutes: number = 30
 ): PricingCalculation {
   // Ensure at least 1 attendee
   const count = Math.max(1, attendeeCount)
+
+  // Duration multiplier (base rates are for 30 minutes)
+  const durationMultiplier = durationMinutes / 30
 
   // Calculate total amount
   // For groups: base_rate + (per_person_rate * additional people)
   // "Additional person" means everyone after the first
   const additionalPeople = count > 1 ? count - 1 : 0
-  const totalAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
+  const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
+  const totalAmount = baseAmount * durationMultiplier
 
   // Per-person cost (for billing purposes, divided evenly)
   const perPersonCost = totalAmount / count
@@ -86,10 +93,11 @@ export function calculateContractorTotal(
   sessions: Array<{
     serviceType: ServiceType
     attendeeCount: number
+    durationMinutes?: number
   }>
 ): number {
   return sessions.reduce((total, session) => {
-    const calc = calculateSessionPricing(session.serviceType, session.attendeeCount)
+    const calc = calculateSessionPricing(session.serviceType, session.attendeeCount, session.durationMinutes)
     return total + calc.contractorPay
   }, 0)
 }

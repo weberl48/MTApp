@@ -25,24 +25,42 @@ import { toast } from 'sonner'
 import { addWeeks, format, parseISO } from 'date-fns'
 import { useOrganization } from '@/contexts/organization-context'
 
+interface ExistingSession {
+  id: string
+  date: string
+  time: string | null
+  duration_minutes: number
+  service_type_id: string
+  status: string
+  notes: string | null
+  attendees: { client_id: string }[]
+}
+
 interface SessionFormProps {
   serviceTypes: ServiceType[]
   clients: Array<Pick<Client, 'id' | 'name'>>
   contractorId: string
+  existingSession?: ExistingSession
 }
 
-export function SessionForm({ serviceTypes, clients, contractorId }: SessionFormProps) {
+export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
   const { organization } = useOrganization()
+  const isEditMode = !!existingSession
 
   const [loading, setLoading] = useState(false)
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [duration, setDuration] = useState('30')
-  const [serviceTypeId, setServiceTypeId] = useState('')
-  const [selectedClients, setSelectedClients] = useState<string[]>([])
-  const [notes, setNotes] = useState('')
-  const [status, setStatus] = useState<'draft' | 'submitted'>('submitted')
+  const [date, setDate] = useState(existingSession?.date || new Date().toISOString().split('T')[0])
+  const [time, setTime] = useState(existingSession?.time?.slice(0, 5) || '09:00')
+  const [duration, setDuration] = useState(existingSession?.duration_minutes?.toString() || '30')
+  const [serviceTypeId, setServiceTypeId] = useState(existingSession?.service_type_id || '')
+  const [selectedClients, setSelectedClients] = useState<string[]>(
+    existingSession?.attendees?.map(a => a.client_id) || []
+  )
+  const [notes, setNotes] = useState(existingSession?.notes || '')
+  const [status, setStatus] = useState<'draft' | 'submitted'>(
+    (existingSession?.status as 'draft' | 'submitted') || 'submitted'
+  )
 
   // Recurring session state
   const [isRecurring, setIsRecurring] = useState(false)
@@ -53,9 +71,9 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
   // Get selected service type for pricing calculation
   const selectedServiceType = serviceTypes.find((st) => st.id === serviceTypeId)
 
-  // Calculate pricing whenever service type or clients change
+  // Calculate pricing whenever service type, clients, or duration change
   const pricing = selectedServiceType && selectedClients.length > 0
-    ? calculateSessionPricing(selectedServiceType, selectedClients.length)
+    ? calculateSessionPricing(selectedServiceType, selectedClients.length, parseInt(duration))
     : null
 
   function addClient(clientId: string) {
@@ -111,37 +129,31 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
     setLoading(true)
 
     try {
-      // Get all session dates (single or recurring)
-      const sessionDates = getSessionDates()
-
-      // Get client payment methods for invoicing
-      const clientData = await supabase
-        .from('clients')
-        .select('id, payment_method')
-        .in('id', selectedClients)
-
-      // Create each session
-      for (const sessionDate of sessionDates) {
-        // Create the session
-        const { data: session, error: sessionError } = await supabase
+      if (isEditMode && existingSession) {
+        // UPDATE existing session
+        const { error: sessionError } = await supabase
           .from('sessions')
-          .insert({
-            date: sessionDate,
+          .update({
+            date,
+            time: time + ':00',
             duration_minutes: parseInt(duration),
             service_type_id: serviceTypeId,
-            contractor_id: contractorId,
             status,
             notes: notes || null,
-            organization_id: organization!.id,
+            updated_at: new Date().toISOString(),
           })
-          .select()
-          .single()
+          .eq('id', existingSession.id)
 
         if (sessionError) throw sessionError
 
-        // Add attendees
+        // Delete old attendees and add new ones
+        await supabase
+          .from('session_attendees')
+          .delete()
+          .eq('session_id', existingSession.id)
+
         const attendees = selectedClients.map((clientId) => ({
-          session_id: session.id,
+          session_id: existingSession.id,
           client_id: clientId,
           individual_cost: pricing?.perPersonCost || 0,
         }))
@@ -152,40 +164,88 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
 
         if (attendeesError) throw attendeesError
 
-        // If submitted, create invoices for each client
-        if (status === 'submitted' && pricing) {
-          const invoices = (clientData.data || []).map((client) => ({
+        toast.success('Session updated successfully!')
+        router.push(`/sessions/${existingSession.id}`)
+        router.refresh()
+      } else {
+        // CREATE new session(s)
+        // Get all session dates (single or recurring)
+        const sessionDates = getSessionDates()
+
+        // Get client payment methods for invoicing
+        const clientData = await supabase
+          .from('clients')
+          .select('id, payment_method')
+          .in('id', selectedClients)
+
+        // Create each session
+        for (const sessionDate of sessionDates) {
+          // Create the session
+          const { data: session, error: sessionError } = await supabase
+            .from('sessions')
+            .insert({
+              date: sessionDate,
+              time: time + ':00',
+              duration_minutes: parseInt(duration),
+              service_type_id: serviceTypeId,
+              contractor_id: contractorId,
+              status,
+              notes: notes || null,
+              organization_id: organization!.id,
+            })
+            .select()
+            .single()
+
+          if (sessionError) throw sessionError
+
+          // Add attendees
+          const attendees = selectedClients.map((clientId) => ({
             session_id: session.id,
-            client_id: client.id,
-            amount: pricing.perPersonCost,
-            mca_cut: pricing.mcaCut / selectedClients.length,
-            contractor_pay: pricing.contractorPay / selectedClients.length,
-            rent_amount: pricing.rentAmount / selectedClients.length,
-            payment_method: client.payment_method,
-            status: 'pending' as const,
-            organization_id: organization!.id,
+            client_id: clientId,
+            individual_cost: pricing?.perPersonCost || 0,
           }))
 
-          const { error: invoicesError } = await supabase
-            .from('invoices')
-            .insert(invoices)
+          const { error: attendeesError } = await supabase
+            .from('session_attendees')
+            .insert(attendees)
 
-          if (invoicesError) {
-            console.error('Error creating invoices:', invoicesError)
-            // Don't fail the whole submission, just log the error
+          if (attendeesError) throw attendeesError
+
+          // If submitted, create invoices for each client
+          if (status === 'submitted' && pricing) {
+            const invoices = (clientData.data || []).map((client) => ({
+              session_id: session.id,
+              client_id: client.id,
+              amount: pricing.perPersonCost,
+              mca_cut: pricing.mcaCut / selectedClients.length,
+              contractor_pay: pricing.contractorPay / selectedClients.length,
+              rent_amount: pricing.rentAmount / selectedClients.length,
+              payment_method: client.payment_method,
+              status: 'pending' as const,
+              organization_id: organization!.id,
+            }))
+
+            const { error: invoicesError } = await supabase
+              .from('invoices')
+              .insert(invoices)
+
+            if (invoicesError) {
+              console.error('Error creating invoices:', invoicesError)
+              // Don't fail the whole submission, just log the error
+            }
           }
         }
-      }
 
-      const message = sessionDates.length > 1
-        ? `${sessionDates.length} sessions logged successfully!`
-        : 'Session logged successfully!'
-      toast.success(message)
-      router.push('/sessions')
-      router.refresh()
+        const message = sessionDates.length > 1
+          ? `${sessionDates.length} sessions logged successfully!`
+          : 'Session logged successfully!'
+        toast.success(message)
+        router.push('/sessions')
+        router.refresh()
+      }
     } catch (error) {
-      console.error('Error creating session:', error)
-      toast.error('Failed to create session')
+      console.error('Error saving session:', error)
+      toast.error(isEditMode ? 'Failed to update session' : 'Failed to create session')
     } finally {
       setLoading(false)
     }
@@ -206,19 +266,32 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
           <CardTitle>Session Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date */}
-          <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+          {/* Date and Time */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date">Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="time">Time *</Label>
+              <Input
+                id="time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          {/* Recurring Session */}
+          {/* Recurring Session - only show for new sessions */}
+          {!isEditMode && (
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <Switch
@@ -278,6 +351,7 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
               </div>
             )}
           </div>
+          )}
 
           {/* Duration */}
           <div className="space-y-2">
@@ -447,12 +521,16 @@ export function SessionForm({ serviceTypes, clients, contractorId }: SessionForm
           </Button>
           <Button type="submit" disabled={loading}>
             {loading
-              ? `Creating ${sessionCount > 1 ? sessionCount + ' sessions' : 'session'}...`
-              : sessionCount > 1
-                ? `Submit ${sessionCount} Sessions`
-                : status === 'submitted'
-                  ? 'Submit Session'
-                  : 'Save Draft'}
+              ? isEditMode
+                ? 'Updating session...'
+                : `Creating ${sessionCount > 1 ? sessionCount + ' sessions' : 'session'}...`
+              : isEditMode
+                ? 'Update Session'
+                : sessionCount > 1
+                  ? `Submit ${sessionCount} Sessions`
+                  : status === 'submitted'
+                    ? 'Submit Session'
+                    : 'Save Draft'}
           </Button>
         </CardFooter>
       </Card>
