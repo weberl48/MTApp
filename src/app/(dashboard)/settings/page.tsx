@@ -22,6 +22,7 @@ import {
   DollarSign,
   Plus,
   Pencil,
+  Trash2,
   Loader2,
   Save,
   Users,
@@ -188,6 +189,28 @@ export default function SettingsPage() {
   function handleAddServiceType() {
     setEditingServiceType(null)
     setIsServiceTypeFormOpen(true)
+  }
+
+  async function handleDeleteServiceType(serviceType: ServiceType) {
+    if (!confirm(`Are you sure you want to delete "${serviceType.name}"? This cannot be undone.`)) {
+      return
+    }
+
+    const supabase = createClient()
+    try {
+      const { error } = await supabase
+        .from('service_types')
+        .delete()
+        .eq('id', serviceType.id)
+
+      if (error) throw error
+
+      toast.success('Service type deleted')
+      loadData()
+    } catch (error) {
+      console.error('Error deleting service type:', error)
+      toast.error('Failed to delete service type. It may be in use by existing sessions.')
+    }
   }
 
   async function copyInviteLink() {
@@ -771,6 +794,14 @@ export default function SettingsPage() {
                           onClick={() => handleEditServiceType(st)}
                         >
                           <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteServiceType(st)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>

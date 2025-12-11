@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header'
 import { Toaster } from '@/components/ui/sonner'
 import { Loader2 } from 'lucide-react'
 import { OrganizationProvider, useOrganization } from '@/contexts/organization-context'
+import { BrandingProvider } from '@/components/providers/branding-provider'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -60,16 +61,18 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header user={user} />
-        <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pt-6 sm:pb-6">
-          {children}
-        </main>
+    <BrandingProvider>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+        <Sidebar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header user={user} />
+          <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pt-6 sm:pb-6">
+            {children}
+          </main>
+        </div>
+        <Toaster />
       </div>
-      <Toaster />
-    </div>
+    </BrandingProvider>
   )
 }
 

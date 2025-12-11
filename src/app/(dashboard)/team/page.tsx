@@ -34,7 +34,8 @@ export default async function TeamPage() {
       .single<{ role: string }>()
 
     console.log('Team page - User profile:', userProfile, 'Error:', profileError)
-    isAdmin = userProfile?.role === 'admin'
+    const role = userProfile?.role
+    isAdmin = role === 'admin' || role === 'owner' || role === 'developer'
   }
 
   console.log('Team page - isAdmin:', isAdmin)

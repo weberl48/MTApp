@@ -72,7 +72,8 @@ export default function AnalyticsPage() {
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      if (userProfile?.role !== 'admin') {
+      const role = userProfile?.role
+      if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
         router.push('/dashboard/')
         return
       }
