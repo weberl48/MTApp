@@ -58,11 +58,21 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const isOwner = user?.role === 'owner' || user?.role === 'developer'
   const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'developer'
 
-  // Parse settings with defaults
+  // Parse settings with defaults (deep merge)
   const settings: OrganizationSettings | null = organization
     ? {
-        ...DEFAULT_SETTINGS,
-        ...(organization.settings as OrganizationSettings),
+        invoice: {
+          ...DEFAULT_SETTINGS.invoice,
+          ...((organization.settings as OrganizationSettings)?.invoice || {}),
+        },
+        session: {
+          ...DEFAULT_SETTINGS.session,
+          ...((organization.settings as OrganizationSettings)?.session || {}),
+        },
+        notification: {
+          ...DEFAULT_SETTINGS.notification,
+          ...((organization.settings as OrganizationSettings)?.notification || {}),
+        },
       }
     : null
 
