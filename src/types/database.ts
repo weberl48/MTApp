@@ -37,6 +37,12 @@ export interface OrganizationSettings {
     email_on_invoice_paid: boolean
     admin_email: string
   }
+  security: {
+    session_timeout_minutes: number
+    require_mfa: boolean
+    max_login_attempts: number
+    lockout_duration_minutes: number
+  }
 }
 
 // Social links structure

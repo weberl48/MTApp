@@ -44,6 +44,12 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
     email_on_invoice_paid: true,
     admin_email: '',
   },
+  security: {
+    session_timeout_minutes: 30,
+    require_mfa: false,
+    max_login_attempts: 5,
+    lockout_duration_minutes: 15,
+  },
 }
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
@@ -72,6 +78,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         notification: {
           ...DEFAULT_SETTINGS.notification,
           ...((organization.settings as OrganizationSettings)?.notification || {}),
+        },
+        security: {
+          ...DEFAULT_SETTINGS.security,
+          ...((organization.settings as OrganizationSettings)?.security || {}),
         },
       }
     : null

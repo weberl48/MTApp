@@ -31,10 +31,12 @@ import {
   Palette,
   Globe,
   History,
+  Shield,
 } from 'lucide-react'
 import { LogoUpload } from '@/components/forms/logo-upload'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { AuditLogTable } from '@/components/tables/audit-log-table'
+import { MfaSetup } from '@/components/forms/mfa-setup'
 import { toast } from 'sonner'
 import type {
   User as UserType,
@@ -285,6 +287,10 @@ export default function SettingsPage() {
             <User className="w-4 h-4" />
             Profile
           </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Security
+          </TabsTrigger>
           {isOwner && (
             <>
               <TabsTrigger value="organization" className="flex items-center gap-2">
@@ -394,6 +400,126 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        {/* Security Tab */}
+        <TabsContent value="security">
+          <div className="space-y-6 max-w-2xl">
+            <MfaSetup />
+
+            {isOwner && localSettings && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Session Security</CardTitle>
+                  <CardDescription>
+                    Configure automatic session timeout and security policies
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                    <Input
+                      id="sessionTimeout"
+                      type="number"
+                      min={5}
+                      max={120}
+                      value={localSettings.security?.session_timeout_minutes ?? 30}
+                      onChange={(e) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          security: {
+                            ...localSettings.security,
+                            session_timeout_minutes: parseInt(e.target.value) || 30,
+                          },
+                        })
+                      }
+                    />
+                    <p className="text-sm text-gray-500">
+                      Users will be logged out after this many minutes of inactivity
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Require Two-Factor Authentication</Label>
+                      <p className="text-sm text-gray-500">
+                        Enforce 2FA for all users in your organization
+                      </p>
+                    </div>
+                    <Switch
+                      checked={localSettings.security?.require_mfa ?? false}
+                      onCheckedChange={(checked) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          security: {
+                            ...localSettings.security,
+                            require_mfa: checked,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="maxLoginAttempts">Max Login Attempts</Label>
+                    <Input
+                      id="maxLoginAttempts"
+                      type="number"
+                      min={3}
+                      max={10}
+                      value={localSettings.security?.max_login_attempts ?? 5}
+                      onChange={(e) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          security: {
+                            ...localSettings.security,
+                            max_login_attempts: parseInt(e.target.value) || 5,
+                          },
+                        })
+                      }
+                    />
+                    <p className="text-sm text-gray-500">
+                      Number of failed login attempts before account lockout
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lockoutDuration">Lockout Duration (minutes)</Label>
+                    <Input
+                      id="lockoutDuration"
+                      type="number"
+                      min={5}
+                      max={60}
+                      value={localSettings.security?.lockout_duration_minutes ?? 15}
+                      onChange={(e) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          security: {
+                            ...localSettings.security,
+                            lockout_duration_minutes: parseInt(e.target.value) || 15,
+                          },
+                        })
+                      }
+                    />
+                    <p className="text-sm text-gray-500">
+                      How long accounts remain locked after too many failed attempts
+                    </p>
+                  </div>
+
+                  <Button onClick={() => saveSettings('security')} disabled={saving}>
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Save Security Settings
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
