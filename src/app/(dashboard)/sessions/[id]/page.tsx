@@ -217,16 +217,16 @@ export default function SessionDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-3 min-w-0">
           <Link href="/sessions">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {session.service_type?.name || 'Session Details'}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
+              {(session.service_type?.name || 'Session Details').replaceAll('-', '‑')}
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
               {new Date(session.date).toLocaleDateString('en-US', {
@@ -238,23 +238,31 @@ export default function SessionDetailPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Badge className={statusColors[session.status]}>
             {statusLabels[session.status] || session.status}
           </Badge>
           {canApprove && (
-            <Button onClick={handleApprove} variant="default">
+            <Button onClick={handleApprove} variant="default" className="w-full sm:w-auto">
               Approve Session
             </Button>
           )}
           {canMarkNoShow && (
-            <Button onClick={handleMarkNoShow} variant="outline" className="text-orange-600 border-orange-300 hover:bg-orange-50">
+            <Button
+              onClick={handleMarkNoShow}
+              variant="outline"
+              className="w-full sm:w-auto text-orange-600 border-orange-300 hover:bg-orange-50"
+            >
               <UserX className="w-4 h-4 mr-2" />
               No Show
             </Button>
           )}
           {canCancel && (
-            <Button onClick={handleCancel} variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
+            >
               <XCircle className="w-4 h-4 mr-2" />
               Cancel
             </Button>

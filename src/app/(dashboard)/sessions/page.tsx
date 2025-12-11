@@ -197,15 +197,15 @@ export default function SessionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
           <p className="text-gray-500 dark:text-gray-400">
             {isAdmin ? 'View and manage all sessions' : 'Your session history'}
           </p>
         </div>
-        <div className="flex items-center space-x-4">
-          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-[200px]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
+          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-full sm:w-[200px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="list">
                 <List className="w-4 h-4 mr-2" />
@@ -218,7 +218,7 @@ export default function SessionsPage() {
             </TabsList>
           </Tabs>
           <Link href="/sessions/new/">
-            <Button>
+            <Button className="w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4 mr-2" />
               New Session
             </Button>

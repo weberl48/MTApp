@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-500 dark:text-gray-400">
@@ -139,7 +139,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link href="/sessions/new/">
-          <Button>
+          <Button className="w-full sm:w-auto justify-center">
             <Plus className="w-4 h-4 mr-2" />
             New Session
           </Button>
