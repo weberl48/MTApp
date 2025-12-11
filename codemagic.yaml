@@ -1,5 +1,5 @@
 workflows:
-  ios-capacitor:
+  ios-build:
     name: iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
@@ -7,6 +7,8 @@ workflows:
       node: 20
       xcode: latest
       cocoapods: default
+      vars:
+        NODE_ENV: production
       groups:
         - env_vars  # Add your env vars in Codemagic UI
     scripts:
@@ -15,7 +17,7 @@ workflows:
           npm install
       - name: Build Next.js
         script: |
-          npm run build
+          NODE_ENV=production npm run build
       - name: Install CocoaPods dependencies
         script: |
           cd ios/App && pod install
@@ -42,13 +44,15 @@ workflows:
     artifacts:
       - MCAManager-simulator.zip
 
-  android-capacitor:
+  android-build:
     name: Android Build
     max_build_duration: 60
     instance_type: linux_x2
     environment:
       node: 20
       java: 17
+      vars:
+        NODE_ENV: production
       groups:
         - env_vars  # Add your env vars in Codemagic UI
     scripts:
@@ -57,7 +61,7 @@ workflows:
           npm install
       - name: Build Next.js
         script: |
-          npm run build
+          NODE_ENV=production npm run build
       - name: Sync Capacitor
         script: |
           npx cap sync android

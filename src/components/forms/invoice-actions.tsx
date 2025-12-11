@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
+import { Browser } from '@capacitor/browser'
+import { isNativePlatform } from '@/lib/capacitor/platform'
 import type { Invoice } from '@/types/database'
 
 interface InvoiceActionsProps {
@@ -108,9 +110,14 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
     }
   }
 
-  function openSquarePaymentLink() {
+  async function openSquarePaymentLink() {
     if (invoice.square_payment_url) {
-      window.open(invoice.square_payment_url, '_blank')
+      // Use Capacitor Browser for native apps, window.open for web
+      if (isNativePlatform()) {
+        await Browser.open({ url: invoice.square_payment_url })
+      } else {
+        window.open(invoice.square_payment_url, '_blank')
+      }
     }
   }
 

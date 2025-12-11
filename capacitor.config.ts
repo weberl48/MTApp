@@ -1,16 +1,18 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// Your deployed Vercel URL - UPDATE THIS to your actual URL
+// Environment-aware configuration
+const isProduction = process.env.NODE_ENV === 'production';
 const PRODUCTION_URL = 'https://maycreativearts.vercel.app';
+const DEVELOPMENT_URL = 'http://localhost:3000';
 
 const config: CapacitorConfig = {
   appId: 'com.maycreativearts.manager',
   appName: 'MCA Manager',
   webDir: '.next',
   server: {
-    // Always load from the deployed Vercel URL for mobile builds
-    url: PRODUCTION_URL,
-    cleartext: false,
+    // Use production URL for builds, localhost for development
+    url: isProduction ? PRODUCTION_URL : DEVELOPMENT_URL,
+    cleartext: !isProduction, // Allow HTTP only in development
   },
   plugins: {
     SplashScreen: {
