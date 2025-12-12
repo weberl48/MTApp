@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, Mail, Phone } from 'lucide-react'
+import { Users, Mail, Phone, ChevronRight } from 'lucide-react'
 import { AddClientDialog } from '@/components/forms/add-client-dialog'
 import { ClientActions } from '@/components/clients/client-actions'
 import type { Client } from '@/types/database'
@@ -76,8 +77,13 @@ export default async function ClientsPage() {
               </TableHeader>
               <TableBody>
                 {clients.map((client) => (
-                  <TableRow key={client.id}>
-                    <TableCell className="font-medium">{client.name}</TableCell>
+                  <TableRow key={client.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <TableCell className="font-medium">
+                      <Link href={`/clients/${client.id}`} className="flex items-center gap-2 hover:text-blue-600">
+                        {client.name}
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         {client.contact_email && (

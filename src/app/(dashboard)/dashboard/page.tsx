@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Calendar, Users, FileText, DollarSign, Plus, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { SessionRequestsManager } from '@/components/portal/session-requests-manager'
+import { ImpersonationSelector } from '@/components/impersonation/impersonation-selector'
+import { useImpersonation } from '@/contexts/impersonation-context'
 
 interface DashboardStats {
   sessionsCount: number
@@ -14,6 +17,8 @@ interface DashboardStats {
   pendingInvoicesCount: number
   pendingAmount: number
   isAdmin: boolean
+  organizationId: string | null
+  actualIsAdmin: boolean  // True admin status (ignores impersonation)
 }
 
 interface RecentSession {
@@ -29,6 +34,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([])
   const [loading, setLoading] = useState(true)
+  const { impersonatedContractor, isImpersonatingContractor } = useImpersonation()
 
   useEffect(() => {
     async function loadDashboard() {
@@ -43,14 +49,20 @@ export default function DashboardPage() {
         return
       }
 
-      // Get user role
+      // Get user role and organization
       const { data: userProfile } = await supabase
         .from('users')
-        .select('role')
+        .select('role, organization_id')
         .eq('id', user.id)
-        .single<{ role: string }>()
+        .single<{ role: string; organization_id: string }>()
 
-      const isAdmin = userProfile?.role === 'admin'
+      const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+
+      // When impersonating, use the impersonated contractor's ID for filtering
+      const effectiveContractorId = isImpersonatingContractor && impersonatedContractor
+        ? impersonatedContractor.id
+        : user.id
+      const effectiveIsAdmin = isImpersonatingContractor ? false : isAdmin
 
       // Fetch statistics
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -63,8 +75,8 @@ export default function DashboardPage() {
         .select('id', { count: 'exact' })
         .gte('date', firstDayOfMonth)
 
-      if (!isAdmin) {
-        sessionsQuery = sessionsQuery.eq('contractor_id', user.id)
+      if (!effectiveIsAdmin) {
+        sessionsQuery = sessionsQuery.eq('contractor_id', effectiveContractorId)
       }
 
       const { count: sessionsCount } = await sessionsQuery
@@ -74,10 +86,10 @@ export default function DashboardPage() {
         .from('clients')
         .select('id', { count: 'exact' })
 
-      // Pending invoices (admin only)
+      // Pending invoices (admin only, not when impersonating)
       let pendingInvoicesCount = 0
       let pendingAmount = 0
-      if (isAdmin) {
+      if (effectiveIsAdmin) {
         const { data: pendingInvoices } = await supabase
           .from('invoices')
           .select('amount')
@@ -92,7 +104,9 @@ export default function DashboardPage() {
         clientsCount: clientsCount || 0,
         pendingInvoicesCount,
         pendingAmount,
-        isAdmin,
+        isAdmin: effectiveIsAdmin,
+        organizationId: userProfile?.organization_id || null,
+        actualIsAdmin: isAdmin,  // Store true admin status
       })
 
       // Recent sessions
@@ -109,8 +123,8 @@ export default function DashboardPage() {
         .order('date', { ascending: false })
         .limit(5)
 
-      if (!isAdmin) {
-        recentSessionsQuery = recentSessionsQuery.eq('contractor_id', user.id)
+      if (!effectiveIsAdmin) {
+        recentSessionsQuery = recentSessionsQuery.eq('contractor_id', effectiveContractorId)
       }
 
       const { data: sessions } = await recentSessionsQuery
@@ -119,7 +133,7 @@ export default function DashboardPage() {
     }
 
     loadDashboard()
-  }, [])
+  }, [impersonatedContractor, isImpersonatingContractor])
 
   if (loading) {
     return (
@@ -135,15 +149,20 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Welcome back! Here&apos;s an overview of your practice.
+            {isImpersonatingContractor
+              ? `Viewing ${impersonatedContractor?.name}'s dashboard`
+              : "Welcome back! Here's an overview of your practice."}
           </p>
         </div>
-        <Link href="/sessions/new/">
-          <Button className="w-full sm:w-auto justify-center">
-            <Plus className="w-4 h-4 mr-2" />
-            New Session
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          {stats?.actualIsAdmin && <ImpersonationSelector />}
+          <Link href="/sessions/new/">
+            <Button className="w-full sm:w-auto justify-center">
+              <Plus className="w-4 h-4 mr-2" />
+              New Session
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -200,6 +219,11 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* Session Requests - Admin Only */}
+      {stats?.isAdmin && stats?.organizationId && (
+        <SessionRequestsManager organizationId={stats.organizationId} />
+      )}
 
       {/* Recent Sessions */}
       <Card>

@@ -33,6 +33,7 @@ interface ExistingSession {
   service_type_id: string
   status: string
   notes: string | null
+  client_notes: string | null
   attendees: { client_id: string }[]
 }
 
@@ -58,6 +59,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     existingSession?.attendees?.map(a => a.client_id) || []
   )
   const [notes, setNotes] = useState(existingSession?.notes || '')
+  const [clientNotes, setClientNotes] = useState(existingSession?.client_notes || '')
   const [status, setStatus] = useState<'draft' | 'submitted'>(
     (existingSession?.status as 'draft' | 'submitted') || 'submitted'
   )
@@ -140,6 +142,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             service_type_id: serviceTypeId,
             status,
             notes: notes || null,
+            client_notes: clientNotes || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id)
@@ -191,6 +194,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               contractor_id: contractorId,
               status,
               notes: notes || null,
+              client_notes: clientNotes || null,
               organization_id: organization!.id,
             })
             .select()
@@ -469,16 +473,34 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </Card>
           )}
 
-          {/* Notes */}
+          {/* Internal Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Session Notes</Label>
+            <Label htmlFor="notes">Internal Notes</Label>
             <Textarea
               id="notes"
-              placeholder="Add any notes about this session..."
+              placeholder="Internal notes (not visible to client)..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={4}
+              rows={3}
             />
+            <p className="text-xs text-gray-500">
+              These notes are for internal use only and will not be shared with the client.
+            </p>
+          </div>
+
+          {/* Client-Facing Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="clientNotes">Client Notes</Label>
+            <Textarea
+              id="clientNotes"
+              placeholder="Notes to share with the client in their portal..."
+              value={clientNotes}
+              onChange={(e) => setClientNotes(e.target.value)}
+              rows={3}
+            />
+            <p className="text-xs text-gray-500">
+              These notes will be visible to the client in their portal.
+            </p>
           </div>
 
           {/* Status */}

@@ -42,6 +42,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
       contractor_id,
       status,
       notes,
+      client_notes,
       attendees:session_attendees(client_id)
     `)
     .eq('id', id)
@@ -76,6 +77,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     service_type_id: session.service_type_id,
     status: session.status,
     notes: session.notes,
+    client_notes: session.client_notes,
     attendees: (session.attendees as { client_id: string }[]) || [],
   }
 

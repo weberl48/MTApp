@@ -15,6 +15,10 @@ export type GoalStatus = 'active' | 'met' | 'not_met'
 export type LocationType = 'in_home' | 'matts_music' | 'other'
 export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individual' | 'art_group'
 
+// Client Portal types
+export type SessionRequestStatus = 'pending' | 'approved' | 'declined' | 'cancelled'
+export type ResourceType = 'homework' | 'file' | 'link'
+
 // Organization settings structure
 export interface OrganizationSettings {
   invoice: {
@@ -272,6 +276,7 @@ export interface Database {
           contractor_id: string
           status: SessionStatus
           notes: string | null
+          client_notes: string | null
           contractor_paid_date: string | null
           contractor_paid_amount: number | null
           organization_id: string
@@ -287,6 +292,7 @@ export interface Database {
           contractor_id: string
           status?: SessionStatus
           notes?: string | null
+          client_notes?: string | null
           contractor_paid_date?: string | null
           contractor_paid_amount?: number | null
           organization_id: string
@@ -301,6 +307,7 @@ export interface Database {
           contractor_id?: string
           status?: SessionStatus
           notes?: string | null
+          client_notes?: string | null
           contractor_paid_date?: string | null
           contractor_paid_amount?: number | null
           organization_id?: string
@@ -403,6 +410,154 @@ export interface Database {
           completed_at?: string | null
         }
       }
+      // Client Portal Tables
+      client_access_tokens: {
+        Row: {
+          id: string
+          client_id: string
+          token: string
+          expires_at: string
+          last_accessed_at: string | null
+          is_revoked: boolean
+          created_by: string
+          organization_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          token: string
+          expires_at: string
+          last_accessed_at?: string | null
+          is_revoked?: boolean
+          created_by: string
+          organization_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          token?: string
+          expires_at?: string
+          last_accessed_at?: string | null
+          is_revoked?: boolean
+          created_by?: string
+          organization_id?: string
+          updated_at?: string
+        }
+      }
+      session_requests: {
+        Row: {
+          id: string
+          client_id: string
+          preferred_date: string
+          preferred_time: string | null
+          alternative_date: string | null
+          alternative_time: string | null
+          duration_minutes: number
+          service_type_id: string | null
+          notes: string | null
+          status: SessionRequestStatus
+          response_notes: string | null
+          responded_by: string | null
+          responded_at: string | null
+          created_session_id: string | null
+          organization_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          preferred_date: string
+          preferred_time?: string | null
+          alternative_date?: string | null
+          alternative_time?: string | null
+          duration_minutes?: number
+          service_type_id?: string | null
+          notes?: string | null
+          status?: SessionRequestStatus
+          response_notes?: string | null
+          responded_by?: string | null
+          responded_at?: string | null
+          created_session_id?: string | null
+          organization_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          preferred_date?: string
+          preferred_time?: string | null
+          alternative_date?: string | null
+          alternative_time?: string | null
+          duration_minutes?: number
+          service_type_id?: string | null
+          notes?: string | null
+          status?: SessionRequestStatus
+          response_notes?: string | null
+          responded_by?: string | null
+          responded_at?: string | null
+          created_session_id?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+      }
+      client_resources: {
+        Row: {
+          id: string
+          client_id: string
+          title: string
+          description: string | null
+          resource_type: ResourceType
+          content: string
+          file_name: string | null
+          file_size: number | null
+          mime_type: string | null
+          due_date: string | null
+          is_completed: boolean
+          completed_at: string | null
+          created_by: string
+          organization_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          title: string
+          description?: string | null
+          resource_type: ResourceType
+          content: string
+          file_name?: string | null
+          file_size?: number | null
+          mime_type?: string | null
+          due_date?: string | null
+          is_completed?: boolean
+          completed_at?: string | null
+          created_by: string
+          organization_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          title?: string
+          description?: string | null
+          resource_type?: ResourceType
+          content?: string
+          file_name?: string | null
+          file_size?: number | null
+          mime_type?: string | null
+          due_date?: string | null
+          is_completed?: boolean
+          completed_at?: string | null
+          created_by?: string
+          organization_id?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -419,6 +574,8 @@ export interface Database {
       goal_status: GoalStatus
       location_type: LocationType
       service_category: ServiceCategory
+      session_request_status: SessionRequestStatus
+      resource_type: ResourceType
     }
   }
 }
@@ -432,6 +589,11 @@ export type Session = Database['public']['Tables']['sessions']['Row']
 export type SessionAttendee = Database['public']['Tables']['session_attendees']['Row']
 export type Invoice = Database['public']['Tables']['invoices']['Row']
 export type ClientGoal = Database['public']['Tables']['client_goals']['Row']
+
+// Client Portal types
+export type ClientAccessToken = Database['public']['Tables']['client_access_tokens']['Row']
+export type SessionRequest = Database['public']['Tables']['session_requests']['Row']
+export type ClientResource = Database['public']['Tables']['client_resources']['Row']
 
 // App Settings types
 export interface BusinessInfo {

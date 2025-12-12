@@ -8,8 +8,10 @@ import { Header } from '@/components/layout/header'
 import { Toaster } from '@/components/ui/sonner'
 import { Loader2 } from 'lucide-react'
 import { OrganizationProvider, useOrganization } from '@/contexts/organization-context'
+import { ImpersonationProvider } from '@/contexts/impersonation-context'
 import { BrandingProvider } from '@/components/providers/branding-provider'
 import { ActivityTracker } from '@/components/providers/activity-tracker'
+import { ImpersonationBanner } from '@/components/impersonation/impersonation-banner'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -64,16 +66,21 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
     <BrandingProvider>
       <ActivityTracker>
-        <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
-          <Sidebar />
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <Header user={user} />
-            <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pt-6 sm:pb-6">
-              {children}
-            </main>
+        <ImpersonationProvider>
+          <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
+            <ImpersonationBanner />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <Header user={user} />
+                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pt-6 sm:pb-6">
+                  {children}
+                </main>
+              </div>
+            </div>
+            <Toaster />
           </div>
-          <Toaster />
-        </div>
+        </ImpersonationProvider>
       </ActivityTracker>
     </BrandingProvider>
   )
