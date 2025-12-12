@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Key, Copy, Check, Loader2, ExternalLink, RefreshCw, Trash2, Eye } from 'lucide-react'
+import { Key, Copy, Check, Loader2, ExternalLink, RefreshCw, Trash2, Eye, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface ClientPortalAccessProps {
@@ -25,6 +25,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   const [tokens, setTokens] = useState<TokenInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [sendingInvite, setSendingInvite] = useState(false)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -90,6 +91,34 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
     } catch (error) {
       console.error('Error revoking token:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to revoke token')
+    }
+  }
+
+  async function sendInvite() {
+    if (!clientEmail) {
+      toast.error('Client does not have an email address on file')
+      return
+    }
+
+    setSendingInvite(true)
+    try {
+      const response = await fetch(`/api/clients/${clientId}/send-invite`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send invite')
+      }
+
+      toast.success(`Portal invite sent to ${clientEmail}`)
+      await loadTokens() // Refresh tokens in case a new one was created
+    } catch (error) {
+      console.error('Error sending invite:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to send invite')
+    } finally {
+      setSendingInvite(false)
     }
   }
 
@@ -184,6 +213,24 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
               </Button>
             </div>
 
+            {/* Send Invite via Email */}
+            {clientEmail && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={sendInvite}
+                disabled={sendingInvite}
+              >
+                {sendingInvite ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Mail className="h-4 w-4 mr-2" />
+                )}
+                {sendingInvite ? 'Sending...' : `Email Invite to ${clientEmail}`}
+              </Button>
+            )}
+
             <div className="flex gap-2 pt-2 border-t">
               <Button
                 size="sm"
@@ -217,19 +264,60 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
               </p>
             )}
 
-            <Button onClick={generateToken} disabled={generating} className="w-full">
-              {generating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Key className="h-4 w-4 mr-2" />
-                  Generate Portal Link
-                </>
-              )}
-            </Button>
+            {clientEmail ? (
+              <Button
+                onClick={sendInvite}
+                disabled={sendingInvite}
+                className="w-full"
+              >
+                {sendingInvite ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sending Invite...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Portal Invite
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button onClick={generateToken} disabled={generating} className="w-full">
+                {generating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Key className="h-4 w-4 mr-2" />
+                    Generate Portal Link
+                  </>
+                )}
+              </Button>
+            )}
+
+            {clientEmail && (
+              <Button
+                variant="outline"
+                onClick={generateToken}
+                disabled={generating}
+                className="w-full"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Key className="h-4 w-4 mr-2" />
+                    Just Generate Link (Don't Send)
+                  </>
+                )}
+              </Button>
+            )}
           </>
         )}
       </CardContent>
