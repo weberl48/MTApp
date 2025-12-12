@@ -54,7 +54,6 @@ export function ImpersonationSelector() {
         supabase
           .from('clients')
           .select('id, name')
-          .eq('is_active', true)
           .order('name')
           .limit(50),
       ])
