@@ -35,10 +35,8 @@ export function ImpersonationSelector() {
   const {
     impersonatedContractor,
     setImpersonatedContractor,
-    impersonatedClient,
-    setImpersonatedClient,
     clearImpersonation,
-    isImpersonating,
+    isImpersonatingContractor,
   } = useImpersonation()
 
   useEffect(() => {
@@ -80,15 +78,8 @@ export function ImpersonationSelector() {
 
       const data = await response.json()
 
-      // Open the portal in a new tab
+      // Open the portal in a new tab (don't set context - client portal is separate)
       window.open(data.portalUrl, '_blank')
-
-      // Also set in context so banner shows
-      setImpersonatedClient({
-        id: client.id,
-        name: client.name,
-        portalToken: data.token,
-      })
     } catch (error) {
       console.error('Error opening client portal:', error)
     } finally {
@@ -109,9 +100,7 @@ export function ImpersonationSelector() {
 
   const activeLabel = impersonatedContractor
     ? `Viewing as: ${impersonatedContractor.name}`
-    : impersonatedClient
-      ? `Viewing as: ${impersonatedClient.name}`
-      : 'View As'
+    : 'View As'
 
   return (
     <DropdownMenu>
@@ -123,7 +112,7 @@ export function ImpersonationSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        {isImpersonating && (
+        {isImpersonatingContractor && (
           <>
             <DropdownMenuItem onClick={clearImpersonation} className="text-amber-600">
               <User className="h-4 w-4 mr-2" />
@@ -144,10 +133,7 @@ export function ImpersonationSelector() {
               {contractors.map((contractor) => (
                 <DropdownMenuItem
                   key={contractor.id}
-                  onClick={() => {
-                    setImpersonatedClient(null)
-                    setImpersonatedContractor(contractor)
-                  }}
+                  onClick={() => setImpersonatedContractor(contractor)}
                   className={impersonatedContractor?.id === contractor.id ? 'bg-amber-50' : ''}
                 >
                   {contractor.name}
@@ -177,7 +163,6 @@ export function ImpersonationSelector() {
                   key={client.id}
                   onClick={() => viewAsClient(client)}
                   disabled={openingPortal === client.id}
-                  className={impersonatedClient?.id === client.id ? 'bg-amber-50' : ''}
                 >
                   {openingPortal === client.id ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -185,9 +170,6 @@ export function ImpersonationSelector() {
                     <ExternalLink className="h-4 w-4 mr-2" />
                   )}
                   {client.name}
-                  {impersonatedClient?.id === client.id && (
-                    <span className="ml-auto text-xs text-amber-600">Active</span>
-                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuSubContent>
