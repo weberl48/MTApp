@@ -10,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, Mail, Phone, ChevronRight } from 'lucide-react'
+import { Users, Mail, Phone, ChevronRight, UserPlus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { AddClientDialog } from '@/components/forms/add-client-dialog'
 import { ClientActions } from '@/components/clients/client-actions'
 import type { Client } from '@/types/database'
@@ -55,8 +56,71 @@ export default async function ClientsPage() {
             Manage your client list and contact information
           </p>
         </div>
-        {isAdmin && <AddClientDialog />}
+        {isAdmin && (
+          <AddClientDialog
+            trigger={
+              <Button size="lg" className="gap-2">
+                <UserPlus className="h-5 w-5" />
+                Add Client
+              </Button>
+            }
+          />
+        )}
       </div>
+
+      {/* Quick Stats */}
+      {isAdmin && clients && clients.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{clients.length}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">Total Clients</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                  <Mail className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                    {clients.filter(c => c.contact_email).length}
+                  </p>
+                  <p className="text-sm text-green-600 dark:text-green-400">With Email</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+                  <UserPlus className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-purple-900 dark:text-purple-100 mb-1">Quick Add</p>
+                  <AddClientDialog
+                    trigger={
+                      <Button size="sm" variant="outline" className="gap-1 border-purple-300 text-purple-700 hover:bg-purple-100 dark:border-purple-700 dark:text-purple-300">
+                        <UserPlus className="h-4 w-4" />
+                        Add & Invite Client
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

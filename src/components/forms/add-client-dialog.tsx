@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, Mail } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import type { PaymentMethod, Client } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
@@ -54,6 +55,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
   const [phone, setPhone] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('private_pay')
   const [notes, setNotes] = useState('')
+  const [sendInvite, setSendInvite] = useState(false)
 
   // Populate form when editing
   useEffect(() => {
@@ -72,6 +74,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
     setPhone('')
     setPaymentMethod('private_pay')
     setNotes('')
+    setSendInvite(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -103,17 +106,38 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
         toast.success('Client updated successfully!')
       } else {
         // Create new client
-        const { error } = await supabase.from('clients').insert({
-          name: name.trim(),
-          contact_email: email.trim() || null,
-          contact_phone: phone.trim() || null,
-          payment_method: paymentMethod,
-          notes: notes.trim() || null,
-          organization_id: organization!.id,
-        })
+        const { data: newClient, error } = await supabase
+          .from('clients')
+          .insert({
+            name: name.trim(),
+            contact_email: email.trim() || null,
+            contact_phone: phone.trim() || null,
+            payment_method: paymentMethod,
+            notes: notes.trim() || null,
+            organization_id: organization!.id,
+          })
+          .select('id')
+          .single()
 
         if (error) throw error
-        toast.success('Client added successfully!')
+
+        // Send portal invite if requested and email is provided
+        if (sendInvite && email.trim()) {
+          try {
+            const response = await fetch(`/api/clients/${newClient.id}/send-invite`, {
+              method: 'POST',
+            })
+            if (response.ok) {
+              toast.success(`Client added and portal invite sent to ${email.trim()}!`)
+            } else {
+              toast.success('Client added! (Failed to send invite - you can retry from client page)')
+            }
+          } catch {
+            toast.success('Client added! (Failed to send invite - you can retry from client page)')
+          }
+        } else {
+          toast.success('Client added successfully!')
+        }
       }
 
       resetForm()
@@ -213,6 +237,32 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                 rows={3}
               />
             </div>
+
+            {/* Send Portal Invite Option (only for new clients with email) */}
+            {!isEditMode && (
+              <div className="flex items-center space-x-2 pt-2 border-t">
+                <Checkbox
+                  id="sendInvite"
+                  checked={sendInvite}
+                  onCheckedChange={(checked) => setSendInvite(checked === true)}
+                  disabled={!email.trim()}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="sendInvite"
+                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 ${!email.trim() ? 'text-gray-400' : ''}`}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Send portal invite
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {email.trim()
+                      ? 'Email client a link to access their portal'
+                      : 'Enter an email address to enable this option'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
@@ -236,6 +286,6 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
 }
 
 // Backward-compatible alias for existing imports
-export function AddClientDialog() {
-  return <ClientDialog />
+export function AddClientDialog({ trigger, onSuccess }: { trigger?: React.ReactNode; onSuccess?: () => void } = {}) {
+  return <ClientDialog trigger={trigger} onSuccess={onSuccess} />
 }
