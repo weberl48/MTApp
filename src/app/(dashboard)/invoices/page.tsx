@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -84,11 +85,13 @@ const paymentMethodLabels: Record<string, string> = {
 function InvoiceTable({
   invoices,
   showActions = false,
-  isAdmin
+  isAdmin,
+  onRefresh,
 }: {
   invoices: Invoice[]
   showActions?: boolean
   isAdmin: boolean
+  onRefresh?: () => void
 }) {
   if (invoices.length === 0) {
     return (
@@ -158,7 +161,7 @@ function InvoiceTable({
               </TableCell>
               {showActions && isAdmin && (
                 <TableCell>
-                  <InvoiceActions invoice={invoice} />
+                  <InvoiceActions invoice={invoice} onStatusChange={onRefresh} />
                 </TableCell>
               )}
             </TableRow>
@@ -173,51 +176,53 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const supabaseRef = useRef(createClient())
 
-  useEffect(() => {
-    async function loadInvoices() {
-      const supabase = createClient()
+  const loadInvoices = useCallback(async () => {
+    const supabase = supabaseRef.current
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-      if (!user) {
-        setLoading(false)
-        return
-      }
-
-      // Check if user is admin
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single<{ role: string }>()
-
-      const admin = userProfile?.role === 'admin'
-      setIsAdmin(admin)
-
-      // Fetch invoices with related data
-      const { data } = await supabase
-        .from('invoices')
-        .select(`
-          *,
-          client:clients(id, name, contact_email),
-          session:sessions(
-            id,
-            date,
-            contractor:users(id, name),
-            service_type:service_types(name)
-          )
-        `)
-        .order('created_at', { ascending: false })
-
-      setInvoices((data as unknown as Invoice[]) || [])
+    if (!user) {
       setLoading(false)
+      return
     }
 
-    loadInvoices()
+    // Check if user is admin/owner/developer
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single<{ role: string }>()
+
+    const role = userProfile?.role
+    const admin = role === 'admin' || role === 'owner' || role === 'developer'
+    setIsAdmin(admin)
+
+    // Fetch invoices with related data
+    const { data } = await supabase
+      .from('invoices')
+      .select(`
+        *,
+        client:clients(id, name, contact_email),
+        session:sessions(
+          id,
+          date,
+          contractor:users(id, name),
+          service_type:service_types(name)
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    setInvoices((data as unknown as Invoice[]) || [])
+    setLoading(false)
   }, [])
+
+  useEffect(() => {
+    loadInvoices()
+  }, [loadInvoices])
 
   // Group invoices by status
   const pendingInvoices = invoices?.filter((inv) => inv.status === 'pending') || []
@@ -344,20 +349,20 @@ export default function InvoicesPage() {
             </TabsList>
             {overdueInvoices.length > 0 && (
               <TabsContent value="overdue">
-                <InvoiceTable invoices={overdueInvoices} showActions isAdmin={isAdmin} />
+                <InvoiceTable invoices={overdueInvoices} showActions isAdmin={isAdmin} onRefresh={loadInvoices} />
               </TabsContent>
             )}
             <TabsContent value="pending">
-              <InvoiceTable invoices={pendingInvoices} showActions isAdmin={isAdmin} />
+              <InvoiceTable invoices={pendingInvoices} showActions isAdmin={isAdmin} onRefresh={loadInvoices} />
             </TabsContent>
             <TabsContent value="sent">
-              <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} />
+              <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} onRefresh={loadInvoices} />
             </TabsContent>
             <TabsContent value="paid">
-              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} />
+              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} onRefresh={loadInvoices} />
             </TabsContent>
             <TabsContent value="all">
-              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} />
+              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} onRefresh={loadInvoices} />
             </TabsContent>
           </Tabs>
         </CardContent>

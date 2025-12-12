@@ -23,9 +23,10 @@ interface InvoiceActionsProps {
     square_invoice_id?: string | null
     square_payment_url?: string | null
   }
+  onStatusChange?: () => void
 }
 
-export function InvoiceActions({ invoice }: InvoiceActionsProps) {
+export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps) {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
@@ -74,6 +75,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       toast.success('Invoice sent successfully')
       router.refresh()
+      onStatusChange?.()
     } catch (error) {
       console.error('Error sending invoice:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to send invoice')
@@ -102,6 +104,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       toast.success('Square invoice created and sent to client!')
       router.refresh()
+      onStatusChange?.()
     } catch (error) {
       console.error('Error creating Square invoice:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to create Square invoice')
@@ -140,6 +143,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       toast.success(`Invoice marked as ${status}`)
       router.refresh()
+      onStatusChange?.()
     } catch (error) {
       console.error('Error updating invoice:', error)
       toast.error('Failed to update invoice')

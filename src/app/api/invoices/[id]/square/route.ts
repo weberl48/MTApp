@@ -31,14 +31,15 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin
+    // Check if user is admin/owner/developer
     const { data: userProfile } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
       .single<{ role: string }>()
 
-    if (userProfile?.role !== 'admin') {
+    const role = userProfile?.role
+    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
