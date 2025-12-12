@@ -30,15 +30,15 @@ export default async function ClientsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if user is admin
-  let isAdmin = false
+  // Check if user can manage clients (admin, owner, or developer)
+  let canManageClients = false
   if (user) {
     const { data: userProfile } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
       .single<{ role: string }>()
-    isAdmin = userProfile?.role === 'admin'
+    canManageClients = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
   }
 
   // Fetch all clients
@@ -56,7 +56,7 @@ export default async function ClientsPage() {
             Manage your client list and contact information
           </p>
         </div>
-        {isAdmin && (
+        {canManageClients && (
           <AddClientDialog
             trigger={
               <Button size="lg" className="gap-2">
@@ -69,7 +69,7 @@ export default async function ClientsPage() {
       </div>
 
       {/* Quick Stats */}
-      {isAdmin && clients && clients.length > 0 && (
+      {canManageClients && clients && clients.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
             <CardContent className="pt-6">
@@ -136,7 +136,7 @@ export default async function ClientsPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Payment Method</TableHead>
                   <TableHead>Notes</TableHead>
-                  {isAdmin && <TableHead className="w-20">Actions</TableHead>}
+                  {canManageClients && <TableHead className="w-20">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,7 +185,7 @@ export default async function ClientsPage() {
                     <TableCell className="max-w-xs truncate">
                       {client.notes || '-'}
                     </TableCell>
-                    {isAdmin && (
+                    {canManageClients && (
                       <TableCell>
                         <ClientActions client={client as Client} />
                       </TableCell>
@@ -198,7 +198,7 @@ export default async function ClientsPage() {
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="mb-4">No clients yet</p>
-              {isAdmin && <AddClientDialog />}
+              {canManageClients && <AddClientDialog />}
             </div>
           )}
         </CardContent>
