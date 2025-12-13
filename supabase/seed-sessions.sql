@@ -1,0 +1,20393 @@
+-- Historical Sessions Import
+-- Generated from Excel data
+
+-- First, ensure service types exist
+DO $$
+DECLARE
+  org_id uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+
+  -- Insert service types if they don't exist (check by name)
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'In-Home Individual Music Therapy', 'music_individual', 'in_home', 50, 0, 23, 0, org_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'In-Home Group Music Therapy', 'music_group', 'in_home', 50, 20, 30, 0, org_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'Matt''s Music Individual' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'Matt''s Music Individual', 'music_individual', 'matts_music', 55, 0, 30, 10, org_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'Musical Expressions', 'music_individual', 'other', 50, 0, 23, 0, org_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'Creative Remedies (Art)', 'art_individual', 'other', 40, 0, 20, 0, org_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id) THEN
+    INSERT INTO service_types (id, name, category, location, base_rate, per_person_rate, mca_percentage, rent_percentage, organization_id)
+    VALUES (gen_random_uuid(), 'Scholarship Session', 'music_individual', 'in_home', 50, 0, 0, 0, org_id);
+  END IF;
+END $$;
+
+-- Insert sessions
+
+-- Session 1: 2024-02-03 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-02-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Bryan Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Bryan Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 2: 2024-01-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Tony sang with thCrosby St Group Colleen For the "Hello So Amherst Street GColleen New Years Reso David Street Gro Colleen When encourage Amherst St Grou Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Jo  DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo  DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: John  Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John  Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 3: 2024-01-30 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Final session: dis 80 MArtin Rd', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kaitlyn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kaitlyn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Tyler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tyler%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Sa
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sa%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 4: 2024-01-24 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Ayub was bounci Home Ayub appeared h Client’s home Before the sessioClients home Olivia was able t  Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ayub Ayub Lopez Tyler Olivia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ayub Ayub Lopez Tyler Olivia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 5: 2024-01-24 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'During the "Hello McKinley Group  Colleen When Brendan w Client''s group ho Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Brendan Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 6: 2024-01-18 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-18', 30, service_type_uuid, contractor_uuid, 'approved', 'When prompted  Group home Client was able t  Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Brendan Tyler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan Tyler%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 7: 2024-01-03 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-03', 30, service_type_uuid, contractor_uuid, 'approved', 'MT Assessment  Group Home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 8: 2024-01-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Worked on blues Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Austin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Austin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 9: 2024-01-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Worked on singin1230 Maple Rd    Jacob Worked on singin1230 Maple Rd    Jacob Synesthesia acti  1200 Master St    Jacob', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica Karen Austin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica Karen Austin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 10: 2024-01-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Singing goodbye 5 West Elmview  Jacob', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Ka
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ka%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 11: 2024-01-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 12: 2024-01-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'makeup session  Client''s home first half of sessioClient''s home second half of se Client''s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah Ikenna Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah Ikenna Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 13: 2024-02-01 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-02-01', 30, service_type_uuid, contractor_uuid, 'approved', 'n/a n/a n/a n/a n/a n/a; first half', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 14: 2024-01-10 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-10', 30, service_type_uuid, contractor_uuid, 'approved', 'n/a; second half   Client''s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 15: 2024-01-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-04', 30, service_type_uuid, contractor_uuid, 'approved', 'na N/a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: kristin Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%kristin Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 16: 2024-01-28 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Makeup immedia Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 17: 2024-03-29 - Caroline - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-29', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kristin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kristin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 18: 2024-03-29 - Amara - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'amara@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-29', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kristin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kristin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 19: 2024-03-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Be
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Be%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 20: 2024-03-06 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Gianna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gianna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 21: 2024-03-06 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 22: 2024-03-08 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-08', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Vic
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vic%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 23: 2024-03-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 24: 2024-03-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-21', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Be
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Be%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 25: 2024-03-21 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-21', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Gianna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gianna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 26: 2024-03-21 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-21', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 27: 2024-03-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-21', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Hillary and
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary and%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 28: 2024-03-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 29: 2024-03-17 - Jacob - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Devon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 30: 2024-03-17 - Jacob - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 31: 2024-04-03 - Jacob - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Devyn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devyn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 32: 2024-04-25 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-25', 30, service_type_uuid, contractor_uuid, 'approved', '5 West Elmview', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 33: 2024-05-01 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-01', 30, service_type_uuid, contractor_uuid, 'approved', '5 West Elmview', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 34: 2024-04-01 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 35: 2024-04-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 36: 2024-04-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-04', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 37: 2024-04-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-18', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 38: 2024-04-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 39: 2024-04-03 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 40: 2024-04-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 41: 2024-05-01 - Jacob - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 42: 2024-04-24 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 43: 2024-04-11 - Amara - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'amara@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-11', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 44: 2024-04-25 - Amara - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'amara@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 45: 2024-04-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-04-25', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawand', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 46: 2024-05-27 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-27', 30, service_type_uuid, contractor_uuid, 'approved', '5 West Elmview Ave', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 47: 2024-06-03 - Jacob - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 48: 2024-05-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-09', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 49: 2024-05-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Group H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 50: 2024-05-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group Ho', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 51: 2024-05-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-23', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group Hom', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 52: 2024-05-01 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 53: 2024-05-22 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 54: 2024-05-29 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 55: 2024-05-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-09', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawanda Le', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 56: 2024-05-23 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-23', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawanda Le', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 57: 2024-05-30 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-05-30', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawanda Le', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 58: 2024-06-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst Group H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 59: 2024-06-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 60: 2024-06-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway DayH', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 61: 2024-06-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway DayH', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 62: 2024-06-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby Group H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 63: 2024-06-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 64: 2024-06-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 65: 2024-06-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-06', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group h', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 66: 2024-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-20', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 67: 2024-06-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Delaware DayHa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 68: 2024-06-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Delaware DayHa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 69: 2024-06-05 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt''s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 70: 2024-06-26 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 71: 2024-06-13 - Amara - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'amara@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 72: 2024-06-12 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-06-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 73: 2024-07-01 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 74: 2024-07-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 75: 2024-07-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway DayH', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 76: 2024-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway DayH', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 77: 2024-07-01 - Colleen - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 78: 2024-07-08 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 79: 2024-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 80: 2024-07-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-18', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 81: 2024-07-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Delaware DayHa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 82: 2024-07-03 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 83: 2024-07-24 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 84: 2024-07-31 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 85: 2024-07-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawand', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 86: 2024-07-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-02', 30, service_type_uuid, contractor_uuid, 'approved', 'People Inc Senio', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 87: 2024-07-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 88: 2024-07-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 89: 2024-07-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 90: 2024-07-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 91: 2024-07-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-07-05', 30, service_type_uuid, contractor_uuid, 'approved', 'The Arts', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 92: 2024-09-18 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Bryan Palmer', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 93: 2024-09-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-10', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 94: 2024-09-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-16', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jeanie Jordan T
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Jordan T%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 95: 2024-09-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-16', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon an
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon an%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 96: 2024-09-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 97: 2024-09-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-19', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 98: 2024-09-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Megan Brunner Megan Brunner Megan Brunner Cоlleen  Cоlleen Colleen Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 99: 2024-09-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Second half
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Second half%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 100: 2024-09-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Colleen Colleen Cоlleen Cоlleen Colleen Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 496.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%496.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 101: 2024-09-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Second half
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Second half%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 102: 2024-09-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Colleen Colleen Cоlleen Cоlleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 103: 2024-10-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 104: 2024-10-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-22', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 105: 2024-10-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-30', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group  Senior DayHab    Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jeanie Nick Lind
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Nick Lind%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 106: 2024-10-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab    Colleen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 107: 2024-10-15 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 108: 2024-10-30 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 109: 2024-10-30 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-10-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 110: 2024-11-21 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 111: 2024-11-21 - Colleen - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 112: 2024-11-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-14', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 113: 2024-11-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby Group H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 114: 2024-11-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-26', 30, service_type_uuid, contractor_uuid, 'approved', 'North Tonawand', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 115: 2024-11-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 116: 2024-11-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 117: 2024-11-26 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 118: 2024-11-01 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-01', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 119: 2024-11-13 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 120: 2024-11-04 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthоny waз aw  Client’з hоme Anthоny waз ab  Client’з hоme Therapist provid  Clients home Firзt half; Ikenna  Clientз hоme', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 121: 2024-11-11 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-11', 30, service_type_uuid, contractor_uuid, 'approved', '"Jозiah partiсip   Clientз hоme Josiah participa   Clients home Ethan created n   Matts Music Ethan сreated 2   Mattз Muзiс Lexi participated  Matts Music Lexi partiсipate   Mattз Muзiс Raсhel partiсi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 122: 2024-11-11 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-11-11', 30, service_type_uuid, contractor_uuid, 'approved', '"Jозiah partiсip   Clientз hоme Josiah participa   Clients home Ethan created n   Matts Music Ethan сreated 2   Mattз Muзiс Lexi participated  Matts Music Lexi partiсipate   Mattз Muзiс Raсhel partiсi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 123: 2024-12-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 124: 2024-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 125: 2024-12-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 126: 2024-12-03 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 127: 2024-12-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 128: 2024-12-04 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 129: 2024-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Main St DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 130: 2024-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 131: 2024-12-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 132: 2024-12-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-10', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 133: 2024-12-10 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 134: 2024-12-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 135: 2024-12-11 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 136: 2024-12-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 137: 2024-12-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 138: 2024-12-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 139: 2024-12-17 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 140: 2024-12-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 141: 2024-12-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 142: 2024-12-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 143: 2024-12-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Hertel DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 144: 2024-12-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-23', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 145: 2024-12-23 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 146: 2024-12-07 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 147: 2024-12-14 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-12-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 148: 2025-01-07 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 149: 2025-01-08 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 150: 2025-01-14 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 151: 2025-01-15 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 152: 2025-01-29 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 153: 2025-02-11 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-11', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 154: 2025-02-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 155: 2025-02-05 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 156: 2025-02-12 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 157: 2025-02-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 158: 2025-02-19 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 159: 2025-02-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 160: 2025-02-26 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 161: 2025-03-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 162: 2025-03-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 163: 2025-03-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 164: 2025-03-19 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 165: 2025-03-26 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 166: 2025-04-01 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-01', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 167: 2025-04-08 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-08', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 168: 2025-04-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 169: 2025-05-06 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 170: 2025-05-27 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-27', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 171: 2025-05-07 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 172: 2025-05-28 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 173: 2025-05-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 174: 2025-06-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley started leMatts Music
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley started leMatts Music%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 175: 2025-06-10 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-10', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 176: 2025-06-03 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 177: 2025-06-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 178: 2025-06-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 179: 2025-06-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 180: 2025-06-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 181: 2025-01-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 182: 2025-01-08 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 183: 2025-01-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Hertel Dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 184: 2024-01-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-01-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 185: 2025-01-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 186: 2025-01-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Southgate CAPP', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 187: 2025-01-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 188: 2025-01-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Hertel DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 189: 2025-01-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior Dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 190: 2025-01-27 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-27', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 191: 2025-01-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 192: 2025-01-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 193: 2025-01-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Southgate CAPP', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 194: 2025-02-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 195: 2025-02-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 196: 2025-02-27 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 197: 2025-02-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St Grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 198: 2025-02-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 199: 2025-02-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 200: 2025-02-04 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 201: 2025-02-03 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 202: 2025-02-11 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 203: 2025-02-18 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 204: 2025-02-25 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 205: 2025-02-10 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 206: 2025-02-00 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-00', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 207: 2025-02-20 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 208: 2025-02-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 209: 2025-02-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby Group H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 210: 2025-02-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 211: 2025-02-07 - Caroline - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 212: 2025-02-28 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 213: 2025-02-14 - Caroline - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-14', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 214: 2025-02-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Main St DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 215: 2025-02-20 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Matt’s Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 216: 2025-02-04 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 217: 2025-02-05 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 218: 2025-02-11 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 219: 2025-02-12 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 220: 2025-02-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 221: 2025-02-19 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 222: 2025-02-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 223: 2025-02-26 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 224: 2025-02-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 225: 2025-02-05 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 226: 2025-02-12 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 227: 2025-02-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 228: 2025-02-19 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 229: 2025-02-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 230: 2025-02-26 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 231: 2025-02-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior Dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 232: 2025-02-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 233: 2025-02-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 234: 2025-02-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 235: 2025-02-03 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 236: 2025-02-10 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 237: 2025-02-24 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-02-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 238: 2025-03-27 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-27', 30, service_type_uuid, contractor_uuid, 'approved', 'Indian Church', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 239: 2025-03-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior DayHab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 240: 2025-03-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 241: 2025-03-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 242: 2025-03-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-13', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 243: 2025-03-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-06', 30, service_type_uuid, contractor_uuid, 'approved', 'David St Group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 244: 2025-03-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 245: 2024-03-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2024-03-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 246: 2025-03-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 247: 2025-03-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior Dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 248: 2025-03-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 249: 2025-03-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Senior Dayhab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 250: 2025-03-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 251: 2025-03-04 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 252: 2025-03-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 253: 2025-03-19 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 254: 2025-03-26 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-03-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 255: 2025-04-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 256: 2025-04-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst st group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 257: 2025-04-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 258: 2025-04-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 259: 2025-04-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 260: 2025-04-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway DayH', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 261: 2025-04-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Crosby St group', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 262: 2025-04-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Indian church', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 263: 2025-04-01 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 264: 2025-04-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 265: 2025-04-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 266: 2025-04-30 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 267: 2025-04-23 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 268: 2025-04-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 269: 2025-04-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 270: 2025-04-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 271: 2025-04-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 272: 2025-04-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 273: 2025-05-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-05', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90                        63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 274: 2025-05-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-29', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 275: 2025-05-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 276: 2025-05-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-15', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 130 130 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%130 130 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 277: 2025-05-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 278: 2025-05-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 279: 2025-05-28 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 55                     39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 280: 2025-05-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 65 65 65 65 65 65 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65 65 65 65 65 65 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 281: 2025-05-06 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 65 65 65 65 65 65 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65 65 65 65 65 65 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 282: 2025-05-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 283: 2025-05-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-05', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *Prepaid *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*Prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 284: 2025-05-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 285: 2025-05-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 286: 2025-05-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 287: 2025-05-01 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-01', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150 150 0
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 0%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 288: 2025-06-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90                        63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 289: 2025-06-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-16', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90                        63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 290: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 291: 2025-06-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 292: 2025-06-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 70                        49
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 293: 2025-06-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-23', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90                        63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 294: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 70                        49
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 295: 2025-06-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150 0 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 0 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 296: 2025-04-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-04-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 297: 2025-06-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 55                     39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 298: 2025-06-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 299: 2025-06-30 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 300: 2025-06-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 301: 2025-06-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-11', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 302: 2025-06-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 303: 2025-06-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-23', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 304: 2025-06-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 305: 2025-06-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 306: 2025-06-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: *prepaid
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 307: 2025-06-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Lincoln CAPP', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 308: 2025-07-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90 90 150 90 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 90 150 90 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 309: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 310: 2025-07-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 311: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 312: 2025-07-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 313: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 314: 2025-07-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 315: 2025-07-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-15', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 316: 2025-07-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-09', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 150 150
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 317: 2025-07-31 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 318: 2025-07-28 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 319: 2025-07-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 320: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Broadway Cheek', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 321: 2025-08-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Main St', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 322: 2025-08-05 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 323: 2025-08-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 324: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Eggert Elementa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 325: 2025-08-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Eggert Elementa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 326: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'SASI Elma', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 327: 2025-08-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Amherst St grou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 328: 2025-08-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 329: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 330: 2025-08-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 331: 2025-08-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 65                        48
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65                        48%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 332: 2025-08-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 55                     39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 333: 2025-08-27 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 334: 2025-09-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 335: 2025-09-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Elmwood DayHa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 336: 2025-09-08 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 337: 2025-09-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Orchard Park Hig', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 338: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Indian church', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 339: 2025-09-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Elma SASI', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 340: 2025-09-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-09', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 341: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participate Eggert elementa  Colleen Group participate Eggert elementa  Colleen Group participate Eggert elementa  Colleen Group participate Eggert elementa  Colleen Courtney particip 4637 Miles', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 342: 2025-10-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participate Elma SASI Harold participat  Virtual Harold participat  Virtual', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 343: 2025-07-07 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 344: 2025-06-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 345: 2025-06-18 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 346: 2025-06-18 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Eric
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Lizzie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lizzie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 347: 2025-06-18 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 348: 2025-06-18 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 349: 2025-06-18 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 350: 2025-06-18 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 351: 2025-06-17 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 352: 2025-06-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tom Emily  Liz Bryan  Jea
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom Emily  Liz Bryan  Jea%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 353: 2025-06-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ John Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 354: 2025-06-17 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 355: 2025-06-17 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 356: 2025-06-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Davis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Piciulo classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 357: 2025-06-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Wackenheim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Starkey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 358: 2025-06-17 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 359: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Nick Hope Pam Th
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Nick Hope Pam Th%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 360: 2025-06-20 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 361: 2025-06-20 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 362: 2025-06-20 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 363: 2025-06-27 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 364: 2025-06-27 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 365: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Shannon Michelle Emily D
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shannon Michelle Emily D%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 366: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Derek Colleen John Alon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Colleen John Alon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 367: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nan Matthew Mark Thom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Matthew Mark Thom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 368: 2025-06-20 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Patty Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty Laurie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 369: 2025-06-27 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 370: 2025-06-27 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 371: 2025-06-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 372: 2025-06-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Francis Pamela Michael J
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis Pamela Michael J%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 373: 2025-06-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Jimmy Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Jimmy Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 374: 2025-06-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 375: 2025-06-24 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 376: 2025-06-27 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-27', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 377: 2025-06-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Emily  John Pam Tom Fra
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily  John Pam Tom Fra%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 378: 2025-06-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 379: 2025-06-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 380: 2025-06-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Marshall Linda Steve Cra
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Linda Steve Cra%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 381: 2025-06-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Danielle Rashaan Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danielle Rashaan Brandy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 382: 2025-06-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kayla Kobe Caleb Annie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 383: 2025-06-18 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 8 clients
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%8 clients%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 384: 2025-07-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 385: 2025-07-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 386: 2025-07-02 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 387: 2025-06-30 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 388: 2025-06-30 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 389: 2025-06-30 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 390: 2025-06-30 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-30', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 391: 2025-06-18 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', 'The group discussed their favorite things a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lizzie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lizzie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Eric
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Madisyn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Madisyn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 392: 2025-06-18 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen verbally responded whenever promp', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 393: 2025-07-16 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica sang along whenever prompted, a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 394: 2025-07-16 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen laid in bed as the therapist sang son', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 395: 2025-07-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthony was still admitted at Buffalo Gene Group participated in the Hello Song, impr Josiah participated in the Hello Song, the I For the Hello Song, Tony sang hello 2 time During the Hello Song, Jim', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 396: 2025-07-14 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthony was still admitted at Buffalo Gene Group participated in the Hello Song, impr Josiah participated in the Hello Song, the I For the Hello Song, Tony sang hello 2 time During the Hello Song, Jim', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 397: 2025-07-14 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was working with his SLP staff mem', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 398: 2025-07-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Simchick-Walkowski clas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 399: 2025-07-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reeves classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 400: 2025-07-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Busky classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 401: 2025-07-28 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith and the therapist analyzed the forms', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 402: 2025-07-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Chmiel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Chmiel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Henn classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 403: 2025-07-17 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zuccari classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 404: 2025-07-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Linda Pamela John Liz Br
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda Pamela John Liz Br%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 405: 2025-07-28 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica sang along with verbal prompting.', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 406: 2025-07-28 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen smiled when the therapist entered th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 407: 2025-07-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Christy Marstel Kristophe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christy Marstel Kristophe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 408: 2025-07-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Derek Elyse Kimberlyn  D
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Elyse Kimberlyn  D%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 409: 2025-07-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mitch Noah Jeremy Tiffan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Noah Jeremy Tiffan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 410: 2025-07-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S second half Josiah participated in the Hello Song, pian For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hell', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 411: 2025-07-21 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S second half Josiah participated in the Hello Song, pian For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hell', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 412: 2025-07-21 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was working with his ALP staff mem', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 413: 2025-07-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Li', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Simchick - Walkowski cla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick - Walkowski cla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 414: 2025-07-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Wate', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reeves classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 415: 2025-07-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Wate', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Busky classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 416: 2025-07-22 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Bea', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 417: 2025-07-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley improvised on the piano for 15 min', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 418: 2025-07-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Guarnieri
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Guarnieri%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Piciulo clas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo clas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 419: 2025-07-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Fowler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Fowler%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Zuccari classr
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classr%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 420: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Pamela Liz Nancy Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Liz Nancy Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 421: 2025-07-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'NO SHOW; Therapist waited until 4:15pm', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 422: 2025-07-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Bear W', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 423: 2025-07-28 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Devon played the chords of the verse of "L', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Devon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 424: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mark Jan Damon Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 425: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: JJ Bobby  Ron Tayeeba
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Bobby  Ron Tayeeba%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 426: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sissy Donna Shontell Ros
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Donna Shontell Ros%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 427: 2025-07-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Hillary sang the entire Hello Song while pla For the Hello Song, Patty sang hello 2 time', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 428: 2025-07-29 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live music for the 30 mi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 429: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, an e', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Gretchen Francis Brian J
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Brian J%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 430: 2025-07-29 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, the S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 431: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Vernon waved hello', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 432: 2025-07-28 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was working with his ALP staff mem', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 433: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Simchick-Walkowski clas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 434: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reeves classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 435: 2025-07-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Busky classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 436: 2025-07-31 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Old', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Guinieri
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Guinieri%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Piciulo class
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo class%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 437: 2025-07-31 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zuccari classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 438: 2025-07-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Pamela James Liz John B
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela James Liz John B%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 439: 2025-07-31 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Nicolas participated in the Hello Song, Kitc', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 440: 2025-07-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Megan Paul Brian Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan Paul Brian Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 441: 2025-07-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Vinny  Reggie Jason Tim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vinny  Reggie Jason Tim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 442: 2025-07-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a sha For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa Group participated in the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 443: 2025-07-07 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a sha For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa Group participated in the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 444: 2025-07-08 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley improvised on the guitar for 15 min', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 445: 2025-07-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Davis classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 446: 2025-07-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Wackenheim and Starkey classrooms; Gro', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Wackenheim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Starkey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 447: 2025-07-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a tra', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Thatius Janet Nancy Jean
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius Janet Nancy Jean%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 448: 2025-07-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Patty sang hello 2 time', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary Vicky Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 449: 2025-07-31 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack identified notes on a treble clef staff a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 450: 2025-07-31 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'The group wrote a song about activities to', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 451: 2025-07-31 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Devon successfully and independently pla', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Devon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 452: 2025-08-04 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar sat on his couch and verbally greet', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 453: 2025-08-05 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live music on guitar for', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 454: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a dis', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Janet  Tom Liz Nancy Lin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet  Tom Liz Nancy Lin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 455: 2025-08-05 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 456: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang hello 2 tim During the Hello Song, Jesse made eye co', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dj John Bernie Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dj John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 457: 2025-08-05 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, Appl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 458: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Appl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Simchick-Walkowski clas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 459: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Appl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reeves classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 460: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Appl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Busky classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 461: 2025-08-05 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Hun', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 462: 2025-08-07 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley participated in the Hello Song, con', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 463: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Janet Linda  Liz Nancy P
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet Linda  Liz Nancy P%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 464: 2025-08-07 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Ethan and therapist listened to The Bonnie', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 465: 2025-08-07 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Kitchen', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 466: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lucy Keith Jennifer Sama
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lucy Keith Jennifer Sama%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 467: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', '"Group participated in the Hello Song, lyric', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jenn Derek  Victoria Meg
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jenn Derek  Victoria Meg%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 468: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a 20', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nan Tabetha Mitch Genes
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Tabetha Mitch Genes%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 469: 2025-08-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Hillary sang the ent', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Vicky Patty Brittany Hillar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky Patty Brittany Hillar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 470: 2025-08-11 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar greeted the therapist verbally, laid o', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 471: 2025-08-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Li', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Simchick - Walkowski cla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick - Walkowski cla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 472: 2025-08-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Li', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reeves classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 473: 2025-08-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Li', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Busky classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 474: 2025-08-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Maynard classroom; Group participated in', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Maynard classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Maynard classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 475: 2025-08-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Zacari classroom; Group participated in the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zuccari classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 476: 2025-08-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Liz Gretchen Thatius Pam
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Gretchen Thatius Pam%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 477: 2025-08-13 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Nicolas participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 478: 2025-08-13 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, When I', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 479: 2025-08-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mark Jan Damon Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 480: 2025-08-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anna Ron Bobby Curtis L
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anna Ron Bobby Curtis L%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 481: 2025-08-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: No Amanda Tim Edwardo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%No Amanda Tim Edwardo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 482: 2025-08-21 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack played the melody to Pink Pony Club', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 483: 2025-08-21 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan smiled and shook the therapists hand', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 484: 2025-08-21 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'The group wrote a song about what duties', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 485: 2025-08-21 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith began choosing chords for each sect', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 486: 2025-08-21 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica gave a three syllable response wh', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 487: 2025-08-21 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen verbally responded to all prompts.  S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 488: 2025-08-26 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live music on the guitar', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 489: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a rai', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Karen John Liz Lin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Karen John Liz Lin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 490: 2025-08-26 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 491: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, he waved hello whi For the Hello Song, Jimmy sang hello 2 tim', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 492: 2025-08-26 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song on hi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 493: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Classroom 1; Group participated in the Hel', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Classroom 1
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 1%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 494: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Classroom 2; Group participated in the Hel', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Classroom 2
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 2%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 495: 2025-08-26 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Classroom 3; Group participated in the Hel', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Classroom 3
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 3%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 496: 2025-08-26 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 497: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Pamela Bryan Thatius Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Bryan Thatius Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 498: 2025-08-28 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Lets G', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 499: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, sing', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kayla Kobe Caleb Annie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 500: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kenneth  Mike Jim Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kenneth  Mike Jim Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 501: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mary Beth Eric Jordan De
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Jordan De%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 502: 2025-08-28 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Afif Jean Steve Chuck Ch
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Afif Jean Steve Chuck Ch%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 503: 2025-09-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack played Ode to joy independently on t', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 504: 2025-09-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan participated in the hello song, by shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 505: 2025-09-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith finished the song structure for her ori', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 506: 2025-09-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica consistently gave 3 syllable respon', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 507: 2025-09-02 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen verbally responded whenever music', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 508: 2025-09-02 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'The group wrote a song about their dream', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 509: 2025-09-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 510: 2025-09-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Client no showed; Grandma will pay cance', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 511: 2025-09-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Pamela Gretchen Hope T
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Gretchen Hope T%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 512: 2025-09-04 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Ethan met with Miley, his new music therap', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 513: 2025-09-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Javier Brenda Devin Jenn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Devin Jenn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 514: 2025-09-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Omar Christian  Elaina C
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Omar Christian  Elaina C%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 515: 2025-09-04 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien Colleen invited me to conduct a transfer se Hillary sang the entire Hello Song while pla Vicky sang the entire Hello Song while play Patty sang hello 2 time', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 516: 2025-09-08 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist played live music on the guitar fo First half; Group participated in the Hello S second half For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hel', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 517: 2025-09-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 518: 2025-09-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Davis and Piciulo classrooms; Group partic', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Davis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Piciulo classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 519: 2025-09-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Wackenheim classroom; Group participate', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Wackenheim classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 520: 2025-09-11 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Old La', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 521: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 522: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 523: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 524: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 525: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Serena Ellison Ryan Davi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serena Ellison Ryan Davi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 526: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: JJ Stephen Andrew Lisa J
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Stephen Andrew Lisa J%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 527: 2025-09-11 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rosland Donna Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rosland Donna Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 528: 2025-09-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-12', 30, service_type_uuid, contractor_uuid, 'approved', '7 participants; Group participated in the He', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Serenity room
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 529: 2025-09-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-12', 30, service_type_uuid, contractor_uuid, 'approved', '6 participants; Group participated in the He', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Harmony classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 530: 2025-09-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-12', 30, service_type_uuid, contractor_uuid, 'approved', '11 participants; Group participated in the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tranquility room
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tranquility room%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 531: 2025-09-15 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was working with his ALP staff mem', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 532: 2025-09-16 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan shook the therapist’s hand during the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 533: 2025-09-16 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica gave one and two syllable verbal r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 534: 2025-09-16 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen smiled and laughed as the therapist', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 535: 2025-09-16 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Met with BP at Matt`s. Reviewed past few', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 536: 2025-09-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided 30 minutes of live guita', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 537: 2025-09-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Liz Thatius Gretchen Mic
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Thatius Gretchen Mic%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 538: 2025-09-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Jimmy sang the entire', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 539: 2025-09-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 540: 2025-09-16 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Hamm classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hamm classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 541: 2025-09-16 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Piciulo classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 542: 2025-09-16 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Goin', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 543: 2025-09-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley participated in a piano improvisatio', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 544: 2025-09-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Going', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 545: 2025-09-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 546: 2025-09-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 547: 2025-09-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 548: 2025-09-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo Aden participated in music expressions, en Elijah participated in an adaptive lesson fo Kemet participated in musical expressions', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 549: 2025-09-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo Aden participated in music expressions, en Elijah participated in an adaptive lesson fo Kemet participated in musical expressions', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 550: 2025-09-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 551: 2025-09-19 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 552: 2025-09-19 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 553: 2025-09-19 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 554: 2025-09-22 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was eating ice cream at a table with', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 555: 2025-09-22 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-22', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 556: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Zach practiced playing “Grant the Gorilla” b', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zach
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zach%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 557: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith listened to the outline of the song she', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 558: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'The group wrote a song about different fall', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 559: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan smiled and waved for the hello song a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 560: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica smiled and clapped when the thera', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 561: 2025-09-24 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen was in an out of sleep for the entiret', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 562: 2025-09-29 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Client was not home when therapist arrive', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 563: 2025-10-01 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith discussed the next song topic ideas', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 564: 2025-10-01 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan lead the music therapist to his room, a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 565: 2025-10-01 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen verbally responded whenever promp', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 566: 2025-10-01 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica smiled and clapped upon seeing th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 567: 2025-10-01 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack played piano with his right hand readi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 568: 2025-10-01 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-01', 30, service_type_uuid, contractor_uuid, 'approved', 'The group did an analysis of the lyrics of th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: N/A
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%N/A%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 569: 2025-10-03 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Worked with client on singing songs of his', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 570: 2025-10-06 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar requested a drum given verbal prom', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 571: 2025-10-11 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Part 1: Worked with client on setting goals', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 572: 2025-10-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 5 Pe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 573: 2025-10-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 5 Pe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 574: 2025-10-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 5 Pe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 575: 2025-10-13 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 5 Pe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 576: 2025-10-14 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Hamm classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hamm classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 577: 2025-10-14 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Piciulo classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 578: 2025-10-14 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, 5 Pe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 579: 2025-10-14 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Nicolas participated in the Hello Song, Dow', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 580: 2025-10-15 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica gave verbal responses to words le', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 581: 2025-10-15 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen smiled upon seeing the therapist.  S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 582: 2025-10-15 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack played the melody to "Ode To Joy" in', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 583: 2025-10-15 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith discussed more with the therapist ab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 584: 2025-10-15 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'The adults discussed the lyrics of the song', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: approx.
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%approx.%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 585: 2025-10-15 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan shook the therapists hand when prom', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 586: 2025-10-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 587: 2025-10-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 588: 2025-10-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 589: 2025-10-15 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-15', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 590: 2025-10-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rashaan Derek Camia  L
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 591: 2025-10-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: JJ Curtis Jamie Anna Ste
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Curtis Jamie Anna Ste%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 592: 2025-10-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kim Donna Tony Sean Ro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kim Donna Tony Sean Ro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 593: 2025-10-16 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Laurie sang hello 2 tim', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Patty Vicky Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 594: 2025-10-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Javier Brenda Andrew  H
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew  H%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 595: 2025-10-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Derek Can Clayton Shan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Can Clayton Shan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 596: 2025-10-17 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tabitha Matthew Genesis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabitha Matthew Genesis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 597: 2025-10-20 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was working with his ALP staff mem', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 598: 2025-10-21 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live music on guitar for', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 599: 2025-10-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Liz Janet Linda Jeanie To
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Janet Linda Jeanie To%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 600: 2025-10-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-21', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ hummed the entire During the Hello Song, John sang ''hello'' 2 For the Hello Song, Bernie sang the phras Jesse remained seated for the entire sessi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ John Bernie Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 601: 2025-10-23 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Henn and Weber classrooms; Group partic', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Henn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Webber classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Webber classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 602: 2025-10-23 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Hamm and Henning classrooms; Group pa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hamm
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Henning class
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning class%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 603: 2025-10-23 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Tipit', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 604: 2025-10-23 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley continued to learn about the guitar', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 605: 2025-10-23 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Tipity T', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 606: 2025-10-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Tr', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 607: 2025-10-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Tr', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 608: 2025-10-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Tr', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 609: 2025-10-23 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, 10 Tr', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 610: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Eric Tommy Robbie Kelly
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric Tommy Robbie Kelly%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 611: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Reggie James Jason Mik
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reggie James Jason Mik%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 612: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Laurie sang hello 2', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary Patty Vicky Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 613: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Harmony classroom; 7 in
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom; 7 in%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 614: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Synergy classroom; 7 ind
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy classroom; 7 ind%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 615: 2025-10-24 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Serenity classroom; 6 ind
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity classroom; 6 ind%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 616: 2025-10-25 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Part1- Met with client and reviewed positiv', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 617: 2025-10-28 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar was watching tv when the therapist', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 618: 2025-10-29 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthony was awake for the entire session', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 619: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Gretchen Francis Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 620: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Steven sang the entire', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon Jimmy Mich
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy Mich%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 621: 2025-10-29 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Henn classroom; Group participated in the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Henn classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 622: 2025-10-29 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Piciulo classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 623: 2025-10-29 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Nicolas Participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 624: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 625: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 626: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 627: 2025-10-29 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Tippi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 628: 2025-10-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mark Kayla Owen  Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 629: 2025-10-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jackie Steven Amanda Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 630: 2025-10-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dennis Vicky John Ivan A
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis Vicky John Ivan A%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 631: 2025-10-31 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Marshall Katie Craig Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Katie Craig Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 632: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan smiled while the therapist played song', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 633: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Devon played the verse of "Let it Be" on pi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Devon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 634: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Zack played the first line of the melody of "', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zack
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 635: 2025-11-03 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'The clients wrote and sang a song togethe', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 636: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica gave one, two, and three syllable r', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 637: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen smiled and laughed while the therap', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 638: 2025-11-03 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith wrote two verses for her new song ab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 639: 2025-11-03 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'The clients listened to and analyzed the lyr', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: approx 12
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%approx 12%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 640: 2025-11-03 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Didn''t do the session - lice outbreak - not n', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: N/A
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%N/A%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 641: 2025-11-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 642: 2025-11-03 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 643: 2025-11-03 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 644: 2025-11-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Harmony classroom; 6 in
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom; 6 in%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 645: 2025-11-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Synergy classroom; 8 ind
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy classroom; 8 ind%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 646: 2025-11-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Serenity room; 8 individua
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room; 8 individua%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 647: 2025-11-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 648: 2025-11-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 649: 2025-11-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 650: 2025-11-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 651: 2025-11-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Javier Brenda Andrew Ne
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew Ne%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 652: 2025-11-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kayla Clay Keller Christia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Clay Keller Christia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 653: 2025-11-07 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Matt Tabitha  Genesis Ma
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matt Tabitha  Genesis Ma%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 654: 2025-11-10 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Part1-Met with client and reviewed highs a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 655: 2025-11-11 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Sang goodbye during Nordoff Robbins “He', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 656: 2025-11-12 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', '"Therapist played on the guitar and sang fo', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 657: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Wi', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Liz Linda Tom Jeanie Kar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Linda Tom Jeanie Kar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 658: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, Vernon waved hello During the Hello Song, Jimmy sang hello 1 For the Hello Song, Michael sang hello 1 ti', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon Michael Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 659: 2025-11-12 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Ikenna participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 660: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 661: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 662: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 663: 2025-11-12 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 664: 2025-11-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rashaan Derek Camia  L
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 665: 2025-11-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 666: 2025-11-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mo Shontell Sean Tony R
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mo Shontell Sean Tony R%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 667: 2025-11-14 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Hillary sang the entire During the Hello Song, Vicky sang the enti For the Hello Song, Patty sang hello 2 time During the Hello Song, Laurie sang hello 2', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary Vicky Patty Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty Laurie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 668: 2025-11-18 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', '“Hello/Goodbye”- Beatles, fast/slow yes/no', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 669: 2025-11-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live music on the guitar', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 670: 2025-11-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Danny Thatius Michael To
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danny Thatius Michael To%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 671: 2025-11-18 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ hummed the entire During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa During the Hello Song, Jesse sat down ne', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ John Bernie Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 672: 2025-11-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Ikenna participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 673: 2025-11-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, ABC', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 674: 2025-11-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Hamm classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hamm classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 675: 2025-11-18 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Henning classroom; Group participated in t', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Henning classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 676: 2025-11-18 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Hun', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 677: 2025-11-18 - Colleen - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Hailey continued to work on her second half Harold participated in a music therapy ses', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hailey Hailey Harold McCown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hailey Hailey Harold McCown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 678: 2025-11-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mark Kayla Owen  Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 679: 2025-11-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jackie Steven Amanda Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 680: 2025-11-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mary Beth Eric Stephanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Stephanie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 681: 2025-11-21 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Marshal Katie Afif Carme
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshal Katie Afif Carme%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 682: 2025-11-24 - Bryan - Creative Remedies
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'bryan@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Creative Remedies (Art)' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Part1-Met with client and reviewed previou', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bryan Palmer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 683: 2025-11-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist provided live guitar music for 30', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 684: 2025-11-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Gretchen Hope Tom Brya
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Hope Tom Brya%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 685: 2025-11-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, Vernon played his j For the Hello Song, Michael sang the entir During the Hello Song, Jimmy said hello 1', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Vernon Michael Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 686: 2025-11-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Ikenna participated in the Hello Song, Tipit', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 687: 2025-11-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, Hun', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 688: 2025-11-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hamm classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 689: 2025-11-25 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 690: 2025-11-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, the', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 691: 2025-11-25 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Tipity T', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 692: 2025-11-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Zach worked on reading the music for “Ge', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Zach
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zach%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 693: 2025-11-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Dan listened to the therapist sing songs.  H', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 694: 2025-11-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Jessica gave verbal responses when prom', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 695: 2025-11-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Karen verbally responded whenever promp', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 696: 2025-11-30 - Jacob - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Faith laid out the structure for her lyrics for', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Faith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 697: 2025-11-30 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'The group discussed the history of the blue', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Approx 8-10 clients
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Approx 8-10 clients%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 698: 2025-11-30 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'The group discussed and wrote a song ab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 699: 2025-11-30 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-11-30', 30, service_type_uuid, contractor_uuid, 'approved', 'The group listened to and discussed three', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 6-8 participants
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%6-8 participants%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 700: 2025-12-01 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-01', 30, service_type_uuid, contractor_uuid, 'approved', 'The group listened to different versions of t', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 10-12 participants
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%10-12 participants%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 701: 2025-12-01 - Jacob - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'jacob@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-01', 30, service_type_uuid, contractor_uuid, 'approved', 'The group discussed and wrote a song ab', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sylvia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 702: 2025-12-01 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar answered the door when the therap', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 703: 2025-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist played holiday songs on the guit', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 704: 2025-12-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: John Michael Liz Thomas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John Michael Liz Thomas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 705: 2025-12-02 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ said hello while pla During the Hello Song, John said hello whi For the Hello Song, Bernie said time to say During the Hello Song, Jesse made eye co', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: DJ John Bernie Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 706: 2025-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Ikenna participated in the Hello Song, Old', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 707: 2025-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 708: 2025-12-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Piciulo classroom; Group participated in th', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Piciulo classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 709: 2025-12-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Henning
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Jones class
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jones class%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 710: 2025-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Run', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 711: 2025-12-02 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Bentley continued to learn guitar and partic', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Bentley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 712: 2025-12-02 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Frosty', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 713: 2025-12-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 714: 2025-12-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 715: 2025-12-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 716: 2025-12-03 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Jingl', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 717: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Dianne Eddie Brenda Jav
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dianne Eddie Brenda Jav%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 718: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Michelle Kayla Chris Elain
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michelle Kayla Chris Elain%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 719: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Mitch Chris Genesis Tiffa
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Chris Genesis Tiffa%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 720: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Laurie sang the ent', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hillary Vicky patty Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky patty Laurie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 721: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Damon David Brandy Will
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon David Brandy Will%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 722: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Kelly JJ Jamie Sandy Ro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kelly JJ Jamie Sandy Ro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 723: 2025-12-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Sissy Elaine Roselyn  Ed
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Elaine Roselyn  Ed%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 724: 2025-12-08 - Caroline West - In home music therapy
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'caroline@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Individual Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar greeted the therapist verbally and to', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tajwar Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 725: 2025-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Synergy room (8 participants); Group parti', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Synergy room
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy room%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 726: 2025-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Serenity room (9 participants); Group parti', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Serenity room
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 727: 2025-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Harmony room (7 participants); Group part', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Harmony room
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony room%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 728: 2025-12-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist played Christmas music on the p', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 729: 2025-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a dru', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nick Karen Tom James M
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick Karen Tom James M%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 730: 2025-12-09 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Tony participated in the Hello So First half; Michael participated in the Hello First half; Vernon participated in the Hello First half; Jimmy participated in the Hello S', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Tony Michael Vernon Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Michael Vernon Jim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 731: 2025-12-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Ikenna participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 732: 2025-12-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Josiah participated in the Hello Song, Build', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 733: 2025-12-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Henn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Webber classro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Webber classro%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 734: 2025-12-09 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, drum', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Starkey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+    -- Attendee: Wackenheim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 735: 2025-12-09 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Rachel participated in the Hello Song, Buil', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 736: 2025-12-10 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Nicolas participated in the Hello Song, Buil', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Nicolas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 737: 2025-12-10 - Colleen - Musical Expressions
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Lexi participated in the Hello Song, Build a', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 738: 2025-12-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, He''ll', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Grossman classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 739: 2025-12-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, He''ll', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Funigiello classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 740: 2025-12-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, He''ll', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Couell classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Session 741: 2025-12-10 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-12-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, He''ll', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Hackett classroom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+    END IF;
+  END IF;
+END $$;
+
+-- Verify the data
+SELECT 'Sessions' as table_name, COUNT(*) as count FROM sessions WHERE organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+UNION ALL
+SELECT 'Session Attendees', COUNT(*) FROM session_attendees sa
+  JOIN sessions s ON sa.session_id = s.id
+  WHERE s.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
