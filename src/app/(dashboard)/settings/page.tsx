@@ -38,7 +38,7 @@ import { ColorPicker } from '@/components/ui/color-picker'
 import { AuditLogTable } from '@/components/tables/audit-log-table'
 import { MfaSetup } from '@/components/forms/mfa-setup'
 import { toast } from 'sonner'
-import { DeveloperOwnerInvite } from '@/components/invites/developer-owner-invite'
+import { DeveloperRoleInvites } from '@/components/invites/developer-role-invites'
 import type {
   User as UserType,
   ServiceType,
@@ -835,7 +835,7 @@ export default function SettingsPage() {
                   {isDeveloper && (
                     <>
                       <Separator />
-                      <DeveloperOwnerInvite organizationId={organization.id} />
+                      <DeveloperRoleInvites organizationId={organization.id} />
                     </>
                   )}
                 </CardContent>

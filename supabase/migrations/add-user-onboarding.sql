@@ -20,24 +20,29 @@ CREATE INDEX IF NOT EXISTS idx_user_onboarding_user_org
 ALTER TABLE user_onboarding ENABLE ROW LEVEL SECURITY;
 
 -- Users can manage their own onboarding rows
+DROP POLICY IF EXISTS "Users can view their onboarding" ON user_onboarding;
 CREATE POLICY "Users can view their onboarding" ON user_onboarding
     FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create their onboarding" ON user_onboarding;
 CREATE POLICY "Users can create their onboarding" ON user_onboarding
     FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their onboarding" ON user_onboarding;
 CREATE POLICY "Users can update their onboarding" ON user_onboarding
     FOR UPDATE
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their onboarding" ON user_onboarding;
 CREATE POLICY "Users can delete their onboarding" ON user_onboarding
     FOR DELETE
     USING (auth.uid() = user_id);
 
 -- Keep updated_at current
+DROP TRIGGER IF EXISTS update_user_onboarding_updated_at ON user_onboarding;
 CREATE TRIGGER update_user_onboarding_updated_at
     BEFORE UPDATE ON user_onboarding
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();

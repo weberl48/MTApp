@@ -4,10 +4,24 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { Copy, Check, Loader2 } from 'lucide-react'
+import { Check, Copy, Loader2 } from 'lucide-react'
 
-export function DeveloperOwnerInvite(props: { organizationId: string }) {
+type InviteRole = 'owner' | 'admin' | 'contractor'
+
+type InviteResult = {
+  inviteUrl: string
+  expiresAt: string
+}
+
+function RoleInviteSection(props: {
+  organizationId: string
+  role: InviteRole
+  title: string
+  description: string
+  defaultExpiresInDays: number
+}) {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
@@ -31,20 +45,23 @@ export function DeveloperOwnerInvite(props: { organizationId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           organizationId: props.organizationId,
-          role: 'owner',
+          role: props.role,
           email: email.trim() || undefined,
-          expiresInDays: 14,
+          expiresInDays: props.defaultExpiresInDays,
         }),
       })
 
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
+      const data = (await response.json().catch(() => ({}))) as Partial<InviteResult> & {
+        error?: string
+      }
+
+      if (!response.ok || !data.inviteUrl || !data.expiresAt) {
         throw new Error(data?.error || 'Failed to generate invite')
       }
 
       setInviteUrl(data.inviteUrl)
       setExpiresAt(data.expiresAt)
-      toast.success('Owner invite link generated')
+      toast.success(`${props.title} link generated`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to generate invite')
     } finally {
@@ -63,18 +80,16 @@ export function DeveloperOwnerInvite(props: { organizationId: string }) {
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-medium">Developer: Owner Invite</p>
-        <p className="text-xs text-gray-500">
-          Generates a single-use owner invite link for this organization.
-        </p>
+        <p className="text-sm font-medium">{props.title}</p>
+        <p className="text-xs text-gray-500">{props.description}</p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="owner_invite_email">Lock to email (optional)</Label>
+        <Label htmlFor={`${props.role}_invite_email`}>Lock to email (optional)</Label>
         <Input
-          id="owner_invite_email"
+          id={`${props.role}_invite_email`}
           type="email"
-          placeholder="owner@example.com"
+          placeholder="person@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -82,7 +97,7 @@ export function DeveloperOwnerInvite(props: { organizationId: string }) {
 
       <Button onClick={generateInvite} disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Generate Owner Invite Link
+        Generate {props.role} invite link
       </Button>
 
       {inviteUrl && (
@@ -94,11 +109,50 @@ export function DeveloperOwnerInvite(props: { organizationId: string }) {
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
-          {displayExpires && (
-            <p className="text-xs text-gray-500">Expires: {displayExpires}</p>
-          )}
+          {displayExpires && <p className="text-xs text-gray-500">Expires: {displayExpires}</p>}
         </div>
       )}
+    </div>
+  )
+}
+
+export function DeveloperRoleInvites(props: { organizationId: string }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-medium">Developer: Secure role invites</p>
+        <p className="text-xs text-gray-500">
+          These are single-use, expiring links (safer than sharing an org ID link).
+        </p>
+      </div>
+
+      <RoleInviteSection
+        organizationId={props.organizationId}
+        role="owner"
+        title="Owner invite"
+        description="Creates an owner for this organization (single-use)."
+        defaultExpiresInDays={14}
+      />
+
+      <Separator />
+
+      <RoleInviteSection
+        organizationId={props.organizationId}
+        role="admin"
+        title="Admin invite"
+        description="Creates an admin for this organization (single-use)."
+        defaultExpiresInDays={14}
+      />
+
+      <Separator />
+
+      <RoleInviteSection
+        organizationId={props.organizationId}
+        role="contractor"
+        title="Contractor invite (secure)"
+        description="Creates a contractor for this organization (single-use)."
+        defaultExpiresInDays={30}
+      />
     </div>
   )
 }

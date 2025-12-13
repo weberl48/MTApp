@@ -23,6 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_user_invites_expires
 ALTER TABLE user_invites ENABLE ROW LEVEL SECURITY;
 
 -- Developer-only for now
+DROP POLICY IF EXISTS "Developers can manage user invites" ON user_invites;
 CREATE POLICY "Developers can manage user invites" ON user_invites
     FOR ALL
     USING (is_developer())
