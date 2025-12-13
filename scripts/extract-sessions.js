@@ -158,13 +158,18 @@ workbook.SheetNames.forEach(sheetName => {
           .replace(/\r/g, '')
           .substring(0, 200);
 
+        // Deduplicate client names within this session
+        const uniqueClients = [...new Set(clientNames.map(c => c.trim().toLowerCase()))]
+          .map(c => clientNames.find(orig => orig.trim().toLowerCase() === c))
+          .filter(c => c && c.length > 1);
+
         sessions.push({
           type: sessionType,
           date: sessionDate,
           contractor,
-          clients: clientNames.length > 0 ? clientNames : ['Unknown'],
+          clients: uniqueClients.length > 0 ? uniqueClients : ['Unknown'],
           notes: cleanNotes,
-          isGroup: sessionType === 'Group Session' || clientNames.length > 1
+          isGroup: sessionType === 'Group Session' || uniqueClients.length > 1
         });
       }
     });
@@ -212,6 +217,20 @@ Object.keys(byType).forEach(t => console.log(`  ${t}: ${byType[t]}`));
 // Generate SQL
 let sql = `-- Historical Sessions Import
 -- Generated from Excel data
+
+-- Clean up any existing sessions from previous import attempts
+DO $$
+DECLARE
+  org_id uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+
+  -- Delete existing session_attendees and sessions
+  DELETE FROM session_attendees WHERE session_id IN (SELECT id FROM sessions WHERE organization_id = org_id);
+  DELETE FROM sessions WHERE organization_id = org_id;
+
+  RAISE NOTICE 'Cleared existing sessions for org: %', org_id;
+END $$;
 
 -- First, ensure service types exist
 DO $$
@@ -282,15 +301,20 @@ BEGIN
 
 `;
 
-  // Add attendees
+  // Add attendees (deduplicated)
+  const seenClients = new Set();
   s.clients.forEach((client, cidx) => {
     const safeClient = client.replace(/'/g, "''").trim();
-    if (safeClient.length > 1) {
+    const clientKey = safeClient.toLowerCase();
+    if (safeClient.length > 1 && !seenClients.has(clientKey)) {
+      seenClients.add(clientKey);
       sql += `    -- Attendee: ${safeClient}
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%${safeClient}%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
 `;
     }

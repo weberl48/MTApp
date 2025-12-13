@@ -1,6 +1,20 @@
 -- Historical Sessions Import
 -- Generated from Excel data
 
+-- Clean up any existing sessions from previous import attempts
+DO $$
+DECLARE
+  org_id uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+
+  -- Delete existing session_attendees and sessions
+  DELETE FROM session_attendees WHERE session_id IN (SELECT id FROM sessions WHERE organization_id = org_id);
+  DELETE FROM sessions WHERE organization_id = org_id;
+
+  RAISE NOTICE 'Cleared existing sessions for org: %', org_id;
+END $$;
+
 -- First, ensure service types exist
 DO $$
 DECLARE
@@ -63,8 +77,10 @@ BEGIN
     -- Attendee: Bryan Bryan Bryan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Bryan Bryan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -90,56 +106,66 @@ BEGIN
     -- Attendee: Tony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Vernon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Jo  DJ
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo  DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Bernie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: John  Patty
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John  Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Hillary
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: DJ
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: John
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-    END IF;
-    -- Attendee: Bernie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -165,20 +191,26 @@ BEGIN
     -- Attendee: Kaitlyn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kaitlyn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Tyler
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tyler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Sa
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sa%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -204,8 +236,10 @@ BEGIN
     -- Attendee: Ayub Ayub Lopez Tyler Olivia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ayub Ayub Lopez Tyler Olivia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -231,8 +265,10 @@ BEGIN
     -- Attendee: Brendan Brendan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan Brendan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -258,8 +294,10 @@ BEGIN
     -- Attendee: Brendan Tyler
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan Tyler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -285,8 +323,10 @@ BEGIN
     -- Attendee: Brendan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -312,8 +352,10 @@ BEGIN
     -- Attendee: Austin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Austin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -339,8 +381,10 @@ BEGIN
     -- Attendee: Jessica Karen Austin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica Karen Austin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -366,20 +410,26 @@ BEGIN
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Ka
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ka%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -405,8 +455,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -432,8 +484,10 @@ BEGIN
     -- Attendee: Josiah Ikenna Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah Ikenna Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -459,8 +513,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -486,8 +542,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -513,8 +571,10 @@ BEGIN
     -- Attendee: kristin Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%kristin Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -540,8 +600,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -567,8 +629,10 @@ BEGIN
     -- Attendee: Kristin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kristin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -594,8 +658,10 @@ BEGIN
     -- Attendee: Kristin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kristin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -621,20 +687,26 @@ BEGIN
     -- Attendee: DJ
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: John
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Be
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Be%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -660,8 +732,10 @@ BEGIN
     -- Attendee: Gianna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gianna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -687,8 +761,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -714,20 +790,26 @@ BEGIN
     -- Attendee: Hillary
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Patty
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Vic
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vic%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -753,20 +835,26 @@ BEGIN
     -- Attendee: Tony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Vernon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Jo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -792,20 +880,26 @@ BEGIN
     -- Attendee: DJ
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: John
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Be
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Be%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -831,8 +925,10 @@ BEGIN
     -- Attendee: Gianna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gianna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -858,8 +954,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -885,14 +983,18 @@ BEGIN
     -- Attendee: Patty
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Hillary and
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary and%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -918,8 +1020,10 @@ BEGIN
     -- Attendee: Vernon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -945,8 +1049,10 @@ BEGIN
     -- Attendee: Devon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -972,8 +1078,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -999,8 +1107,10 @@ BEGIN
     -- Attendee: Devyn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devyn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1026,8 +1136,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1053,8 +1165,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1080,8 +1194,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1107,8 +1223,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1134,8 +1252,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1161,8 +1281,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1188,8 +1310,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1215,8 +1339,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1242,8 +1368,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1269,8 +1397,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1296,8 +1426,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1323,8 +1455,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1350,8 +1484,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1377,8 +1513,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1404,8 +1542,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1431,8 +1571,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1458,8 +1600,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1485,8 +1629,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1512,8 +1658,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1539,8 +1687,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1566,8 +1716,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1593,8 +1745,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1620,8 +1774,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1647,8 +1803,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1674,8 +1832,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1701,8 +1861,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1728,8 +1890,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1755,8 +1919,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1782,8 +1948,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1809,8 +1977,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1836,8 +2006,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1863,8 +2035,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1890,8 +2064,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1917,8 +2093,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1944,8 +2122,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1971,8 +2151,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -1998,8 +2180,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2025,8 +2209,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2052,8 +2238,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2079,8 +2267,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2106,8 +2296,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2133,8 +2325,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2160,8 +2354,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2187,8 +2383,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2214,8 +2412,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2241,8 +2441,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2268,8 +2470,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2295,8 +2499,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2322,8 +2528,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2349,8 +2557,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2376,8 +2586,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2403,8 +2615,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2430,8 +2644,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2457,8 +2673,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2484,8 +2702,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2511,8 +2731,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2538,8 +2760,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2565,8 +2789,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2592,8 +2818,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2619,8 +2847,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2646,8 +2876,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2673,8 +2905,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2700,8 +2934,10 @@ BEGIN
     -- Attendee: Jeanie Jordan T
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Jordan T%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2727,8 +2963,10 @@ BEGIN
     -- Attendee: Tony Vernon an
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon an%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2754,8 +2992,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2781,8 +3021,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2808,8 +3050,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2835,8 +3079,10 @@ BEGIN
     -- Attendee: Second half
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Second half%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2862,8 +3108,10 @@ BEGIN
     -- Attendee: 496.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%496.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2889,8 +3137,10 @@ BEGIN
     -- Attendee: Second half
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Second half%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2916,8 +3166,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2943,8 +3195,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2970,8 +3224,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -2997,8 +3253,10 @@ BEGIN
     -- Attendee: Jeanie Nick Lind
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Nick Lind%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3024,8 +3282,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3051,8 +3311,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3078,8 +3340,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3105,8 +3369,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3132,8 +3398,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3159,8 +3427,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3186,8 +3456,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3213,8 +3485,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3240,8 +3514,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3267,8 +3543,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3294,8 +3572,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3321,8 +3601,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3348,8 +3630,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3375,8 +3659,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3402,8 +3688,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3429,8 +3717,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3456,8 +3746,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3483,8 +3775,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3510,8 +3804,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3537,8 +3833,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3564,8 +3862,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3591,8 +3891,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3618,8 +3920,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3645,8 +3949,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3672,8 +3978,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3699,8 +4007,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3726,8 +4036,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3753,8 +4065,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3780,8 +4094,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3807,8 +4123,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3834,8 +4152,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3861,8 +4181,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3888,8 +4210,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3915,8 +4239,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3942,8 +4268,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3969,8 +4297,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -3996,8 +4326,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4023,8 +4355,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4050,8 +4384,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4077,8 +4413,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4104,8 +4442,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4131,8 +4471,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4158,8 +4500,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4185,8 +4529,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4212,8 +4558,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4239,8 +4587,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4266,8 +4616,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4293,8 +4645,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4320,8 +4674,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4347,8 +4703,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4374,8 +4732,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4401,8 +4761,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4428,8 +4790,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4455,8 +4819,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4482,8 +4848,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4509,8 +4877,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4536,8 +4906,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4563,8 +4935,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4590,8 +4964,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4617,8 +4993,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4644,8 +5022,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4671,8 +5051,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4698,8 +5080,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4725,8 +5109,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4752,8 +5138,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4779,8 +5167,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4806,8 +5196,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4833,8 +5225,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4860,8 +5254,10 @@ BEGIN
     -- Attendee: Bentley started leMatts Music
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley started leMatts Music%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4887,8 +5283,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4914,8 +5312,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4941,8 +5341,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4968,8 +5370,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -4995,8 +5399,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5022,8 +5428,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5049,8 +5457,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5076,8 +5486,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5103,8 +5515,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5130,8 +5544,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5157,8 +5573,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5184,8 +5602,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5211,8 +5631,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5238,8 +5660,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5265,8 +5689,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5292,8 +5718,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5319,8 +5747,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5346,8 +5776,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5373,8 +5805,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5400,8 +5834,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5427,8 +5863,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5454,8 +5892,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5481,8 +5921,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5508,8 +5950,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5535,8 +5979,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5562,8 +6008,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5589,8 +6037,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5616,8 +6066,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5643,8 +6095,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5670,8 +6124,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5697,8 +6153,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5724,8 +6182,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5751,8 +6211,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5778,8 +6240,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5805,8 +6269,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5832,8 +6298,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5859,8 +6327,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5886,8 +6356,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5913,8 +6385,10 @@ BEGIN
     -- Attendee: 38.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5940,8 +6414,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5967,8 +6443,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -5994,8 +6472,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6021,8 +6501,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6048,8 +6530,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6075,8 +6559,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6102,8 +6588,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6129,8 +6617,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6156,8 +6646,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6183,8 +6675,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6210,8 +6704,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6237,8 +6733,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6264,8 +6762,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6291,8 +6791,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6318,8 +6820,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6345,8 +6849,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6372,8 +6878,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6399,8 +6907,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6426,8 +6936,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6453,8 +6965,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6480,8 +6994,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6507,8 +7023,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6534,8 +7052,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6561,8 +7081,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6588,8 +7110,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6615,8 +7139,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6642,8 +7168,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6669,8 +7197,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6696,8 +7226,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6723,8 +7255,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6750,8 +7284,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6777,8 +7313,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6804,8 +7342,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6831,8 +7371,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6858,8 +7400,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6885,8 +7429,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6912,8 +7458,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6939,8 +7487,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6966,8 +7516,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -6993,8 +7545,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7020,8 +7574,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7047,8 +7603,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7074,8 +7632,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7101,8 +7661,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7128,8 +7690,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7155,8 +7719,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7182,8 +7748,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7209,8 +7777,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7236,8 +7806,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7263,8 +7835,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7290,8 +7864,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7317,8 +7893,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7344,8 +7922,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7371,8 +7951,10 @@ BEGIN
     -- Attendee: 39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7398,8 +7980,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7425,8 +8009,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7452,8 +8038,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7479,8 +8067,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7506,8 +8096,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7533,8 +8125,10 @@ BEGIN
     -- Attendee: 90                        63
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7560,8 +8154,10 @@ BEGIN
     -- Attendee: 150 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7587,8 +8183,10 @@ BEGIN
     -- Attendee: 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7614,8 +8212,10 @@ BEGIN
     -- Attendee: 130 130 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%130 130 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7641,8 +8241,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7668,8 +8270,10 @@ BEGIN
     -- Attendee: 150 150 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7695,8 +8299,10 @@ BEGIN
     -- Attendee: 55                     39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7722,8 +8328,10 @@ BEGIN
     -- Attendee: 65 65 65 65 65 65 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65 65 65 65 65 65 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7749,8 +8357,10 @@ BEGIN
     -- Attendee: 65 65 65 65 65 65 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65 65 65 65 65 65 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7776,8 +8386,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7803,8 +8415,10 @@ BEGIN
     -- Attendee: *Prepaid *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*Prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7830,8 +8444,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7857,8 +8473,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7884,8 +8502,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7911,8 +8531,10 @@ BEGIN
     -- Attendee: 150 150 150 0
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 0%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7938,8 +8560,10 @@ BEGIN
     -- Attendee: 90                        63
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7965,8 +8589,10 @@ BEGIN
     -- Attendee: 90                        63
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -7992,8 +8618,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8019,8 +8647,10 @@ BEGIN
     -- Attendee: 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8046,8 +8676,10 @@ BEGIN
     -- Attendee: 70                        49
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8073,8 +8705,10 @@ BEGIN
     -- Attendee: 90                        63
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8100,8 +8734,10 @@ BEGIN
     -- Attendee: 70                        49
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8127,8 +8763,10 @@ BEGIN
     -- Attendee: 150 150 0 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 0 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8154,8 +8792,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8181,8 +8821,10 @@ BEGIN
     -- Attendee: 55                     39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8208,8 +8850,10 @@ BEGIN
     -- Attendee: *prepaid *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8235,8 +8879,10 @@ BEGIN
     -- Attendee: *prepaid *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8262,8 +8908,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8289,8 +8937,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8316,8 +8966,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8343,8 +8995,10 @@ BEGIN
     -- Attendee: *prepaid *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid *prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8370,8 +9024,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8397,8 +9053,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8424,8 +9082,10 @@ BEGIN
     -- Attendee: *prepaid
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%*prepaid%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8451,8 +9111,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8478,8 +9140,10 @@ BEGIN
     -- Attendee: 90 90 150 90 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 90 150 90 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8505,8 +9169,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8532,8 +9198,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8559,8 +9227,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8586,8 +9256,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8613,8 +9285,10 @@ BEGIN
     -- Attendee: 150 150 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150 150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8640,8 +9314,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8667,8 +9343,10 @@ BEGIN
     -- Attendee: 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8694,8 +9372,10 @@ BEGIN
     -- Attendee: 150 150
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%150 150%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8721,8 +9401,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8748,8 +9430,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8775,8 +9459,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8802,8 +9488,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8829,8 +9517,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8856,8 +9546,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8883,8 +9575,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8910,8 +9604,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8937,8 +9633,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8964,8 +9662,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -8991,8 +9691,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9018,8 +9720,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9045,8 +9749,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9072,8 +9778,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9099,8 +9807,10 @@ BEGIN
     -- Attendee: 65                        48
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65                        48%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9126,8 +9836,10 @@ BEGIN
     -- Attendee: 55                     39.5
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9153,8 +9865,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9180,8 +9894,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9207,8 +9923,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9234,8 +9952,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9261,8 +9981,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9288,8 +10010,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9315,8 +10039,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9342,8 +10068,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9369,8 +10097,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9396,8 +10126,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9423,8 +10155,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9450,8 +10184,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9477,8 +10213,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9504,14 +10242,18 @@ BEGIN
     -- Attendee: Eric
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Lizzie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lizzie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9537,8 +10279,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9564,8 +10308,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9591,8 +10337,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9618,20 +10366,26 @@ BEGIN
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9657,8 +10411,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9684,8 +10440,10 @@ BEGIN
     -- Attendee: Tom Emily  Liz Bryan  Jea
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom Emily  Liz Bryan  Jea%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9711,8 +10469,10 @@ BEGIN
     -- Attendee: DJ John Bernie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9738,8 +10498,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9765,8 +10527,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9792,14 +10556,18 @@ BEGIN
     -- Attendee: Davis
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Piciulo classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9825,14 +10593,18 @@ BEGIN
     -- Attendee: Wackenheim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Starkey
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9858,8 +10630,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9885,8 +10659,10 @@ BEGIN
     -- Attendee: Bryan Nick Hope Pam Th
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Nick Hope Pam Th%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9912,8 +10688,10 @@ BEGIN
     -- Attendee: Ethan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9939,8 +10717,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9966,8 +10746,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -9993,8 +10775,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10020,8 +10804,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10047,8 +10833,10 @@ BEGIN
     -- Attendee: Shannon Michelle Emily D
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shannon Michelle Emily D%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10074,8 +10862,10 @@ BEGIN
     -- Attendee: Derek Colleen John Alon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Colleen John Alon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10101,8 +10891,10 @@ BEGIN
     -- Attendee: Nan Matthew Mark Thom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Matthew Mark Thom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10128,8 +10920,10 @@ BEGIN
     -- Attendee: Patty Laurie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10155,8 +10949,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10182,8 +10978,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10209,8 +11007,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10236,8 +11036,10 @@ BEGIN
     -- Attendee: Francis Pamela Michael J
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis Pamela Michael J%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10263,8 +11065,10 @@ BEGIN
     -- Attendee: Tony Jimmy Vernon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Jimmy Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10290,8 +11094,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10317,8 +11123,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10344,8 +11152,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10371,8 +11181,10 @@ BEGIN
     -- Attendee: Emily  John Pam Tom Fra
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily  John Pam Tom Fra%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10398,8 +11210,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10425,8 +11239,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10452,8 +11268,10 @@ BEGIN
     -- Attendee: Marshall Linda Steve Cra
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Linda Steve Cra%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10479,8 +11297,10 @@ BEGIN
     -- Attendee: Danielle Rashaan Brandy
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danielle Rashaan Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10506,8 +11326,10 @@ BEGIN
     -- Attendee: Kayla Kobe Caleb Annie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10533,8 +11355,10 @@ BEGIN
     -- Attendee: 8 clients
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%8 clients%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10560,8 +11384,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10587,8 +11413,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10614,20 +11442,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10653,8 +11487,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10680,8 +11516,10 @@ BEGIN
     -- Attendee: Janet
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10707,8 +11545,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10734,8 +11574,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10761,20 +11603,26 @@ BEGIN
     -- Attendee: Lizzie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lizzie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Eric
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Madisyn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Madisyn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10800,8 +11648,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10827,8 +11677,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10854,8 +11706,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10881,8 +11735,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10908,8 +11764,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10935,8 +11793,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10962,8 +11822,10 @@ BEGIN
     -- Attendee: Simchick-Walkowski clas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -10989,8 +11851,10 @@ BEGIN
     -- Attendee: Reeves classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11016,8 +11880,10 @@ BEGIN
     -- Attendee: Busky classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11043,8 +11909,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11070,14 +11938,18 @@ BEGIN
     -- Attendee: Chmiel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Chmiel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Henn classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11103,8 +11975,10 @@ BEGIN
     -- Attendee: Zuccari classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11130,8 +12004,10 @@ BEGIN
     -- Attendee: Linda Pamela John Liz Br
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda Pamela John Liz Br%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11157,8 +12033,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11184,8 +12062,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11211,8 +12091,10 @@ BEGIN
     -- Attendee: Christy Marstel Kristophe
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christy Marstel Kristophe%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11238,8 +12120,10 @@ BEGIN
     -- Attendee: Derek Elyse Kimberlyn  D
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Elyse Kimberlyn  D%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11265,8 +12149,10 @@ BEGIN
     -- Attendee: Mitch Noah Jeremy Tiffan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Noah Jeremy Tiffan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11292,8 +12178,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11319,8 +12207,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11346,8 +12236,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11373,8 +12265,10 @@ BEGIN
     -- Attendee: Simchick - Walkowski cla
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick - Walkowski cla%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11400,8 +12294,10 @@ BEGIN
     -- Attendee: Reeves classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11427,8 +12323,10 @@ BEGIN
     -- Attendee: Busky classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11454,8 +12352,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11481,8 +12381,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11508,14 +12410,18 @@ BEGIN
     -- Attendee: Guarnieri
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Guarnieri%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Piciulo clas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo clas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11541,14 +12447,18 @@ BEGIN
     -- Attendee: Fowler
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Fowler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Zuccari classr
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classr%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11574,8 +12484,10 @@ BEGIN
     -- Attendee: Pamela Liz Nancy Janet
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Liz Nancy Janet%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11601,8 +12513,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11628,8 +12542,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11655,8 +12571,10 @@ BEGIN
     -- Attendee: Devon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11682,8 +12600,10 @@ BEGIN
     -- Attendee: Mark Jan Damon Brandy
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11709,8 +12629,10 @@ BEGIN
     -- Attendee: JJ Bobby  Ron Tayeeba
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Bobby  Ron Tayeeba%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11736,8 +12658,10 @@ BEGIN
     -- Attendee: Sissy Donna Shontell Ros
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Donna Shontell Ros%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11763,8 +12687,10 @@ BEGIN
     -- Attendee: Hillary Patty
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11790,8 +12716,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11817,8 +12745,10 @@ BEGIN
     -- Attendee: Gretchen Francis Brian J
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Brian J%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11844,8 +12774,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11871,8 +12803,10 @@ BEGIN
     -- Attendee: Tony Vernon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11898,8 +12832,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11925,8 +12861,10 @@ BEGIN
     -- Attendee: Simchick-Walkowski clas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11952,8 +12890,10 @@ BEGIN
     -- Attendee: Reeves classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -11979,8 +12919,10 @@ BEGIN
     -- Attendee: Busky classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12006,14 +12948,18 @@ BEGIN
     -- Attendee: Guinieri
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Guinieri%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Piciulo class
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo class%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12039,8 +12985,10 @@ BEGIN
     -- Attendee: Zuccari classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12066,8 +13014,10 @@ BEGIN
     -- Attendee: Pamela James Liz John B
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela James Liz John B%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12093,8 +13043,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12120,8 +13072,10 @@ BEGIN
     -- Attendee: Megan Paul Brian Bryan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan Paul Brian Bryan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12147,8 +13101,10 @@ BEGIN
     -- Attendee: Vinny  Reggie Jason Tim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vinny  Reggie Jason Tim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12174,8 +13130,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12201,8 +13159,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12228,8 +13188,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12255,14 +13217,18 @@ BEGIN
     -- Attendee: Piciulo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Davis classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12288,14 +13254,18 @@ BEGIN
     -- Attendee: Wackenheim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Starkey
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12321,8 +13291,10 @@ BEGIN
     -- Attendee: Thatius Janet Nancy Jean
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius Janet Nancy Jean%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12348,8 +13320,10 @@ BEGIN
     -- Attendee: Hillary Vicky Patty
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12375,8 +13349,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12402,20 +13378,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12441,8 +13423,10 @@ BEGIN
     -- Attendee: Devon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12468,8 +13452,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12495,8 +13481,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12522,8 +13510,10 @@ BEGIN
     -- Attendee: Janet  Tom Liz Nancy Lin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet  Tom Liz Nancy Lin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12549,8 +13539,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12576,8 +13568,10 @@ BEGIN
     -- Attendee: Dj John Bernie Jesse
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dj John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12603,8 +13597,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12630,8 +13626,10 @@ BEGIN
     -- Attendee: Simchick-Walkowski clas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick-Walkowski clas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12657,8 +13655,10 @@ BEGIN
     -- Attendee: Reeves classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12684,8 +13684,10 @@ BEGIN
     -- Attendee: Busky classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12711,8 +13713,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12738,8 +13742,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12765,8 +13771,10 @@ BEGIN
     -- Attendee: Janet Linda  Liz Nancy P
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet Linda  Liz Nancy P%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12792,8 +13800,10 @@ BEGIN
     -- Attendee: Ethan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12819,8 +13829,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12846,8 +13858,10 @@ BEGIN
     -- Attendee: Lucy Keith Jennifer Sama
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lucy Keith Jennifer Sama%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12873,8 +13887,10 @@ BEGIN
     -- Attendee: Jenn Derek  Victoria Meg
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jenn Derek  Victoria Meg%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12900,8 +13916,10 @@ BEGIN
     -- Attendee: Nan Tabetha Mitch Genes
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Tabetha Mitch Genes%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12927,8 +13945,10 @@ BEGIN
     -- Attendee: Vicky Patty Brittany Hillar
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky Patty Brittany Hillar%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12954,8 +13974,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -12981,8 +14003,10 @@ BEGIN
     -- Attendee: Simchick - Walkowski cla
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Simchick - Walkowski cla%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13008,8 +14032,10 @@ BEGIN
     -- Attendee: Reeves classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reeves classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13035,8 +14061,10 @@ BEGIN
     -- Attendee: Busky classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Busky classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13062,8 +14090,10 @@ BEGIN
     -- Attendee: Maynard classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Maynard classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13089,8 +14119,10 @@ BEGIN
     -- Attendee: Zuccari classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zuccari classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13116,8 +14148,10 @@ BEGIN
     -- Attendee: Liz Gretchen Thatius Pam
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Gretchen Thatius Pam%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13143,8 +14177,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13170,8 +14206,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13197,8 +14235,10 @@ BEGIN
     -- Attendee: Mark Jan Damon Brandy
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13224,8 +14264,10 @@ BEGIN
     -- Attendee: Anna Ron Bobby Curtis L
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anna Ron Bobby Curtis L%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13251,8 +14293,10 @@ BEGIN
     -- Attendee: No Amanda Tim Edwardo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%No Amanda Tim Edwardo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13278,8 +14322,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13305,8 +14351,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13332,20 +14380,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13371,8 +14425,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13398,8 +14454,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13425,8 +14483,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13452,8 +14512,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13479,8 +14541,10 @@ BEGIN
     -- Attendee: Bryan Karen John Liz Lin
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Karen John Liz Lin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13506,8 +14570,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13533,8 +14599,10 @@ BEGIN
     -- Attendee: Tony Vernon Jimmy
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13560,8 +14628,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13587,8 +14657,10 @@ BEGIN
     -- Attendee: Classroom 1
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 1%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13614,8 +14686,10 @@ BEGIN
     -- Attendee: Classroom 2
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 2%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13641,8 +14715,10 @@ BEGIN
     -- Attendee: Classroom 3
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Classroom 3%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13668,8 +14744,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13695,8 +14773,10 @@ BEGIN
     -- Attendee: Pamela Bryan Thatius Jo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Bryan Thatius Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13722,8 +14802,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13749,8 +14831,10 @@ BEGIN
     -- Attendee: Kayla Kobe Caleb Annie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13776,8 +14860,10 @@ BEGIN
     -- Attendee: Kenneth  Mike Jim Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kenneth  Mike Jim Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13803,8 +14889,10 @@ BEGIN
     -- Attendee: Mary Beth Eric Jordan De
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Jordan De%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13830,8 +14918,10 @@ BEGIN
     -- Attendee: Afif Jean Steve Chuck Ch
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Afif Jean Steve Chuck Ch%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13857,8 +14947,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13884,8 +14976,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13911,8 +15005,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13938,8 +15034,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13965,8 +15063,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -13992,20 +15092,26 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14031,8 +15137,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14058,8 +15166,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14085,8 +15195,10 @@ BEGIN
     -- Attendee: Pamela Gretchen Hope T
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Gretchen Hope T%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14112,8 +15224,10 @@ BEGIN
     -- Attendee: Ethan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14139,8 +15253,10 @@ BEGIN
     -- Attendee: Javier Brenda Devin Jenn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Devin Jenn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14166,8 +15282,10 @@ BEGIN
     -- Attendee: Omar Christian  Elaina C
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Omar Christian  Elaina C%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14193,8 +15311,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14220,8 +15340,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14247,8 +15369,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14274,14 +15398,18 @@ BEGIN
     -- Attendee: Davis
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davis%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Piciulo classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14307,8 +15435,10 @@ BEGIN
     -- Attendee: Wackenheim classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14334,8 +15464,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14361,8 +15493,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14388,8 +15522,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14415,8 +15551,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14442,8 +15580,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14469,8 +15609,10 @@ BEGIN
     -- Attendee: Serena Ellison Ryan Davi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serena Ellison Ryan Davi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14496,8 +15638,10 @@ BEGIN
     -- Attendee: JJ Stephen Andrew Lisa J
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Stephen Andrew Lisa J%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14523,8 +15667,10 @@ BEGIN
     -- Attendee: Rosland Donna Amanda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rosland Donna Amanda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14550,8 +15696,10 @@ BEGIN
     -- Attendee: Serenity room
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14577,8 +15725,10 @@ BEGIN
     -- Attendee: Harmony classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14604,8 +15754,10 @@ BEGIN
     -- Attendee: Tranquility room
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tranquility room%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14631,8 +15783,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14658,8 +15812,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14685,8 +15841,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14712,8 +15870,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14739,8 +15899,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14766,8 +15928,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14793,8 +15957,10 @@ BEGIN
     -- Attendee: Liz Thatius Gretchen Mic
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Thatius Gretchen Mic%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14820,8 +15986,10 @@ BEGIN
     -- Attendee: Tony Vernon Jimmy
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14847,8 +16015,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14874,8 +16044,10 @@ BEGIN
     -- Attendee: Hamm classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14901,8 +16073,10 @@ BEGIN
     -- Attendee: Piciulo classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14928,8 +16102,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14955,8 +16131,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -14982,8 +16160,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15009,8 +16189,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15036,8 +16218,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15063,8 +16247,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15090,8 +16276,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15117,8 +16305,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15144,8 +16334,10 @@ BEGIN
     -- Attendee: Colleen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15171,8 +16363,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15198,8 +16392,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15225,8 +16421,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15252,8 +16450,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15279,8 +16479,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15306,8 +16508,10 @@ BEGIN
     -- Attendee: Zach
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zach%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15333,8 +16537,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15360,20 +16566,26 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15399,8 +16611,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15426,8 +16640,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15453,8 +16669,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15480,8 +16698,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15507,8 +16727,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15534,8 +16756,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15561,8 +16785,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15588,8 +16814,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15615,8 +16843,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15642,8 +16872,10 @@ BEGIN
     -- Attendee: N/A
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%N/A%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15669,8 +16901,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15696,8 +16930,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15723,8 +16959,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15750,8 +16988,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15777,8 +17017,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15804,8 +17046,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15831,8 +17075,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15858,8 +17104,10 @@ BEGIN
     -- Attendee: Hamm classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15885,8 +17133,10 @@ BEGIN
     -- Attendee: Piciulo classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15912,8 +17162,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15939,8 +17191,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15966,8 +17220,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -15993,8 +17249,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16020,8 +17278,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16047,8 +17307,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16074,8 +17336,10 @@ BEGIN
     -- Attendee: approx.
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%approx.%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16101,8 +17365,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16128,8 +17394,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16155,8 +17423,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16182,8 +17452,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16209,8 +17481,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16236,8 +17510,10 @@ BEGIN
     -- Attendee: Rashaan Derek Camia  L
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16263,8 +17539,10 @@ BEGIN
     -- Attendee: JJ Curtis Jamie Anna Ste
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Curtis Jamie Anna Ste%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16290,8 +17568,10 @@ BEGIN
     -- Attendee: Kim Donna Tony Sean Ro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kim Donna Tony Sean Ro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16317,8 +17597,10 @@ BEGIN
     -- Attendee: Patty Vicky Laurie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16344,8 +17626,10 @@ BEGIN
     -- Attendee: Javier Brenda Andrew  H
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew  H%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16371,8 +17655,10 @@ BEGIN
     -- Attendee: Derek Can Clayton Shan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Can Clayton Shan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16398,8 +17684,10 @@ BEGIN
     -- Attendee: Tabitha Matthew Genesis
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabitha Matthew Genesis%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16425,8 +17713,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16452,8 +17742,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16479,8 +17771,10 @@ BEGIN
     -- Attendee: Liz Janet Linda Jeanie To
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Janet Linda Jeanie To%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16506,8 +17800,10 @@ BEGIN
     -- Attendee: DJ John Bernie Jesse
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16533,14 +17829,18 @@ BEGIN
     -- Attendee: Henn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Webber classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Webber classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16566,14 +17866,18 @@ BEGIN
     -- Attendee: Hamm
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Henning class
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning class%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16599,8 +17903,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16626,8 +17932,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16653,8 +17961,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16680,8 +17990,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16707,8 +18019,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16734,8 +18048,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16761,8 +18077,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16788,8 +18106,10 @@ BEGIN
     -- Attendee: Eric Tommy Robbie Kelly
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric Tommy Robbie Kelly%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16815,8 +18135,10 @@ BEGIN
     -- Attendee: Reggie James Jason Mik
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reggie James Jason Mik%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16842,8 +18164,10 @@ BEGIN
     -- Attendee: Hillary Patty Vicky Laurie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16869,8 +18193,10 @@ BEGIN
     -- Attendee: Harmony classroom; 7 in
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom; 7 in%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16896,8 +18222,10 @@ BEGIN
     -- Attendee: Synergy classroom; 7 ind
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy classroom; 7 ind%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16923,8 +18251,10 @@ BEGIN
     -- Attendee: Serenity classroom; 6 ind
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity classroom; 6 ind%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16950,8 +18280,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -16977,8 +18309,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17004,8 +18338,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17031,8 +18367,10 @@ BEGIN
     -- Attendee: Gretchen Francis Thatius
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Thatius%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17058,8 +18396,10 @@ BEGIN
     -- Attendee: Tony Vernon Jimmy Mich
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy Mich%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17085,8 +18425,10 @@ BEGIN
     -- Attendee: Henn classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17112,8 +18454,10 @@ BEGIN
     -- Attendee: Piciulo classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17139,8 +18483,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17166,8 +18512,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17193,8 +18541,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17220,8 +18570,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17247,8 +18599,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17274,8 +18628,10 @@ BEGIN
     -- Attendee: Mark Kayla Owen  Caleb
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17301,8 +18657,10 @@ BEGIN
     -- Attendee: Jackie Steven Amanda Jo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17328,8 +18686,10 @@ BEGIN
     -- Attendee: Dennis Vicky John Ivan A
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis Vicky John Ivan A%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17355,8 +18715,10 @@ BEGIN
     -- Attendee: Marshall Katie Craig Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Katie Craig Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17382,8 +18744,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17409,8 +18773,10 @@ BEGIN
     -- Attendee: Devon
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17436,8 +18802,10 @@ BEGIN
     -- Attendee: Zack
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zack%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17463,20 +18831,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17502,8 +18876,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17529,8 +18905,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17556,8 +18934,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17583,8 +18963,10 @@ BEGIN
     -- Attendee: approx 12
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%approx 12%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17610,8 +18992,10 @@ BEGIN
     -- Attendee: N/A
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%N/A%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17637,8 +19021,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17664,8 +19050,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17691,8 +19079,10 @@ BEGIN
     -- Attendee: Unknown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17718,8 +19108,10 @@ BEGIN
     -- Attendee: Harmony classroom; 6 in
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony classroom; 6 in%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17745,8 +19137,10 @@ BEGIN
     -- Attendee: Synergy classroom; 8 ind
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy classroom; 8 ind%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17772,8 +19166,10 @@ BEGIN
     -- Attendee: Serenity room; 8 individua
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room; 8 individua%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17799,8 +19195,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17826,8 +19224,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17853,8 +19253,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17880,8 +19282,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17907,8 +19311,10 @@ BEGIN
     -- Attendee: Javier Brenda Andrew Ne
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew Ne%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17934,8 +19340,10 @@ BEGIN
     -- Attendee: Kayla Clay Keller Christia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Clay Keller Christia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17961,8 +19369,10 @@ BEGIN
     -- Attendee: Matt Tabitha  Genesis Ma
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matt Tabitha  Genesis Ma%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -17988,8 +19398,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18015,8 +19427,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18042,8 +19456,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18069,8 +19485,10 @@ BEGIN
     -- Attendee: Liz Linda Tom Jeanie Kar
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Linda Tom Jeanie Kar%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18096,8 +19514,10 @@ BEGIN
     -- Attendee: Tony Vernon Michael Jim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18123,8 +19543,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18150,8 +19572,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18177,8 +19601,10 @@ BEGIN
     -- Attendee: Funigiello
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18204,8 +19630,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18231,8 +19659,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18258,8 +19688,10 @@ BEGIN
     -- Attendee: Rashaan Derek Camia  L
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18285,8 +19717,10 @@ BEGIN
     -- Attendee: Colleen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18312,8 +19746,10 @@ BEGIN
     -- Attendee: Mo Shontell Sean Tony R
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mo Shontell Sean Tony R%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18339,8 +19775,10 @@ BEGIN
     -- Attendee: Hillary Vicky Patty Laurie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18366,8 +19804,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18393,8 +19833,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18420,8 +19862,10 @@ BEGIN
     -- Attendee: Danny Thatius Michael To
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danny Thatius Michael To%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18447,8 +19891,10 @@ BEGIN
     -- Attendee: DJ John Bernie Jesse
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18474,8 +19920,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18501,8 +19949,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18528,8 +19978,10 @@ BEGIN
     -- Attendee: Hamm classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18555,8 +20007,10 @@ BEGIN
     -- Attendee: Henning classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18582,8 +20036,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18609,8 +20065,10 @@ BEGIN
     -- Attendee: Hailey Hailey Harold McCown
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hailey Hailey Harold McCown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18636,8 +20094,10 @@ BEGIN
     -- Attendee: Mark Kayla Owen  Caleb
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18663,8 +20123,10 @@ BEGIN
     -- Attendee: Jackie Steven Amanda Jo
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18690,8 +20152,10 @@ BEGIN
     -- Attendee: Mary Beth Eric Stephanie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Stephanie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18717,8 +20181,10 @@ BEGIN
     -- Attendee: Marshal Katie Afif Carme
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshal Katie Afif Carme%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18744,8 +20210,10 @@ BEGIN
     -- Attendee: Bryan Palmer
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Palmer%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18771,8 +20239,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18798,8 +20268,10 @@ BEGIN
     -- Attendee: Gretchen Hope Tom Brya
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Hope Tom Brya%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18825,8 +20297,10 @@ BEGIN
     -- Attendee: Tony Vernon Michael Jim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18852,8 +20326,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18879,8 +20355,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18906,8 +20384,10 @@ BEGIN
     -- Attendee: Hamm classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hamm classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18933,8 +20413,10 @@ BEGIN
     -- Attendee: Piciulo classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18960,8 +20442,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -18987,8 +20471,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19014,8 +20500,10 @@ BEGIN
     -- Attendee: Zach
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Zach%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19041,8 +20529,10 @@ BEGIN
     -- Attendee: Dan
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19068,8 +20558,10 @@ BEGIN
     -- Attendee: Jessica
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19095,8 +20587,10 @@ BEGIN
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19122,8 +20616,10 @@ BEGIN
     -- Attendee: Faith
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Faith%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19149,8 +20645,10 @@ BEGIN
     -- Attendee: Approx 8-10 clients
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Approx 8-10 clients%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19176,20 +20674,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19215,8 +20719,10 @@ BEGIN
     -- Attendee: 6-8 participants
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%6-8 participants%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19242,8 +20748,10 @@ BEGIN
     -- Attendee: 10-12 participants
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%10-12 participants%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19269,20 +20777,26 @@ BEGIN
     -- Attendee: Sylvia
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sylvia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Karen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Linda
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19308,8 +20822,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19335,8 +20851,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19362,8 +20880,10 @@ BEGIN
     -- Attendee: John Michael Liz Thomas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John Michael Liz Thomas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19389,8 +20909,10 @@ BEGIN
     -- Attendee: DJ John Bernie Jesse
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19416,8 +20938,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19443,8 +20967,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19470,8 +20996,10 @@ BEGIN
     -- Attendee: Piciulo classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Piciulo classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19497,14 +21025,18 @@ BEGIN
     -- Attendee: Henning
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henning%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Jones class
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jones class%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19530,8 +21062,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19557,8 +21091,10 @@ BEGIN
     -- Attendee: Bentley
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bentley%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19584,8 +21120,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19611,8 +21149,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19638,8 +21178,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19665,8 +21207,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19692,8 +21236,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19719,8 +21265,10 @@ BEGIN
     -- Attendee: Dianne Eddie Brenda Jav
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dianne Eddie Brenda Jav%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19746,8 +21294,10 @@ BEGIN
     -- Attendee: Michelle Kayla Chris Elain
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michelle Kayla Chris Elain%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19773,8 +21323,10 @@ BEGIN
     -- Attendee: Mitch Chris Genesis Tiffa
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Chris Genesis Tiffa%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19800,8 +21352,10 @@ BEGIN
     -- Attendee: Hillary Vicky patty Laurie
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky patty Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19827,8 +21381,10 @@ BEGIN
     -- Attendee: Damon David Brandy Will
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon David Brandy Will%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19854,8 +21410,10 @@ BEGIN
     -- Attendee: Kelly JJ Jamie Sandy Ro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kelly JJ Jamie Sandy Ro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19881,8 +21439,10 @@ BEGIN
     -- Attendee: Sissy Elaine Roselyn  Ed
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Elaine Roselyn  Ed%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19908,8 +21468,10 @@ BEGIN
     -- Attendee: Tajwar Tasheen
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar Tasheen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19935,8 +21497,10 @@ BEGIN
     -- Attendee: Synergy room
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Synergy room%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19962,8 +21526,10 @@ BEGIN
     -- Attendee: Serenity room
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serenity room%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -19989,8 +21555,10 @@ BEGIN
     -- Attendee: Harmony room
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harmony room%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20016,8 +21584,10 @@ BEGIN
     -- Attendee: Anthony
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20043,8 +21613,10 @@ BEGIN
     -- Attendee: Nick Karen Tom James M
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick Karen Tom James M%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20070,8 +21642,10 @@ BEGIN
     -- Attendee: Tony Michael Vernon Jim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Michael Vernon Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20097,8 +21671,10 @@ BEGIN
     -- Attendee: Ikenna
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20124,8 +21700,10 @@ BEGIN
     -- Attendee: Josiah
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20151,14 +21729,18 @@ BEGIN
     -- Attendee: Henn
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Henn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Webber classro
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Webber classro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20184,14 +21766,18 @@ BEGIN
     -- Attendee: Starkey
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Starkey%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
     -- Attendee: Wackenheim
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Wackenheim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20217,8 +21803,10 @@ BEGIN
     -- Attendee: Rachel
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20244,8 +21832,10 @@ BEGIN
     -- Attendee: Nicolas
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nicolas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20271,8 +21861,10 @@ BEGIN
     -- Attendee: Lexi
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20298,8 +21890,10 @@ BEGIN
     -- Attendee: Grossman classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Grossman classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20325,8 +21919,10 @@ BEGIN
     -- Attendee: Funigiello classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Funigiello classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20352,8 +21948,10 @@ BEGIN
     -- Attendee: Couell classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Couell classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
@@ -20379,8 +21977,10 @@ BEGIN
     -- Attendee: Hackett classroom
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hackett classroom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-      VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
     END IF;
   END IF;
 END $$;
