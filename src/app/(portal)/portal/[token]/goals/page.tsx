@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePortal } from '@/contexts/portal-context'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Target, CheckCircle2, Circle, XCircle } from 'lucide-react'

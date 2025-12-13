@@ -54,17 +54,6 @@ function createForegroundColor(hex: string, isDark: boolean): string {
 }
 
 /**
- * Creates a hover/focus variant (slightly darker)
- */
-function adjustBrightness(hex: string, factor: number): string {
-  const cleanHex = hex.replace('#', '')
-  const r = Math.min(255, Math.max(0, Math.round(parseInt(cleanHex.substring(0, 2), 16) * factor)))
-  const g = Math.min(255, Math.max(0, Math.round(parseInt(cleanHex.substring(2, 4), 16) * factor)))
-  const b = Math.min(255, Math.max(0, Math.round(parseInt(cleanHex.substring(4, 6), 16) * factor)))
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-}
-
-/**
  * Checks if a color is considered "light" (for determining foreground color)
  */
 function isLightColor(hex: string): boolean {
@@ -100,7 +89,9 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
 
     // Convert hex colors to OKLCH for CSS variables
     const primaryOklch = hexToOklchApprox(primary_color)
-    const secondaryOklch = secondary_color ? hexToOklchApprox(secondary_color) : primaryOklch
+    // Secondary color is computed but reserved for future use
+    const _secondaryOklch = secondary_color ? hexToOklchApprox(secondary_color) : primaryOklch
+    void _secondaryOklch // Suppress unused variable warning
 
     // Determine if primary is light or dark for foreground color
     const primaryIsLight = isLightColor(primary_color)

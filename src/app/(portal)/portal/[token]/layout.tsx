@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PortalProvider, usePortal } from '@/contexts/portal-context'
 import { Button } from '@/components/ui/button'
 import { Loader2, Calendar, FileText, Target, Home, AlertCircle } from 'lucide-react'
@@ -50,9 +51,11 @@ function PortalHeader() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             {organization?.logo_url ? (
-              <img
+              <Image
                 src={organization.logo_url}
-                alt={organization.name}
+                alt={organization.name || 'Organization logo'}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-lg object-cover"
               />
             ) : (
@@ -78,7 +81,6 @@ function PortalHeader() {
 function PortalContent({ children }: { children: React.ReactNode }) {
   const { loading, error, isValid } = usePortal()
   const router = useRouter()
-  const params = useParams()
 
   if (loading) {
     return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePortal } from '@/contexts/portal-context'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -42,25 +42,24 @@ export default function PortalResourcesPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
+    async function loadResources() {
+      try {
+        const response = await fetch('/api/portal/resources', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setResources(data.resources || [])
+        }
+      } catch (error) {
+        console.error('Error loading resources:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     loadResources()
   }, [token])
-
-  async function loadResources() {
-    try {
-      const response = await fetch('/api/portal/resources', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setResources(data.resources || [])
-      }
-    } catch (error) {
-      console.error('Error loading resources:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   async function toggleHomeworkComplete(resource: Resource) {
     setUpdatingId(resource.id)

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -27,7 +25,6 @@ import {
   FileText,
   Link as LinkIcon,
   ClipboardList,
-  Plus,
   Loader2,
   MoreVertical,
   Trash2,
@@ -73,22 +70,21 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   useEffect(() => {
+    async function loadResources() {
+      try {
+        const response = await fetch(`/api/clients/${clientId}/resources`)
+        if (response.ok) {
+          const data = await response.json()
+          setResources(data.resources || [])
+        }
+      } catch (error) {
+        console.error('Error loading resources:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     loadResources()
   }, [clientId])
-
-  async function loadResources() {
-    try {
-      const response = await fetch(`/api/clients/${clientId}/resources`)
-      if (response.ok) {
-        const data = await response.json()
-        setResources(data.resources || [])
-      }
-    } catch (error) {
-      console.error('Error loading resources:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   function openDialog(type: 'homework' | 'link' | 'file') {
     setDialogType(type)

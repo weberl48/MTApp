@@ -29,10 +29,23 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
+    async function loadTokens() {
+      try {
+        const response = await fetch(`/api/clients/${clientId}/access-token`)
+        if (response.ok) {
+          const data = await response.json()
+          setTokens(data.tokens || [])
+        }
+      } catch (error) {
+        console.error('Error loading tokens:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     loadTokens()
   }, [clientId])
 
-  async function loadTokens() {
+  async function refreshTokens() {
     try {
       const response = await fetch(`/api/clients/${clientId}/access-token`)
       if (response.ok) {
@@ -41,8 +54,6 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       }
     } catch (error) {
       console.error('Error loading tokens:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -60,7 +71,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       }
 
       toast.success('Portal access link generated!')
-      await loadTokens()
+      await refreshTokens()
     } catch (error) {
       console.error('Error generating token:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to generate token')
@@ -113,7 +124,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       }
 
       toast.success(`Portal invite sent to ${clientEmail}`)
-      await loadTokens() // Refresh tokens in case a new one was created
+      await refreshTokens() // Refresh tokens in case a new one was created
     } catch (error) {
       console.error('Error sending invite:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to send invite')
@@ -260,7 +271,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
 
             {!clientEmail && (
               <p className="text-xs text-amber-600">
-                Note: Client has no email on file. They won't be able to request a new link if this one expires.
+                Note: Client has no email on file. They won&apos;t be able to request a new link if this one expires.
               </p>
             )}
 
@@ -313,7 +324,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
                 ) : (
                   <>
                     <Key className="h-4 w-4 mr-2" />
-                    Just Generate Link (Don't Send)
+                    Just Generate Link (Don&apos;t Send)
                   </>
                 )}
               </Button>

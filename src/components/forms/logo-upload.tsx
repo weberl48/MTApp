@@ -121,6 +121,7 @@ export function LogoUpload({ organizationId, currentLogoUrl, onUploadComplete }:
         <div className="relative w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {preview ? (
             <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview}
                 alt="Organization logo"

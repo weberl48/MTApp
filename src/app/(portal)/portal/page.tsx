@@ -41,7 +41,7 @@ export default function PortalLoginPage() {
       if (data.portalUrl) {
         setDevUrl(data.portalUrl)
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)

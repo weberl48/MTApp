@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar, Key, Copy, Check } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
 import { ClientResourcesManager } from '@/components/portal/client-resources-manager'
 import { ClientPortalAccess } from '@/components/clients/client-portal-access'
 

@@ -44,7 +44,8 @@ function getServerSnapshot(): MobileInfo {
 }
 
 // Empty subscribe since platform info doesn't change
-function subscribe(_callback: () => void): () => void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function subscribe(_: () => void): () => void {
   return () => {}
 }
 

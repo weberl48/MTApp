@@ -151,7 +151,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function saveSettings(_section: keyof OrganizationSettings) {
+  async function saveSettings() {
     if (!localSettings) return
     setSaving(true)
     try {
@@ -510,7 +510,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
 
-                  <Button onClick={() => saveSettings('security')} disabled={saving}>
+                  <Button onClick={() => saveSettings()} disabled={saving}>
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
@@ -1031,7 +1031,7 @@ export default function SettingsPage() {
                     }
                   />
                 </div>
-                <Button onClick={() => saveSettings('invoice')} disabled={saving}>
+                <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Save Invoice Settings
@@ -1161,7 +1161,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 )}
-                <Button onClick={() => saveSettings('session')} disabled={saving}>
+                <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Save Session Settings
@@ -1226,7 +1226,7 @@ export default function SettingsPage() {
                     }
                   />
                 </div>
-                <Button onClick={() => saveSettings('notification')} disabled={saving}>
+                <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Save Notification Settings

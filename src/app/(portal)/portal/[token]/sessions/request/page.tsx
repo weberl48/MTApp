@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { usePortal } from '@/contexts/portal-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,7 +20,6 @@ import { toast } from 'sonner'
 
 export default function RequestSessionPage() {
   const { token } = usePortal()
-  const router = useRouter()
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)

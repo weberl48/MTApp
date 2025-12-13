@@ -58,43 +58,42 @@ export function SessionRequestsManager({
   const [responseNotes, setResponseNotes] = useState('')
 
   useEffect(() => {
+    async function loadRequests() {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from('session_requests')
+        .select(`
+          id,
+          preferred_date,
+          preferred_time,
+          alternative_date,
+          alternative_time,
+          duration_minutes,
+          notes,
+          status,
+          response_notes,
+          created_at,
+          client:clients(id, name)
+        `)
+        .eq('organization_id', organizationId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error loading session requests:', error)
+      } else {
+        const transformed = (data || []).map((req) => ({
+          ...req,
+          client: Array.isArray(req.client) ? req.client[0] : req.client,
+        }))
+        setRequests(transformed as SessionRequest[])
+      }
+
+      setLoading(false)
+    }
     loadRequests()
   }, [organizationId])
-
-  async function loadRequests() {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('session_requests')
-      .select(`
-        id,
-        preferred_date,
-        preferred_time,
-        alternative_date,
-        alternative_time,
-        duration_minutes,
-        notes,
-        status,
-        response_notes,
-        created_at,
-        client:clients(id, name)
-      `)
-      .eq('organization_id', organizationId)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true })
-
-    if (error) {
-      console.error('Error loading session requests:', error)
-    } else {
-      const transformed = (data || []).map((req) => ({
-        ...req,
-        client: Array.isArray(req.client) ? req.client[0] : req.client,
-      }))
-      setRequests(transformed as SessionRequest[])
-    }
-
-    setLoading(false)
-  }
 
   function formatDate(dateStr: string) {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
