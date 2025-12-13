@@ -337,7 +337,8 @@ export default function InvoicesPage() {
       const admin = role === 'admin' || role === 'owner' || role === 'developer'
 
       // Fetch invoices with related data
-      const { data } = await supabase
+      // For contractors, only fetch invoices for their sessions
+      let query = supabase
         .from('invoices')
         .select(`
           *,
@@ -345,11 +346,37 @@ export default function InvoicesPage() {
           session:sessions(
             id,
             date,
+            contractor_id,
             contractor:users(id, name),
             service_type:service_types(name)
           )
         `)
         .order('created_at', { ascending: false })
+
+      // If not admin, filter to only show invoices for this contractor's sessions
+      if (!admin) {
+        // Get invoice IDs for sessions where this user is the contractor
+        const { data: contractorSessions } = await supabase
+          .from('sessions')
+          .select('id')
+          .eq('contractor_id', user.id)
+
+        const sessionIds = contractorSessions?.map((s) => s.id) || []
+
+        if (sessionIds.length === 0) {
+          // No sessions, return empty array
+          if (!cancelled) {
+            setIsAdmin(admin)
+            setInvoices([])
+            setLoading(false)
+          }
+          return
+        }
+
+        query = query.in('session_id', sessionIds)
+      }
+
+      const { data } = await query
 
       if (!cancelled) {
         setIsAdmin(admin)
