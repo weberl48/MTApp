@@ -168,9 +168,9 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
   return (
     <div className="space-y-4">
       {/* Header with totals */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="relative w-72">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 min-w-0">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search contractors..."
@@ -179,12 +179,12 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
               className="pl-10"
             />
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 break-words">
             {totalSessions} unpaid session{totalSessions !== 1 ? 's' : ''} •{' '}
             <span className="font-medium text-amber-600">{formatCurrency(totalUnpaid)}</span> total
           </div>
         </div>
-        <Button onClick={exportToExcel} variant="outline">
+        <Button onClick={exportToExcel} variant="outline" className="w-full sm:w-auto">
           <FileSpreadsheet className="mr-2 h-4 w-4" />
           Export to Excel
         </Button>

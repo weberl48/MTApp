@@ -210,8 +210,8 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="relative w-72">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search contractors..."
@@ -222,7 +222,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
             className="pl-10"
           />
         </div>
-        <Button onClick={exportToExcel} variant="outline">
+        <Button onClick={exportToExcel} variant="outline" className="w-full sm:w-auto">
           <FileSpreadsheet className="mr-2 h-4 w-4" />
           Export to Excel
         </Button>

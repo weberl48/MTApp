@@ -282,7 +282,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList className="flex-wrap h-auto">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Profile
@@ -542,7 +542,7 @@ export default function SettingsPage() {
                     onChange={(e) => setOrgName(e.target.value)}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="org_email">Email</Label>
                     <Input
@@ -619,7 +619,7 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorPicker
                       label="Primary Color"
                       value={primaryColor}
@@ -708,11 +708,12 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="timezone">Timezone</Label>
                       <select
                         id="timezone"
+                        aria-label="Timezone"
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
                         className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
@@ -729,6 +730,7 @@ export default function SettingsPage() {
                       <Label htmlFor="currency">Currency</Label>
                       <select
                         id="currency"
+                        aria-label="Currency"
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
@@ -752,7 +754,7 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="facebook">Facebook</Label>
                       <Input
@@ -815,13 +817,13 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Input
                       value={`${typeof window !== 'undefined' ? window.location.origin : ''}/signup?org=${organization.id}`}
                       readOnly
                       className="font-mono text-sm"
                     />
-                    <Button onClick={copyInviteLink} variant="outline">
+                    <Button onClick={copyInviteLink} variant="outline" className="w-full sm:w-auto">
                       {copiedInvite ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
@@ -873,14 +875,14 @@ export default function SettingsPage() {
         {isAdmin && (
           <TabsContent value="services">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle>Service Types</CardTitle>
                   <CardDescription>
                     Configure pricing rules for each service type
                   </CardDescription>
                 </div>
-                <Button onClick={handleAddServiceType}>
+                <Button onClick={handleAddServiceType} className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Service Type
                 </Button>

@@ -295,7 +295,7 @@ export default function PaymentsPage() {
 
       {/* Tabs for Payroll Hub vs History */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full">
           <TabsTrigger value="payroll" className="flex items-center gap-2">
             <DollarSign className="w-4 h-4" />
             Payroll Hub
