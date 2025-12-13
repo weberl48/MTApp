@@ -240,13 +240,13 @@ export default function TeamMemberPage() {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words min-w-0">
               {member.name || 'Unnamed User'}
             </h1>
             {editingRole ? (
               <div className="flex items-center gap-2">
                 <Select value={newRole} onValueChange={setNewRole}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-full sm:w-[140px]">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>

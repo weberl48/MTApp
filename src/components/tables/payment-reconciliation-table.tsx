@@ -279,7 +279,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
           />
         </div>
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0) }}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -290,7 +290,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
           </SelectContent>
         </Select>
         <Select value={squareFilter} onValueChange={(v) => { setSquareFilter(v); setPage(0) }}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue placeholder="Square" />
           </SelectTrigger>
           <SelectContent>

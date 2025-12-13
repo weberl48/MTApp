@@ -178,7 +178,7 @@ export function AuditLogTable() {
           />
         </div>
         <Select value={tableFilter} onValueChange={(v) => { setTableFilter(v); setPage(0) }}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by table" />
           </SelectTrigger>
           <SelectContent>
@@ -189,7 +189,7 @@ export function AuditLogTable() {
           </SelectContent>
         </Select>
         <Select value={actionFilter} onValueChange={(v) => { setActionFilter(v); setPage(0) }}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue placeholder="Filter by action" />
           </SelectTrigger>
           <SelectContent>
