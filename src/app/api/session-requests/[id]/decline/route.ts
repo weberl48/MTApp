@@ -45,7 +45,7 @@ export async function POST(
     // Get the request with client and organization info
     const { data: sessionRequest, error: fetchError } = await supabase
       .from('session_requests')
-      .select('*, client:clients(id, name, email), organization:organizations(id, name)')
+      .select('*, client:clients(id, name, contact_email), organization:organizations(id, name)')
       .eq('id', requestId)
       .single()
 
@@ -98,7 +98,7 @@ export async function POST(
     const client = Array.isArray(sessionRequest.client) ? sessionRequest.client[0] : sessionRequest.client
     const organization = Array.isArray(sessionRequest.organization) ? sessionRequest.organization[0] : sessionRequest.organization
 
-    if (client?.email) {
+    if (client?.contact_email) {
       // Get client's portal token for the link
       const { data: tokenData } = await supabase
         .from('client_access_tokens')
@@ -117,7 +117,7 @@ export async function POST(
 
       try {
         await sendSessionRequestStatusEmail({
-          to: client.email,
+          to: client.contact_email,
           clientName: client.name || 'Client',
           organizationName: organization?.name || 'Your Practice',
           status: 'declined',
@@ -126,7 +126,7 @@ export async function POST(
           responseNotes: response_notes,
           portalUrl,
         })
-        console.log(`[Session Request] Decline email sent to ${client.email}`)
+        console.log(`[Session Request] Decline email sent to ${client.contact_email}`)
       } catch (emailError) {
         console.error('Failed to send decline email:', emailError)
         // Don't fail the request if email fails
