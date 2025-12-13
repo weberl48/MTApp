@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -10,15 +11,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye } from 'lucide-react'
+import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import type { User } from '@/types/database'
 
 interface HeaderProps {
   user: User | null
+}
+
+interface ContractorOption {
+  id: string
+  name: string
+  email: string
+}
+
+interface ClientOption {
+  id: string
+  name: string
+  portal_token: string | null
 }
 
 const roleLabels: Record<string, string> = {
@@ -31,10 +48,52 @@ const roleLabels: Record<string, string> = {
 export function Header({ user }: HeaderProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, actualRole, viewAsRole, setViewAsRole, allOrganizations, switchOrganization } = useOrganization()
+  const {
+    organization,
+    actualRole,
+    viewAsRole,
+    setViewAsRole,
+    viewAsContractor,
+    setViewAsContractor,
+    allOrganizations,
+    switchOrganization
+  } = useOrganization()
+
+  const [contractors, setContractors] = useState<ContractorOption[]>([])
+  const [clients, setClients] = useState<ClientOption[]>([])
 
   // Show dev tools if actual role is developer (not the simulated role)
   const showDevTools = actualRole === 'developer'
+
+  // Fetch contractors and clients for dev tools
+  useEffect(() => {
+    if (!showDevTools) return
+
+    async function fetchDevData() {
+      // Fetch contractors
+      const { data: contractorData } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .in('role', ['contractor', 'admin'])
+        .order('name')
+
+      if (contractorData) {
+        setContractors(contractorData)
+      }
+
+      // Fetch clients with portal tokens
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('id, name, portal_token')
+        .order('name')
+
+      if (clientData) {
+        setClients(clientData)
+      }
+    }
+
+    fetchDevData()
+  }, [showDevTools, supabase])
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -107,46 +166,131 @@ export function Header({ user }: HeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant={viewAsRole ? 'default' : 'outline'}
+                  variant={viewAsRole || viewAsContractor ? 'default' : 'outline'}
                   size="sm"
-                  className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
+                  className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole || viewAsContractor ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
                 >
                   <Eye className="w-4 h-4" />
-                  <span className="hidden sm:inline">
-                    {viewAsRole ? `As ${roleLabels[viewAsRole]}` : 'View As'}
+                  <span className="hidden sm:inline max-w-[150px] truncate">
+                    {viewAsContractor
+                      ? `As ${viewAsContractor.name}`
+                      : viewAsRole
+                        ? `As ${roleLabels[viewAsRole]}`
+                        : 'View As'}
                   </span>
                   <ChevronDown className="hidden sm:inline w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48" align="start">
+              <DropdownMenuContent className="w-56" align="start">
                 <DropdownMenuLabel>View As Role</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => setViewAsRole(null)}
-                  className={!viewAsRole ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  onClick={() => {
+                    setViewAsRole(null)
+                    setViewAsContractor(null)
+                  }}
+                  className={!viewAsRole && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 >
                   <span className="font-medium">Developer (actual)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setViewAsRole('owner')}
-                  className={viewAsRole === 'owner' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  onClick={() => {
+                    setViewAsRole('owner')
+                    setViewAsContractor(null)
+                  }}
+                  className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 >
                   <span className="font-medium">Owner</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setViewAsRole('admin')}
-                  className={viewAsRole === 'admin' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  onClick={() => {
+                    setViewAsRole('admin')
+                    setViewAsContractor(null)
+                  }}
+                  className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 >
                   <span className="font-medium">Admin</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setViewAsRole('contractor')}
-                  className={viewAsRole === 'contractor' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  onClick={() => {
+                    setViewAsRole('contractor')
+                    setViewAsContractor(null)
+                  }}
+                  className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 >
-                  <span className="font-medium">Contractor</span>
+                  <span className="font-medium">Contractor (generic)</span>
                 </DropdownMenuItem>
+
+                {contractors.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <Users className="w-4 h-4 mr-2" />
+                        <span>Specific Contractor</span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                          {contractors.map((contractor) => (
+                            <DropdownMenuItem
+                              key={contractor.id}
+                              onClick={() => {
+                                setViewAsRole('contractor')
+                                setViewAsContractor(contractor)
+                              }}
+                              className={viewAsContractor?.id === contractor.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">{contractor.name}</span>
+                                <span className="text-xs text-gray-500">{contractor.email}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Client Portal Preview */}
+            {clients.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 px-2 sm:px-3">
+                    <ExternalLink className="w-4 h-4" />
+                    <span className="hidden sm:inline">Client Portal</span>
+                    <ChevronDown className="hidden sm:inline w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 max-h-[400px] overflow-y-auto" align="start">
+                  <DropdownMenuLabel>Preview Client Portal</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {clients.map((client) => (
+                    <DropdownMenuItem
+                      key={client.id}
+                      onClick={() => {
+                        if (client.portal_token) {
+                          window.open(`/portal/${client.portal_token}`, '_blank')
+                        } else {
+                          router.push(`/clients/${client.id}`)
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium truncate">{client.name}</span>
+                        {client.portal_token ? (
+                          <Badge variant="outline" className="ml-2 text-xs">Has Token</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="ml-2 text-xs">No Token</Badge>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </>
         )}
       </div>

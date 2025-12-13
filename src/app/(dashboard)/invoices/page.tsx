@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface Invoice {
   id: string
@@ -311,6 +312,9 @@ export default function InvoicesPage() {
     toast.success(`Exported ${selectedIds.size} invoice(s)`)
   }
 
+  // Get context values for view-as filtering
+  const { isAdmin: contextIsAdmin, effectiveUserId, viewAsContractor } = useOrganization()
+
   useEffect(() => {
     let cancelled = false
 
@@ -326,18 +330,11 @@ export default function InvoicesPage() {
         return
       }
 
-      // Check if user is admin/owner/developer
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single<{ role: string }>()
-
-      const role = userProfile?.role
-      const admin = role === 'admin' || role === 'owner' || role === 'developer'
+      // Use context isAdmin (which respects viewAsRole)
+      const admin = contextIsAdmin
 
       // Fetch invoices with related data
-      // For contractors, only fetch invoices for their sessions
+      // For contractors (or when viewing as a specific contractor), only fetch their invoices
       let query = supabase
         .from('invoices')
         .select(`
@@ -353,20 +350,23 @@ export default function InvoicesPage() {
         `)
         .order('created_at', { ascending: false })
 
-      // If not admin, filter to only show invoices for this contractor's sessions
-      if (!admin) {
-        // Get invoice IDs for sessions where this user is the contractor
+      // If not admin OR viewing as a specific contractor, filter invoices
+      const shouldFilterByContractor = !admin || viewAsContractor
+      const contractorIdToFilter = viewAsContractor?.id || (admin ? null : effectiveUserId)
+
+      if (shouldFilterByContractor && contractorIdToFilter) {
+        // Get invoice IDs for sessions where this contractor is assigned
         const { data: contractorSessions } = await supabase
           .from('sessions')
           .select('id')
-          .eq('contractor_id', user.id)
+          .eq('contractor_id', contractorIdToFilter)
 
         const sessionIds = contractorSessions?.map((s) => s.id) || []
 
         if (sessionIds.length === 0) {
           // No sessions, return empty array
           if (!cancelled) {
-            setIsAdmin(admin)
+            setIsAdmin(admin && !viewAsContractor)
             setInvoices([])
             setLoading(false)
           }
@@ -379,7 +379,7 @@ export default function InvoicesPage() {
       const { data } = await query
 
       if (!cancelled) {
-        setIsAdmin(admin)
+        setIsAdmin(admin && !viewAsContractor)
         setInvoices((data as unknown as Invoice[]) || [])
         setLoading(false)
       }
@@ -390,7 +390,7 @@ export default function InvoicesPage() {
     return () => {
       cancelled = true
     }
-  }, [refreshTrigger])
+  }, [refreshTrigger, contextIsAdmin, effectiveUserId, viewAsContractor])
 
   // Group invoices by status
   const pendingInvoices = invoices?.filter((inv) => inv.status === 'pending') || []

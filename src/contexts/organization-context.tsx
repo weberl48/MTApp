@@ -6,6 +6,12 @@ import type { Organization, User, OrganizationSettings } from '@/types/database'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
 
+interface ViewAsContractor {
+  id: string
+  name: string
+  email: string
+}
+
 interface OrganizationContextType {
   organization: Organization | null
   user: User | null
@@ -18,6 +24,9 @@ interface OrganizationContextType {
   actualRole: string | null // The user's real role (for developers to know their actual permissions)
   viewAsRole: ViewAsRole // The role being simulated (null = use actual role)
   setViewAsRole: (role: ViewAsRole) => void
+  viewAsContractor: ViewAsContractor | null // Specific contractor being simulated
+  setViewAsContractor: (contractor: ViewAsContractor | null) => void
+  effectiveUserId: string | null // The user ID to use for data queries (actual or simulated)
   allOrganizations: Organization[]
   switchOrganization: (orgId: string) => Promise<void>
   refreshOrganization: () => Promise<void>
@@ -65,6 +74,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([])
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null)
   const [viewAsRole, setViewAsRole] = useState<ViewAsRole>(null)
+  const [viewAsContractor, setViewAsContractor] = useState<ViewAsContractor | null>(null)
 
   // Actual role from the database
   const actualRole = user?.role || null
@@ -77,6 +87,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const isDeveloper = effectiveRole === 'developer'
   const isOwner = effectiveRole === 'owner' || effectiveRole === 'developer'
   const isAdmin = effectiveRole === 'admin' || effectiveRole === 'owner' || effectiveRole === 'developer'
+
+  // Effective user ID for data queries (use simulated contractor if set, otherwise actual user)
+  const effectiveUserId = viewAsContractor?.id || user?.id || null
 
   // Parse settings with defaults (deep merge)
   const settings: OrganizationSettings | null = organization
@@ -266,6 +279,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         actualRole,
         viewAsRole,
         setViewAsRole,
+        viewAsContractor,
+        setViewAsContractor,
+        effectiveUserId,
         allOrganizations,
         switchOrganization,
         refreshOrganization,
