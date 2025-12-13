@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,13 @@ import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { addWeeks, format, parseISO } from 'date-fns'
 import { useOrganization } from '@/contexts/organization-context'
+import { ClientMultiSelect } from '@/components/forms/client-multi-select'
+import {
+  clearSessionFormDefaults,
+  getSessionFormDefaultsStorageKey,
+  loadSessionFormDefaults,
+  saveSessionFormDefaults,
+} from '@/lib/session-form/defaults'
 
 interface ExistingSession {
   id: string
@@ -64,6 +71,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     (existingSession?.status as 'draft' | 'submitted') || 'submitted'
   )
 
+  const storageKey = useMemo(() => {
+    if (!organization?.id) return null
+    return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId })
+  }, [organization?.id, contractorId])
+
   // Recurring session state
   const [isRecurring, setIsRecurring] = useState(false)
   const [repeatMode, setRepeatMode] = useState<'weeks' | 'until'>('weeks')
@@ -78,15 +90,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     ? calculateSessionPricing(selectedServiceType, selectedClients.length, parseInt(duration))
     : null
 
-  function addClient(clientId: string) {
-    if (!selectedClients.includes(clientId)) {
-      setSelectedClients([...selectedClients, clientId])
-    }
-  }
-
   function removeClient(clientId: string) {
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
   }
+
+  // Load remembered defaults (new sessions only). Never persist/restore notes.
+  const clientIdSet = useMemo(() => new Set(clients.map((c) => c.id)), [clients])
+  const [didApplyDefaults, setDidApplyDefaults] = useState(false)
+
+  useEffect(() => {
+    if (isEditMode) return
+    if (!storageKey) return
+    if (didApplyDefaults) return
+
+    const defaults = loadSessionFormDefaults(storageKey)
+    if (!defaults) {
+      setDidApplyDefaults(true)
+      return
+    }
+
+    setTime(defaults.time)
+    setDuration(defaults.duration)
+    setServiceTypeId(defaults.serviceTypeId)
+    setSelectedClients(defaults.selectedClientIds.filter((id) => clientIdSet.has(id)))
+    setDidApplyDefaults(true)
+  }, [clientIdSet, didApplyDefaults, isEditMode, storageKey])
 
   // Calculate all session dates for recurring sessions
   function getSessionDates(): string[] {
@@ -243,6 +271,16 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         const message = sessionDates.length > 1
           ? `${sessionDates.length} sessions logged successfully!`
           : 'Session logged successfully!'
+
+        if (storageKey) {
+          saveSessionFormDefaults(storageKey, {
+            time,
+            duration,
+            serviceTypeId,
+            selectedClientIds: selectedClients,
+          })
+        }
+
         toast.success(message)
         router.push('/sessions/')
         router.refresh()
@@ -259,9 +297,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   function getClientName(clientId: string) {
     return clients.find((c) => c.id === clientId)?.name || 'Unknown'
   }
-
-  // Filter out already selected clients
-  const availableClients = clients.filter((c) => !selectedClients.includes(c.id))
 
   return (
     <form onSubmit={handleSubmit}>
@@ -410,25 +445,19 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                     type="button"
                     onClick={() => removeClient(clientId)}
                     className="ml-1 hover:text-red-500"
+                    aria-label={`Remove ${getClientName(clientId)}`}
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </Badge>
               ))}
             </div>
-            {availableClients.length > 0 && (
-              <Select onValueChange={addClient} value="">
-                <SelectTrigger>
-                  <SelectValue placeholder="Add a client..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {clients.length > 0 && (
+              <ClientMultiSelect
+                clients={clients}
+                selectedIds={selectedClients}
+                onChange={setSelectedClients}
+              />
             )}
             {clients.length === 0 && (
               <p className="text-sm text-amber-600 dark:text-amber-400">
@@ -533,14 +562,39 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            {!isEditMode && storageKey && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 justify-start px-2 text-gray-500"
+                disabled={loading}
+                onClick={() => {
+                  clearSessionFormDefaults(storageKey)
+                  setTime('09:00')
+                  setDuration('30')
+                  setServiceTypeId('')
+                  setSelectedClients([])
+                  setIsRecurring(false)
+                  setRepeatMode('weeks')
+                  setRepeatWeeks('4')
+                  setEndDate('')
+                  toast.success('Remembered defaults cleared')
+                }}
+              >
+                Reset remembered defaults
+              </Button>
+            )}
+          </div>
           <Button type="submit" disabled={loading}>
             {loading
               ? isEditMode
