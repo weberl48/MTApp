@@ -18,7 +18,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/login/')
   }
 
   // Get user role
@@ -55,12 +55,12 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
   // Check access - only admin or session owner can edit
   const canEdit = isAdmin || session.contractor_id === user.id
   if (!canEdit) {
-    redirect('/sessions')
+    redirect('/sessions/')
   }
 
   // Only draft sessions can be edited by contractors
   if (!isAdmin && session.status !== 'draft') {
-    redirect(`/sessions/${id}`)
+    redirect(`/sessions/${id}/`)
   }
 
   // Fetch service types and clients for the form

@@ -107,7 +107,7 @@ function PortalContent({ children }: { children: React.ReactNode }) {
           <p className="text-sm text-gray-500 mb-6">
             Please request a new link by entering your email below, or contact your therapist.
           </p>
-          <Button onClick={() => router.push('/portal')} className="w-full">
+          <Button onClick={() => router.push('/portal/')} className="w-full">
             Request New Link
           </Button>
         </div>

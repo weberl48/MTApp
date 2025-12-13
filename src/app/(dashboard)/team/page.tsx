@@ -41,7 +41,7 @@ export default async function TeamPage() {
   console.log('Team page - isAdmin:', isAdmin)
 
   if (!isAdmin) {
-    redirect('/dashboard')
+    redirect('/dashboard/')
   }
 
   // Fetch all users with their session and invoice stats

@@ -34,7 +34,7 @@ export function MfaChallenge({ factorId, onCancel }: MfaChallengeProps) {
       await verifyMfaChallenge(factorId, challengeId, code)
 
       // Success - redirect to dashboard
-      router.push('/dashboard')
+      router.push('/dashboard/')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid verification code')

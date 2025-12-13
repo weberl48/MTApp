@@ -129,7 +129,7 @@ export default function InvoiceDetailPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/login')
+        router.push('/login/')
         return
       }
 

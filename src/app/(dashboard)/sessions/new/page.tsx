@@ -10,7 +10,7 @@ export default async function NewSessionPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/login/')
   }
 
   // Fetch service types and clients for the form

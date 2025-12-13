@@ -168,7 +168,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         if (attendeesError) throw attendeesError
 
         toast.success('Session updated successfully!')
-        router.push(`/sessions/${existingSession.id}`)
+        router.push(`/sessions/${existingSession.id}/`)
         router.refresh()
       } else {
         // CREATE new session(s)
@@ -244,7 +244,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           ? `${sessionDates.length} sessions logged successfully!`
           : 'Session logged successfully!'
         toast.success(message)
-        router.push('/sessions')
+        router.push('/sessions/')
         router.refresh()
       }
     } catch (error) {

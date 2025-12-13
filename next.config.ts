@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
               "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.squareup.com https://connect.squareup.com https://*.resend.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.squareup.com https://connect.squareup.com https://*.resend.com capacitor://localhost http://localhost",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

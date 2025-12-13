@@ -3,6 +3,16 @@ import { Resend } from 'resend'
 // Initialize Resend - will use API key from environment
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 interface SendInvoiceEmailParams {
   to: string
   clientName: string
@@ -53,7 +63,7 @@ export async function sendInvoiceEmail({
     : []
 
   const { data, error } = await resend.emails.send({
-    from: 'May Creative Arts <onboarding@resend.dev>',
+    from: 'May Creative Arts <noreply@rattatata.xyz>',
     to: [to],
     subject: `Invoice ${invoiceNumber} - May Creative Arts`,
     html: `
@@ -192,7 +202,7 @@ export async function sendMagicLinkEmail({
   portalUrl,
 }: SendMagicLinkEmailParams) {
   const { data, error } = await resend.emails.send({
-    from: `${organizationName} <onboarding@resend.dev>`,
+    from: `${organizationName} <noreply@rattatata.xyz>`,
     to: [to],
     subject: `Your Portal Access Link - ${organizationName}`,
     html: `
@@ -330,7 +340,7 @@ export async function sendSessionRequestStatusEmail({
   const statusEmoji = isApproved ? '✓' : '✗'
 
   const { data, error } = await resend.emails.send({
-    from: `${organizationName} <onboarding@resend.dev>`,
+    from: `${organizationName} <noreply@rattatata.xyz>`,
     to: [to],
     subject: `Session Request ${statusText} - ${organizationName}`,
     html: `
@@ -382,7 +392,7 @@ export async function sendSessionRequestStatusEmail({
               ${responseNotes ? `
               <div style="border-left: 4px solid #1e40af; padding-left: 16px; margin-bottom: 24px;">
                 <p style="margin: 0 0 8px; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Message from your therapist</p>
-                <p style="margin: 0; color: #374151; font-size: 15px; line-height: 24px;">${responseNotes}</p>
+                <p style="margin: 0; color: #374151; font-size: 15px; line-height: 24px;">${escapeHtml(responseNotes)}</p>
               </div>
               ` : ''}
 

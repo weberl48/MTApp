@@ -29,7 +29,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/login/')
   }
 
   // Get user profile to check permissions
@@ -40,7 +40,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
     .single()
 
   if (!profile) {
-    redirect('/login')
+    redirect('/login/')
   }
 
   // Fetch the client

@@ -62,7 +62,7 @@ export default function SessionDetailPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/login')
+        router.push('/login/')
         return
       }
 
@@ -110,7 +110,7 @@ export default function SessionDetailPage() {
       // Check access - contractors can only see their own sessions
       const sessionData = data as unknown as SessionDetails
       if (!admin && sessionData.contractor?.id !== user.id) {
-        router.push('/sessions')
+        router.push('/sessions/')
         return
       }
 
@@ -180,7 +180,7 @@ export default function SessionDetailPage() {
       .eq('id', session.id)
 
     if (!error) {
-      router.push('/sessions')
+      router.push('/sessions/')
     }
   }
 

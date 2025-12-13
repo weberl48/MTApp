@@ -28,7 +28,7 @@ export function Header({ user }: HeaderProps) {
 
   async function handleSignOut() {
     await supabase.auth.signOut()
-    router.push('/login')
+    router.push('/login/')
     router.refresh()
   }
 
@@ -120,11 +120,11 @@ export function Header({ user }: HeaderProps) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/settings')}>
+          <DropdownMenuItem onClick={() => router.push('/settings/')}>
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/settings')}>
+          <DropdownMenuItem onClick={() => router.push('/settings/')}>
             <UserIcon className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
