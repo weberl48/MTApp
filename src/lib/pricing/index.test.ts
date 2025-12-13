@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import { calculateSessionPricing } from './index'
 import type { ServiceType } from '@/types/database'
 

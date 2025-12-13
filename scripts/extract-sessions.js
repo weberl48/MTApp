@@ -46,7 +46,10 @@ function parseDate(dateStr) {
   if (typeof dateStr === 'number') {
     const excelEpoch = new Date(1899, 11, 30);
     const date = new Date(excelEpoch.getTime() + dateStr * 24 * 60 * 60 * 1000);
-    return date.toISOString().split('T')[0];
+    const isoDate = date.toISOString().split('T')[0];
+    // Validate the date
+    if (isValidDate(isoDate)) return isoDate;
+    return null;
   }
 
   const str = String(dateStr).trim();
@@ -58,10 +61,31 @@ function parseDate(dateStr) {
     if (year.length === 2) {
       year = parseInt(year) > 50 ? '19' + year : '20' + year;
     }
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    // Validate day and month
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
+    if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12) {
+      return null;
+    }
+    const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    if (isValidDate(result)) return result;
+    return null;
   }
 
   return null;
+}
+
+// Validate a date string is actually valid
+function isValidDate(dateStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  // Basic validation
+  if (year < 2020 || year > 2030) return false;
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  // Check days in month
+  const daysInMonth = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (day > daysInMonth[month]) return false;
+  return true;
 }
 
 // Extract client names from a string
@@ -72,14 +96,35 @@ function extractClientNames(str) {
   let cleaned = String(str)
     .replace(/\d{1,2}\/\d{1,2}(\/\d{2,4})?/g, '') // Remove dates
     .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 
-  // Split by common delimiters
-  const parts = cleaned.split(/[,\s]+and\s+|,\s*|\s+and\s+/i);
+  // Split by common delimiters (comma, "and", multiple spaces)
+  const parts = cleaned.split(/[,\s]+and\s+|,\s*|\s+and\s+|\s{2,}/i);
 
-  return parts
+  // Further split any remaining compound names (e.g., "Tony Vernon Jo")
+  const allNames = [];
+  parts.forEach(p => {
+    const trimmed = p.trim();
+    // If it looks like multiple first names together (all caps words), split them
+    if (trimmed.includes(' ') && !trimmed.match(/^[A-Z][a-z]+\s+[A-Z][a-z]+$/)) {
+      // Might be "Tony Vernon Jo" - split by space
+      const words = trimmed.split(/\s+/);
+      // Only split if words look like first names (capitalized, short)
+      if (words.every(w => w.length < 15 && w.match(/^[A-Z]/))) {
+        allNames.push(...words);
+      } else {
+        allNames.push(trimmed);
+      }
+    } else {
+      allNames.push(trimmed);
+    }
+  });
+
+  return allNames
     .map(p => p.trim())
-    .filter(p => p.length > 1 && !p.match(/^\d+$/) && p.length < 30);
+    .filter(p => p.length > 1 && !p.match(/^\d+(\.\d+)?$/) && p.length < 30)
+    .filter(p => !p.match(/^(the|and|or|with|for|at|in|on|to|a|an)$/i)); // Remove common words
 }
 
 // Collected sessions

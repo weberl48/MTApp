@@ -14,8 +14,11 @@ import { Building2, UserPlus } from 'lucide-react'
 export default function SignupPage() {
   const searchParams = useSearchParams()
   const inviteOrgId = searchParams.get('org') // For joining existing org via invite link
+  const inviteToken = searchParams.get('invite') // Secure role-based invite token
 
-  const [signupType, setSignupType] = useState<'new-org' | 'join-org'>(inviteOrgId ? 'join-org' : 'new-org')
+  const [signupType, setSignupType] = useState<'new-org' | 'join-org'>(
+    inviteOrgId || inviteToken ? 'join-org' : 'new-org'
+  )
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -67,9 +70,13 @@ export default function SignupPage() {
         // Creating new organization - will become owner
         metadata.organization_name = organizationName.trim()
       } else {
-        // Joining existing organization - will become contractor
-        metadata.organization_id = inviteCode.trim()
-        metadata.role = 'contractor'
+        // Joining existing organization - either via org id (contractor) or secure invite token (role-based)
+        if (inviteToken) {
+          metadata.invite_token = inviteToken
+        } else {
+          metadata.organization_id = inviteCode.trim()
+          metadata.role = 'contractor'
+        }
       }
 
       const { error } = await supabase.auth.signUp({
@@ -130,7 +137,7 @@ export default function SignupPage() {
           )}
 
           {/* Signup Type Toggle */}
-          {!inviteOrgId && (
+          {!inviteOrgId && !inviteToken && (
             <Tabs value={signupType} onValueChange={(v) => setSignupType(v as 'new-org' | 'join-org')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="new-org" className="flex items-center gap-2">
@@ -162,7 +169,7 @@ export default function SignupPage() {
           )}
 
           {/* Invite Code (for joining org) */}
-          {signupType === 'join-org' && (
+          {signupType === 'join-org' && !inviteToken && (
             <div className="space-y-2">
               <Label htmlFor="inviteCode">Invite Code</Label>
               <Input
@@ -175,6 +182,12 @@ export default function SignupPage() {
                 disabled={!!inviteOrgId}
               />
               <p className="text-xs text-gray-500">Get this from your practice administrator</p>
+            </div>
+          )}
+
+          {inviteToken && (
+            <div className="p-3 text-sm text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300 rounded-md">
+              You&apos;re signing up with a secure invite link.
             </div>
           )}
 

@@ -74,8 +74,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-02-03', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Bryan Bryan Bryan
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Bryan Bryan%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -119,8 +119,16 @@ BEGIN
         VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
       END IF;
     END IF;
-    -- Attendee: Jo  DJ
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo  DJ%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -135,8 +143,8 @@ BEGIN
         VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
       END IF;
     END IF;
-    -- Attendee: John  Patty
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John  Patty%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: John Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -145,14 +153,6 @@ BEGIN
     END IF;
     -- Attendee: Hillary
     SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-    -- Attendee: DJ
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -233,8 +233,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Ayub was bounci Home Ayub appeared h Client’s home Before the sessioClients home Olivia was able t  Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Ayub Ayub Lopez Tyler Olivia
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ayub Ayub Lopez Tyler Olivia%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Ayub
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ayub%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Lopez
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lopez%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tyler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tyler%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Olivia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Olivia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -378,8 +402,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-01-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Worked on singin1230 Maple Rd    Jacob Worked on singin1230 Maple Rd    Jacob Synesthesia acti  1200 Master St    Jacob', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jessica Karen Austin
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica Karen Austin%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jessica
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jessica%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Austin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Austin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -481,8 +521,16 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-01-24', 30, service_type_uuid, contractor_uuid, 'approved', 'makeup session  Client''s home first half of sessioClient''s home second half of se Client''s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Josiah Ikenna Ikenna
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah Ikenna Ikenna%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -510,8 +558,48 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-02-01', 30, service_type_uuid, contractor_uuid, 'approved', 'n/a n/a n/a n/a n/a n/a; first half', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Lexi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lexi%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Rachel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rachel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Matt
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matt%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ikenna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ikenna%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -2438,8 +2526,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-07-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -2826,36 +2914,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 91: 2024-07-05 - Colleen - Group Session
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2024-07-05', 30, service_type_uuid, contractor_uuid, 'approved', 'The Arts', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 92: 2024-09-18 - Bryan - Creative Remedies
+-- Session 91: 2024-09-18 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -2884,7 +2943,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 93: 2024-09-10 - Colleen - Group Session
+-- Session 92: 2024-09-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -2913,7 +2972,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 94: 2024-09-16 - Colleen - Group Session
+-- Session 93: 2024-09-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -2931,8 +2990,16 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-09-16', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jeanie Jordan T
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Jordan T%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jeanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jordan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jordan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -2942,7 +3009,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 95: 2024-09-16 - Colleen - Group Session
+-- Session 94: 2024-09-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -2971,7 +3038,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 96: 2024-09-17 - Colleen - Group Session
+-- Session 95: 2024-09-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3000,7 +3067,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 97: 2024-09-19 - Colleen - Group Session
+-- Session 96: 2024-09-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3029,7 +3096,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 98: 2024-09-18 - Colleen - Musical Expressions
+-- Session 97: 2024-09-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3058,7 +3125,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 99: 2024-09-09 - Colleen - Musical Expressions
+-- Session 98: 2024-09-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3087,7 +3154,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 100: 2024-09-09 - Colleen - Musical Expressions
+-- Session 99: 2024-09-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3105,8 +3172,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-09-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Colleen Colleen Cоlleen Cоlleen Colleen Colleen', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 496.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%496.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3116,7 +3183,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 101: 2024-09-16 - Colleen - Musical Expressions
+-- Session 100: 2024-09-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3145,7 +3212,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 102: 2024-09-16 - Colleen - Musical Expressions
+-- Session 101: 2024-09-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3174,7 +3241,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 103: 2024-10-07 - Colleen - Group Session
+-- Session 102: 2024-10-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3203,7 +3270,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 104: 2024-10-22 - Colleen - Group Session
+-- Session 103: 2024-10-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3221,8 +3288,16 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-10-22', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Cоlleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Cоlleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3232,7 +3307,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 105: 2024-10-30 - Colleen - Group Session
+-- Session 104: 2024-10-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3250,8 +3325,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-10-30', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group  Senior DayHab    Colleen', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jeanie Nick Lind
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie Nick Lind%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jeanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nick
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Lind
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lind%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3261,7 +3352,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 106: 2024-10-30 - Colleen - Group Session
+-- Session 105: 2024-10-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3290,7 +3381,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 107: 2024-10-15 - Colleen - Musical Expressions
+-- Session 106: 2024-10-15 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3319,7 +3410,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 108: 2024-10-30 - Colleen - Musical Expressions
+-- Session 107: 2024-10-30 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3348,7 +3439,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 109: 2024-10-30 - Colleen - Scholarship
+-- Session 108: 2024-10-30 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -3377,7 +3468,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 110: 2024-11-21 - Bryan - Creative Remedies
+-- Session 109: 2024-11-21 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -3406,7 +3497,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 111: 2024-11-21 - Colleen - Creative Remedies
+-- Session 110: 2024-11-21 - Colleen - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -3435,7 +3526,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 112: 2024-11-14 - Colleen - Group Session
+-- Session 111: 2024-11-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3464,7 +3555,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 113: 2024-11-25 - Colleen - Group Session
+-- Session 112: 2024-11-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3493,7 +3584,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 114: 2024-11-26 - Colleen - Group Session
+-- Session 113: 2024-11-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3522,7 +3613,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 115: 2024-11-13 - Colleen - Group Session
+-- Session 114: 2024-11-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3551,7 +3642,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 116: 2024-11-20 - Colleen - Group Session
+-- Session 115: 2024-11-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3580,7 +3671,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 117: 2024-11-26 - Colleen - In home music therapy
+-- Session 116: 2024-11-26 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -3598,8 +3689,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3609,7 +3700,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 118: 2024-11-01 - Caroline West - In home music therapy
+-- Session 117: 2024-11-01 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -3627,8 +3718,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-01', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3638,7 +3729,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 119: 2024-11-13 - Colleen - In home music therapy
+-- Session 118: 2024-11-13 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -3656,8 +3747,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-13', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3667,7 +3758,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 120: 2024-11-04 - Colleen - Musical Expressions
+-- Session 119: 2024-11-04 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3685,8 +3776,16 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthоny waз aw  Client’з hоme Anthоny waз ab  Client’з hоme Therapist provid  Clients home Firзt half; Ikenna  Clientз hоme', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Cоlleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Cоlleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3696,7 +3795,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 121: 2024-11-11 - Colleen - Musical Expressions
+-- Session 120: 2024-11-11 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3714,8 +3813,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-11', 30, service_type_uuid, contractor_uuid, 'approved', '"Jозiah partiсip   Clientз hоme Josiah participa   Clients home Ethan created n   Matts Music Ethan сreated 2   Mattз Muзiс Lexi participated  Matts Music Lexi partiсipate   Mattз Muзiс Raсhel partiсi', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Cоlleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Cоlleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Megan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brunner
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brunner%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3725,7 +3848,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 122: 2024-11-11 - Colleen - Scholarship
+-- Session 121: 2024-11-11 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -3743,8 +3866,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-11-11', 30, service_type_uuid, contractor_uuid, 'approved', '"Jозiah partiсip   Clientз hоme Josiah participa   Clients home Ethan created n   Matts Music Ethan сreated 2   Mattз Muзiс Lexi participated  Matts Music Lexi partiсipate   Mattз Muзiс Raсhel partiсi', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Cоlleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Cоlleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Megan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brunner
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brunner%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3754,7 +3901,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 123: 2024-12-02 - Colleen - Group Session
+-- Session 122: 2024-12-02 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3783,7 +3930,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 124: 2024-12-02 - Colleen - Musical Expressions
+-- Session 123: 2024-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3801,8 +3948,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -3812,7 +3959,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 125: 2024-12-03 - Colleen - Group Session
+-- Session 124: 2024-12-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3841,7 +3988,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 126: 2024-12-03 - Colleen - Musical Expressions
+-- Session 125: 2024-12-03 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3870,7 +4017,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 127: 2024-12-04 - Colleen - Group Session
+-- Session 126: 2024-12-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3899,7 +4046,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 128: 2024-12-04 - Colleen - Musical Expressions
+-- Session 127: 2024-12-04 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -3928,7 +4075,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 129: 2024-12-05 - Colleen - Group Session
+-- Session 128: 2024-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3957,7 +4104,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 130: 2024-12-09 - Colleen - Group Session
+-- Session 129: 2024-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -3986,7 +4133,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 131: 2024-12-09 - Colleen - Musical Expressions
+-- Session 130: 2024-12-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4004,8 +4151,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -4015,7 +4162,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 132: 2024-12-10 - Colleen - Group Session
+-- Session 131: 2024-12-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4044,7 +4191,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 133: 2024-12-10 - Colleen - Musical Expressions
+-- Session 132: 2024-12-10 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4073,7 +4220,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 134: 2024-12-11 - Colleen - Group Session
+-- Session 133: 2024-12-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4102,7 +4249,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 135: 2024-12-11 - Colleen - Musical Expressions
+-- Session 134: 2024-12-11 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4131,7 +4278,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 136: 2024-12-16 - Colleen - Group Session
+-- Session 135: 2024-12-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4160,7 +4307,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 137: 2024-12-16 - Colleen - Musical Expressions
+-- Session 136: 2024-12-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4178,8 +4325,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-12-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -4189,7 +4336,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 138: 2024-12-17 - Colleen - Group Session
+-- Session 137: 2024-12-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4218,7 +4365,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 139: 2024-12-17 - Colleen - Musical Expressions
+-- Session 138: 2024-12-17 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4247,7 +4394,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 140: 2024-12-18 - Colleen - Group Session
+-- Session 139: 2024-12-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4276,7 +4423,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 141: 2024-12-18 - Colleen - Scholarship
+-- Session 140: 2024-12-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4305,7 +4452,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 142: 2024-12-18 - Colleen - Musical Expressions
+-- Session 141: 2024-12-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4334,7 +4481,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 143: 2024-12-19 - Colleen - Group Session
+-- Session 142: 2024-12-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4363,7 +4510,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 144: 2024-12-23 - Colleen - Group Session
+-- Session 143: 2024-12-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -4392,7 +4539,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 145: 2024-12-23 - Colleen - Musical Expressions
+-- Session 144: 2024-12-23 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -4410,8 +4557,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2024-12-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -4421,7 +4568,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 146: 2024-12-07 - Bryan - Creative Remedies
+-- Session 145: 2024-12-07 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -4450,7 +4597,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 147: 2024-12-14 - Bryan - Creative Remedies
+-- Session 146: 2024-12-14 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -4479,7 +4626,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 148: 2025-01-07 - Colleen - Scholarship
+-- Session 147: 2025-01-07 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4508,7 +4655,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 149: 2025-01-08 - Colleen - Scholarship
+-- Session 148: 2025-01-08 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4537,7 +4684,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 150: 2025-01-14 - Colleen - Scholarship
+-- Session 149: 2025-01-14 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4566,7 +4713,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 151: 2025-01-15 - Colleen - Scholarship
+-- Session 150: 2025-01-15 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4595,7 +4742,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 152: 2025-01-29 - Colleen - Scholarship
+-- Session 151: 2025-01-29 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4624,7 +4771,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 153: 2025-02-11 - Colleen - Scholarship
+-- Session 152: 2025-02-11 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4653,7 +4800,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 154: 2025-02-04 - Colleen - Scholarship
+-- Session 153: 2025-02-04 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4682,7 +4829,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 155: 2025-02-05 - Colleen - Scholarship
+-- Session 154: 2025-02-05 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4711,7 +4858,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 156: 2025-02-12 - Colleen - Scholarship
+-- Session 155: 2025-02-12 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4740,7 +4887,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 157: 2025-02-18 - Colleen - Scholarship
+-- Session 156: 2025-02-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4769,7 +4916,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 158: 2025-02-19 - Colleen - Scholarship
+-- Session 157: 2025-02-19 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4798,7 +4945,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 159: 2025-02-25 - Colleen - Scholarship
+-- Session 158: 2025-02-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4827,7 +4974,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 160: 2025-02-26 - Colleen - Scholarship
+-- Session 159: 2025-02-26 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4856,7 +5003,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 161: 2025-03-04 - Colleen - Scholarship
+-- Session 160: 2025-03-04 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4885,7 +5032,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 162: 2025-03-18 - Colleen - Scholarship
+-- Session 161: 2025-03-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4914,7 +5061,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 163: 2025-03-25 - Colleen - Scholarship
+-- Session 162: 2025-03-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4943,7 +5090,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 164: 2025-03-19 - Colleen - Scholarship
+-- Session 163: 2025-03-19 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -4972,7 +5119,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 165: 2025-03-26 - Colleen - Scholarship
+-- Session 164: 2025-03-26 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5001,7 +5148,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 166: 2025-04-01 - Colleen - Scholarship
+-- Session 165: 2025-04-01 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5030,7 +5177,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 167: 2025-04-08 - Colleen - Scholarship
+-- Session 166: 2025-04-08 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5059,7 +5206,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 168: 2025-04-02 - Colleen - Scholarship
+-- Session 167: 2025-04-02 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5088,7 +5235,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 169: 2025-05-06 - Colleen - Scholarship
+-- Session 168: 2025-05-06 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5117,7 +5264,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 170: 2025-05-27 - Colleen - Scholarship
+-- Session 169: 2025-05-27 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5146,7 +5293,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 171: 2025-05-07 - Colleen - Scholarship
+-- Session 170: 2025-05-07 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5175,7 +5322,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 172: 2025-05-28 - Colleen - Scholarship
+-- Session 171: 2025-05-28 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5204,7 +5351,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 173: 2025-05-13 - Colleen - Scholarship
+-- Session 172: 2025-05-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5233,7 +5380,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 174: 2025-06-17 - Colleen - Scholarship
+-- Session 173: 2025-06-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5262,7 +5409,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 175: 2025-06-10 - Colleen - Scholarship
+-- Session 174: 2025-06-10 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5291,7 +5438,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 176: 2025-06-03 - Colleen - Scholarship
+-- Session 175: 2025-06-03 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5320,7 +5467,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 177: 2025-06-18 - Colleen - Scholarship
+-- Session 176: 2025-06-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5349,7 +5496,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 178: 2025-06-25 - Colleen - Scholarship
+-- Session 177: 2025-06-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5378,7 +5525,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 179: 2025-06-04 - Colleen - Scholarship
+-- Session 178: 2025-06-04 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5407,7 +5554,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 180: 2025-06-17 - Colleen - Scholarship
+-- Session 179: 2025-06-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -5436,7 +5583,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 181: 2025-01-06 - Colleen - Group Session
+-- Session 180: 2025-01-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5465,7 +5612,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 182: 2025-01-08 - Colleen - Group Session
+-- Session 181: 2025-01-08 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5494,7 +5641,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 183: 2025-01-09 - Colleen - Group Session
+-- Session 182: 2025-01-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5523,7 +5670,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 184: 2024-01-13 - Colleen - Group Session
+-- Session 183: 2024-01-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5552,7 +5699,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 185: 2025-01-15 - Colleen - Group Session
+-- Session 184: 2025-01-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5581,7 +5728,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 186: 2025-01-16 - Colleen - Group Session
+-- Session 185: 2025-01-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5610,7 +5757,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 187: 2025-01-20 - Colleen - Group Session
+-- Session 186: 2025-01-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5639,7 +5786,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 188: 2025-01-23 - Colleen - Group Session
+-- Session 187: 2025-01-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5668,7 +5815,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 189: 2025-01-24 - Colleen - Group Session
+-- Session 188: 2025-01-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5697,7 +5844,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 190: 2025-01-27 - Colleen - Group Session
+-- Session 189: 2025-01-27 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5726,7 +5873,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 191: 2025-01-28 - Colleen - Group Session
+-- Session 190: 2025-01-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5755,7 +5902,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 192: 2025-01-29 - Colleen - Group Session
+-- Session 191: 2025-01-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5784,7 +5931,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 193: 2025-01-30 - Colleen - Group Session
+-- Session 192: 2025-01-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5813,7 +5960,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 194: 2025-02-13 - Colleen - Group Session
+-- Session 193: 2025-02-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5842,7 +5989,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 195: 2025-02-18 - Colleen - Group Session
+-- Session 194: 2025-02-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5871,7 +6018,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 196: 2025-02-27 - Colleen - Group Session
+-- Session 195: 2025-02-27 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5900,7 +6047,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 197: 2025-02-03 - Colleen - Group Session
+-- Session 196: 2025-02-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5929,7 +6076,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 198: 2025-02-06 - Colleen - Group Session
+-- Session 197: 2025-02-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5958,7 +6105,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 199: 2025-02-20 - Colleen - Group Session
+-- Session 198: 2025-02-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -5987,7 +6134,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 200: 2025-02-04 - Colleen - In home music therapy
+-- Session 199: 2025-02-04 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6005,8 +6152,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6016,7 +6163,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 201: 2025-02-03 - Colleen - Musical Expressions
+-- Session 200: 2025-02-03 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6034,8 +6181,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Client’s home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6045,7 +6192,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 202: 2025-02-11 - Colleen - In home music therapy
+-- Session 201: 2025-02-11 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6063,8 +6210,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6074,7 +6221,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 203: 2025-02-18 - Colleen - In home music therapy
+-- Session 202: 2025-02-18 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6092,8 +6239,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6103,7 +6250,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 204: 2025-02-25 - Colleen - In home music therapy
+-- Session 203: 2025-02-25 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6121,8 +6268,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6132,7 +6279,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 205: 2025-02-10 - Colleen - Musical Expressions
+-- Session 204: 2025-02-10 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6150,8 +6297,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6161,36 +6308,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 206: 2025-02-00 - Colleen - Musical Expressions
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Musical Expressions' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-00', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 207: 2025-02-20 - Colleen - Musical Expressions
+-- Session 205: 2025-02-20 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6208,8 +6326,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-20', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6219,7 +6337,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 208: 2025-02-24 - Colleen - Musical Expressions
+-- Session 206: 2025-02-24 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6237,8 +6355,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Clients home', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6248,7 +6366,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 209: 2025-02-24 - Colleen - Group Session
+-- Session 207: 2025-02-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6277,7 +6395,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 210: 2025-02-10 - Colleen - Group Session
+-- Session 208: 2025-02-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6306,7 +6424,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 211: 2025-02-07 - Caroline - In home music therapy
+-- Session 209: 2025-02-07 - Caroline - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6324,8 +6442,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-07', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6335,7 +6453,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 212: 2025-02-28 - Caroline West - In home music therapy
+-- Session 210: 2025-02-28 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6353,8 +6471,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-28', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6364,7 +6482,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 213: 2025-02-14 - Caroline - In home music therapy
+-- Session 211: 2025-02-14 - Caroline - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -6382,8 +6500,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-14', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 38.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%38.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6393,7 +6511,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 214: 2025-02-21 - Colleen - Group Session
+-- Session 212: 2025-02-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6422,7 +6540,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 215: 2025-02-20 - Bryan - Creative Remedies
+-- Session 213: 2025-02-20 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -6451,7 +6569,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 216: 2025-02-04 - Colleen - Musical Expressions
+-- Session 214: 2025-02-04 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6469,8 +6587,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6480,7 +6598,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 217: 2025-02-05 - Colleen - Musical Expressions
+-- Session 215: 2025-02-05 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6498,8 +6616,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6509,7 +6627,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 218: 2025-02-11 - Colleen - Musical Expressions
+-- Session 216: 2025-02-11 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6527,8 +6645,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6538,7 +6656,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 219: 2025-02-12 - Colleen - Musical Expressions
+-- Session 217: 2025-02-12 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6556,8 +6674,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6567,7 +6685,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 220: 2025-02-18 - Colleen - Musical Expressions
+-- Session 218: 2025-02-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6585,8 +6703,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6596,7 +6714,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 221: 2025-02-19 - Colleen - Musical Expressions
+-- Session 219: 2025-02-19 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6614,8 +6732,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6625,7 +6743,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 222: 2025-02-25 - Colleen - Musical Expressions
+-- Session 220: 2025-02-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6643,8 +6761,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6654,7 +6772,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 223: 2025-02-26 - Colleen - Musical Expressions
+-- Session 221: 2025-02-26 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -6672,8 +6790,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -6683,210 +6801,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 224: 2025-02-04 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 225: 2025-02-05 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 226: 2025-02-12 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 227: 2025-02-18 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 228: 2025-02-19 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 229: 2025-02-25 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 230: 2025-02-26 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-02-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 231: 2025-02-05 - Colleen - Group Session
+-- Session 222: 2025-02-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6915,7 +6830,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 232: 2025-02-12 - Colleen - Group Session
+-- Session 223: 2025-02-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6944,7 +6859,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 233: 2025-02-19 - Colleen - Group Session
+-- Session 224: 2025-02-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -6973,7 +6888,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 234: 2025-02-26 - Colleen - Group Session
+-- Session 225: 2025-02-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7002,7 +6917,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 235: 2025-02-03 - Colleen - In home music therapy
+-- Session 226: 2025-02-03 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -7020,8 +6935,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7031,7 +6946,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 236: 2025-02-10 - Colleen - In home music therapy
+-- Session 227: 2025-02-10 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -7049,8 +6964,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-10', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7060,7 +6975,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 237: 2025-02-24 - Colleen - In home music therapy
+-- Session 228: 2025-02-24 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -7078,8 +6993,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-02-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Virtual', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7089,7 +7004,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 238: 2025-03-27 - Colleen - Group Session
+-- Session 229: 2025-03-27 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7118,7 +7033,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 239: 2025-03-17 - Colleen - Group Session
+-- Session 230: 2025-03-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7147,7 +7062,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 240: 2025-03-10 - Colleen - Group Session
+-- Session 231: 2025-03-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7176,7 +7091,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 241: 2025-03-03 - Colleen - Group Session
+-- Session 232: 2025-03-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7205,7 +7120,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 242: 2025-03-13 - Colleen - Group Session
+-- Session 233: 2025-03-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7234,7 +7149,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 243: 2025-03-06 - Colleen - Group Session
+-- Session 234: 2025-03-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7263,7 +7178,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 244: 2025-03-12 - Colleen - Group Session
+-- Session 235: 2025-03-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7292,7 +7207,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 245: 2024-03-12 - Colleen - Group Session
+-- Session 236: 2024-03-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7321,7 +7236,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 246: 2025-03-19 - Colleen - Group Session
+-- Session 237: 2025-03-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7350,7 +7265,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 247: 2025-03-05 - Colleen - Group Session
+-- Session 238: 2025-03-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7379,7 +7294,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 248: 2025-03-26 - Colleen - Group Session
+-- Session 239: 2025-03-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7408,7 +7323,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 249: 2025-03-31 - Colleen - Group Session
+-- Session 240: 2025-03-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7437,7 +7352,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 250: 2025-03-24 - Colleen - Group Session
+-- Session 241: 2025-03-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7466,123 +7381,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 251: 2025-03-04 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-03-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 252: 2025-03-18 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-03-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 253: 2025-03-19 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-03-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 254: 2025-03-26 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-03-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 255: 2025-04-07 - Colleen - Group Session
+-- Session 242: 2025-04-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7611,7 +7410,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 256: 2025-04-21 - Colleen - Group Session
+-- Session 243: 2025-04-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7640,7 +7439,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 257: 2025-04-17 - Colleen - Group Session
+-- Session 244: 2025-04-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7669,7 +7468,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 258: 2025-04-03 - Colleen - Group Session
+-- Session 245: 2025-04-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7698,7 +7497,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 259: 2025-04-23 - Colleen - Group Session
+-- Session 246: 2025-04-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7727,7 +7526,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 260: 2025-04-10 - Colleen - Group Session
+-- Session 247: 2025-04-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7756,7 +7555,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 261: 2025-04-28 - Colleen - Group Session
+-- Session 248: 2025-04-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7785,7 +7584,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 262: 2025-04-24 - Colleen - Group Session
+-- Session 249: 2025-04-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7814,65 +7613,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 263: 2025-04-01 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-04-01', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 264: 2025-04-02 - Colleen - Scholarship
-DO $$
-DECLARE
-  org_id uuid;
-  contractor_uuid uuid;
-  service_type_uuid uuid;
-  session_uuid uuid;
-  client_uuid uuid;
-BEGIN
-  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
-  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
-  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
-
-  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
-    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
-    VALUES (gen_random_uuid(), '2025-04-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
-    RETURNING id INTO session_uuid;
-
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
-    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
-      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
-        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
-        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
-      END IF;
-    END IF;
-  END IF;
-END $$;
-
--- Session 265: 2025-04-09 - Colleen - Scholarship
+-- Session 250: 2025-04-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -7890,8 +7631,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-04-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7901,7 +7642,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 266: 2025-04-30 - Colleen - Scholarship
+-- Session 251: 2025-04-30 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -7919,8 +7660,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-04-30', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7930,7 +7671,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 267: 2025-04-23 - Colleen - Scholarship
+-- Session 252: 2025-04-23 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -7948,8 +7689,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-04-23', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -7959,7 +7700,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 268: 2025-04-02 - Colleen - Group Session
+-- Session 253: 2025-04-02 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -7988,7 +7729,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 269: 2025-04-09 - Colleen - Group Session
+-- Session 254: 2025-04-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8017,7 +7758,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 270: 2025-04-30 - Colleen - Group Session
+-- Session 255: 2025-04-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8046,7 +7787,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 271: 2025-04-16 - Colleen - Group Session
+-- Session 256: 2025-04-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8075,7 +7816,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 272: 2025-04-22 - Colleen - Group Session
+-- Session 257: 2025-04-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8104,7 +7845,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 273: 2025-05-05 - Colleen - Group Session
+-- Session 258: 2025-05-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8122,8 +7863,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-05-05', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 90                        63
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8133,7 +7874,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 274: 2025-05-29 - Colleen - Group Session
+-- Session 259: 2025-05-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8162,7 +7903,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 275: 2025-05-30 - Colleen - Group Session
+-- Session 260: 2025-05-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8191,7 +7932,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 276: 2025-05-15 - Colleen - Group Session
+-- Session 261: 2025-05-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8220,7 +7961,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 277: 2025-05-12 - Colleen - Group Session
+-- Session 262: 2025-05-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8238,8 +7979,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-05-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 70 49 110 77 90 63 110 77
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70 49 110 77 90 63 110 77%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8249,7 +7990,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 278: 2025-05-30 - Colleen - Group Session
+-- Session 263: 2025-05-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8278,7 +8019,36 @@ BEGIN
   END IF;
 END $$;
 
--- Session 279: 2025-05-28 - Colleen - Scholarship
+-- Session 264: 2025-05-06 - Colleen - Scholarship
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'Scholarship Session' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-05-06', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 55 39.5 55 39.5 55 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55 39.5 55 39.5 55 39.5%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 265: 2025-05-28 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -8296,8 +8066,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-05-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Matts Music', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 55                     39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 55 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55 39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8307,7 +8077,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 280: 2025-05-06 - Colleen - Group Session
+-- Session 266: 2025-05-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8336,7 +8106,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 281: 2025-05-06 - Colleen - Scholarship
+-- Session 267: 2025-05-06 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -8365,7 +8135,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 282: 2025-05-14 - Colleen - Group Session
+-- Session 268: 2025-05-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8394,7 +8164,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 283: 2025-05-05 - Colleen - Group Session
+-- Session 269: 2025-05-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8423,7 +8193,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 284: 2025-05-28 - Colleen - Group Session
+-- Session 270: 2025-05-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8452,7 +8222,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 285: 2025-05-07 - Colleen - Group Session
+-- Session 271: 2025-05-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8481,7 +8251,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 286: 2025-05-12 - Colleen - Group Session
+-- Session 272: 2025-05-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8510,7 +8280,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 287: 2025-05-01 - Colleen - Group Session
+-- Session 273: 2025-05-01 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8539,7 +8309,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 288: 2025-06-02 - Colleen - Group Session
+-- Session 274: 2025-06-02 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8557,8 +8327,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-02', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 90                        63
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8568,7 +8338,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 289: 2025-06-16 - Colleen - Group Session
+-- Session 275: 2025-06-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8586,8 +8356,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-16', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 90                        63
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8597,7 +8367,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 290: 2025-06-20 - Colleen - Group Session
+-- Session 276: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8626,7 +8396,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 291: 2025-06-12 - Colleen - Group Session
+-- Session 277: 2025-06-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8655,7 +8425,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 292: 2025-06-12 - Colleen - Group Session
+-- Session 278: 2025-06-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8673,8 +8443,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-12', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 70                        49
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 70 49
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70 49%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8684,7 +8454,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 293: 2025-06-23 - Colleen - Group Session
+-- Session 279: 2025-06-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8702,8 +8472,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-23', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 90                        63
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90                        63%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8713,7 +8483,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 294: 2025-06-20 - Colleen - Group Session
+-- Session 280: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8731,8 +8501,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 70                        49
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70                        49%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 70 49
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70 49%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8742,7 +8512,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 295: 2025-06-26 - Colleen - Group Session
+-- Session 281: 2025-06-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8771,7 +8541,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 296: 2025-04-17 - Colleen - Scholarship
+-- Session 282: 2025-04-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -8800,7 +8570,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 297: 2025-06-18 - Colleen - Scholarship
+-- Session 283: 2025-06-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -8818,8 +8588,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-18', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 55                     39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 55 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55 39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -8829,7 +8599,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 298: 2025-06-30 - Colleen - Group Session
+-- Session 284: 2025-06-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8858,7 +8628,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 299: 2025-06-30 - Colleen - Scholarship
+-- Session 285: 2025-06-30 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -8887,7 +8657,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 300: 2025-06-18 - Colleen - Group Session
+-- Session 286: 2025-06-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8916,7 +8686,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 301: 2025-06-11 - Colleen - Group Session
+-- Session 287: 2025-06-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8945,7 +8715,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 302: 2025-06-25 - Colleen - Group Session
+-- Session 288: 2025-06-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -8974,7 +8744,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 303: 2025-06-23 - Colleen - Group Session
+-- Session 289: 2025-06-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9003,7 +8773,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 304: 2025-06-30 - Colleen - Group Session
+-- Session 290: 2025-06-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9032,7 +8802,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 305: 2025-06-12 - Colleen - Group Session
+-- Session 291: 2025-06-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9061,7 +8831,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 306: 2025-06-16 - Colleen - Group Session
+-- Session 292: 2025-06-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9090,7 +8860,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 307: 2025-06-26 - Colleen - Group Session
+-- Session 293: 2025-06-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9119,7 +8889,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 308: 2025-07-28 - Colleen - Group Session
+-- Session 294: 2025-07-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9148,7 +8918,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 309: 2025-07-25 - Colleen - Group Session
+-- Session 295: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9177,7 +8947,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 310: 2025-07-22 - Colleen - Group Session
+-- Session 296: 2025-07-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9195,8 +8965,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 110 77 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%110 77 90 63%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -9206,7 +8976,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 311: 2025-07-29 - Colleen - Group Session
+-- Session 297: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9224,8 +8994,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 70 49 70 49
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70 49 70 49%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -9235,7 +9005,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 312: 2025-07-31 - Colleen - Group Session
+-- Session 298: 2025-07-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9264,7 +9034,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 313: 2025-07-25 - Colleen - Group Session
+-- Session 299: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9293,7 +9063,36 @@ BEGIN
   END IF;
 END $$;
 
--- Session 314: 2025-07-17 - Colleen - Group Session
+-- Session 300: 2025-07-22 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-07-22', 30, service_type_uuid, contractor_uuid, 'approved', 'Seniors', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Unknown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 301: 2025-07-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9322,7 +9121,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 315: 2025-07-15 - Colleen - Group Session
+-- Session 302: 2025-07-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9351,7 +9150,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 316: 2025-07-09 - Colleen - Group Session
+-- Session 303: 2025-07-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9380,7 +9179,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 317: 2025-07-31 - Colleen - Scholarship
+-- Session 304: 2025-07-31 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9398,8 +9197,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 0 25 0 50 55 38.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%0 25 0 50 55 38.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -9409,7 +9208,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 318: 2025-07-28 - Colleen - Scholarship
+-- Session 305: 2025-07-28 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9438,7 +9237,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 319: 2025-07-17 - Colleen - Scholarship
+-- Session 306: 2025-07-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9467,7 +9266,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 320: 2025-08-28 - Colleen - Group Session
+-- Session 307: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9496,7 +9295,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 321: 2025-08-14 - Colleen - Group Session
+-- Session 308: 2025-08-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9525,7 +9324,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 322: 2025-08-05 - Colleen - Scholarship
+-- Session 309: 2025-08-05 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9554,7 +9353,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 323: 2025-08-25 - Colleen - Group Session
+-- Session 310: 2025-08-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9583,7 +9382,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 324: 2025-08-05 - Colleen - Group Session
+-- Session 311: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9612,7 +9411,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 325: 2025-08-12 - Colleen - Group Session
+-- Session 312: 2025-08-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9641,7 +9440,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 326: 2025-08-26 - Colleen - Group Session
+-- Session 313: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9670,7 +9469,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 327: 2025-08-04 - Colleen - Group Session
+-- Session 314: 2025-08-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9699,7 +9498,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 328: 2025-08-06 - Colleen - Group Session
+-- Session 315: 2025-08-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9728,7 +9527,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 329: 2025-08-07 - Colleen - Group Session
+-- Session 316: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9757,7 +9556,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 330: 2025-08-13 - Colleen - Group Session
+-- Session 317: 2025-08-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9786,7 +9585,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 331: 2025-08-13 - Colleen - Scholarship
+-- Session 318: 2025-08-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9804,8 +9603,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 65                        48
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65                        48%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 65 48
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%65 48%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -9815,7 +9614,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 332: 2025-08-13 - Colleen - Scholarship
+-- Session 319: 2025-08-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -9833,8 +9632,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: 55                     39.5
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55                     39.5%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: 55 39.5
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%55 39.5%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -9844,7 +9643,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 333: 2025-08-27 - Colleen - Group Session
+-- Session 320: 2025-08-27 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9873,7 +9672,65 @@ BEGIN
   END IF;
 END $$;
 
--- Session 334: 2025-09-03 - Colleen - Group Session
+-- Session 321: 2025-08-05 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 70 53 70 53 70 53 70 53 90 63
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%70 53 70 53 70 53 70 53 90 63%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 322: 2025-08-25 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-08-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: 90 63 110 77
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%90 63 110 77%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 323: 2025-09-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9902,7 +9759,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 335: 2025-09-04 - Colleen - Group Session
+-- Session 324: 2025-09-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9931,7 +9788,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 336: 2025-09-08 - Colleen - Group Session
+-- Session 325: 2025-09-08 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9960,7 +9817,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 337: 2025-09-10 - Colleen - Group Session
+-- Session 326: 2025-09-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -9989,7 +9846,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 338: 2025-09-11 - Colleen - Group Session
+-- Session 327: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10018,7 +9875,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 339: 2025-09-12 - Colleen - Group Session
+-- Session 328: 2025-09-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10047,7 +9904,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 340: 2025-09-09 - Colleen - Scholarship
+-- Session 329: 2025-09-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -10076,7 +9933,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 341: 2025-10-24 - Colleen - Group Session
+-- Session 330: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10105,7 +9962,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 342: 2025-10-06 - Colleen - Group Session
+-- Session 331: 2025-10-06 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10123,8 +9980,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participate Elma SASI Harold participat  Virtual Harold participat  Virtual', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Miley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Miley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Heisler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Heisler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10134,7 +10007,52 @@ BEGIN
   END IF;
 END $$;
 
--- Session 343: 2025-07-07 - Caroline West - In home music therapy
+-- Session 332: 2025-10-06 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-10-06', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participate Elma SASI Group participate The edge Tajwar requested Home Tajwar was worki Home Tajwar was watc  Home For the Hello So For the Hello So For the Hello So For the Hello So', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caroline
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caroline%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: West
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%West%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 333: 2025-07-07 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10163,7 +10081,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 344: 2025-06-18 - Colleen - Scholarship
+-- Session 334: 2025-06-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -10192,7 +10110,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 345: 2025-06-18 - Jacob - In home music therapy
+-- Session 335: 2025-06-18 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10221,7 +10139,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 346: 2025-06-18 - Jacob - Group Session
+-- Session 336: 2025-06-18 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10258,7 +10176,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 347: 2025-06-18 - Jacob - In home music therapy
+-- Session 337: 2025-06-18 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10287,7 +10205,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 348: 2025-06-18 - Jacob - In home music therapy
+-- Session 338: 2025-06-18 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10316,7 +10234,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 349: 2025-06-18 - Jacob - In home music therapy
+-- Session 339: 2025-06-18 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10345,7 +10263,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 350: 2025-06-18 - Jacob - Group Session
+-- Session 340: 2025-06-18 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10390,7 +10308,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 351: 2025-06-17 - Colleen - Musical Expressions
+-- Session 341: 2025-06-17 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10419,7 +10337,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 352: 2025-06-17 - Colleen - Group Session
+-- Session 342: 2025-06-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10437,8 +10355,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tom Emily  Liz Bryan  Jea
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom Emily  Liz Bryan  Jea%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Emily
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jea
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jea%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10448,7 +10398,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 353: 2025-06-17 - Colleen - Group Session
+-- Session 343: 2025-06-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10466,8 +10416,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-17', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: DJ John Bernie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10477,7 +10443,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 354: 2025-06-17 - Colleen - Musical Expressions
+-- Session 344: 2025-06-17 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10506,7 +10472,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 355: 2025-06-17 - Colleen - Musical Expressions
+-- Session 345: 2025-06-17 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10535,7 +10501,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 356: 2025-06-17 - Colleen - Scholarship
+-- Session 346: 2025-06-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -10572,7 +10538,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 357: 2025-06-17 - Colleen - Scholarship
+-- Session 347: 2025-06-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -10609,7 +10575,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 358: 2025-06-17 - Colleen - Musical Expressions
+-- Session 348: 2025-06-17 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10638,7 +10604,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 359: 2025-06-20 - Colleen - Group Session
+-- Session 349: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10656,8 +10622,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Bryan Nick Hope Pam Th
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Nick Hope Pam Th%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nick
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hope
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hope%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Pam
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pam%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Th
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Th%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10667,7 +10665,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 360: 2025-06-20 - Colleen - Musical Expressions
+-- Session 350: 2025-06-20 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10696,7 +10694,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 361: 2025-06-20 - Colleen - Scholarship
+-- Session 351: 2025-06-20 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -10725,7 +10723,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 362: 2025-06-20 - Colleen - Musical Expressions
+-- Session 352: 2025-06-20 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -10754,7 +10752,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 363: 2025-06-27 - Jacob - In home music therapy
+-- Session 353: 2025-06-27 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10783,7 +10781,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 364: 2025-06-27 - Jacob - In home music therapy
+-- Session 354: 2025-06-27 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10812,7 +10810,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 365: 2025-06-20 - Colleen - Group Session
+-- Session 355: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10830,8 +10828,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Shannon Michelle Emily D
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shannon Michelle Emily D%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Shannon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shannon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michelle
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michelle%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Emily
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10841,7 +10855,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 366: 2025-06-20 - Colleen - Group Session
+-- Session 356: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10859,8 +10873,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Derek Colleen John Alon
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Colleen John Alon%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10870,7 +10908,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 367: 2025-06-20 - Colleen - Group Session
+-- Session 357: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10888,8 +10926,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-20', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Nan Matthew Mark Thom
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Matthew Mark Thom%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Nan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Matthew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matthew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thom%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -10899,7 +10961,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 368: 2025-06-20 - Colleen - Group Session
+-- Session 358: 2025-06-20 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -10928,7 +10990,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 369: 2025-06-27 - Jacob - In home music therapy
+-- Session 359: 2025-06-27 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10957,7 +11019,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 370: 2025-06-27 - Jacob - In home music therapy
+-- Session 360: 2025-06-27 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -10986,7 +11048,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 371: 2025-06-24 - Colleen - Musical Expressions
+-- Session 361: 2025-06-24 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11015,7 +11077,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 372: 2025-06-24 - Colleen - Group Session
+-- Session 362: 2025-06-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11033,8 +11095,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Francis Pamela Michael J
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis Pamela Michael J%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Francis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11044,7 +11122,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 373: 2025-06-24 - Colleen - Group Session
+-- Session 363: 2025-06-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11062,8 +11140,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-24', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Jimmy Vernon
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Jimmy Vernon%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11073,7 +11167,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 374: 2025-06-24 - Colleen - Musical Expressions
+-- Session 364: 2025-06-24 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11102,7 +11196,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 375: 2025-06-24 - Colleen - Musical Expressions
+-- Session 365: 2025-06-24 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11131,7 +11225,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 376: 2025-06-27 - Jacob - In home music therapy
+-- Session 366: 2025-06-27 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11160,7 +11254,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 377: 2025-06-25 - Colleen - Group Session
+-- Session 367: 2025-06-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11178,8 +11272,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-25', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Emily  John Pam Tom Fra
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily  John Pam Tom Fra%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Emily
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Pam
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pam%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Fra
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Fra%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11189,7 +11315,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 378: 2025-06-25 - Colleen - Scholarship
+-- Session 368: 2025-06-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -11218,7 +11344,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 379: 2025-06-25 - Colleen - Musical Expressions
+-- Session 369: 2025-06-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11247,7 +11373,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 380: 2025-06-26 - Colleen - Group Session
+-- Session 370: 2025-06-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11265,8 +11391,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Marshall Linda Steve Cra
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Linda Steve Cra%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Marshall
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steve
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steve%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Cra
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Cra%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11276,7 +11426,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 381: 2025-06-26 - Colleen - Group Session
+-- Session 371: 2025-06-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11294,8 +11444,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Danielle Rashaan Brandy
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danielle Rashaan Brandy%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Danielle
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danielle%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Rashaan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11305,7 +11471,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 382: 2025-06-26 - Colleen - Group Session
+-- Session 372: 2025-06-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11323,8 +11489,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-06-26', 30, service_type_uuid, contractor_uuid, 'approved', '', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kayla Kobe Caleb Annie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kobe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kobe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caleb%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Annie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Annie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11334,7 +11524,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 383: 2025-06-18 - Jacob - Group Session
+-- Session 373: 2025-06-18 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11363,7 +11553,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 384: 2025-07-02 - Jacob - In home music therapy
+-- Session 374: 2025-07-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11392,7 +11582,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 385: 2025-07-02 - Jacob - In home music therapy
+-- Session 375: 2025-07-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11421,7 +11611,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 386: 2025-07-02 - Jacob - Group Session
+-- Session 376: 2025-07-02 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11466,7 +11656,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 387: 2025-06-30 - Colleen - Musical Expressions
+-- Session 377: 2025-06-30 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11495,7 +11685,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 388: 2025-06-30 - Colleen - Group Session
+-- Session 378: 2025-06-30 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11524,7 +11714,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 389: 2025-06-30 - Colleen - Musical Expressions
+-- Session 379: 2025-06-30 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11553,7 +11743,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 390: 2025-06-30 - Colleen - Musical Expressions
+-- Session 380: 2025-06-30 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11582,7 +11772,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 391: 2025-06-18 - Jacob - Group Session
+-- Session 381: 2025-06-18 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11627,7 +11817,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 392: 2025-06-18 - Jacob - In home music therapy
+-- Session 382: 2025-06-18 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11656,7 +11846,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 393: 2025-07-16 - Jacob - In home music therapy
+-- Session 383: 2025-07-16 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11685,7 +11875,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 394: 2025-07-16 - Jacob - In home music therapy
+-- Session 384: 2025-07-16 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11714,7 +11904,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 395: 2025-07-14 - Colleen - Group Session
+-- Session 385: 2025-07-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11732,8 +11922,72 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthony was still admitted at Buffalo Gene Group participated in the Hello Song, impr Josiah participated in the Hello Song, the I For the Hello Song, Tony sang hello 2 time During the Hello Song, Jim', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Francis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11743,7 +11997,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 396: 2025-07-14 - Colleen - Musical Expressions
+-- Session 386: 2025-07-14 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -11761,8 +12015,72 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Anthony was still admitted at Buffalo Gene Group participated in the Hello Song, impr Josiah participated in the Hello Song, the I For the Hello Song, Tony sang hello 2 time During the Hello Song, Jim', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Francis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -11772,7 +12090,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 397: 2025-07-14 - Caroline West - In home music therapy
+-- Session 387: 2025-07-14 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11801,7 +12119,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 398: 2025-07-15 - Colleen - Group Session
+-- Session 388: 2025-07-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11830,7 +12148,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 399: 2025-07-15 - Colleen - Group Session
+-- Session 389: 2025-07-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11859,7 +12177,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 400: 2025-07-15 - Colleen - Group Session
+-- Session 390: 2025-07-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -11888,7 +12206,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 401: 2025-07-28 - Jacob - In home music therapy
+-- Session 391: 2025-07-28 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -11917,7 +12235,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 402: 2025-07-17 - Colleen - Scholarship
+-- Session 392: 2025-07-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -11954,7 +12272,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 403: 2025-07-17 - Colleen - Scholarship
+-- Session 393: 2025-07-17 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -11983,7 +12301,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 404: 2025-07-17 - Colleen - Group Session
+-- Session 394: 2025-07-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12001,8 +12319,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Linda Pamela John Liz Br
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda Pamela John Liz Br%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Br
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Br%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12012,7 +12362,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 405: 2025-07-28 - Jacob - In home music therapy
+-- Session 395: 2025-07-28 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -12041,7 +12391,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 406: 2025-07-28 - Jacob - In home music therapy
+-- Session 396: 2025-07-28 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -12070,7 +12420,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 407: 2025-07-17 - Colleen - Group Session
+-- Session 397: 2025-07-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12088,8 +12438,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Christy Marstel Kristophe
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christy Marstel Kristophe%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Christy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Marstel
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marstel%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kristophe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kristophe%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12099,7 +12465,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 408: 2025-07-17 - Colleen - Group Session
+-- Session 398: 2025-07-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12117,8 +12483,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Derek Elyse Kimberlyn  D
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Elyse Kimberlyn  D%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Elyse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Elyse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kimberlyn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kimberlyn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12128,7 +12510,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 409: 2025-07-17 - Colleen - Group Session
+-- Session 399: 2025-07-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12146,8 +12528,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, We''r', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mitch Noah Jeremy Tiffan
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Noah Jeremy Tiffan%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mitch
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Noah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Noah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jeremy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeremy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tiffan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tiffan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12157,7 +12563,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 410: 2025-07-21 - Colleen - Group Session
+-- Session 400: 2025-07-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12175,8 +12581,72 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S second half Josiah participated in the Hello Song, pian For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hell', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gret
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gret%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12186,7 +12656,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 411: 2025-07-21 - Colleen - Musical Expressions
+-- Session 401: 2025-07-21 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -12204,8 +12674,72 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S second half Josiah participated in the Hello Song, pian For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hell', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gret
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gret%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Josiah
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Josiah%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12215,7 +12749,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 412: 2025-07-21 - Caroline West - In home music therapy
+-- Session 402: 2025-07-21 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -12244,7 +12778,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 413: 2025-07-22 - Colleen - Group Session
+-- Session 403: 2025-07-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12273,7 +12807,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 414: 2025-07-22 - Colleen - Group Session
+-- Session 404: 2025-07-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12302,7 +12836,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 415: 2025-07-22 - Colleen - Group Session
+-- Session 405: 2025-07-22 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12331,7 +12865,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 416: 2025-07-22 - Colleen - Musical Expressions
+-- Session 406: 2025-07-22 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -12360,7 +12894,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 417: 2025-07-25 - Colleen - Scholarship
+-- Session 407: 2025-07-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12389,7 +12923,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 418: 2025-07-25 - Colleen - Scholarship
+-- Session 408: 2025-07-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12426,7 +12960,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 419: 2025-07-25 - Colleen - Scholarship
+-- Session 409: 2025-07-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12463,7 +12997,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 420: 2025-07-25 - Colleen - Group Session
+-- Session 410: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12481,8 +13015,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Pamela Liz Nancy Janet
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Liz Nancy Janet%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12492,7 +13050,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 421: 2025-07-25 - Colleen - Scholarship
+-- Session 411: 2025-07-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12521,7 +13079,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 422: 2025-07-25 - Colleen - Musical Expressions
+-- Session 412: 2025-07-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -12550,7 +13108,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 423: 2025-07-28 - Jacob - In home music therapy
+-- Session 413: 2025-07-28 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -12579,7 +13137,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 424: 2025-07-25 - Colleen - Group Session
+-- Session 414: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12597,8 +13155,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mark Jan Damon Brandy
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Damon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12608,7 +13190,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 425: 2025-07-25 - Colleen - Group Session
+-- Session 415: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12626,8 +13208,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: JJ Bobby  Ron Tayeeba
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Bobby  Ron Tayeeba%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: JJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bobby
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bobby%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ron
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ron%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tayeeba
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tayeeba%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12637,7 +13243,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 426: 2025-07-25 - Colleen - Group Session
+-- Session 416: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12655,8 +13261,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Su', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Sissy Donna Shontell Ros
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Donna Shontell Ros%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Sissy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Donna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Donna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Shontell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shontell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ros
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ros%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12666,7 +13296,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 427: 2025-07-25 - Colleen - Group Session
+-- Session 417: 2025-07-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12695,7 +13325,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 428: 2025-07-29 - Colleen - Musical Expressions
+-- Session 418: 2025-07-29 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -12724,7 +13354,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 429: 2025-07-29 - Colleen - Group Session
+-- Session 419: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12742,8 +13372,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-29', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, an e', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Gretchen Francis Brian J
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Brian J%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Francis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brian
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brian%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -12753,7 +13399,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 430: 2025-07-29 - Colleen - Musical Expressions
+-- Session 420: 2025-07-29 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -12782,7 +13428,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 431: 2025-07-29 - Colleen - Group Session
+-- Session 421: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12811,7 +13457,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 432: 2025-07-28 - Caroline West - In home music therapy
+-- Session 422: 2025-07-28 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -12840,7 +13486,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 433: 2025-07-29 - Colleen - Group Session
+-- Session 423: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12869,7 +13515,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 434: 2025-07-29 - Colleen - Group Session
+-- Session 424: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12898,7 +13544,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 435: 2025-07-29 - Colleen - Group Session
+-- Session 425: 2025-07-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -12927,7 +13573,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 436: 2025-07-31 - Colleen - Scholarship
+-- Session 426: 2025-07-31 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12964,7 +13610,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 437: 2025-07-31 - Colleen - Scholarship
+-- Session 427: 2025-07-31 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -12993,7 +13639,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 438: 2025-07-31 - Colleen - Group Session
+-- Session 428: 2025-07-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13011,8 +13657,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Pamela James Liz John B
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela James Liz John B%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: James
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%James%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13022,7 +13692,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 439: 2025-07-31 - Colleen - Scholarship
+-- Session 429: 2025-07-31 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -13051,7 +13721,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 440: 2025-07-31 - Colleen - Group Session
+-- Session 430: 2025-07-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13069,8 +13739,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Megan Paul Brian Bryan
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan Paul Brian Bryan%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Megan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Megan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Paul
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Paul%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brian
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brian%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13080,7 +13774,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 441: 2025-07-31 - Colleen - Group Session
+-- Session 431: 2025-07-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13098,8 +13792,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, Shak', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Vinny  Reggie Jason Tim
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vinny  Reggie Jason Tim%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Vinny
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vinny%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Reggie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reggie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jason
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jason%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13109,7 +13827,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 442: 2025-07-07 - Colleen - Group Session
+-- Session 432: 2025-07-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13127,8 +13845,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a sha For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa Group participated in the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13138,7 +13856,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 443: 2025-07-07 - Colleen - Musical Expressions
+-- Session 433: 2025-07-07 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13156,8 +13874,8 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a sha For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa Group participated in the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13167,7 +13885,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 444: 2025-07-08 - Colleen - Scholarship
+-- Session 434: 2025-07-08 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -13196,7 +13914,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 445: 2025-07-09 - Colleen - Scholarship
+-- Session 435: 2025-07-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -13233,7 +13951,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 446: 2025-07-09 - Colleen - Scholarship
+-- Session 436: 2025-07-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -13270,7 +13988,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 447: 2025-07-09 - Colleen - Group Session
+-- Session 437: 2025-07-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13288,8 +14006,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a tra', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Thatius Janet Nancy Jean
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius Janet Nancy Jean%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jean
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jean%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13299,7 +14041,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 448: 2025-07-31 - Colleen - Group Session
+-- Session 438: 2025-07-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13317,8 +14059,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-07-31', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Patty sang hello 2 time', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Hillary Vicky Patty
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13328,7 +14086,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 449: 2025-07-31 - Jacob - In home music therapy
+-- Session 439: 2025-07-31 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -13357,7 +14115,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 450: 2025-07-31 - Jacob - Group Session
+-- Session 440: 2025-07-31 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13402,7 +14160,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 451: 2025-07-31 - Jacob - In home music therapy
+-- Session 441: 2025-07-31 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -13431,7 +14189,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 452: 2025-08-04 - Caroline West - In home music therapy
+-- Session 442: 2025-08-04 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -13460,7 +14218,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 453: 2025-08-05 - Colleen - Musical Expressions
+-- Session 443: 2025-08-05 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13489,7 +14247,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 454: 2025-08-05 - Colleen - Group Session
+-- Session 444: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13507,8 +14265,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a dis', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Janet  Tom Liz Nancy Lin
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet  Tom Liz Nancy Lin%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Lin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13518,7 +14308,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 455: 2025-08-05 - Colleen - Musical Expressions
+-- Session 445: 2025-08-05 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13547,7 +14337,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 456: 2025-08-05 - Colleen - Group Session
+-- Session 446: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13565,8 +14355,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-05', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang hello 2 tim During the Hello Song, Jesse made eye co', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Dj John Bernie Jesse
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dj John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Dj
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dj%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13576,7 +14390,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 457: 2025-08-05 - Colleen - Musical Expressions
+-- Session 447: 2025-08-05 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13605,7 +14419,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 458: 2025-08-05 - Colleen - Group Session
+-- Session 448: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13634,7 +14448,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 459: 2025-08-05 - Colleen - Group Session
+-- Session 449: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13663,7 +14477,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 460: 2025-08-05 - Colleen - Group Session
+-- Session 450: 2025-08-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13692,7 +14506,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 461: 2025-08-05 - Colleen - Musical Expressions
+-- Session 451: 2025-08-05 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13721,7 +14535,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 462: 2025-08-07 - Colleen - Scholarship
+-- Session 452: 2025-08-07 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -13750,7 +14564,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 463: 2025-08-07 - Colleen - Group Session
+-- Session 453: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13768,8 +14582,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Janet Linda  Liz Nancy P
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet Linda  Liz Nancy P%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nancy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nancy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13779,7 +14617,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 464: 2025-08-07 - Colleen - Musical Expressions
+-- Session 454: 2025-08-07 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13808,7 +14646,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 465: 2025-08-07 - Colleen - Musical Expressions
+-- Session 455: 2025-08-07 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -13837,7 +14675,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 466: 2025-08-07 - Colleen - Group Session
+-- Session 456: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13855,8 +14693,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Lucy Keith Jennifer Sama
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lucy Keith Jennifer Sama%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Lucy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lucy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Keith
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Keith%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jennifer
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jennifer%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Sama
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sama%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13866,7 +14728,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 467: 2025-08-07 - Colleen - Group Session
+-- Session 457: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13884,8 +14746,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', '"Group participated in the Hello Song, lyric', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jenn Derek  Victoria Meg
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jenn Derek  Victoria Meg%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jenn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jenn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Victoria
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Victoria%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Meg
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Meg%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13895,7 +14781,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 468: 2025-08-07 - Colleen - Group Session
+-- Session 458: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13913,8 +14799,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a 20', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Nan Tabetha Mitch Genes
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan Tabetha Mitch Genes%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Nan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tabetha
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabetha%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mitch
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Genes
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Genes%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13924,7 +14834,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 469: 2025-08-07 - Colleen - Group Session
+-- Session 459: 2025-08-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -13942,8 +14852,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-07', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Hillary sang the ent', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Vicky Patty Brittany Hillar
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky Patty Brittany Hillar%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brittany
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brittany%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hillar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillar%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -13953,7 +14887,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 470: 2025-08-11 - Caroline West - In home music therapy
+-- Session 460: 2025-08-11 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -13982,7 +14916,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 471: 2025-08-13 - Colleen - Group Session
+-- Session 461: 2025-08-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14011,7 +14945,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 472: 2025-08-13 - Colleen - Group Session
+-- Session 462: 2025-08-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14040,7 +14974,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 473: 2025-08-13 - Colleen - Group Session
+-- Session 463: 2025-08-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14069,7 +15003,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 474: 2025-08-13 - Colleen - Scholarship
+-- Session 464: 2025-08-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -14098,7 +15032,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 475: 2025-08-13 - Colleen - Scholarship
+-- Session 465: 2025-08-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -14127,7 +15061,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 476: 2025-08-13 - Colleen - Group Session
+-- Session 466: 2025-08-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14145,8 +15079,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-13', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Liz Gretchen Thatius Pam
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Gretchen Thatius Pam%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Pam
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pam%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14156,7 +15114,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 477: 2025-08-13 - Colleen - Scholarship
+-- Session 467: 2025-08-13 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -14185,7 +15143,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 478: 2025-08-13 - Colleen - Musical Expressions
+-- Session 468: 2025-08-13 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14214,7 +15172,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 479: 2025-08-14 - Colleen - Group Session
+-- Session 469: 2025-08-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14232,8 +15190,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mark Jan Damon Brandy
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Jan Damon Brandy%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Damon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brandy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14243,7 +15225,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 480: 2025-08-14 - Colleen - Group Session
+-- Session 470: 2025-08-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14261,8 +15243,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Anna Ron Bobby Curtis L
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anna Ron Bobby Curtis L%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Anna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ron
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ron%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bobby
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bobby%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Curtis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Curtis%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14272,7 +15278,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 481: 2025-08-14 - Colleen - Group Session
+-- Session 471: 2025-08-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14290,8 +15296,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with e', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: No Amanda Tim Edwardo
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%No Amanda Tim Edwardo%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: No
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%No%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Edwardo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Edwardo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14301,7 +15331,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 482: 2025-08-21 - Jacob - In home music therapy
+-- Session 472: 2025-08-21 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14330,7 +15360,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 483: 2025-08-21 - Jacob - In home music therapy
+-- Session 473: 2025-08-21 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14359,7 +15389,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 484: 2025-08-21 - Jacob - Group Session
+-- Session 474: 2025-08-21 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14404,7 +15434,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 485: 2025-08-21 - Jacob - In home music therapy
+-- Session 475: 2025-08-21 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14433,7 +15463,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 486: 2025-08-21 - Jacob - In home music therapy
+-- Session 476: 2025-08-21 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14462,7 +15492,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 487: 2025-08-21 - Jacob - In home music therapy
+-- Session 477: 2025-08-21 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14491,7 +15521,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 488: 2025-08-26 - Colleen - Musical Expressions
+-- Session 478: 2025-08-26 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14520,7 +15550,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 489: 2025-08-26 - Colleen - Group Session
+-- Session 479: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14538,8 +15568,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a rai', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Bryan Karen John Liz Lin
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan Karen John Liz Lin%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Lin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lin%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14549,7 +15611,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 490: 2025-08-26 - Colleen - Musical Expressions
+-- Session 480: 2025-08-26 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14578,7 +15640,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 491: 2025-08-26 - Colleen - Group Session
+-- Session 481: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14596,8 +15658,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-26', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, he waved hello whi For the Hello Song, Jimmy sang hello 2 tim', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Vernon Jimmy
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14607,7 +15685,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 492: 2025-08-26 - Colleen - Musical Expressions
+-- Session 482: 2025-08-26 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14636,7 +15714,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 493: 2025-08-26 - Colleen - Group Session
+-- Session 483: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14665,7 +15743,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 494: 2025-08-26 - Colleen - Group Session
+-- Session 484: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14694,7 +15772,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 495: 2025-08-26 - Colleen - Group Session
+-- Session 485: 2025-08-26 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14723,7 +15801,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 496: 2025-08-26 - Colleen - Musical Expressions
+-- Session 486: 2025-08-26 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14752,7 +15830,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 497: 2025-08-28 - Colleen - Group Session
+-- Session 487: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14770,8 +15848,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Pamela Bryan Thatius Jo
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Bryan Thatius Jo%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14781,7 +15883,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 498: 2025-08-28 - Colleen - Musical Expressions
+-- Session 488: 2025-08-28 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -14810,7 +15912,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 499: 2025-08-28 - Colleen - Group Session
+-- Session 489: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14828,8 +15930,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, sing', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kayla Kobe Caleb Annie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Kobe Caleb Annie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kobe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kobe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caleb%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Annie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Annie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14839,7 +15965,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 500: 2025-08-28 - Colleen - Group Session
+-- Session 490: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14857,8 +15983,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kenneth  Mike Jim Karen
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kenneth  Mike Jim Karen%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kenneth
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kenneth%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mike
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mike%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14868,7 +16018,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 501: 2025-08-28 - Colleen - Group Session
+-- Session 491: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14886,8 +16036,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mary Beth Eric Jordan De
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Jordan De%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Beth
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Beth%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Eric
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jordan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jordan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: De
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%De%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14897,7 +16079,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 502: 2025-08-28 - Colleen - Group Session
+-- Session 492: 2025-08-28 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -14915,8 +16097,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-08-28', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Tra', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Afif Jean Steve Chuck Ch
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Afif Jean Steve Chuck Ch%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Afif
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Afif%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jean
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jean%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steve
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steve%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Chuck
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Chuck%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ch
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ch%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -14926,7 +16140,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 503: 2025-09-02 - Jacob - In home music therapy
+-- Session 493: 2025-09-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14955,7 +16169,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 504: 2025-09-02 - Jacob - In home music therapy
+-- Session 494: 2025-09-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -14984,7 +16198,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 505: 2025-09-02 - Jacob - In home music therapy
+-- Session 495: 2025-09-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15013,7 +16227,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 506: 2025-09-02 - Jacob - In home music therapy
+-- Session 496: 2025-09-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15042,7 +16256,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 507: 2025-09-02 - Jacob - In home music therapy
+-- Session 497: 2025-09-02 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15071,7 +16285,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 508: 2025-09-02 - Jacob - Group Session
+-- Session 498: 2025-09-02 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15116,7 +16330,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 509: 2025-09-02 - Colleen - Musical Expressions
+-- Session 499: 2025-09-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15145,7 +16359,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 510: 2025-09-02 - Colleen - Scholarship
+-- Session 500: 2025-09-02 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -15174,7 +16388,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 511: 2025-09-04 - Colleen - Group Session
+-- Session 501: 2025-09-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15192,8 +16406,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Pamela Gretchen Hope T
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela Gretchen Hope T%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Pamela
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Pamela%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hope
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hope%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15203,7 +16433,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 512: 2025-09-04 - Colleen - Musical Expressions
+-- Session 502: 2025-09-04 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15232,7 +16462,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 513: 2025-09-04 - Colleen - Group Session
+-- Session 503: 2025-09-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15250,8 +16480,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Javier Brenda Devin Jenn
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Devin Jenn%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Javier
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brenda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brenda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Devin
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Devin%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jenn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jenn%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15261,7 +16515,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 514: 2025-09-04 - Colleen - Group Session
+-- Session 504: 2025-09-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15279,8 +16533,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Omar Christian  Elaina C
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Omar Christian  Elaina C%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Omar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Omar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Christian
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christian%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Elaina
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Elaina%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15290,7 +16560,140 @@ BEGIN
   END IF;
 END $$;
 
--- Session 515: 2025-09-04 - Colleen - In home music therapy
+-- Session 505: 2025-09-04 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien Colleen invited me to conduct a transfer se Hillary sang the entire Hello Song while pla Vicky sang the entire Hello Song while play Patty sang hello 2 time', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Matthew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matthew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Corey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Corey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tabe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dellapenta
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dellapenta%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brittan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brittan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alex
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alex%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: S.
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%S.%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: O’Connell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%O’Connell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 506: 2025-09-04 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15308,8 +16711,112 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-04', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, clien Colleen invited me to conduct a transfer se Hillary sang the entire Hello Song while pla Vicky sang the entire Hello Song while play Patty sang hello 2 time', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Matthew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matthew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Corey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Corey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tabe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ethan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ethan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dellapenta
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dellapenta%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brittan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brittan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alex
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alex%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: S.
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%S.%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: O’Connell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%O’Connell%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15319,7 +16826,100 @@ BEGIN
   END IF;
 END $$;
 
--- Session 516: 2025-09-08 - Colleen - Musical Expressions
+-- Session 507: 2025-09-08 - Colleen - Group Session
+DO $$
+DECLARE
+  org_id uuid;
+  contractor_uuid uuid;
+  service_type_uuid uuid;
+  session_uuid uuid;
+  client_uuid uuid;
+BEGIN
+  SELECT id INTO org_id FROM organizations WHERE slug = 'may-creative-arts' LIMIT 1;
+  SELECT id INTO contractor_uuid FROM users WHERE email = 'colleen@maycreativearts.com' LIMIT 1;
+  SELECT id INTO service_type_uuid FROM service_types WHERE name = 'In-Home Group Music Therapy' AND organization_id = org_id LIMIT 1;
+
+  IF contractor_uuid IS NOT NULL AND service_type_uuid IS NOT NULL THEN
+    INSERT INTO sessions (id, date, duration_minutes, service_type_id, contractor_id, status, notes, organization_id)
+    VALUES (gen_random_uuid(), '2025-09-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist played live music on the guitar fo First half; Group participated in the Hello S second half For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hel', org_id)
+    RETURNING id INTO session_uuid;
+
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hope
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hope%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+  END IF;
+END $$;
+
+-- Session 508: 2025-09-08 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15337,8 +16937,72 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-08', 30, service_type_uuid, contractor_uuid, 'approved', 'Therapist played live music on the guitar fo First half; Group participated in the Hello S second half For the Hello Song, DJ sang hello 2 times During the Hello Song, John sang hello 2 ti For the Hel', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hope
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hope%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15348,7 +17012,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 517: 2025-09-09 - Colleen - Musical Expressions
+-- Session 509: 2025-09-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15377,7 +17041,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 518: 2025-09-09 - Colleen - Scholarship
+-- Session 510: 2025-09-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -15414,7 +17078,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 519: 2025-09-09 - Colleen - Scholarship
+-- Session 511: 2025-09-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -15443,7 +17107,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 520: 2025-09-11 - Colleen - Musical Expressions
+-- Session 512: 2025-09-11 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15472,7 +17136,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 521: 2025-09-11 - Colleen - Group Session
+-- Session 513: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15501,7 +17165,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 522: 2025-09-11 - Colleen - Group Session
+-- Session 514: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15530,7 +17194,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 523: 2025-09-11 - Colleen - Group Session
+-- Session 515: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15559,7 +17223,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 524: 2025-09-11 - Colleen - Group Session
+-- Session 516: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15588,7 +17252,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 525: 2025-09-11 - Colleen - Group Session
+-- Session 517: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15606,8 +17270,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Serena Ellison Ryan Davi
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serena Ellison Ryan Davi%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Serena
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Serena%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ellison
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ellison%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ryan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ryan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Davi
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Davi%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15617,7 +17305,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 526: 2025-09-11 - Colleen - Group Session
+-- Session 518: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15635,8 +17323,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: JJ Stephen Andrew Lisa J
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Stephen Andrew Lisa J%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: JJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Stephen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Stephen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Andrew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Andrew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Lisa
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Lisa%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15646,7 +17358,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 527: 2025-09-11 - Colleen - Group Session
+-- Session 519: 2025-09-11 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15664,8 +17376,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-11', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, xylop', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Rosland Donna Amanda
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rosland Donna Amanda%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Rosland
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rosland%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Donna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Donna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15675,7 +17403,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 528: 2025-09-12 - Colleen - Group Session
+-- Session 520: 2025-09-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15704,7 +17432,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 529: 2025-09-12 - Colleen - Group Session
+-- Session 521: 2025-09-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15733,7 +17461,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 530: 2025-09-12 - Colleen - Group Session
+-- Session 522: 2025-09-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15762,7 +17490,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 531: 2025-09-15 - Caroline West - In home music therapy
+-- Session 523: 2025-09-15 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15791,7 +17519,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 532: 2025-09-16 - Jacob - In home music therapy
+-- Session 524: 2025-09-16 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15820,7 +17548,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 533: 2025-09-16 - Jacob - In home music therapy
+-- Session 525: 2025-09-16 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15849,7 +17577,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 534: 2025-09-16 - Jacob - In home music therapy
+-- Session 526: 2025-09-16 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -15878,7 +17606,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 535: 2025-09-16 - Bryan - Creative Remedies
+-- Session 527: 2025-09-16 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -15907,7 +17635,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 536: 2025-09-16 - Colleen - Musical Expressions
+-- Session 528: 2025-09-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -15936,7 +17664,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 537: 2025-09-16 - Colleen - Group Session
+-- Session 529: 2025-09-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15954,8 +17682,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Liz Thatius Gretchen Mic
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Thatius Gretchen Mic%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mic
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mic%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15965,7 +17717,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 538: 2025-09-16 - Colleen - Group Session
+-- Session 530: 2025-09-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -15983,8 +17735,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-16', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Jimmy sang the entire', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Vernon Jimmy
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -15994,7 +17762,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 539: 2025-09-16 - Colleen - Musical Expressions
+-- Session 531: 2025-09-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16023,7 +17791,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 540: 2025-09-16 - Colleen - Scholarship
+-- Session 532: 2025-09-16 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -16052,7 +17820,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 541: 2025-09-16 - Colleen - Scholarship
+-- Session 533: 2025-09-16 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -16081,7 +17849,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 542: 2025-09-16 - Colleen - Musical Expressions
+-- Session 534: 2025-09-16 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16110,7 +17878,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 543: 2025-09-18 - Colleen - Scholarship
+-- Session 535: 2025-09-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -16139,7 +17907,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 544: 2025-09-18 - Colleen - Musical Expressions
+-- Session 536: 2025-09-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16168,7 +17936,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 545: 2025-09-18 - Colleen - Group Session
+-- Session 537: 2025-09-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16197,7 +17965,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 546: 2025-09-18 - Colleen - Group Session
+-- Session 538: 2025-09-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16226,7 +17994,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 547: 2025-09-18 - Colleen - Group Session
+-- Session 539: 2025-09-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16255,7 +18023,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 548: 2025-09-18 - Colleen - Group Session
+-- Session 540: 2025-09-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16273,8 +18041,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo Aden participated in music expressions, en Elijah participated in an adaptive lesson fo Kemet participated in musical expressions', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Miley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Miley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Heisler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Heisler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16284,7 +18068,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 549: 2025-09-18 - Colleen - Musical Expressions
+-- Session 541: 2025-09-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16302,8 +18086,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, If Yo Aden participated in music expressions, en Elijah participated in an adaptive lesson fo Kemet participated in musical expressions', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Colleen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Miley
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Miley%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Heisler
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Heisler%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16313,7 +18113,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 550: 2025-09-19 - Colleen - Group Session
+-- Session 542: 2025-09-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16331,8 +18131,64 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Colleen
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Colleen%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Owen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Owen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kobe
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kobe%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caleb%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Annie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Annie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Emily
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Emily%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16342,7 +18198,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 551: 2025-09-19 - Colleen - Group Session
+-- Session 543: 2025-09-19 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16360,8 +18216,136 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jackie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steven
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steven%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dennis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ivan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ivan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Marshall
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Katie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Katie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Craig
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Craig%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kemet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kemet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nelson
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nelson%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: O’Connell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%O’Connell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alex
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alex%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16371,7 +18355,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 552: 2025-09-19 - Colleen - In home music therapy
+-- Session 544: 2025-09-19 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16389,8 +18373,136 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jackie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steven
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steven%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dennis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ivan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ivan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Marshall
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Katie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Katie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Craig
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Craig%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kemet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kemet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nelson
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nelson%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: O’Connell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%O’Connell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alex
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alex%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16400,7 +18512,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 553: 2025-09-19 - Colleen - Musical Expressions
+-- Session 545: 2025-09-19 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16418,8 +18530,136 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-09-19', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, para Group participated in the Hello Song, para Group participated in the Hello Song, para Kemet participated in musical expressions Brendan participated in a mus', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jackie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steven
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steven%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dennis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ivan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ivan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Marshall
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Katie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Katie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Craig
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Craig%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kemet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kemet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Nelson
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nelson%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brendan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brendan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: O’Connell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%O’Connell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Alex
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Alex%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -16429,7 +18669,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 554: 2025-09-22 - Caroline West - In home music therapy
+-- Session 546: 2025-09-22 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16458,7 +18698,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 555: 2025-09-22 - Colleen - Musical Expressions
+-- Session 547: 2025-09-22 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -16487,7 +18727,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 556: 2025-09-24 - Jacob - In home music therapy
+-- Session 548: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16516,7 +18756,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 557: 2025-09-24 - Jacob - In home music therapy
+-- Session 549: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16545,7 +18785,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 558: 2025-09-24 - Jacob - In home music therapy
+-- Session 550: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16590,7 +18830,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 559: 2025-09-24 - Jacob - In home music therapy
+-- Session 551: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16619,7 +18859,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 560: 2025-09-24 - Jacob - In home music therapy
+-- Session 552: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16648,7 +18888,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 561: 2025-09-24 - Jacob - In home music therapy
+-- Session 553: 2025-09-24 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16677,7 +18917,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 562: 2025-09-29 - Caroline West - In home music therapy
+-- Session 554: 2025-09-29 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16706,7 +18946,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 563: 2025-10-01 - Jacob - In home music therapy
+-- Session 555: 2025-10-01 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16735,7 +18975,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 564: 2025-10-01 - Jacob - In home music therapy
+-- Session 556: 2025-10-01 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16764,7 +19004,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 565: 2025-10-01 - Jacob - In home music therapy
+-- Session 557: 2025-10-01 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16793,7 +19033,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 566: 2025-10-01 - Jacob - In home music therapy
+-- Session 558: 2025-10-01 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16822,7 +19062,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 567: 2025-10-01 - Jacob - In home music therapy
+-- Session 559: 2025-10-01 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16851,7 +19091,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 568: 2025-10-01 - Jacob - Group Session
+-- Session 560: 2025-10-01 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16880,7 +19120,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 569: 2025-10-03 - Bryan - Creative Remedies
+-- Session 561: 2025-10-03 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -16909,7 +19149,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 570: 2025-10-06 - Caroline West - In home music therapy
+-- Session 562: 2025-10-06 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -16938,7 +19178,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 571: 2025-10-11 - Bryan - Creative Remedies
+-- Session 563: 2025-10-11 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -16967,7 +19207,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 572: 2025-10-13 - Colleen - Group Session
+-- Session 564: 2025-10-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -16996,7 +19236,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 573: 2025-10-13 - Colleen - Group Session
+-- Session 565: 2025-10-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17025,7 +19265,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 574: 2025-10-13 - Colleen - Group Session
+-- Session 566: 2025-10-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17054,7 +19294,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 575: 2025-10-13 - Colleen - Group Session
+-- Session 567: 2025-10-13 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17083,7 +19323,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 576: 2025-10-14 - Colleen - Scholarship
+-- Session 568: 2025-10-14 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17112,7 +19352,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 577: 2025-10-14 - Colleen - Scholarship
+-- Session 569: 2025-10-14 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17141,7 +19381,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 578: 2025-10-14 - Colleen - Musical Expressions
+-- Session 570: 2025-10-14 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -17170,7 +19410,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 579: 2025-10-14 - Colleen - Scholarship
+-- Session 571: 2025-10-14 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17199,7 +19439,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 580: 2025-10-15 - Jacob - In home music therapy
+-- Session 572: 2025-10-15 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17228,7 +19468,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 581: 2025-10-15 - Jacob - In home music therapy
+-- Session 573: 2025-10-15 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17257,7 +19497,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 582: 2025-10-15 - Jacob - In home music therapy
+-- Session 574: 2025-10-15 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17286,7 +19526,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 583: 2025-10-15 - Jacob - In home music therapy
+-- Session 575: 2025-10-15 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17315,7 +19555,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 584: 2025-10-15 - Jacob - Group Session
+-- Session 576: 2025-10-15 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17344,7 +19584,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 585: 2025-10-15 - Jacob - In home music therapy
+-- Session 577: 2025-10-15 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17373,7 +19613,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 586: 2025-10-15 - Colleen - Group Session
+-- Session 578: 2025-10-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17402,7 +19642,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 587: 2025-10-15 - Colleen - Group Session
+-- Session 579: 2025-10-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17431,7 +19671,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 588: 2025-10-15 - Colleen - Group Session
+-- Session 580: 2025-10-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17460,7 +19700,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 589: 2025-10-15 - Colleen - Group Session
+-- Session 581: 2025-10-15 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17489,7 +19729,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 590: 2025-10-16 - Colleen - Group Session
+-- Session 582: 2025-10-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17507,8 +19747,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Rashaan Derek Camia  L
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Rashaan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Camia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Camia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17518,7 +19774,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 591: 2025-10-16 - Colleen - Group Session
+-- Session 583: 2025-10-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17536,8 +19792,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: JJ Curtis Jamie Anna Ste
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ Curtis Jamie Anna Ste%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: JJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Curtis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Curtis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jamie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jamie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Anna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ste
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ste%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17547,7 +19835,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 592: 2025-10-16 - Colleen - Group Session
+-- Session 584: 2025-10-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17565,8 +19853,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kim Donna Tony Sean Ro
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kim Donna Tony Sean Ro%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kim%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Donna
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Donna%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Sean
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sean%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17576,7 +19896,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 593: 2025-10-16 - Colleen - Group Session
+-- Session 585: 2025-10-16 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17594,8 +19914,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-16', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Laurie sang hello 2 tim', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Patty Vicky Laurie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17605,7 +19941,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 594: 2025-10-17 - Colleen - Group Session
+-- Session 586: 2025-10-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17623,8 +19959,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Javier Brenda Andrew  H
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew  H%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Javier
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brenda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brenda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Andrew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Andrew%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17634,7 +19986,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 595: 2025-10-17 - Colleen - Group Session
+-- Session 587: 2025-10-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17652,8 +20004,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Derek Can Clayton Shan
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek Can Clayton Shan%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Can
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Can%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Clayton
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Clayton%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Shan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17663,7 +20039,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 596: 2025-10-17 - Colleen - Group Session
+-- Session 588: 2025-10-17 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17681,8 +20057,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-17', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tabitha Matthew Genesis
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabitha Matthew Genesis%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tabitha
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabitha%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Matthew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matthew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Genesis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Genesis%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17692,7 +20084,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 597: 2025-10-20 - Caroline West - In home music therapy
+-- Session 589: 2025-10-20 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -17721,7 +20113,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 598: 2025-10-21 - Colleen - Musical Expressions
+-- Session 590: 2025-10-21 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -17750,7 +20142,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 599: 2025-10-21 - Colleen - Group Session
+-- Session 591: 2025-10-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17768,8 +20160,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-21', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Liz Janet Linda Jeanie To
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Janet Linda Jeanie To%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Janet
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Janet%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jeanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17779,7 +20195,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 600: 2025-10-21 - Colleen - Group Session
+-- Session 592: 2025-10-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17797,8 +20213,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-21', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ hummed the entire During the Hello Song, John sang ''hello'' 2 For the Hello Song, Bernie sang the phras Jesse remained seated for the entire sessi', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: DJ John Bernie Jesse
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -17808,7 +20248,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 601: 2025-10-23 - Colleen - Scholarship
+-- Session 593: 2025-10-23 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17845,7 +20285,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 602: 2025-10-23 - Colleen - Scholarship
+-- Session 594: 2025-10-23 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17882,7 +20322,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 603: 2025-10-23 - Colleen - Musical Expressions
+-- Session 595: 2025-10-23 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -17911,7 +20351,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 604: 2025-10-23 - Colleen - Scholarship
+-- Session 596: 2025-10-23 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -17940,7 +20380,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 605: 2025-10-23 - Colleen - Musical Expressions
+-- Session 597: 2025-10-23 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -17969,7 +20409,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 606: 2025-10-23 - Colleen - Group Session
+-- Session 598: 2025-10-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -17998,7 +20438,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 607: 2025-10-23 - Colleen - Group Session
+-- Session 599: 2025-10-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18027,7 +20467,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 608: 2025-10-23 - Colleen - Group Session
+-- Session 600: 2025-10-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18056,7 +20496,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 609: 2025-10-23 - Colleen - Group Session
+-- Session 601: 2025-10-23 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18085,7 +20525,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 610: 2025-10-24 - Colleen - Group Session
+-- Session 602: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18103,8 +20543,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Eric Tommy Robbie Kelly
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric Tommy Robbie Kelly%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Eric
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tommy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tommy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Robbie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Robbie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kelly
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kelly%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18114,7 +20578,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 611: 2025-10-24 - Colleen - Group Session
+-- Session 603: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18132,8 +20596,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song with r', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Reggie James Jason Mik
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reggie James Jason Mik%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Reggie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Reggie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: James
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%James%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jason
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jason%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mik
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mik%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18143,7 +20631,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 612: 2025-10-24 - Colleen - Group Session
+-- Session 604: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18161,8 +20649,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-24', 30, service_type_uuid, contractor_uuid, 'approved', 'During the Hello Song, Laurie sang hello 2', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Hillary Patty Vicky Laurie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Patty Vicky Laurie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18172,7 +20684,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 613: 2025-10-24 - Colleen - Group Session
+-- Session 605: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18201,7 +20713,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 614: 2025-10-24 - Colleen - Group Session
+-- Session 606: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18230,7 +20742,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 615: 2025-10-24 - Colleen - Group Session
+-- Session 607: 2025-10-24 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18259,7 +20771,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 616: 2025-10-25 - Bryan - Creative Remedies
+-- Session 608: 2025-10-25 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -18288,7 +20800,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 617: 2025-10-28 - Caroline West - In home music therapy
+-- Session 609: 2025-10-28 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18317,7 +20829,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 618: 2025-10-29 - Colleen - Musical Expressions
+-- Session 610: 2025-10-29 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -18346,7 +20858,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 619: 2025-10-29 - Colleen - Group Session
+-- Session 611: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18364,8 +20876,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; group participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Gretchen Francis Thatius
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Francis Thatius%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Francis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Francis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18375,7 +20903,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 620: 2025-10-29 - Colleen - Group Session
+-- Session 612: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18393,8 +20921,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-29', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Steven sang the entire', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Vernon Jimmy Mich
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Jimmy Mich%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jimmy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jimmy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Mich
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mich%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18404,7 +20956,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 621: 2025-10-29 - Colleen - Scholarship
+-- Session 613: 2025-10-29 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -18433,7 +20985,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 622: 2025-10-29 - Colleen - Scholarship
+-- Session 614: 2025-10-29 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -18462,7 +21014,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 623: 2025-10-29 - Colleen - Scholarship
+-- Session 615: 2025-10-29 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -18491,7 +21043,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 624: 2025-10-29 - Colleen - Group Session
+-- Session 616: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18520,7 +21072,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 625: 2025-10-29 - Colleen - Group Session
+-- Session 617: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18549,7 +21101,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 626: 2025-10-29 - Colleen - Group Session
+-- Session 618: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18578,7 +21130,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 627: 2025-10-29 - Colleen - Group Session
+-- Session 619: 2025-10-29 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18607,7 +21159,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 628: 2025-10-31 - Colleen - Group Session
+-- Session 620: 2025-10-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18625,8 +21177,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mark Kayla Owen  Caleb
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Owen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Owen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caleb%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18636,7 +21212,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 629: 2025-10-31 - Colleen - Group Session
+-- Session 621: 2025-10-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18654,8 +21230,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jackie Steven Amanda Jo
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jackie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steven
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steven%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18665,7 +21265,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 630: 2025-10-31 - Colleen - Group Session
+-- Session 622: 2025-10-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18683,8 +21283,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Dennis Vicky John Ivan A
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis Vicky John Ivan A%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Dennis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dennis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ivan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ivan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18694,7 +21318,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 631: 2025-10-31 - Colleen - Group Session
+-- Session 623: 2025-10-31 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18712,8 +21336,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-10-31', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ha', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Marshall Katie Craig Dan
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall Katie Craig Dan%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Marshall
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshall%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Katie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Katie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Craig
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Craig%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Dan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dan%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -18723,7 +21371,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 632: 2025-11-03 - Jacob - In home music therapy
+-- Session 624: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18752,7 +21400,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 633: 2025-11-03 - Jacob - In home music therapy
+-- Session 625: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18781,7 +21429,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 634: 2025-11-03 - Jacob - In home music therapy
+-- Session 626: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18810,7 +21458,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 635: 2025-11-03 - Jacob - Group Session
+-- Session 627: 2025-11-03 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18855,7 +21503,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 636: 2025-11-03 - Jacob - In home music therapy
+-- Session 628: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18884,7 +21532,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 637: 2025-11-03 - Jacob - In home music therapy
+-- Session 629: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18913,7 +21561,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 638: 2025-11-03 - Jacob - In home music therapy
+-- Session 630: 2025-11-03 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -18942,7 +21590,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 639: 2025-11-03 - Jacob - Group Session
+-- Session 631: 2025-11-03 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -18971,7 +21619,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 640: 2025-11-03 - Jacob - Group Session
+-- Session 632: 2025-11-03 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19000,7 +21648,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 641: 2025-11-03 - Colleen - Group Session
+-- Session 633: 2025-11-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19018,8 +21666,80 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tajwar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kare
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kare%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19029,7 +21749,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 642: 2025-11-03 - Colleen - In home music therapy
+-- Session 634: 2025-11-03 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -19047,8 +21767,80 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tajwar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kare
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kare%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19058,7 +21850,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 643: 2025-11-03 - Colleen - Musical Expressions
+-- Session 635: 2025-11-03 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19076,8 +21868,80 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-03', 30, service_type_uuid, contractor_uuid, 'approved', 'Tajwar chose an instrument after he was gi Anthony remained awake for the entire ses Group participated in the Hello Song, stret For the Hello Song, DJ hummed the entire During the Hello Song, John sa', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Unknown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Unknown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tajwar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tajwar%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tasheen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tasheen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Anthony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Anthony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kare
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kare%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19087,7 +21951,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 644: 2025-11-04 - Colleen - Group Session
+-- Session 636: 2025-11-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19116,7 +21980,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 645: 2025-11-04 - Colleen - Group Session
+-- Session 637: 2025-11-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19145,7 +22009,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 646: 2025-11-04 - Colleen - Group Session
+-- Session 638: 2025-11-04 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19174,7 +22038,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 647: 2025-11-05 - Colleen - Group Session
+-- Session 639: 2025-11-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19203,7 +22067,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 648: 2025-11-05 - Colleen - Group Session
+-- Session 640: 2025-11-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19232,7 +22096,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 649: 2025-11-05 - Colleen - Group Session
+-- Session 641: 2025-11-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19261,7 +22125,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 650: 2025-11-05 - Colleen - Group Session
+-- Session 642: 2025-11-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19290,7 +22154,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 651: 2025-11-07 - Colleen - Group Session
+-- Session 643: 2025-11-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19308,8 +22172,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Javier Brenda Andrew Ne
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier Brenda Andrew Ne%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Javier
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Javier%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brenda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brenda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Andrew
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Andrew%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ne
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ne%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19319,7 +22207,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 652: 2025-11-07 - Colleen - Group Session
+-- Session 644: 2025-11-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19337,8 +22225,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kayla Clay Keller Christia
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla Clay Keller Christia%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Clay
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Clay%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Keller
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Keller%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Christia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Christia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19348,7 +22260,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 653: 2025-11-07 - Colleen - Group Session
+-- Session 645: 2025-11-07 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19366,8 +22278,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-07', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Matt Tabitha  Genesis Ma
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matt Tabitha  Genesis Ma%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Matt
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Matt%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tabitha
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tabitha%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Genesis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Genesis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ma
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ma%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19377,7 +22313,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 654: 2025-11-10 - Bryan - Creative Remedies
+-- Session 646: 2025-11-10 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -19406,7 +22342,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 655: 2025-11-11 - Caroline West - In home music therapy
+-- Session 647: 2025-11-11 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -19435,7 +22371,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 656: 2025-11-12 - Colleen - Musical Expressions
+-- Session 648: 2025-11-12 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19464,7 +22400,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 657: 2025-11-12 - Colleen - Group Session
+-- Session 649: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19482,8 +22418,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Wi', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Liz Linda Tom Jeanie Kar
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz Linda Tom Jeanie Kar%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Linda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Linda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jeanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jeanie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kar
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kar%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19493,7 +22461,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 658: 2025-11-12 - Colleen - Group Session
+-- Session 650: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19511,8 +22479,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-12', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, Vernon waved hello During the Hello Song, Jimmy sang hello 1 For the Hello Song, Michael sang hello 1 ti', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Vernon Michael Jim
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19522,7 +22514,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 659: 2025-11-12 - Colleen - Musical Expressions
+-- Session 651: 2025-11-12 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19551,7 +22543,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 660: 2025-11-12 - Colleen - Group Session
+-- Session 652: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19580,7 +22572,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 661: 2025-11-12 - Colleen - Group Session
+-- Session 653: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19609,7 +22601,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 662: 2025-11-12 - Colleen - Group Session
+-- Session 654: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19638,7 +22630,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 663: 2025-11-12 - Colleen - Group Session
+-- Session 655: 2025-11-12 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19667,7 +22659,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 664: 2025-11-14 - Colleen - Group Session
+-- Session 656: 2025-11-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19685,8 +22677,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Rashaan Derek Camia  L
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan Derek Camia  L%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Rashaan
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Rashaan%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Derek
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Derek%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Camia
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Camia%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19696,7 +22704,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 665: 2025-11-14 - Colleen - Group Session
+-- Session 657: 2025-11-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19725,7 +22733,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 666: 2025-11-14 - Colleen - Group Session
+-- Session 658: 2025-11-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19743,8 +22751,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mo Shontell Sean Tony R
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mo Shontell Sean Tony R%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mo%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Shontell
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Shontell%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Sean
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sean%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19754,7 +22786,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 667: 2025-11-14 - Colleen - Group Session
+-- Session 659: 2025-11-14 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19772,8 +22804,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-14', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Hillary sang the entire During the Hello Song, Vicky sang the enti For the Hello Song, Patty sang hello 2 time During the Hello Song, Laurie sang hello 2', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Hillary Vicky Patty Laurie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary Vicky Patty Laurie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Hillary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hillary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vicky
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vicky%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Patty
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Patty%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Laurie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Laurie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19783,7 +22839,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 668: 2025-11-18 - Caroline West - In home music therapy
+-- Session 660: 2025-11-18 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -19812,7 +22868,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 669: 2025-11-18 - Colleen - Musical Expressions
+-- Session 661: 2025-11-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19841,7 +22897,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 670: 2025-11-18 - Colleen - Group Session
+-- Session 662: 2025-11-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19859,8 +22915,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Th', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Danny Thatius Michael To
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danny Thatius Michael To%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Danny
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Danny%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thatius
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thatius%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19870,7 +22942,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 671: 2025-11-18 - Colleen - Group Session
+-- Session 663: 2025-11-18 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -19888,8 +22960,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ hummed the entire During the Hello Song, John sang hello 2 ti For the Hello Song, Bernie sang time to sa During the Hello Song, Jesse sat down ne', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: DJ John Bernie Jesse
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -19899,7 +22995,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 672: 2025-11-18 - Colleen - Musical Expressions
+-- Session 664: 2025-11-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19928,7 +23024,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 673: 2025-11-18 - Colleen - Musical Expressions
+-- Session 665: 2025-11-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -19957,7 +23053,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 674: 2025-11-18 - Colleen - Scholarship
+-- Session 666: 2025-11-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -19986,7 +23082,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 675: 2025-11-18 - Colleen - Scholarship
+-- Session 667: 2025-11-18 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -20015,7 +23111,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 676: 2025-11-18 - Colleen - Musical Expressions
+-- Session 668: 2025-11-18 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20044,7 +23140,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 677: 2025-11-18 - Colleen - In home music therapy
+-- Session 669: 2025-11-18 - Colleen - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20062,8 +23158,24 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-18', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Hailey continued to work on her second half Harold participated in a music therapy ses', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Hailey Hailey Harold McCown
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hailey Hailey Harold McCown%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Hailey
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hailey%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Harold
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Harold%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: McCown
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%McCown%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20073,7 +23185,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 678: 2025-11-21 - Colleen - Group Session
+-- Session 670: 2025-11-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20091,8 +23203,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mark Kayla Owen  Caleb
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark Kayla Owen  Caleb%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mark
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mark%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Owen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Owen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Caleb
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Caleb%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20102,7 +23238,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 679: 2025-11-21 - Colleen - Group Session
+-- Session 671: 2025-11-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20120,8 +23256,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Jackie Steven Amanda Jo
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie Steven Amanda Jo%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Jackie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jackie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Steven
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Steven%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Amanda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Amanda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jo
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jo%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20131,7 +23291,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 680: 2025-11-21 - Colleen - Group Session
+-- Session 672: 2025-11-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20149,8 +23309,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mary Beth Eric Stephanie
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary Beth Eric Stephanie%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mary
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mary%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Beth
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Beth%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Eric
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eric%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Stephanie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Stephanie%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20160,7 +23344,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 681: 2025-11-21 - Colleen - Group Session
+-- Session 673: 2025-11-21 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20178,8 +23362,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-21', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, the H', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Marshal Katie Afif Carme
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshal Katie Afif Carme%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Marshal
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Marshal%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Katie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Katie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Afif
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Afif%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Carme
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Carme%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20189,7 +23397,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 682: 2025-11-24 - Bryan - Creative Remedies
+-- Session 674: 2025-11-24 - Bryan - Creative Remedies
 DO $$
 DECLARE
   org_id uuid;
@@ -20218,7 +23426,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 683: 2025-11-25 - Colleen - Musical Expressions
+-- Session 675: 2025-11-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20247,7 +23455,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 684: 2025-11-25 - Colleen - Group Session
+-- Session 676: 2025-11-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20265,8 +23473,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Th', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Gretchen Hope Tom Brya
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen Hope Tom Brya%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Gretchen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Gretchen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Hope
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Hope%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brya
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brya%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20276,7 +23508,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 685: 2025-11-25 - Colleen - Group Session
+-- Session 677: 2025-11-25 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20294,8 +23526,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-11-25', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, Tony sang the entire s During the Hello Song, Vernon played his j For the Hello Song, Michael sang the entir During the Hello Song, Jimmy said hello 1', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Vernon Michael Jim
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Vernon Michael Jim%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20305,7 +23561,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 686: 2025-11-25 - Colleen - Musical Expressions
+-- Session 678: 2025-11-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20334,7 +23590,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 687: 2025-11-25 - Colleen - Musical Expressions
+-- Session 679: 2025-11-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20363,7 +23619,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 688: 2025-11-25 - Colleen - Scholarship
+-- Session 680: 2025-11-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -20392,7 +23648,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 689: 2025-11-25 - Colleen - Scholarship
+-- Session 681: 2025-11-25 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -20421,7 +23677,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 690: 2025-11-25 - Colleen - Musical Expressions
+-- Session 682: 2025-11-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20450,7 +23706,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 691: 2025-11-25 - Colleen - Musical Expressions
+-- Session 683: 2025-11-25 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20479,7 +23735,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 692: 2025-11-30 - Jacob - In home music therapy
+-- Session 684: 2025-11-30 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20508,7 +23764,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 693: 2025-11-30 - Jacob - In home music therapy
+-- Session 685: 2025-11-30 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20537,7 +23793,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 694: 2025-11-30 - Jacob - In home music therapy
+-- Session 686: 2025-11-30 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20566,7 +23822,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 695: 2025-11-30 - Jacob - In home music therapy
+-- Session 687: 2025-11-30 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20595,7 +23851,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 696: 2025-11-30 - Jacob - In home music therapy
+-- Session 688: 2025-11-30 - Jacob - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20624,7 +23880,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 697: 2025-11-30 - Jacob - Group Session
+-- Session 689: 2025-11-30 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20653,7 +23909,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 698: 2025-11-30 - Jacob - Group Session
+-- Session 690: 2025-11-30 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20698,7 +23954,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 699: 2025-11-30 - Jacob - Group Session
+-- Session 691: 2025-11-30 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20727,7 +23983,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 700: 2025-12-01 - Jacob - Group Session
+-- Session 692: 2025-12-01 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20756,7 +24012,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 701: 2025-12-01 - Jacob - Group Session
+-- Session 693: 2025-12-01 - Jacob - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20801,7 +24057,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 702: 2025-12-01 - Caroline West - In home music therapy
+-- Session 694: 2025-12-01 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -20830,7 +24086,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 703: 2025-12-02 - Colleen - Musical Expressions
+-- Session 695: 2025-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20859,7 +24115,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 704: 2025-12-02 - Colleen - Group Session
+-- Session 696: 2025-12-02 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20877,8 +24133,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ho', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: John Michael Liz Thomas
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John Michael Liz Thomas%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Liz
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Liz%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Thomas
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Thomas%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20888,7 +24168,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 705: 2025-12-02 - Colleen - Group Session
+-- Session 697: 2025-12-02 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -20906,8 +24186,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-02', 30, service_type_uuid, contractor_uuid, 'approved', 'For the Hello Song, DJ said hello while pla During the Hello Song, John said hello whi For the Hello Song, Bernie said time to say During the Hello Song, Jesse made eye co', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: DJ John Bernie Jesse
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ John Bernie Jesse%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: DJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%DJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: John
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%John%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Bernie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Bernie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jesse
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jesse%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -20917,7 +24221,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 706: 2025-12-02 - Colleen - Musical Expressions
+-- Session 698: 2025-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20946,7 +24250,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 707: 2025-12-02 - Colleen - Musical Expressions
+-- Session 699: 2025-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -20975,7 +24279,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 708: 2025-12-02 - Colleen - Scholarship
+-- Session 700: 2025-12-02 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21004,7 +24308,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 709: 2025-12-02 - Colleen - Scholarship
+-- Session 701: 2025-12-02 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21041,7 +24345,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 710: 2025-12-02 - Colleen - Musical Expressions
+-- Session 702: 2025-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21070,7 +24374,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 711: 2025-12-02 - Colleen - Scholarship
+-- Session 703: 2025-12-02 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21099,7 +24403,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 712: 2025-12-02 - Colleen - Musical Expressions
+-- Session 704: 2025-12-02 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21128,7 +24432,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 713: 2025-12-03 - Colleen - Group Session
+-- Session 705: 2025-12-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21157,7 +24461,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 714: 2025-12-03 - Colleen - Group Session
+-- Session 706: 2025-12-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21186,7 +24490,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 715: 2025-12-03 - Colleen - Group Session
+-- Session 707: 2025-12-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21215,7 +24519,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 716: 2025-12-03 - Colleen - Group Session
+-- Session 708: 2025-12-03 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21244,7 +24548,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 717: 2025-12-05 - Colleen - Group Session
+-- Session 709: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21262,8 +24566,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Dianne Eddie Brenda Jav
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dianne Eddie Brenda Jav%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Dianne
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Dianne%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Eddie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Eddie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brenda
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brenda%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jav
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jav%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21273,7 +24601,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 718: 2025-12-05 - Colleen - Group Session
+-- Session 710: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21291,8 +24619,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Michelle Kayla Chris Elain
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michelle Kayla Chris Elain%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Michelle
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michelle%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Kayla
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kayla%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Chris
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Chris%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Elain
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Elain%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21302,7 +24654,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 719: 2025-12-05 - Colleen - Group Session
+-- Session 711: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21320,8 +24672,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Mitch Chris Genesis Tiffa
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch Chris Genesis Tiffa%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Mitch
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Mitch%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Chris
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Chris%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Genesis
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Genesis%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tiffa
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tiffa%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21331,7 +24707,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 720: 2025-12-05 - Colleen - Group Session
+-- Session 712: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21360,7 +24736,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 721: 2025-12-05 - Colleen - Group Session
+-- Session 713: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21378,8 +24754,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Damon David Brandy Will
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon David Brandy Will%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Damon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Damon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: David
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%David%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Brandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Brandy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Will
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Will%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21389,7 +24789,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 722: 2025-12-05 - Colleen - Group Session
+-- Session 714: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21407,8 +24807,40 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Kelly JJ Jamie Sandy Ro
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kelly JJ Jamie Sandy Ro%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Kelly
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Kelly%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: JJ
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%JJ%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jamie
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jamie%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Sandy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sandy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ro
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ro%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21418,7 +24850,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 723: 2025-12-05 - Colleen - Group Session
+-- Session 715: 2025-12-05 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21436,8 +24868,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-05', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a Ch', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Sissy Elaine Roselyn  Ed
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy Elaine Roselyn  Ed%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Sissy
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Sissy%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Elaine
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Elaine%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Roselyn
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Roselyn%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Ed
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Ed%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21447,7 +24903,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 724: 2025-12-08 - Caroline West - In home music therapy
+-- Session 716: 2025-12-08 - Caroline West - In home music therapy
 DO $$
 DECLARE
   org_id uuid;
@@ -21476,7 +24932,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 725: 2025-12-09 - Colleen - Group Session
+-- Session 717: 2025-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21505,7 +24961,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 726: 2025-12-09 - Colleen - Group Session
+-- Session 718: 2025-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21534,7 +24990,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 727: 2025-12-09 - Colleen - Group Session
+-- Session 719: 2025-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21563,7 +25019,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 728: 2025-12-09 - Colleen - Musical Expressions
+-- Session 720: 2025-12-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21592,7 +25048,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 729: 2025-12-09 - Colleen - Group Session
+-- Session 721: 2025-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21610,8 +25066,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'Group participated in the Hello Song, a dru', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Nick Karen Tom James M
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick Karen Tom James M%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Nick
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Nick%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Karen
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Karen%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Tom
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tom%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: James
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%James%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21621,7 +25101,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 730: 2025-12-09 - Colleen - Group Session
+-- Session 722: 2025-12-09 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21639,8 +25119,32 @@ BEGIN
     VALUES (gen_random_uuid(), '2025-12-09', 30, service_type_uuid, contractor_uuid, 'approved', 'First half; Tony participated in the Hello So First half; Michael participated in the Hello First half; Vernon participated in the Hello First half; Jimmy participated in the Hello S', org_id)
     RETURNING id INTO session_uuid;
 
-    -- Attendee: Tony Michael Vernon Jim
-    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony Michael Vernon Jim%' AND organization_id = org_id LIMIT 1;
+    -- Attendee: Tony
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Tony%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Michael
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Michael%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Vernon
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Vernon%' AND organization_id = org_id LIMIT 1;
+    IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
+        INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
+        VALUES (gen_random_uuid(), session_uuid, client_uuid, 50);
+      END IF;
+    END IF;
+    -- Attendee: Jim
+    SELECT id INTO client_uuid FROM clients WHERE name ILIKE '%Jim%' AND organization_id = org_id LIMIT 1;
     IF client_uuid IS NOT NULL AND session_uuid IS NOT NULL THEN
       IF NOT EXISTS (SELECT 1 FROM session_attendees WHERE session_id = session_uuid AND client_id = client_uuid) THEN
         INSERT INTO session_attendees (id, session_id, client_id, individual_cost)
@@ -21650,7 +25154,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 731: 2025-12-09 - Colleen - Musical Expressions
+-- Session 723: 2025-12-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21679,7 +25183,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 732: 2025-12-09 - Colleen - Musical Expressions
+-- Session 724: 2025-12-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21708,7 +25212,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 733: 2025-12-09 - Colleen - Scholarship
+-- Session 725: 2025-12-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21745,7 +25249,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 734: 2025-12-09 - Colleen - Scholarship
+-- Session 726: 2025-12-09 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21782,7 +25286,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 735: 2025-12-09 - Colleen - Musical Expressions
+-- Session 727: 2025-12-09 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21811,7 +25315,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 736: 2025-12-10 - Colleen - Scholarship
+-- Session 728: 2025-12-10 - Colleen - Scholarship
 DO $$
 DECLARE
   org_id uuid;
@@ -21840,7 +25344,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 737: 2025-12-10 - Colleen - Musical Expressions
+-- Session 729: 2025-12-10 - Colleen - Musical Expressions
 DO $$
 DECLARE
   org_id uuid;
@@ -21869,7 +25373,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 738: 2025-12-10 - Colleen - Group Session
+-- Session 730: 2025-12-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21898,7 +25402,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 739: 2025-12-10 - Colleen - Group Session
+-- Session 731: 2025-12-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21927,7 +25431,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 740: 2025-12-10 - Colleen - Group Session
+-- Session 732: 2025-12-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;
@@ -21956,7 +25460,7 @@ BEGIN
   END IF;
 END $$;
 
--- Session 741: 2025-12-10 - Colleen - Group Session
+-- Session 733: 2025-12-10 - Colleen - Group Session
 DO $$
 DECLARE
   org_id uuid;

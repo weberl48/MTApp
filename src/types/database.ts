@@ -185,6 +185,77 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_onboarding: {
+        Row: {
+          id: string
+          user_id: string
+          organization_id: string
+          wizard_key: string
+          step: number
+          completed_at: string | null
+          skipped_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          organization_id: string
+          wizard_key: string
+          step?: number
+          completed_at?: string | null
+          skipped_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          organization_id?: string
+          wizard_key?: string
+          step?: number
+          completed_at?: string | null
+          skipped_at?: string | null
+          updated_at?: string
+        }
+      }
+      user_invites: {
+        Row: {
+          id: string
+          token: string
+          organization_id: string
+          role: UserRole
+          invited_email: string | null
+          expires_at: string
+          used_at: string | null
+          used_by: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          token: string
+          organization_id: string
+          role: UserRole
+          invited_email?: string | null
+          expires_at: string
+          used_at?: string | null
+          used_by?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          token?: string
+          organization_id?: string
+          role?: UserRole
+          invited_email?: string | null
+          expires_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          created_by?: string | null
+        }
+      }
       clients: {
         Row: {
           id: string
@@ -583,6 +654,7 @@ export interface Database {
 // Convenience types for working with the database
 export type Organization = Database['public']['Tables']['organizations']['Row']
 export type User = Database['public']['Tables']['users']['Row']
+export type UserOnboarding = Database['public']['Tables']['user_onboarding']['Row']
 export type Client = Database['public']['Tables']['clients']['Row']
 export type ServiceType = Database['public']['Tables']['service_types']['Row']
 export type Session = Database['public']['Tables']['sessions']['Row']

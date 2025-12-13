@@ -38,6 +38,7 @@ import { ColorPicker } from '@/components/ui/color-picker'
 import { AuditLogTable } from '@/components/tables/audit-log-table'
 import { MfaSetup } from '@/components/forms/mfa-setup'
 import { toast } from 'sonner'
+import { DeveloperOwnerInvite } from '@/components/invites/developer-owner-invite'
 import type {
   User as UserType,
   ServiceType,
@@ -46,7 +47,7 @@ import type {
 } from '@/types/database'
 
 export default function SettingsPage() {
-  const { organization, user, settings, isOwner, isAdmin, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
+  const { organization, user, settings, isOwner, isAdmin, isDeveloper, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
   const [saving, setSaving] = useState(false)
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([])
   const [teamMembers, setTeamMembers] = useState<UserType[]>([])
@@ -830,6 +831,13 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500">
                     Anyone with this link can create an account and join your practice as a contractor
                   </p>
+
+                  {isDeveloper && (
+                    <>
+                      <Separator />
+                      <DeveloperOwnerInvite organizationId={organization.id} />
+                    </>
+                  )}
                 </CardContent>
               </Card>
 

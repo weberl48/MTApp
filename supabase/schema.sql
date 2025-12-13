@@ -93,6 +93,75 @@ CREATE TABLE users (
 );
 
 -- ==============================================================================
+-- USER ONBOARDING TABLE (tracks onboarding wizard progress/completion)
+-- ==============================================================================
+
+CREATE TABLE user_onboarding (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    wizard_key TEXT NOT NULL,
+    step INTEGER NOT NULL DEFAULT 0,
+    completed_at TIMESTAMPTZ,
+    skipped_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, organization_id, wizard_key)
+);
+
+-- ==============================================================================
+-- USER INVITES TABLE (secure role-based invite tokens)
+-- ==============================================================================
+
+CREATE TABLE user_invites (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    token TEXT NOT NULL UNIQUE,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    role user_role NOT NULL,
+    invited_email TEXT,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used_at TIMESTAMPTZ,
+    used_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_onboarding_user_org
+    ON user_onboarding (user_id, organization_id);
+
+ALTER TABLE user_onboarding ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their onboarding" ON user_onboarding
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their onboarding" ON user_onboarding
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their onboarding" ON user_onboarding
+    FOR UPDATE
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their onboarding" ON user_onboarding
+    FOR DELETE
+    USING (auth.uid() = user_id);
+
+CREATE INDEX idx_user_invites_org_role
+    ON user_invites (organization_id, role);
+
+CREATE INDEX idx_user_invites_expires
+    ON user_invites (expires_at);
+
+ALTER TABLE user_invites ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Developers can manage user invites" ON user_invites
+    FOR ALL
+    USING (is_developer())
+    WITH CHECK (is_developer());
+
+-- ==============================================================================
 -- CLIENTS TABLE
 -- ==============================================================================
 
@@ -347,6 +416,9 @@ CREATE TRIGGER update_sessions_updated_at BEFORE UPDATE ON sessions
 CREATE TRIGGER update_invoices_updated_at BEFORE UPDATE ON invoices
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+CREATE TRIGGER update_user_onboarding_updated_at BEFORE UPDATE ON user_onboarding
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- ==============================================================================
 -- ROW LEVEL SECURITY
 -- ==============================================================================
@@ -361,6 +433,7 @@ ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE client_goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE session_reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_onboarding ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================================================
 -- RLS POLICIES: ORGANIZATIONS
@@ -762,18 +835,57 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
     org_id UUID;
+    new_user_role user_role;
+    invite_token TEXT;
+    invite_org_id UUID;
+    invite_role user_role;
+    invite_email TEXT;
+    invite_expires TIMESTAMPTZ;
+    invite_used_at TIMESTAMPTZ;
 BEGIN
-    -- Check if organization is specified in metadata
-    org_id := NEW.raw_user_meta_data->>'organization_id';
+    -- Prefer secure invite token if present
+    invite_token := NEW.raw_user_meta_data->>'invite_token';
 
+    IF invite_token IS NOT NULL AND invite_token <> '' THEN
+        SELECT organization_id, role, invited_email, expires_at, used_at
+        INTO invite_org_id, invite_role, invite_email, invite_expires, invite_used_at
+        FROM public.user_invites
+        WHERE token = invite_token;
+
+        IF invite_org_id IS NOT NULL
+           AND invite_used_at IS NULL
+           AND invite_expires > NOW()
+           AND (invite_email IS NULL OR LOWER(invite_email) = LOWER(NEW.email)) THEN
+
+            org_id := invite_org_id;
+            new_user_role := invite_role;
+
+            UPDATE public.user_invites
+            SET used_at = NOW(), used_by = NEW.id
+            WHERE token = invite_token;
+        END IF;
+    END IF;
+
+    -- Fall back to legacy org join/create
     IF org_id IS NULL THEN
-        -- Create a new organization for this user
-        INSERT INTO public.organizations (name, slug)
-        VALUES (
-            COALESCE(NEW.raw_user_meta_data->>'organization_name', split_part(NEW.email, '@', 1) || '''s Practice'),
-            COALESCE(NEW.raw_user_meta_data->>'organization_slug', replace(lower(split_part(NEW.email, '@', 1)), '.', '-') || '-' || substr(gen_random_uuid()::text, 1, 8))
-        )
-        RETURNING id INTO org_id;
+        -- Check if organization is specified in metadata
+        org_id := (NEW.raw_user_meta_data->>'organization_id')::UUID;
+
+        IF org_id IS NULL THEN
+            -- Create a new organization for this user
+            INSERT INTO public.organizations (name, slug)
+            VALUES (
+                COALESCE(NEW.raw_user_meta_data->>'organization_name', split_part(NEW.email, '@', 1) || '''s Practice'),
+                COALESCE(NEW.raw_user_meta_data->>'organization_slug', replace(lower(split_part(NEW.email, '@', 1)), '.', '-') || '-' || substr(gen_random_uuid()::text, 1, 8))
+            )
+            RETURNING id INTO org_id;
+
+            -- Keep legacy behavior: new org creator becomes admin
+            new_user_role := 'admin';
+        ELSE
+            -- Joining an existing org without a secure invite token always creates a contractor
+            new_user_role := 'contractor';
+        END IF;
     END IF;
 
     INSERT INTO public.users (id, email, name, role, organization_id)
@@ -781,7 +893,7 @@ BEGIN
         NEW.id,
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
-        COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'contractor'),
+        COALESCE(new_user_role, 'contractor'),
         org_id
     );
 

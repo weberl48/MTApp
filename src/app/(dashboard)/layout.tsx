@@ -12,6 +12,7 @@ import { ImpersonationProvider } from '@/contexts/impersonation-context'
 import { BrandingProvider } from '@/components/providers/branding-provider'
 import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { ImpersonationBanner } from '@/components/impersonation/impersonation-banner'
+import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -74,6 +75,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
                 <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-6">
+                  <OwnerOnboardingGate />
                   {children}
                 </main>
               </div>
