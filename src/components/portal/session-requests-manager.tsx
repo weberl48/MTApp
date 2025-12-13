@@ -147,7 +147,10 @@ export function SessionRequestsManager({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to ${actionType} request`)
+        const errorMsg = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || `Failed to ${actionType} request`
+        throw new Error(errorMsg)
       }
 
       toast.success(

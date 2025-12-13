@@ -50,7 +50,15 @@ export async function POST(
       .single()
 
     if (fetchError || !sessionRequest) {
-      return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+      console.error('Session request fetch error:', {
+        requestId,
+        fetchError,
+        userOrgId: profile.organization_id,
+      })
+      return NextResponse.json(
+        { error: 'Request not found', details: fetchError?.message },
+        { status: 404 }
+      )
     }
 
     // Verify same organization
