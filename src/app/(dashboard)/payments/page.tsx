@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { ContractorPaymentsTable } from '@/components/tables/contractor-payments-table'
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
+import { AdminGuard } from '@/components/guards/admin-guard'
 
 interface InvoiceData {
   id: string
@@ -264,6 +265,7 @@ export default function PaymentsPage() {
   const totalMcaCut = invoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
 
   return (
+    <AdminGuard>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Contractor Payments</h1>
@@ -456,5 +458,6 @@ export default function PaymentsPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </AdminGuard>
   )
 }

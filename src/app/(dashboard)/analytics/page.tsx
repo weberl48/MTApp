@@ -9,6 +9,7 @@ import { PaymentStatusChart } from '@/components/charts/payment-status-chart'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/pricing'
 import { DollarSign, TrendingUp, Users, Calendar, Loader2 } from 'lucide-react'
+import { AdminGuard } from '@/components/guards/admin-guard'
 
 interface Invoice {
   amount: number
@@ -176,6 +177,7 @@ export default function AnalyticsPage() {
   ].filter(d => d.value > 0)
 
   return (
+    <AdminGuard>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
@@ -282,5 +284,6 @@ export default function AnalyticsPage() {
         </Card>
       </div>
     </div>
+    </AdminGuard>
   )
 }

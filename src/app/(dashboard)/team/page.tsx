@@ -14,6 +14,7 @@ import {
 import { formatCurrency } from '@/lib/pricing'
 import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import Link from 'next/link'
+import { AdminGuard } from '@/components/guards/admin-guard'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -101,6 +102,7 @@ export default async function TeamPage() {
   const totalPendingPay = Object.values(userStats).reduce((sum, s) => sum + s.pendingPay, 0)
 
   return (
+    <AdminGuard>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
@@ -260,5 +262,6 @@ export default async function TeamPage() {
         </CardContent>
       </Card>
     </div>
+    </AdminGuard>
   )
 }
