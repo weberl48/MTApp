@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2 } from 'lucide-react'
+import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import type { User } from '@/types/database'
 
@@ -21,10 +21,20 @@ interface HeaderProps {
   user: User | null
 }
 
+const roleLabels: Record<string, string> = {
+  developer: 'Developer',
+  owner: 'Owner',
+  admin: 'Admin',
+  contractor: 'Contractor',
+}
+
 export function Header({ user }: HeaderProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, isDeveloper, allOrganizations, switchOrganization } = useOrganization()
+  const { organization, actualRole, viewAsRole, setViewAsRole, allOrganizations, switchOrganization } = useOrganization()
+
+  // Show dev tools if actual role is developer (not the simulated role)
+  const showDevTools = actualRole === 'developer'
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -48,7 +58,7 @@ export function Header({ user }: HeaderProps) {
 
       {/* Developer badge and org switcher */}
       <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-4">
-        {isDeveloper && (
+        {showDevTools && (
           <>
             <Badge
               variant="outline"
@@ -90,6 +100,51 @@ export function Header({ user }: HeaderProps) {
                     </DropdownMenuItem>
                   ))}
                 </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* View As Role Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={viewAsRole ? 'default' : 'outline'}
+                  size="sm"
+                  className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
+                >
+                  <Eye className="w-4 h-4" />
+                  <span className="hidden sm:inline">
+                    {viewAsRole ? `As ${roleLabels[viewAsRole]}` : 'View As'}
+                  </span>
+                  <ChevronDown className="hidden sm:inline w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48" align="start">
+                <DropdownMenuLabel>View As Role</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setViewAsRole(null)}
+                  className={!viewAsRole ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                >
+                  <span className="font-medium">Developer (actual)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setViewAsRole('owner')}
+                  className={viewAsRole === 'owner' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                >
+                  <span className="font-medium">Owner</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setViewAsRole('admin')}
+                  className={viewAsRole === 'admin' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                >
+                  <span className="font-medium">Admin</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setViewAsRole('contractor')}
+                  className={viewAsRole === 'contractor' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                >
+                  <span className="font-medium">Contractor</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>

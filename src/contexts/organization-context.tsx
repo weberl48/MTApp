@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { createClient } from '@/lib/supabase/client'
 import type { Organization, User, OrganizationSettings } from '@/types/database'
 
+type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
+
 interface OrganizationContextType {
   organization: Organization | null
   user: User | null
@@ -13,6 +15,9 @@ interface OrganizationContextType {
   isDeveloper: boolean
   isOwner: boolean
   isAdmin: boolean
+  actualRole: string | null // The user's real role (for developers to know their actual permissions)
+  viewAsRole: ViewAsRole // The role being simulated (null = use actual role)
+  setViewAsRole: (role: ViewAsRole) => void
   allOrganizations: Organization[]
   switchOrganization: (orgId: string) => Promise<void>
   refreshOrganization: () => Promise<void>
@@ -59,10 +64,19 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([])
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null)
+  const [viewAsRole, setViewAsRole] = useState<ViewAsRole>(null)
 
-  const isDeveloper = user?.role === 'developer'
-  const isOwner = user?.role === 'owner' || user?.role === 'developer'
-  const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'developer'
+  // Actual role from the database
+  const actualRole = user?.role || null
+  const actualIsDeveloper = actualRole === 'developer'
+
+  // Effective role (respects viewAsRole for developers)
+  const effectiveRole = actualIsDeveloper && viewAsRole ? viewAsRole : actualRole
+
+  // Role checks based on effective role (allows developers to simulate other roles)
+  const isDeveloper = effectiveRole === 'developer'
+  const isOwner = effectiveRole === 'owner' || effectiveRole === 'developer'
+  const isAdmin = effectiveRole === 'admin' || effectiveRole === 'owner' || effectiveRole === 'developer'
 
   // Parse settings with defaults (deep merge)
   const settings: OrganizationSettings | null = organization
@@ -249,6 +263,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         isDeveloper,
         isOwner,
         isAdmin,
+        actualRole,
+        viewAsRole,
+        setViewAsRole,
         allOrganizations,
         switchOrganization,
         refreshOrganization,
