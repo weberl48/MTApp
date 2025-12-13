@@ -18,7 +18,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X, Calculator, Repeat } from 'lucide-react'
+import { X, Calculator, Repeat, AlertTriangle } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
@@ -89,6 +90,74 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const pricing = selectedServiceType && selectedClients.length > 0
     ? calculateSessionPricing(selectedServiceType, selectedClients.length, parseInt(duration))
     : null
+
+  // Duplicate detection
+  const [duplicateWarning, setDuplicateWarning] = useState<{
+    sessionId: string
+    clientName: string
+    date: string
+    serviceTypeName: string
+  } | null>(null)
+
+  // Check for duplicates when date, clients, or service type changes
+  useEffect(() => {
+    if (isEditMode) return // Don't check duplicates when editing
+    if (!date || !serviceTypeId || selectedClients.length === 0) {
+      setDuplicateWarning(null)
+      return
+    }
+
+    const checkDuplicates = async () => {
+      try {
+        // Check if any of the selected clients already have a session on this date with this service type
+        const { data, error } = await supabase
+          .from('sessions')
+          .select(`
+            id,
+            date,
+            service_type:service_types(name),
+            attendees:session_attendees(
+              client:clients(id, name)
+            )
+          `)
+          .eq('date', date)
+          .eq('service_type_id', serviceTypeId)
+          .neq('status', 'cancelled')
+          .limit(10)
+
+        if (error) {
+          console.error('Error checking duplicates:', error)
+          return
+        }
+
+        // Find if any selected client is already in a session on this date
+        for (const session of data || []) {
+          const sessionAttendees = session.attendees || []
+          for (const attendee of sessionAttendees) {
+            const client = Array.isArray(attendee.client) ? attendee.client[0] : attendee.client
+            if (client && selectedClients.includes(client.id)) {
+              const serviceType = Array.isArray(session.service_type) ? session.service_type[0] : session.service_type
+              setDuplicateWarning({
+                sessionId: session.id,
+                clientName: client.name,
+                date: session.date,
+                serviceTypeName: serviceType?.name || 'Unknown',
+              })
+              return
+            }
+          }
+        }
+
+        setDuplicateWarning(null)
+      } catch (err) {
+        console.error('Error checking duplicates:', err)
+      }
+    }
+
+    // Debounce the check
+    const timeout = setTimeout(checkDuplicates, 300)
+    return () => clearTimeout(timeout)
+  }, [date, serviceTypeId, selectedClients, isEditMode, supabase])
 
   function removeClient(clientId: string) {
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
@@ -560,6 +629,27 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </label>
             </div>
           </div>
+
+          {/* Duplicate Warning */}
+          {duplicateWarning && (
+            <Alert variant="destructive" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertTitle className="text-yellow-800 dark:text-yellow-200">Potential Duplicate Session</AlertTitle>
+              <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                <strong>{duplicateWarning.clientName}</strong> already has a <strong>{duplicateWarning.serviceTypeName}</strong> session
+                on <strong>{new Date(duplicateWarning.date).toLocaleDateString()}</strong>.
+                <br />
+                <a
+                  href={`/sessions/${duplicateWarning.sessionId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  View existing session →
+                </a>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="flex flex-col gap-2">

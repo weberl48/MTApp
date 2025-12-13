@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle, Receipt } from 'lucide-react'
+import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle, Receipt, Filter } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import { ContractorPaymentsTable } from '@/components/tables/contractor-payments-table'
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
@@ -51,6 +54,16 @@ interface SessionWithInvoices {
   session_attendees: { client: { name: string } | null }[]
 }
 
+// Helper to get default date range (start of current month to today)
+function getDefaultDateRange() {
+  const today = new Date()
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  return {
+    from: startOfMonth.toISOString().split('T')[0],
+    to: today.toISOString().split('T')[0],
+  }
+}
+
 export default function PaymentsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -58,6 +71,10 @@ export default function PaymentsPage() {
   const [contractors, setContractors] = useState<ContractorPayment[]>([])
   const [unpaidContractors, setUnpaidContractors] = useState<ContractorPayout[]>([])
   const [activeTab, setActiveTab] = useState('payroll')
+
+  // Date range filtering
+  const [dateRange, setDateRange] = useState(getDefaultDateRange())
+  const [showAllDates, setShowAllDates] = useState(true)
 
   const loadPayments = async () => {
     const supabase = createClient()
@@ -209,6 +226,29 @@ export default function PaymentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Filter unpaid contractors by date range (must be before conditional return)
+  const filteredUnpaidContractors = useMemo(() => {
+    if (showAllDates) return unpaidContractors
+
+    return unpaidContractors
+      .map((contractor) => {
+        const filteredSessions = contractor.unpaidSessions.filter((session) => {
+          const sessionDate = session.date
+          return sessionDate >= dateRange.from && sessionDate <= dateRange.to
+        })
+
+        if (filteredSessions.length === 0) return null
+
+        return {
+          ...contractor,
+          unpaidSessions: filteredSessions,
+          totalPending: filteredSessions.reduce((sum, s) => sum + s.contractor_pay, 0),
+          sessionCount: filteredSessions.length,
+        }
+      })
+      .filter((c): c is ContractorPayout => c !== null)
+  }, [unpaidContractors, showAllDates, dateRange])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -318,18 +358,68 @@ export default function PaymentsPage() {
         <TabsContent value="payroll" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Unpaid Sessions</CardTitle>
-              <CardDescription>
-                {unpaidContractors.length === 0
-                  ? 'All contractors have been paid!'
-                  : `${unpaidContractors.length} contractor${
-                      unpaidContractors.length !== 1 ? 's' : ''
-                    } with unpaid sessions`}
-              </CardDescription>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <CardTitle>Unpaid Sessions</CardTitle>
+                  <CardDescription>
+                    {filteredUnpaidContractors.length === 0
+                      ? 'All contractors have been paid!'
+                      : `${filteredUnpaidContractors.length} contractor${
+                          filteredUnpaidContractors.length !== 1 ? 's' : ''
+                        } with unpaid sessions`}
+                  </CardDescription>
+                </div>
+
+                {/* Date Range Filter */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm font-medium">Filter by Date</span>
+                    <Button
+                      variant={showAllDates ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowAllDates(true)}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant={!showAllDates ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowAllDates(false)}
+                    >
+                      Range
+                    </Button>
+                  </div>
+                  {!showAllDates && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="fromDate" className="text-xs">From:</Label>
+                        <Input
+                          id="fromDate"
+                          type="date"
+                          value={dateRange.from}
+                          onChange={(e) => setDateRange((prev) => ({ ...prev, from: e.target.value }))}
+                          className="h-8 w-36 text-sm"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="toDate" className="text-xs">To:</Label>
+                        <Input
+                          id="toDate"
+                          type="date"
+                          value={dateRange.to}
+                          onChange={(e) => setDateRange((prev) => ({ ...prev, to: e.target.value }))}
+                          className="h-8 w-36 text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <PayrollHubTable
-                contractors={unpaidContractors}
+                contractors={filteredUnpaidContractors}
                 onPayoutComplete={loadPayments}
               />
             </CardContent>

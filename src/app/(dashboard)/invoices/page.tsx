@@ -14,7 +14,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, CheckCircle, Loader2, AlertTriangle, Eye } from 'lucide-react'
+import { FileText, Clock, CheckCircle, Loader2, AlertTriangle, Eye, Download, Send, CheckCheck } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
@@ -86,11 +88,17 @@ function InvoiceTable({
   showActions = false,
   isAdmin,
   onRefresh,
+  selectedIds,
+  onSelectChange,
+  showSelection = false,
 }: {
   invoices: Invoice[]
   showActions?: boolean
   isAdmin: boolean
   onRefresh?: () => void
+  selectedIds?: Set<string>
+  onSelectChange?: (id: string, checked: boolean) => void
+  showSelection?: boolean
 }) {
   if (invoices.length === 0) {
     return (
@@ -101,10 +109,25 @@ function InvoiceTable({
     )
   }
 
+  const allSelected = invoices.length > 0 && invoices.every((inv) => selectedIds?.has(inv.id))
+  const someSelected = invoices.some((inv) => selectedIds?.has(inv.id))
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          {showSelection && isAdmin && (
+            <TableHead className="w-12">
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={(checked) => {
+                  invoices.forEach((inv) => onSelectChange?.(inv.id, !!checked))
+                }}
+                aria-label="Select all"
+                className={someSelected && !allSelected ? 'opacity-50' : ''}
+              />
+            </TableHead>
+          )}
           <TableHead>Client</TableHead>
           <TableHead>Service</TableHead>
           <TableHead>Date</TableHead>
@@ -119,7 +142,16 @@ function InvoiceTable({
         {invoices.map((invoice) => {
           const { status, isOverdue, daysOverdue } = getInvoiceStatus(invoice)
           return (
-            <TableRow key={invoice.id}>
+            <TableRow key={invoice.id} className={selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}>
+              {showSelection && isAdmin && (
+                <TableCell>
+                  <Checkbox
+                    checked={selectedIds?.has(invoice.id) || false}
+                    onCheckedChange={(checked) => onSelectChange?.(invoice.id, !!checked)}
+                    aria-label={`Select invoice for ${invoice.client?.name}`}
+                  />
+                </TableCell>
+              )}
               <TableCell className="font-medium">{invoice.client?.name}</TableCell>
               <TableCell>{invoice.session?.service_type?.name}</TableCell>
               <TableCell>
@@ -176,11 +208,108 @@ export default function InvoicesPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
   const supabaseRef = useRef(createClient())
 
   const handleRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1)
+    setSelectedIds(new Set()) // Clear selection on refresh
   }, [])
+
+  const handleSelectChange = useCallback((id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (checked) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
+      return next
+    })
+  }, [])
+
+  const selectedInvoices = invoices.filter((inv) => selectedIds.has(inv.id))
+  const selectedTotal = selectedInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+
+  // Bulk action handlers
+  const handleBulkMarkPaid = async () => {
+    if (selectedIds.size === 0) return
+    setBulkActionLoading(true)
+    try {
+      const supabase = supabaseRef.current
+      const today = new Date().toISOString().split('T')[0]
+
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'paid', paid_date: today })
+        .in('id', Array.from(selectedIds))
+
+      if (error) throw error
+
+      toast.success(`Marked ${selectedIds.size} invoice(s) as paid`)
+      handleRefresh()
+    } catch (error) {
+      console.error('Error marking invoices as paid:', error)
+      toast.error('Failed to mark invoices as paid')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
+  const handleBulkMarkSent = async () => {
+    if (selectedIds.size === 0) return
+    setBulkActionLoading(true)
+    try {
+      const supabase = supabaseRef.current
+
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'sent' })
+        .in('id', Array.from(selectedIds))
+        .eq('status', 'pending') // Only update pending invoices
+
+      if (error) throw error
+
+      toast.success(`Marked ${selectedIds.size} invoice(s) as sent`)
+      handleRefresh()
+    } catch (error) {
+      console.error('Error marking invoices as sent:', error)
+      toast.error('Failed to mark invoices as sent')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
+  const handleBulkExport = () => {
+    if (selectedIds.size === 0) return
+
+    // Build CSV content
+    const headers = ['Client', 'Service', 'Date', 'Payment Method', 'Amount', 'Status']
+    const rows = selectedInvoices.map((inv) => [
+      inv.client?.name || '',
+      inv.session?.service_type?.name || '',
+      inv.session?.date || '',
+      paymentMethodLabels[inv.payment_method] || inv.payment_method,
+      inv.amount.toFixed(2),
+      inv.status,
+    ])
+
+    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n')
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success(`Exported ${selectedIds.size} invoice(s)`)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -241,6 +370,14 @@ export default function InvoicesPage() {
   const sentInvoices = invoices?.filter((inv) => inv.status === 'sent') || []
   const paidInvoices = invoices?.filter((inv) => inv.status === 'paid') || []
   const overdueInvoices = sentInvoices.filter((inv) => getInvoiceStatus(inv).isOverdue)
+
+  // Group by payment method (unpaid only - most useful for follow-up)
+  const selfDirectedUnpaid = invoices?.filter(
+    (inv) => inv.payment_method === 'self_directed' && inv.status !== 'paid'
+  ) || []
+  const groupHomeUnpaid = invoices?.filter(
+    (inv) => inv.payment_method === 'group_home' && inv.status !== 'paid'
+  ) || []
 
   // Calculate totals
   const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
@@ -330,12 +467,71 @@ export default function InvoicesPage() {
         </Card>
       </div>
 
+      {/* Bulk Action Bar */}
+      {isAdmin && selectedIds.size > 0 && (
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium">
+                  {selectedIds.size} invoice{selectedIds.size !== 1 ? 's' : ''} selected
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Total: {formatCurrency(selectedTotal)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkExport}
+                  disabled={bulkActionLoading}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkMarkSent}
+                  disabled={bulkActionLoading}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Mark Sent
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleBulkMarkPaid}
+                  disabled={bulkActionLoading}
+                >
+                  {bulkActionLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCheck className="w-4 h-4 mr-2" />
+                  )}
+                  Mark Paid
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedIds(new Set())}
+                  disabled={bulkActionLoading}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Invoice Tabs */}
       <Card>
         <CardHeader>
           <CardTitle>All Invoices</CardTitle>
           <CardDescription>
             {invoices?.length || 0} invoices total
+            {isAdmin && <span className="ml-2 text-xs">(Select invoices for bulk actions)</span>}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -358,24 +554,44 @@ export default function InvoicesPage() {
               <TabsTrigger value="all">
                 All ({invoices?.length || 0})
               </TabsTrigger>
+              {selfDirectedUnpaid.length > 0 && (
+                <TabsTrigger value="self-directed" className="text-orange-600 dark:text-orange-400">
+                  Self-Directed ({selfDirectedUnpaid.length})
+                </TabsTrigger>
+              )}
+              {groupHomeUnpaid.length > 0 && (
+                <TabsTrigger value="group-home">
+                  Group Home ({groupHomeUnpaid.length})
+                </TabsTrigger>
+              )}
             </TabsList>
             {overdueInvoices.length > 0 && (
               <TabsContent value="overdue">
-                <InvoiceTable invoices={overdueInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} />
+                <InvoiceTable invoices={overdueInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
               </TabsContent>
             )}
             <TabsContent value="pending">
-              <InvoiceTable invoices={pendingInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} />
+              <InvoiceTable invoices={pendingInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="sent">
-              <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} />
+              <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="paid">
-              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} onRefresh={handleRefresh} />
+              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="all">
-              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} onRefresh={handleRefresh} />
+              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
+            {selfDirectedUnpaid.length > 0 && (
+              <TabsContent value="self-directed">
+                <InvoiceTable invoices={selfDirectedUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              </TabsContent>
+            )}
+            {groupHomeUnpaid.length > 0 && (
+              <TabsContent value="group-home">
+                <InvoiceTable invoices={groupHomeUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              </TabsContent>
+            )}
           </Tabs>
         </CardContent>
       </Card>
