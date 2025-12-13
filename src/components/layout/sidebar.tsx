@@ -17,21 +17,36 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useOrganization } from '@/contexts/organization-context'
 
-const navigation = [
+type NavItem = {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  adminOnly?: boolean
+}
+
+const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Sessions', href: '/sessions', icon: Calendar },
   { name: 'Clients', href: '/clients', icon: Users },
   { name: 'Invoices', href: '/invoices', icon: FileText },
-  { name: 'Team', href: '/team', icon: UsersRound },
-  { name: 'Payments', href: '/payments', icon: Wallet },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
+  { name: 'Payments', href: '/payments', icon: Wallet, adminOnly: true },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { isAdmin, isDeveloper, isOwner } = useOrganization()
+
+  // Filter navigation based on user role
+  const isAdminOrAbove = isAdmin || isOwner || isDeveloper
+  const filteredNavigation = navigation.filter(
+    (item) => !item.adminOnly || isAdminOrAbove
+  )
 
   return (
     <>
@@ -76,7 +91,7 @@ export function Sidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = pathname.startsWith(item.href)
               return (
                 <Link
