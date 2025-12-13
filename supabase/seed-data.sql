@@ -98,7 +98,7 @@ WHERE NOT EXISTS (
 
 -- Insert Clients
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Aden Finkas',
@@ -106,11 +106,10 @@ VALUES (
   '716-555-1000',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Angie',
@@ -118,11 +117,10 @@ VALUES (
   '716-555-1001',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Annie',
@@ -130,11 +128,10 @@ VALUES (
   '716-555-1002',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Anthony',
@@ -142,11 +139,10 @@ VALUES (
   '716-555-1003',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Arnold Cook',
@@ -154,11 +150,10 @@ VALUES (
   '716-555-1004',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Austin',
@@ -166,11 +161,10 @@ VALUES (
   '716-555-1005',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Ayub',
@@ -178,11 +172,10 @@ VALUES (
   '716-555-1006',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Bentley',
@@ -190,11 +183,10 @@ VALUES (
   '716-555-1007',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Bernie',
@@ -202,11 +194,10 @@ VALUES (
   '716-555-1008',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Brendan O''Connell',
@@ -214,11 +205,10 @@ VALUES (
   '716-555-1009',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Brittany',
@@ -226,11 +216,10 @@ VALUES (
   '716-555-1010',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Bryan Palmer',
@@ -238,11 +227,10 @@ VALUES (
   '716-555-1011',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Bryce',
@@ -250,11 +238,10 @@ VALUES (
   '716-555-1012',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Caleb',
@@ -262,11 +249,10 @@ VALUES (
   '716-555-1013',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Cindy',
@@ -274,11 +260,10 @@ VALUES (
   '716-555-1014',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Claire Syracuse',
@@ -286,11 +271,10 @@ VALUES (
   '716-555-1015',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Courtney Jordan',
@@ -298,11 +282,10 @@ VALUES (
   '716-555-1016',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'DJ',
@@ -310,11 +293,10 @@ VALUES (
   '716-555-1017',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Dan',
@@ -322,11 +304,10 @@ VALUES (
   '716-555-1018',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'David Harrington',
@@ -334,11 +315,10 @@ VALUES (
   '716-555-1019',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Derek',
@@ -346,11 +326,10 @@ VALUES (
   '716-555-1020',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Devon',
@@ -358,11 +337,10 @@ VALUES (
   '716-555-1021',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Devyn',
@@ -370,11 +348,10 @@ VALUES (
   '716-555-1022',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Elijah Siever',
@@ -382,11 +359,10 @@ VALUES (
   '716-555-1023',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Emily',
@@ -394,11 +370,10 @@ VALUES (
   '716-555-1024',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Emma',
@@ -406,11 +381,10 @@ VALUES (
   '716-555-1025',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Eric',
@@ -418,11 +392,10 @@ VALUES (
   '716-555-1026',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Ethan',
@@ -430,11 +403,10 @@ VALUES (
   '716-555-1027',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Faith',
@@ -442,11 +414,10 @@ VALUES (
   '716-555-1028',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Francis',
@@ -454,11 +425,10 @@ VALUES (
   '716-555-1029',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Gianna',
@@ -466,11 +436,10 @@ VALUES (
   '716-555-1030',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Gretchen',
@@ -478,11 +447,10 @@ VALUES (
   '716-555-1031',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Harold McCown',
@@ -490,11 +458,10 @@ VALUES (
   '716-555-1032',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Hillary',
@@ -502,11 +469,10 @@ VALUES (
   '716-555-1033',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Hope',
@@ -514,11 +480,10 @@ VALUES (
   '716-555-1034',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Ikenna',
@@ -526,11 +491,10 @@ VALUES (
   '716-555-1035',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'James',
@@ -538,11 +502,10 @@ VALUES (
   '716-555-1036',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Janet',
@@ -550,11 +513,10 @@ VALUES (
   '716-555-1037',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Jeanie',
@@ -562,11 +524,10 @@ VALUES (
   '716-555-1038',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Jessica',
@@ -574,11 +535,10 @@ VALUES (
   '716-555-1039',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Jimmy',
@@ -586,11 +546,10 @@ VALUES (
   '716-555-1040',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'John',
@@ -598,11 +557,10 @@ VALUES (
   '716-555-1041',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Jordan',
@@ -610,11 +568,10 @@ VALUES (
   '716-555-1042',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Joseph',
@@ -622,11 +579,10 @@ VALUES (
   '716-555-1043',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Josiah',
@@ -634,11 +590,10 @@ VALUES (
   '716-555-1044',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Julie',
@@ -646,11 +601,10 @@ VALUES (
   '716-555-1045',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Karen',
@@ -658,11 +612,10 @@ VALUES (
   '716-555-1046',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Kayla',
@@ -670,11 +623,10 @@ VALUES (
   '716-555-1047',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Kobe',
@@ -682,11 +634,10 @@ VALUES (
   '716-555-1048',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Kristin',
@@ -694,11 +645,10 @@ VALUES (
   '716-555-1049',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Laurie',
@@ -706,11 +656,10 @@ VALUES (
   '716-555-1050',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Lexi',
@@ -718,11 +667,10 @@ VALUES (
   '716-555-1051',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Lincoln',
@@ -730,11 +678,10 @@ VALUES (
   '716-555-1052',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Linda',
@@ -742,11 +689,10 @@ VALUES (
   '716-555-1053',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Liz',
@@ -754,11 +700,10 @@ VALUES (
   '716-555-1054',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Lizzie',
@@ -766,11 +711,10 @@ VALUES (
   '716-555-1055',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Lizziey Hauser',
@@ -778,11 +722,10 @@ VALUES (
   '716-555-1056',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Madisyn',
@@ -790,11 +733,10 @@ VALUES (
   '716-555-1057',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Maeve Hathaway',
@@ -802,11 +744,10 @@ VALUES (
   '716-555-1058',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Mark',
@@ -814,11 +755,10 @@ VALUES (
   '716-555-1059',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Matt',
@@ -826,11 +766,10 @@ VALUES (
   '716-555-1060',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Michael',
@@ -838,11 +777,10 @@ VALUES (
   '716-555-1061',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Michelle',
@@ -850,11 +788,10 @@ VALUES (
   '716-555-1062',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Mikey',
@@ -862,11 +799,10 @@ VALUES (
   '716-555-1063',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Molly Hathaway',
@@ -874,11 +810,10 @@ VALUES (
   '716-555-1064',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Nancy',
@@ -886,11 +821,10 @@ VALUES (
   '716-555-1065',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Nick',
@@ -898,11 +832,10 @@ VALUES (
   '716-555-1066',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Nicolas',
@@ -910,11 +843,10 @@ VALUES (
   '716-555-1067',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Olivia',
@@ -922,11 +854,10 @@ VALUES (
   '716-555-1068',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Owen',
@@ -934,11 +865,10 @@ VALUES (
   '716-555-1069',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Pam',
@@ -946,11 +876,10 @@ VALUES (
   '716-555-1070',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Patty',
@@ -958,11 +887,10 @@ VALUES (
   '716-555-1071',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Rachel',
@@ -970,11 +898,10 @@ VALUES (
   '716-555-1072',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Sandy Baker',
@@ -982,11 +909,10 @@ VALUES (
   '716-555-1073',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Shannon',
@@ -994,11 +920,10 @@ VALUES (
   '716-555-1074',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Sylvia',
@@ -1006,11 +931,10 @@ VALUES (
   '716-555-1075',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Tajwar',
@@ -1018,11 +942,10 @@ VALUES (
   '716-555-1076',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Tasheen',
@@ -1030,11 +953,10 @@ VALUES (
   '716-555-1077',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Thatius',
@@ -1042,11 +964,10 @@ VALUES (
   '716-555-1078',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Tom',
@@ -1054,11 +975,10 @@ VALUES (
   '716-555-1079',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Tony',
@@ -1066,11 +986,10 @@ VALUES (
   '716-555-1080',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Tyler',
@@ -1078,11 +997,10 @@ VALUES (
   '716-555-1081',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Vernon',
@@ -1090,11 +1008,10 @@ VALUES (
   '716-555-1082',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Vic',
@@ -1102,11 +1019,10 @@ VALUES (
   '716-555-1083',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Vicky',
@@ -1114,11 +1030,10 @@ VALUES (
   '716-555-1084',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Weston',
@@ -1126,11 +1041,10 @@ VALUES (
   '716-555-1085',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   'Zack',
@@ -1138,7 +1052,6 @@ VALUES (
   '716-555-1086',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 

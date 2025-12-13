@@ -116,7 +116,7 @@ clients.forEach((c, idx) => {
   // Escape single quotes in names
   const safeName = c.name.replace(/'/g, "''");
   sql += `
-INSERT INTO clients (id, name, email, phone, payment_method, organization_id, status, created_at)
+INSERT INTO clients (id, name, contact_email, contact_phone, payment_method, organization_id, created_at)
 VALUES (
   gen_random_uuid(),
   '${safeName}',
@@ -124,7 +124,6 @@ VALUES (
   '${c.phone}',
   'private_pay',
   (SELECT id FROM organizations WHERE slug = 'may-creative-arts'),
-  'active',
   NOW()
 );
 `;
