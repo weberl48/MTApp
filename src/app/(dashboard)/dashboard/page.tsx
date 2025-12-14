@@ -8,8 +8,7 @@ import Link from 'next/link'
 import { Calendar, Users, FileText, DollarSign, Plus, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { SessionRequestsManager } from '@/components/portal/session-requests-manager'
-import { ImpersonationSelector } from '@/components/impersonation/impersonation-selector'
-import { useImpersonation } from '@/contexts/impersonation-context'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface DashboardStats {
   sessionsCount: number
@@ -34,7 +33,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([])
   const [loading, setLoading] = useState(true)
-  const { impersonatedContractor, isImpersonatingContractor } = useImpersonation()
+  const { viewAsContractor, viewAsRole } = useOrganization()
+
+  // Determine if viewing as a contractor
+  const isViewingAsContractor = viewAsRole === 'contractor' || !!viewAsContractor
 
   useEffect(() => {
     async function loadDashboard() {
@@ -58,11 +60,11 @@ export default function DashboardPage() {
 
       const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
 
-      // When impersonating, use the impersonated contractor's ID for filtering
-      const effectiveContractorId = isImpersonatingContractor && impersonatedContractor
-        ? impersonatedContractor.id
+      // When viewing as contractor, use their ID for filtering
+      const effectiveContractorId = viewAsContractor
+        ? viewAsContractor.id
         : user.id
-      const effectiveIsAdmin = isImpersonatingContractor ? false : isAdmin
+      const effectiveIsAdmin = isViewingAsContractor ? false : isAdmin
 
       // Fetch statistics
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -133,7 +135,7 @@ export default function DashboardPage() {
     }
 
     loadDashboard()
-  }, [impersonatedContractor, isImpersonatingContractor])
+  }, [viewAsContractor, isViewingAsContractor])
 
   if (loading) {
     return (
@@ -149,13 +151,12 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            {isImpersonatingContractor
-              ? `Viewing ${impersonatedContractor?.name}'s dashboard`
+            {viewAsContractor
+              ? `Viewing ${viewAsContractor.name}'s dashboard`
               : "Welcome back! Here's an overview of your practice."}
           </p>
         </div>
         <div className="flex gap-2">
-          {stats?.actualIsAdmin && <ImpersonationSelector />}
           <Link href="/sessions/new/">
             <Button className="w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4 mr-2" />

@@ -35,7 +35,7 @@ interface ContractorOption {
 interface ClientOption {
   id: string
   name: string
-  portal_token: string | null
+  active_token: string | null
 }
 
 const roleLabels: Record<string, string> = {
@@ -62,12 +62,14 @@ export function Header({ user }: HeaderProps) {
   const [contractors, setContractors] = useState<ContractorOption[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
 
-  // Show dev tools if actual role is developer (not the simulated role)
-  const showDevTools = actualRole === 'developer'
+  // Show view-as tools for developers and owners
+  const showViewAsTools = actualRole === 'developer' || actualRole === 'owner'
+  // Only developers can switch organizations and preview client portals
+  const showDevOnlyTools = actualRole === 'developer'
 
-  // Fetch contractors and clients for dev tools
+  // Fetch contractors and clients for view-as tools
   useEffect(() => {
-    if (!showDevTools) return
+    if (!showViewAsTools) return
 
     async function fetchDevData() {
       // Fetch contractors
@@ -81,19 +83,37 @@ export function Header({ user }: HeaderProps) {
         setContractors(contractorData)
       }
 
-      // Fetch clients with portal tokens
+      // Fetch clients with their active portal tokens from client_access_tokens table
       const { data: clientData } = await supabase
         .from('clients')
-        .select('id, name, portal_token')
+        .select(`
+          id,
+          name,
+          client_access_tokens!client_access_tokens_client_id_fkey(token, is_active, expires_at)
+        `)
         .order('name')
 
       if (clientData) {
-        setClients(clientData)
+        // Transform to get the active token for each client
+        const clientsWithTokens = clientData.map((client) => {
+          const tokens = client.client_access_tokens || []
+          // Find first active, non-expired token
+          const activeToken = tokens.find(
+            (t: { token: string; is_active: boolean; expires_at: string }) =>
+              t.is_active && new Date(t.expires_at) > new Date()
+          )
+          return {
+            id: client.id,
+            name: client.name,
+            active_token: activeToken?.token || null,
+          }
+        })
+        setClients(clientsWithTokens)
       }
     }
 
     fetchDevData()
-  }, [showDevTools, supabase])
+  }, [showViewAsTools, supabase])
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -115,9 +135,10 @@ export function Header({ user }: HeaderProps) {
       {/* Spacer for mobile menu button */}
       <div className="w-12 lg:hidden" />
 
-      {/* Developer badge and org switcher */}
+      {/* Developer badge and tools */}
       <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-4">
-        {showDevTools && (
+        {/* Developer-only badge and org switcher */}
+        {showDevOnlyTools && (
           <>
             <Badge
               variant="outline"
@@ -161,8 +182,11 @@ export function Header({ user }: HeaderProps) {
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
+          </>
+        )}
 
-            {/* View As Role Switcher */}
+        {/* View As Role Switcher - available to developers and owners */}
+        {showViewAsTools && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -191,17 +215,19 @@ export function Header({ user }: HeaderProps) {
                   }}
                   className={!viewAsRole && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 >
-                  <span className="font-medium">Developer (actual)</span>
+                  <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setViewAsRole('owner')
-                    setViewAsContractor(null)
-                  }}
-                  className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                >
-                  <span className="font-medium">Owner</span>
-                </DropdownMenuItem>
+                {actualRole === 'developer' && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setViewAsRole('owner')
+                      setViewAsContractor(null)
+                    }}
+                    className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  >
+                    <span className="font-medium">Owner</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={() => {
                     setViewAsRole('admin')
@@ -253,45 +279,44 @@ export function Header({ user }: HeaderProps) {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+        )}
 
-            {/* Client Portal Preview */}
-            {clients.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2 px-2 sm:px-3">
-                    <ExternalLink className="w-4 h-4" />
-                    <span className="hidden sm:inline">Client Portal</span>
-                    <ChevronDown className="hidden sm:inline w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 max-h-[400px] overflow-y-auto" align="start">
-                  <DropdownMenuLabel>Preview Client Portal</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {clients.map((client) => (
-                    <DropdownMenuItem
-                      key={client.id}
-                      onClick={() => {
-                        if (client.portal_token) {
-                          window.open(`/portal/${client.portal_token}`, '_blank')
-                        } else {
-                          router.push(`/clients/${client.id}`)
-                        }
-                      }}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-medium truncate">{client.name}</span>
-                        {client.portal_token ? (
-                          <Badge variant="outline" className="ml-2 text-xs">Has Token</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="ml-2 text-xs">No Token</Badge>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </>
+        {/* Client Portal Preview - Developer only */}
+        {showDevOnlyTools && clients.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2 px-2 sm:px-3">
+                <ExternalLink className="w-4 h-4" />
+                <span className="hidden sm:inline">Client Portal</span>
+                <ChevronDown className="hidden sm:inline w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 max-h-[400px] overflow-y-auto" align="start">
+              <DropdownMenuLabel>Preview Client Portal</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {clients.map((client) => (
+                <DropdownMenuItem
+                  key={client.id}
+                  onClick={() => {
+                    if (client.active_token) {
+                      window.open(`/portal/${client.active_token}`, '_blank')
+                    } else {
+                      router.push(`/clients/${client.id}/`)
+                    }
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-medium truncate">{client.name}</span>
+                    {client.active_token ? (
+                      <Badge variant="outline" className="ml-2 text-xs">Has Token</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="ml-2 text-xs">No Token</Badge>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 

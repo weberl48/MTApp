@@ -413,7 +413,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
             </div>
 
             {dialogType === 'file' ? (
-              <div className="space-y-2">
+              <div key="file-input" className="space-y-2">
                 <Label htmlFor="file">File *</Label>
                 <Input
                   id="file"
@@ -432,12 +432,13 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
                 )}
               </div>
             ) : (
-              <div className="space-y-2">
+              <div key="content-input" className="space-y-2">
                 <Label htmlFor="content">
                   {dialogType === 'homework' ? 'Assignment Details *' : 'URL *'}
                 </Label>
                 {dialogType === 'homework' ? (
                   <Textarea
+                    key="homework-textarea"
                     id="content"
                     placeholder="Describe the homework assignment..."
                     value={content}
@@ -447,6 +448,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
                   />
                 ) : (
                   <Input
+                    key="url-input"
                     id="content"
                     type="url"
                     placeholder="https://..."

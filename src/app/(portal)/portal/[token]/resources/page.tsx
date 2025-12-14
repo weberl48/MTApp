@@ -16,7 +16,15 @@ import {
   Clock,
   CheckCircle2,
   Loader2,
+  Eye,
+  X,
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
 
 interface Resource {
@@ -40,6 +48,10 @@ export default function PortalResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [previewResource, setPreviewResource] = useState<Resource | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   useEffect(() => {
     async function loadResources() {
@@ -92,6 +104,79 @@ export default function PortalResourcesPage() {
       toast.error('Failed to update')
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  function isPreviewable(mimeType: string | null): boolean {
+    if (!mimeType) return false
+    return mimeType.startsWith('image/') || mimeType === 'application/pdf'
+  }
+
+  async function previewFile(resource: Resource) {
+    setPreviewResource(resource)
+    setPreviewLoading(true)
+    try {
+      const response = await fetch(`/api/portal/resources/${resource.id}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to load preview')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      setPreviewUrl(url)
+    } catch (error) {
+      console.error('Preview error:', error)
+      toast.error('Failed to load preview')
+      setPreviewResource(null)
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
+  function closePreview() {
+    if (previewUrl) {
+      window.URL.revokeObjectURL(previewUrl)
+    }
+    setPreviewResource(null)
+    setPreviewUrl(null)
+  }
+
+  async function downloadFile(resource: Resource) {
+    setDownloadingId(resource.id)
+    try {
+      const response = await fetch(`/api/portal/resources/${resource.id}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Download failed')
+      }
+
+      // Get the file as a blob
+      const blob = await response.blob()
+
+      // Create download link and trigger it
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = resource.file_name || 'download'
+      document.body.appendChild(a)
+      a.click()
+
+      // Cleanup
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Download started')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to download file')
+    } finally {
+      setDownloadingId(null)
     }
   }
 
@@ -230,17 +315,31 @@ export default function PortalResourcesPage() {
                   </Button>
                 )}
                 {resource.resource_type === 'file' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      // TODO: Implement file download via signed URL
-                      toast.info('File downloads coming soon')
-                    }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
+                  <div className="flex gap-2">
+                    {isPreviewable(resource.mime_type) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => previewFile(resource)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadFile(resource)}
+                      disabled={downloadingId === resource.id}
+                    >
+                      {downloadingId === resource.id ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      {downloadingId === resource.id ? 'Downloading...' : 'Download'}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -326,6 +425,49 @@ export default function PortalResourcesPage() {
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Preview Dialog */}
+      <Dialog open={!!previewResource} onOpenChange={(open) => !open && closePreview()}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{previewResource?.title}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {previewLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                <span className="ml-2 text-gray-500">Loading preview...</span>
+              </div>
+            ) : previewUrl && previewResource?.mime_type?.startsWith('image/') ? (
+              <img
+                src={previewUrl}
+                alt={previewResource.title}
+                className="max-w-full h-auto rounded-lg mx-auto"
+              />
+            ) : previewUrl && previewResource?.mime_type === 'application/pdf' ? (
+              <iframe
+                src={previewUrl}
+                className="w-full h-[70vh] rounded-lg border"
+                title={previewResource.title}
+              />
+            ) : null}
+          </div>
+          {previewResource && (
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => downloadFile(previewResource)}
+                disabled={downloadingId === previewResource.id}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
