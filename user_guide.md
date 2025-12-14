@@ -102,9 +102,23 @@ You can see exactly what your contractors see by using the **View As** feature:
 1. Look for the **View As** dropdown in the header
 2. Select a contractor to view the app as them
 3. The sidebar and data will filter to show only their view
-4. Click **Exit View** to return to your normal owner view
+4. Click **Exit View** (select "Owner (actual)") to return to your normal view
 
 This is helpful for understanding the contractor experience or troubleshooting issues.
+
+### Previewing the Client Portal
+
+To see what a specific client sees in their portal:
+
+1. Go to **Clients** > click on a client
+2. Look for the **Portal Access** section
+3. If they have a portal link, click **View Portal** to open it in a new tab
+4. If they don't have one yet, click **Generate Link** to create one
+
+The client portal shows them:
+- Their upcoming and past sessions
+- Their invoices and payment status
+- Resources you've shared (homework, files, links)
 
 ---
 
