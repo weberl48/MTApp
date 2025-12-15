@@ -70,14 +70,11 @@ BEGIN
         org_id := (NEW.raw_user_meta_data->>'organization_id')::UUID;
 
         IF org_id IS NULL THEN
-            -- Creating new organization
+            -- Creating new organization - use generate_unique_slug to avoid conflicts
             INSERT INTO public.organizations (name, slug, email)
             VALUES (
                 COALESCE(NEW.raw_user_meta_data->>'organization_name', 'My Practice'),
-                COALESCE(
-                    NEW.raw_user_meta_data->>'organization_slug',
-                    LOWER(REPLACE(COALESCE(NEW.raw_user_meta_data->>'organization_name', 'my-practice-' || substr(NEW.id::text, 1, 8)), ' ', '-'))
-                ),
+                generate_unique_slug(COALESCE(NEW.raw_user_meta_data->>'organization_name', 'my-practice-' || substr(NEW.id::text, 1, 8))),
                 NEW.email
             )
             RETURNING id INTO org_id;
@@ -108,4 +105,5 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
