@@ -78,13 +78,15 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   // Actual role from the database
   const actualRole = user?.role || null
-  const actualIsDeveloper = actualRole === 'developer'
+  // Owner has same permissions as developer
+  const actualIsDeveloper = actualRole === 'developer' || actualRole === 'owner'
 
-  // Effective role (respects viewAsRole for developers)
+  // Effective role (respects viewAsRole for developers/owners)
   const effectiveRole = actualIsDeveloper && viewAsRole ? viewAsRole : actualRole
 
   // Role checks based on effective role (allows developers to simulate other roles)
-  const isDeveloper = effectiveRole === 'developer'
+  // Owner has the same permissions as developer
+  const isDeveloper = effectiveRole === 'developer' || effectiveRole === 'owner'
   const isOwner = effectiveRole === 'owner' || effectiveRole === 'developer'
   const isAdmin = effectiveRole === 'admin' || effectiveRole === 'owner' || effectiveRole === 'developer'
 
@@ -142,8 +144,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
       setUser(userProfile)
 
-      // If developer, load all organizations for switching
-      if (userProfile.role === 'developer') {
+      // If developer or owner, load all organizations for switching
+      if (userProfile.role === 'developer' || userProfile.role === 'owner') {
         const { data: allOrgs } = await supabase
           .from('organizations')
           .select('*')

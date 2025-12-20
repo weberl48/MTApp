@@ -52,7 +52,7 @@ export async function POST(
       return NextResponse.json({ error: 'Client not found' }, { status: 404 })
     }
 
-    if (client.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (client.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

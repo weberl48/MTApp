@@ -48,7 +48,7 @@ export async function GET(
     }
 
     // Verify organization access
-    if (resource.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (resource.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

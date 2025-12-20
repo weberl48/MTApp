@@ -46,7 +46,7 @@ export async function GET(
       return NextResponse.json({ error: 'Client not found' }, { status: 404 })
     }
 
-    if (client.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (client.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -140,7 +140,7 @@ export async function POST(
       return NextResponse.json({ error: 'Client not found' }, { status: 404 })
     }
 
-    if (client.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (client.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -280,7 +280,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Resource does not belong to this client' }, { status: 400 })
     }
 
-    if (resource.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (resource.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

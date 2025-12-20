@@ -62,7 +62,7 @@ export async function POST(
     }
 
     // Verify same organization
-    if (sessionRequest.organization_id !== profile.organization_id && profile.role !== 'developer') {
+    if (sessionRequest.organization_id !== profile.organization_id && profile.role !== 'developer' && profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
