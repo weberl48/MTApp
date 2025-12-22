@@ -1,4 +1,4 @@
-import { squareClient, getDefaultLocationId } from './client'
+import { squareClient, getDefaultLocationId, dollarsToCents } from './client'
 import { randomUUID } from 'crypto'
 
 interface CreateSquareInvoiceParams {
@@ -56,76 +56,132 @@ async function findOrCreateCustomer(
 export async function createSquareInvoice(
   params: CreateSquareInvoiceParams
 ): Promise<SquareInvoiceResult> {
-  const locationId = await getDefaultLocationId()
+  // Get location ID
+  let locationId: string
+  try {
+    locationId = await getDefaultLocationId()
+  } catch (error) {
+    console.error('Failed to get Square location:', error)
+    throw new Error(`Square location error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 
   // Find or create customer in Square
-  const customerId = await findOrCreateCustomer(params.clientEmail, params.clientName)
+  let customerId: string
+  try {
+    customerId = await findOrCreateCustomer(params.clientEmail, params.clientName)
+  } catch (error) {
+    console.error('Failed to find/create Square customer:', error)
+    throw new Error(`Square customer error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 
-  // Create the invoice
-  const invoiceResult = await squareClient.invoices.create({
-    invoice: {
-      locationId,
-      orderId: undefined, // We're not using Square orders
-      primaryRecipient: {
+  // Create an order first (required for invoices with amounts)
+  let orderId: string
+  try {
+    const orderResult = await squareClient.orders.create({
+      order: {
+        locationId,
         customerId,
+        lineItems: [
+          {
+            name: params.description,
+            quantity: '1',
+            basePriceMoney: {
+              amount: dollarsToCents(params.amount),
+              currency: 'USD',
+            },
+          },
+        ],
+        state: 'OPEN',
       },
-      paymentRequests: [
-        {
-          requestType: 'BALANCE',
-          dueDate: params.dueDate.split('T')[0], // YYYY-MM-DD format
-          automaticPaymentSource: 'NONE',
-          reminders: [
-            {
-              relativeScheduledDays: -1,
-              message: 'Your invoice from May Creative Arts is due tomorrow.',
-            },
-            {
-              relativeScheduledDays: 0,
-              message: 'Your invoice from May Creative Arts is due today.',
-            },
-            {
-              relativeScheduledDays: 3,
-              message: 'Your invoice from May Creative Arts is past due.',
-            },
-          ],
+      idempotencyKey: randomUUID(),
+    })
+
+    if (!orderResult?.order?.id) {
+      throw new Error('Square returned empty order response')
+    }
+    orderId = orderResult.order.id
+  } catch (error) {
+    console.error('Failed to create Square order:', error)
+    throw new Error(`Square order creation error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+
+  // Create the invoice linked to the order
+  let invoiceResult
+  try {
+    invoiceResult = await squareClient.invoices.create({
+      invoice: {
+        locationId,
+        orderId,
+        primaryRecipient: {
+          customerId,
         },
-      ],
-      invoiceNumber: params.invoiceNumber,
-      title: 'Music Therapy Services',
-      description: params.description,
-      customFields: params.note
-        ? [
-            {
-              label: 'Session Notes',
-              value: params.note,
-              placement: 'ABOVE_LINE_ITEMS',
-            },
-          ]
-        : undefined,
-      deliveryMethod: 'EMAIL',
-      acceptedPaymentMethods: {
-        card: true,
-        squareGiftCard: false,
-        bankAccount: true,
-        buyNowPayLater: false,
-        cashAppPay: true,
+        paymentRequests: [
+          {
+            requestType: 'BALANCE',
+            dueDate: params.dueDate.split('T')[0], // YYYY-MM-DD format
+            automaticPaymentSource: 'NONE',
+            reminders: [
+              {
+                relativeScheduledDays: -1,
+                message: 'Your invoice from May Creative Arts is due tomorrow.',
+              },
+              {
+                relativeScheduledDays: 0,
+                message: 'Your invoice from May Creative Arts is due today.',
+              },
+              {
+                relativeScheduledDays: 3,
+                message: 'Your invoice from May Creative Arts is past due.',
+              },
+            ],
+          },
+        ],
+        invoiceNumber: params.invoiceNumber,
+        title: 'Music Therapy Services',
+        description: params.description,
+        customFields: params.note
+          ? [
+              {
+                label: 'Session Notes',
+                value: params.note,
+                placement: 'ABOVE_LINE_ITEMS',
+              },
+            ]
+          : undefined,
+        deliveryMethod: 'EMAIL',
+        acceptedPaymentMethods: {
+          card: true,
+          squareGiftCard: false,
+          bankAccount: true,
+          buyNowPayLater: false,
+          cashAppPay: true,
+        },
       },
-    },
-    idempotencyKey: randomUUID(),
-  })
+      idempotencyKey: randomUUID(),
+    })
+  } catch (error) {
+    console.error('Failed to create Square invoice:', error)
+    throw new Error(`Square invoice creation error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 
   if (!invoiceResult?.invoice?.id) {
-    throw new Error('Failed to create Square invoice')
+    throw new Error('Square returned empty invoice response')
   }
 
   const invoiceId = invoiceResult.invoice.id
 
   // Publish the invoice (sends it to the customer)
-  const publishResult = await squareClient.invoices.publish({
-    invoiceId,
-    version: invoiceResult.invoice.version!,
-    idempotencyKey: randomUUID(),
-  })
+  let publishResult
+  try {
+    publishResult = await squareClient.invoices.publish({
+      invoiceId,
+      version: invoiceResult.invoice.version!,
+      idempotencyKey: randomUUID(),
+    })
+  } catch (error) {
+    console.error('Failed to publish Square invoice:', error)
+    throw new Error(`Square invoice publish error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 
   return {
     invoiceId,
