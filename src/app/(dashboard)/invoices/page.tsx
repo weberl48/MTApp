@@ -81,6 +81,7 @@ const paymentMethodLabels: Record<string, string> = {
   self_directed: 'Self-Directed',
   group_home: 'Group Home',
   scholarship: 'Scholarship',
+  venmo: 'Venmo',
 }
 
 // Moved outside the component to avoid re-creating during render

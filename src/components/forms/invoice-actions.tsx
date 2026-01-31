@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink } from 'lucide-react'
+import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { Browser } from '@capacitor/browser'
 import { isNativePlatform } from '@/lib/capacitor/platform'
@@ -167,10 +167,16 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
           </DropdownMenuItem>
         )}
         {invoice.status !== 'paid' && (
-          <DropdownMenuItem onClick={() => updateStatus('paid')}>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Mark as Paid
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => updateStatus('paid')}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Mark as Paid
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => updateStatus('paid')}>
+              <Smartphone className="mr-2 h-4 w-4" />
+              Mark Paid (Venmo)
+            </DropdownMenuItem>
+          </>
         )}
         {invoice.status === 'paid' && (
           <DropdownMenuItem onClick={() => updateStatus('sent')}>

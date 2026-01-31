@@ -1,12 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { Resend } from 'resend'
+import { formatCurrency } from '@/lib/pricing'
 
 // Use service role for webhooks since there's no user context
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+// Send payment notification to organization owner
+async function sendPaymentNotification(squareInvoiceId: string) {
+  try {
+    // Fetch invoice with related data
+    const { data: invoice } = await supabaseAdmin
+      .from('invoices')
+      .select(`
+        id,
+        amount,
+        organization_id,
+        client:clients(name),
+        session:sessions(
+          date,
+          service_type:service_types(name)
+        )
+      `)
+      .eq('square_invoice_id', squareInvoiceId)
+      .single()
+
+    if (!invoice) return
+
+    // Fetch organization owner
+    const { data: owner } = await supabaseAdmin
+      .from('users')
+      .select('email, name')
+      .eq('organization_id', invoice.organization_id)
+      .eq('role', 'owner')
+      .single()
+
+    if (!owner?.email) return
+
+    // Extract nested data (handle Supabase join types which can be arrays or objects)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const clientData = invoice.client as any
+    const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionData = invoice.session as any
+    const session = Array.isArray(sessionData) ? sessionData[0] : sessionData
+    const serviceType = session?.service_type
+    const serviceTypeName = Array.isArray(serviceType) ? serviceType[0]?.name : serviceType?.name
+
+    // Send notification email
+    await resend.emails.send({
+      from: 'May Creative Arts <noreply@rattatata.xyz>',
+      to: [owner.email],
+      subject: `Payment Received - ${formatCurrency(invoice.amount)}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #059669;">Payment Received!</h2>
+          <p>A Square invoice has been paid:</p>
+          <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p style="margin: 4px 0;"><strong>Client:</strong> ${clientName || 'Unknown'}</p>
+            <p style="margin: 4px 0;"><strong>Service:</strong> ${serviceTypeName || 'Unknown'}</p>
+            <p style="margin: 4px 0;"><strong>Amount:</strong> ${formatCurrency(invoice.amount)}</p>
+            ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${new Date(session.date).toLocaleDateString()}</p>` : ''}
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">This is an automated notification from your MCA Manager.</p>
+        </div>
+      `,
+    })
+
+    console.log(`Payment notification sent to ${owner.email}`)
+  } catch (error) {
+    // Don't fail the webhook if notification fails
+    console.error('Failed to send payment notification:', error)
+  }
+}
 
 // Verify Square webhook signature
 function verifySquareSignature(
@@ -90,6 +163,11 @@ export async function POST(request: NextRequest) {
       }
 
       console.log(`Updated invoice ${squareInvoiceId} to status ${ourStatus}`)
+
+      // Send notification to owner when invoice is paid
+      if (ourStatus === 'paid') {
+        await sendPaymentNotification(squareInvoiceId)
+      }
     }
 
     // Handle payment events (as backup)
@@ -98,7 +176,7 @@ export async function POST(request: NextRequest) {
       const invoiceId = paymentData?.invoice_id
 
       if (invoiceId) {
-        await supabaseAdmin
+        const { error } = await supabaseAdmin
           .from('invoices')
           .update({
             status: 'paid',
@@ -106,7 +184,10 @@ export async function POST(request: NextRequest) {
           })
           .eq('square_invoice_id', invoiceId)
 
-        console.log(`Marked invoice ${invoiceId} as paid from payment event`)
+        if (!error) {
+          console.log(`Marked invoice ${invoiceId} as paid from payment event`)
+          await sendPaymentNotification(invoiceId)
+        }
       }
     }
 
