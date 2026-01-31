@@ -1,17 +1,9 @@
 import { Resend } from 'resend'
+import { escape as escapeHtml } from 'he'
+import { format, parse } from 'date-fns'
 
 // Initialize Resend - will use API key from environment
 const resend = new Resend(process.env.RESEND_API_KEY)
-
-// HTML escape function to prevent XSS in email templates
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
 
 interface SendInvoiceEmailParams {
   to: string
@@ -39,19 +31,9 @@ export async function sendInvoiceEmail({
     currency: 'USD',
   }).format(amount)
 
-  const formattedDate = new Date(sessionDate).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-
-  const formattedDueDate = dueDate
-    ? new Date(dueDate).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : null
+  // Use date-fns for consistent date formatting
+  const formattedDate = format(new Date(sessionDate), 'MMMM d, yyyy')
+  const formattedDueDate = dueDate ? format(new Date(dueDate), 'MMMM d, yyyy') : null
 
   const attachments = pdfBuffer
     ? [
@@ -316,21 +298,10 @@ export async function sendSessionRequestStatusEmail({
   responseNotes,
   portalUrl,
 }: SendSessionRequestStatusEmailParams) {
-  const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-
+  // Use date-fns for consistent date/time formatting
+  const formattedDate = format(new Date(preferredDate + 'T00:00:00'), 'EEEE, MMMM d, yyyy')
   const formattedTime = preferredTime
-    ? (() => {
-        const [hours, minutes] = preferredTime.split(':')
-        const hour = parseInt(hours)
-        const ampm = hour >= 12 ? 'PM' : 'AM'
-        const hour12 = hour % 12 || 12
-        return `${hour12}:${minutes} ${ampm}`
-      })()
+    ? format(parse(preferredTime, 'HH:mm', new Date()), 'h:mm a')
     : null
 
   const isApproved = status === 'approved'
