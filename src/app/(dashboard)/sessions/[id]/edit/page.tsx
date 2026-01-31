@@ -44,6 +44,8 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
       status,
       notes,
       client_notes,
+      group_headcount,
+      group_member_names,
       attendees:session_attendees(client_id)
     `)
     .eq('id', id)
@@ -83,6 +85,8 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     status: session.status,
     notes: decryptedNotes,
     client_notes: decryptedClientNotes,
+    group_headcount: session.group_headcount,
+    group_member_names: session.group_member_names,
     attendees: (session.attendees as { client_id: string }[]) || [],
   }
 

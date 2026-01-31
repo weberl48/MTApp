@@ -25,6 +25,8 @@ interface SessionDetails {
   duration_minutes: number
   status: string
   notes: string | null
+  group_headcount: number | null
+  group_member_names: string | null
   created_at: string
   updated_at: string
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
@@ -90,6 +92,8 @@ export default function SessionDetailPage() {
           duration_minutes,
           status,
           notes,
+          group_headcount,
+          group_member_names,
           created_at,
           updated_at,
           service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage),
@@ -396,9 +400,46 @@ export default function SessionDetailPage() {
                 {formatCurrency(totalCost / session.attendees.length)} per person
               </div>
             )}
+
+            {/* Group session indicator */}
+            {session.group_headcount && (
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                  Group Session - {session.group_headcount} participants
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Group Session Details */}
+      {session.group_headcount && (
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <CardTitle className="text-purple-900 dark:text-purple-100">Group Session Details</CardTitle>
+            <CardDescription>Participant information for this group session</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-purple-500" />
+              <div>
+                <p className="text-sm text-gray-500">Total Participants</p>
+                <p className="font-medium">{session.group_headcount} people</p>
+              </div>
+            </div>
+
+            {session.group_member_names && (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Participant Names</p>
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <p className="whitespace-pre-wrap text-sm">{session.group_member_names}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

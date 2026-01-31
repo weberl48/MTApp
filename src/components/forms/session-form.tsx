@@ -42,6 +42,8 @@ interface ExistingSession {
   status: string
   notes: string | null
   client_notes: string | null
+  group_headcount: number | null
+  group_member_names: string | null
   attendees: { client_id: string }[]
 }
 
@@ -73,6 +75,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     (existingSession?.status as 'draft' | 'submitted') || 'submitted'
   )
 
+  // Group session fields
+  const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
+  const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
+
   const storageKey = useMemo(() => {
     if (!organization?.id) return null
     return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId })
@@ -81,9 +87,17 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Get selected service type for pricing calculation
   const selectedServiceType = serviceTypes.find((st) => st.id === serviceTypeId)
 
-  // Calculate pricing whenever service type, clients, or duration change
-  const pricing = selectedServiceType && selectedClients.length > 0
-    ? calculateSessionPricing(selectedServiceType, selectedClients.length, parseInt(duration))
+  // Check if this is a group service type (has per_person_rate > 0)
+  const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
+
+  // For groups, use headcount; for individuals, use selected clients count
+  const attendeeCount = isGroupService
+    ? parseInt(groupHeadcount) || 0
+    : selectedClients.length
+
+  // Calculate pricing whenever service type, attendees, or duration change
+  const pricing = selectedServiceType && attendeeCount > 0
+    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration))
     : null
 
   // Duplicate detection
@@ -193,6 +207,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       return
     }
 
+    // Group session validation
+    if (isGroupService) {
+      const headcount = parseInt(groupHeadcount)
+      if (!headcount || headcount < 1) {
+        toast.error('Please enter the number of attendees for this group session')
+        return
+      }
+      // Require member names for submitted sessions
+      if (status === 'submitted' && !groupMemberNames.trim()) {
+        toast.error('Please enter participant names before submitting a group session')
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
@@ -212,6 +240,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             status,
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
+            group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+            group_member_names: isGroupService ? groupMemberNames.trim() || null : null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id)
@@ -259,6 +289,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             status,
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
+            group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+            group_member_names: isGroupService ? groupMemberNames.trim() || null : null,
             organization_id: organization!.id,
           })
           .select()
@@ -398,9 +430,14 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
           </div>
 
-          {/* Clients */}
+          {/* Clients - For billing entity (e.g., People Inc, BryLin) */}
           <div className="space-y-2">
-            <Label>Clients *</Label>
+            <Label>{isGroupService ? 'Billing Client *' : 'Clients *'}</Label>
+            {isGroupService && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Select the organization or client being billed for this group session.
+              </p>
+            )}
             <div className="flex flex-wrap gap-2 mb-2">
               {selectedClients.map((clientId) => (
                 <Badge
@@ -433,6 +470,56 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+
+          {/* Group Session Fields - Only show for group service types */}
+          {isGroupService && (
+            <Card className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/20">
+              <CardContent className="pt-4 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium text-purple-900 dark:text-purple-100">
+                    Group Session Details
+                  </span>
+                </div>
+
+                {/* Headcount */}
+                <div className="space-y-2">
+                  <Label htmlFor="groupHeadcount">Number of Attendees *</Label>
+                  <Input
+                    id="groupHeadcount"
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={groupHeadcount}
+                    onChange={(e) => setGroupHeadcount(e.target.value)}
+                    placeholder="Enter headcount"
+                    className="w-32"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Total number of participants in this group session.
+                  </p>
+                </div>
+
+                {/* Member Names */}
+                <div className="space-y-2">
+                  <Label htmlFor="groupMemberNames">
+                    Participant Names {status === 'submitted' && '*'}
+                  </Label>
+                  <Textarea
+                    id="groupMemberNames"
+                    value={groupMemberNames}
+                    onChange={(e) => setGroupMemberNames(e.target.value)}
+                    placeholder="List participant names (one per line or comma-separated)..."
+                    rows={4}
+                  />
+                  <p className="text-xs text-gray-500">
+                    {status === 'submitted'
+                      ? 'Required when submitting. List all participants for documentation.'
+                      : 'Optional for drafts. List all participants for documentation.'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pricing Preview */}
           {pricing && (
