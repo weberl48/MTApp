@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Calendar, Users, FileText, DollarSign, Plus, Loader2 } from 'lucide-react'
+import { Calendar, Users, FileText, DollarSign, Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { SessionRequestsManager } from '@/components/portal/session-requests-manager'
 import { useOrganization } from '@/contexts/organization-context'
@@ -15,9 +15,18 @@ interface DashboardStats {
   clientsCount: number
   pendingInvoicesCount: number
   pendingAmount: number
+  overdueInvoicesCount: number
+  overdueAmount: number
   isAdmin: boolean
   organizationId: string | null
   actualIsAdmin: boolean  // True admin status (ignores impersonation)
+}
+
+interface OverdueInvoice {
+  id: string
+  amount: number
+  due_date: string
+  client: { name: string } | null
 }
 
 interface RecentSession {
@@ -32,6 +41,7 @@ interface RecentSession {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([])
+  const [overdueInvoices, setOverdueInvoices] = useState<OverdueInvoice[]>([])
   const [loading, setLoading] = useState(true)
   const { viewAsContractor, viewAsRole } = useOrganization()
 
@@ -91,6 +101,9 @@ export default function DashboardPage() {
       // Pending invoices (admin only, not when impersonating)
       let pendingInvoicesCount = 0
       let pendingAmount = 0
+      let overdueInvoicesCount = 0
+      let overdueAmount = 0
+
       if (effectiveIsAdmin) {
         const { data: pendingInvoices } = await supabase
           .from('invoices')
@@ -99,6 +112,25 @@ export default function DashboardPage() {
 
         pendingInvoicesCount = pendingInvoices?.length || 0
         pendingAmount = pendingInvoices?.reduce((sum, inv) => sum + inv.amount, 0) || 0
+
+        // Overdue invoices (sent > 30 days ago, still not paid)
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0]
+
+        const { data: overdueData } = await supabase
+          .from('invoices')
+          .select('id, amount, due_date, client:clients(name)')
+          .eq('status', 'sent')
+          .lt('due_date', thirtyDaysAgoStr)
+          .order('due_date', { ascending: true })
+          .limit(5)
+
+        if (overdueData) {
+          setOverdueInvoices(overdueData as unknown as OverdueInvoice[])
+          overdueInvoicesCount = overdueData.length
+          overdueAmount = overdueData.reduce((sum, inv) => sum + inv.amount, 0)
+        }
       }
 
       setStats({
@@ -106,6 +138,8 @@ export default function DashboardPage() {
         clientsCount: clientsCount || 0,
         pendingInvoicesCount,
         pendingAmount,
+        overdueInvoicesCount,
+        overdueAmount,
         isAdmin: effectiveIsAdmin,
         organizationId: userProfile?.organization_id || null,
         actualIsAdmin: isAdmin,  // Store true admin status
@@ -220,6 +254,56 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* Overdue Invoices Alert - Admin Only */}
+      {stats?.isAdmin && overdueInvoices.length > 0 && (
+        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <CardTitle className="text-red-700 dark:text-red-400">
+                  Overdue Invoices
+                </CardTitle>
+              </div>
+              <Link href="/invoices">
+                <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100">
+                  View All
+                </Button>
+              </Link>
+            </div>
+            <CardDescription className="text-red-600 dark:text-red-400">
+              {stats.overdueInvoicesCount} invoice{stats.overdueInvoicesCount !== 1 ? 's' : ''} past due
+              {' • '}
+              {formatCurrency(stats.overdueAmount)} outstanding
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {overdueInvoices.map((invoice) => {
+                const clientData = invoice.client as { name: string } | { name: string }[] | null
+                const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name
+                const daysOverdue = Math.floor(
+                  (new Date().getTime() - new Date(invoice.due_date).getTime()) / (1000 * 60 * 60 * 24)
+                )
+                return (
+                  <Link
+                    key={invoice.id}
+                    href={`/invoices/${invoice.id}`}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <div>
+                      <p className="font-medium">{clientName || 'Unknown Client'}</p>
+                      <p className="text-sm text-red-600">{daysOverdue} days overdue</p>
+                    </div>
+                    <span className="font-bold text-red-700">{formatCurrency(invoice.amount)}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Session Requests - Admin Only */}
       {stats?.isAdmin && stats?.organizationId && (
