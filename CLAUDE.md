@@ -36,6 +36,12 @@ npm run cap:android  # Open in Android Studio
 npm run mobile:prepare  # Build + sync for mobile
 ```
 
+### Health Checks
+```bash
+npm run health         # Check localhost:3000
+npm run health https://your-app.vercel.app  # Check production
+```
+
 ## Architecture
 
 ### Route Groups
@@ -108,6 +114,9 @@ Service types control pricing with these fields:
 | `/api/webhooks/square` | POST | Square payment webhooks |
 | `/api/cron/send-reminders` | GET | Invoice reminder cron |
 | `/api/portal/*` | Various | Client portal endpoints |
+| `/api/health` | GET | Full health check (all services) |
+| `/api/health/live` | GET | Liveness probe (app running) |
+| `/api/health/ready` | GET | Readiness probe (DB connected) |
 
 ## Key Components
 
@@ -141,6 +150,6 @@ SQUARE_ACCESS_TOKEN=
 SQUARE_ENVIRONMENT=sandbox|production
 
 # PHI Encryption (HIPAA compliance)
-# Generate with: openssl rand -base64 32
-ENCRYPTION_KEY=your-secure-32-char-key-here
+# Generate with: openssl rand -hex 32
+ENCRYPTION_KEY=64-hex-character-key-here
 ```
