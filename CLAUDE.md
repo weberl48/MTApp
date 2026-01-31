@@ -214,3 +214,32 @@ The app supports per-contractor-per-service pricing:
 // 2. service_type defaults + user.pay_increase
 // 3. Calculated from service_type formula
 ```
+
+### Leverage Existing Packages
+
+Before implementing new functionality, always check for existing solutions:
+
+1. **Search npm** for well-maintained packages that solve the problem
+   - Prefer packages with: high weekly downloads, recent updates, TypeScript support, minimal dependencies
+   - Examples already in use: `date-fns` (dates), `sonner` (toasts), `react-pdf` (PDFs), `zod` (validation)
+
+2. **Check shadcn/ui** for components before building custom ones
+   - Run `npx shadcn@latest add <component>` to add new components
+   - Existing: Button, Card, Dialog, Select, Table, Tabs, Badge, etc.
+
+3. **Use Supabase features** before building custom backends
+   - Auth, RLS policies, real-time subscriptions, storage, edge functions
+
+4. **Evaluate before adopting**:
+   - Is the package actively maintained (commits in last 6 months)?
+   - Does it have known security vulnerabilities (`npm audit`)?
+   - Is the bundle size reasonable for the functionality?
+   - Does it have good TypeScript types?
+
+5. **Document dependencies** - When adding a new package, note why it was chosen over alternatives
+
+```bash
+# Check package health before installing
+npm view <package> time modified  # Last publish date
+npm view <package> homepage       # Check GitHub stars/issues
+```
