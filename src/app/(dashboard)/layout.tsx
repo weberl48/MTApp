@@ -11,6 +11,7 @@ import { OrganizationProvider, useOrganization } from '@/contexts/organization-c
 import { BrandingProvider } from '@/components/providers/branding-provider'
 import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
+import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -71,8 +72,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col flex-1 overflow-hidden">
               <Header user={user} />
               <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-6">
-                <OwnerOnboardingGate />
-                {children}
+                <MfaEnforcementGuard>
+                  <OwnerOnboardingGate />
+                  {children}
+                </MfaEnforcementGuard>
               </main>
             </div>
           </div>

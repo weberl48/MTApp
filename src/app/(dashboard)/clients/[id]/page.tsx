@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
 import { ClientResourcesManager } from '@/components/portal/client-resources-manager'
 import { ClientPortalAccess } from '@/components/clients/client-portal-access'
+import { decryptField } from '@/lib/crypto'
 
 interface ClientDetailPageProps {
   params: Promise<{ id: string }>
@@ -58,6 +59,9 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   if (client.organization_id !== profile.organization_id && profile.role !== 'developer') {
     notFound()
   }
+
+  // Decrypt client notes if encrypted
+  const decryptedNotes = client.notes ? await decryptField(client.notes) : null
 
   const isAdmin = ['admin', 'owner', 'developer'].includes(profile.role)
 
@@ -121,9 +125,9 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
               </Badge>
             </div>
 
-            {client.notes && (
+            {decryptedNotes && (
               <div className="pt-2 border-t">
-                <p className="text-sm text-gray-500">{client.notes}</p>
+                <p className="text-sm text-gray-500">{decryptedNotes}</p>
               </div>
             )}
           </CardContent>

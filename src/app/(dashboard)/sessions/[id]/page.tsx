@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { decryptField, isEncrypted } from '@/lib/crypto'
 
 interface SessionAttendee {
   id: string
@@ -54,6 +55,7 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadSession() {
@@ -120,6 +122,19 @@ export default function SessionDetailPage() {
 
     loadSession()
   }, [params.id, router])
+
+  // Decrypt notes when session loads
+  useEffect(() => {
+    async function decryptNotes() {
+      if (session?.notes && isEncrypted(session.notes)) {
+        const decrypted = await decryptField(session.notes)
+        setDecryptedNotes(decrypted)
+      } else {
+        setDecryptedNotes(session?.notes || null)
+      }
+    }
+    decryptNotes()
+  }, [session?.notes])
 
   const handleApprove = async () => {
     if (!session) return
@@ -416,13 +431,13 @@ export default function SessionDetailPage() {
         </CardContent>
       </Card>
 
-      {session.notes && (
+      {decryptedNotes && (
         <Card>
           <CardHeader>
             <CardTitle>Session Notes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap">{session.notes}</p>
+            <p className="whitespace-pre-wrap">{decryptedNotes}</p>
           </CardContent>
         </Card>
       )}

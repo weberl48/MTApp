@@ -1,51 +1,146 @@
-# MCA App - Detailed Reference
+# CLAUDE.md
 
-See the root `CLAUDE.md` for primary documentation. This file contains additional implementation details.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Service Type Configuration
+## Project Overview
 
-Service types are stored in the `service_types` table with these fields:
-- `base_rate` - Base price (for 30 minutes)
-- `per_person_rate` - Additional cost per person after the first (0 for individual sessions)
-- `mca_percentage` - Percentage taken by MCA (20-30%)
-- `contractor_cap` - Maximum contractor pay per session (null if no cap)
-- `rent_percentage` - Percentage for rent (10% for Matt's Music, 0 otherwise)
-- `category` - `music_individual`, `music_group`, `art_individual`, `art_group`
-- `location` - `in_home`, `matts_music`, `other`
+MCA App is a multi-tenant practice management system for May Creative Arts, handling session tracking, invoicing, and contractor payments for music/art therapy practices.
 
-## Payment Methods
+## Tech Stack
 
-Clients can pay via:
-- `private_pay` - Cash/check direct payment
-- `self_directed` - Self-directed reimbursement (often slow payer)
-- `group_home` - Group home billing via checks
-- `scholarship` - Scholarship fund
+- **Framework**: Next.js 16 (App Router) with React 19
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **UI Components**: shadcn/ui (Radix primitives)
+- **Database & Auth**: Supabase (PostgreSQL + Row Level Security)
+- **Mobile**: Capacitor (Android & iOS)
+- **Testing**: Vitest + React Testing Library
+- **Email**: Resend
+- **Payments**: Square API
 
-## Organization Settings Structure
+## Development Commands
 
-Settings stored in `organizations.settings` JSON field:
-```typescript
-{
-  invoice: { footer_text, payment_instructions, due_days, send_reminders, reminder_days[] },
-  session: { default_duration, duration_options[], require_notes, auto_submit, reminder_hours, send_reminders },
-  notification: { email_on_session_submit, email_on_invoice_paid, admin_email },
-  security: { session_timeout_minutes, require_mfa, max_login_attempts, lockout_duration_minutes }
-}
+```bash
+npm run dev          # Start Next.js dev server (http://localhost:3000)
+npm run build        # Production build
+npm run lint         # Run ESLint
+npm run test         # Run Vitest tests
+npm run test -- --watch  # Run tests in watch mode
 ```
+
+### Mobile Development
+```bash
+npm run cap:sync     # Sync web build to native projects
+npm run cap:ios      # Open in Xcode
+npm run cap:android  # Open in Android Studio
+npm run mobile:prepare  # Build + sync for mobile
+```
+
+## Architecture
+
+### Route Groups
+- `(auth)` - Login, signup, password reset (public)
+- `(dashboard)` - Main app with sidebar (requires auth)
+- `(portal)` - Client portal (token-based access, no auth)
+- `api/` - API routes for PDF generation, webhooks, etc.
+
+### Key Patterns
+
+**Supabase Client Usage**:
+- Server Components/API routes: `import { createClient } from '@/lib/supabase/server'`
+- Client Components: `import { createClient } from '@/lib/supabase/client'`
+- Service role (webhooks): `import { createServiceClient } from '@/lib/supabase/service'`
+
+**Context Providers**:
+- `OrganizationContext` - Current user + organization data (dashboard)
+- `PortalContext` - Client data for portal (token-based)
+- `BrandingProvider` - Organization branding (colors, logo)
+
+**Pricing Logic** (`src/lib/pricing/index.ts`):
+- `calculateSessionPricing()` - Computes total, MCA cut, contractor pay, rent
+- Handles duration scaling (30-min base), per-person rates for groups, contractor caps
+
+### Database Schema
+
+Core tables with RLS policies:
+- `organizations` - Multi-tenant container with settings JSON
+- `users` - Extends Supabase auth, has role enum (developer/owner/admin/contractor)
+- `clients` - Patients with payment method
+- `service_types` - Pricing configuration per organization
+- `sessions` - Session logs with status workflow (draft → submitted → approved)
+- `session_attendees` - Many-to-many for group sessions
+- `invoices` - Generated from sessions, Square integration fields
+
+Schema is in `supabase/schema.sql`. Run migrations via Supabase Dashboard or CLI.
+
+### User Roles & Permissions
+
+| Role | Access |
+|------|--------|
+| `developer` | Full system access + all organizations |
+| `owner` | Full org access, manage team, branding |
+| `admin` | Same as owner except org deletion |
+| `contractor` | Own sessions/invoices only |
+
+### Service Types
+
+Service types control pricing with these fields:
+- `base_rate` - Price for 30 minutes
+- `per_person_rate` - Additional per person after first (0 for individual)
+- `mca_percentage` - Organization's cut (20-30%)
+- `contractor_cap` - Max contractor pay (null if uncapped)
+- `rent_percentage` - Location rent (10% for Matt's Music)
+
+### Payment Methods
+
+- `private_pay` - Direct payment
+- `self_directed` - Reimbursement (often slow)
+- `group_home` - Facility billing
+- `scholarship` - Scholarship fund
 
 ## API Routes
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/invoices/[id]/pdf` | GET | Generate PDF for invoice |
-| `/api/invoices/[id]/send` | POST | Send invoice via email |
-| `/api/invoices/[id]/square` | POST | Create/send Square invoice |
-| `/api/webhooks/square` | POST | Handle Square payment webhooks |
-| `/api/cron/send-reminders` | GET | Cron job for invoice reminders |
+| `/api/invoices/[id]/pdf` | GET | Generate PDF |
+| `/api/invoices/[id]/send` | POST | Email invoice |
+| `/api/invoices/[id]/square` | POST | Create Square invoice |
+| `/api/webhooks/square` | POST | Square payment webhooks |
+| `/api/cron/send-reminders` | GET | Invoice reminder cron |
+| `/api/portal/*` | Various | Client portal endpoints |
 
 ## Key Components
 
-- `SessionForm` (`components/forms/session-form.tsx`) - Main session entry form
-- `InvoiceActions` (`components/forms/invoice-actions.tsx`) - Invoice status/payment actions
-- `InvoicePDF` (`components/pdf/invoice-pdf.tsx`) - React-PDF invoice template
-- `PayrollHubTable` (`components/tables/payroll-hub-table.tsx`) - Contractor payment tracking
+- `SessionForm` - Main session entry with pricing preview
+- `InvoiceActions` - Invoice status and payment actions
+- `InvoicePDF` - React-PDF template
+- `PayrollHubTable` - Contractor payment tracking
+- `AdminGuard` - Role-based component wrapper
+
+## Testing
+
+Tests use Vitest with jsdom. Run a single test file:
+```bash
+npm run test -- src/lib/pricing/index.test.ts
+```
+
+Existing tests cover:
+- Pricing calculations (`src/lib/pricing/index.test.ts`)
+- Session form defaults (`src/lib/session-form/defaults.test.ts`)
+- Client multi-select component (`src/components/forms/client-multi-select.test.tsx`)
+
+## Environment Variables
+
+Required in `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+RESEND_API_KEY=
+SQUARE_ACCESS_TOKEN=
+SQUARE_ENVIRONMENT=sandbox|production
+
+# PHI Encryption (HIPAA compliance)
+# Generate with: openssl rand -base64 32
+ENCRYPTION_KEY=your-secure-32-char-key-here
+```

@@ -32,6 +32,7 @@ import {
   loadSessionFormDefaults,
   saveSessionFormDefaults,
 } from '@/lib/session-form/defaults'
+import { encryptField } from '@/lib/crypto'
 
 interface ExistingSession {
   id: string
@@ -228,6 +229,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setLoading(true)
 
     try {
+      // Encrypt PHI fields before saving
+      const encryptedNotes = notes ? await encryptField(notes) : null
+      const encryptedClientNotes = clientNotes ? await encryptField(clientNotes) : null
+
       if (isEditMode && existingSession) {
         // UPDATE existing session
         const { error: sessionError } = await supabase
@@ -238,8 +243,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             duration_minutes: parseInt(duration),
             service_type_id: serviceTypeId,
             status,
-            notes: notes || null,
-            client_notes: clientNotes || null,
+            notes: encryptedNotes,
+            client_notes: encryptedClientNotes,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id)
@@ -290,8 +295,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               service_type_id: serviceTypeId,
               contractor_id: contractorId,
               status,
-              notes: notes || null,
-              client_notes: clientNotes || null,
+              notes: encryptedNotes,
+              client_notes: encryptedClientNotes,
               organization_id: organization!.id,
             })
             .select()

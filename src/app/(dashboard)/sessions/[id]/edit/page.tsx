@@ -4,6 +4,7 @@ import { SessionForm } from '@/components/forms/session-form'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import { decryptField } from '@/lib/crypto'
 
 interface EditSessionPageProps {
   params: Promise<{ id: string }>
@@ -69,6 +70,10 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     supabase.from('clients').select('id, name').order('name'),
   ])
 
+  // Decrypt PHI fields
+  const decryptedNotes = session.notes ? await decryptField(session.notes) : null
+  const decryptedClientNotes = session.client_notes ? await decryptField(session.client_notes) : null
+
   const existingSession = {
     id: session.id,
     date: session.date,
@@ -76,8 +81,8 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     duration_minutes: session.duration_minutes,
     service_type_id: session.service_type_id,
     status: session.status,
-    notes: session.notes,
-    client_notes: session.client_notes,
+    notes: decryptedNotes,
+    client_notes: decryptedClientNotes,
     attendees: (session.attendees as { client_id: string }[]) || [],
   }
 

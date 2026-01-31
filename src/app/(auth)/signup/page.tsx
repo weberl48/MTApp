@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Building2, UserPlus } from 'lucide-react'
+import { validatePassword } from '@/lib/auth/password'
+import { PasswordStrength } from '@/components/forms/password-strength'
 
 export default function SignupPage() {
   const searchParams = useSearchParams()
@@ -41,8 +43,9 @@ export default function SignupPage() {
       return
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.isValid) {
+      setError(`Password requirements not met: ${passwordValidation.message}`)
       setLoading(false)
       return
     }
@@ -229,7 +232,7 @@ export default function SignupPage() {
               autoComplete="new-password"
               minLength={8}
             />
-            <p className="text-xs text-gray-500">At least 8 characters</p>
+            <PasswordStrength password={password} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
