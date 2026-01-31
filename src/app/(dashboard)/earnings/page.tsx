@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { formatCurrency } from '@/lib/pricing'
+import { formatCurrency, calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
+import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { redirect } from 'next/navigation'
@@ -81,6 +82,25 @@ export default function EarningsPage() {
         return
       }
 
+      // Fetch contractor-specific rates
+      const [{ data: contractorData }, { data: customRates }] = await Promise.all([
+        supabase
+          .from('users')
+          .select('pay_increase')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('contractor_rates')
+          .select('service_type_id, contractor_pay')
+          .eq('contractor_id', user.id)
+      ])
+
+      const payIncrease = contractorData?.pay_increase || 0
+      const customRatesMap = new Map<string, number>()
+      for (const rate of customRates || []) {
+        customRatesMap.set(rate.service_type_id, rate.contractor_pay)
+      }
+
       // Calculate earnings from sessions
       let ytdEarnings = 0
       let ytdPaid = 0
@@ -102,21 +122,22 @@ export default function EarningsPage() {
         if (!serviceType) continue
 
         const attendeeCount = Math.max(1, (session.attendees as { id: string }[])?.length || 1)
-        const durationMultiplier = (session.duration_minutes || 30) / 30
-        const additionalPeople = attendeeCount > 1 ? attendeeCount - 1 : 0
-        const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
-        const totalAmount = baseAmount * durationMultiplier
-        const rentAmount = (totalAmount * serviceType.rent_percentage) / 100
-        let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
-        let contractorPay = totalAmount - mcaCut - rentAmount
 
-        // Apply contractor cap
-        if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
-          contractorPay = serviceType.contractor_cap
-        }
+        // Build contractor pricing overrides
+        const customPay = customRatesMap.get(serviceType.id)
+        const overrides: ContractorPricingOverrides | undefined =
+          customPay || payIncrease ? { customContractorPay: customPay, payIncrease } : undefined
 
-        // Use actual paid amount if available
-        const earnings = session.contractor_paid_amount || contractorPay
+        // Use shared pricing calculation
+        const pricing = calculateSessionPricing(
+          serviceType as ServiceType,
+          attendeeCount,
+          session.duration_minutes || 30,
+          overrides
+        )
+
+        // Use actual paid amount if available, otherwise use calculated
+        const earnings = session.contractor_paid_amount || pricing.contractorPay
 
         ytdEarnings += earnings
         if (session.contractor_paid_date) {

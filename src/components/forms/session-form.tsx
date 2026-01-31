@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { X, Calculator, AlertTriangle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { calculateSessionPricing, formatCurrency, getPricingDescription } from '@/lib/pricing'
+import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -79,6 +79,42 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
   const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
 
+  // Contractor-specific pricing overrides
+  const [contractorPayIncrease, setContractorPayIncrease] = useState<number>(0)
+  const [contractorCustomRates, setContractorCustomRates] = useState<Map<string, number>>(new Map())
+
+  // Fetch contractor-specific rates on mount
+  useEffect(() => {
+    async function loadContractorRates() {
+      // Fetch contractor's pay_increase
+      const { data: contractor } = await supabase
+        .from('users')
+        .select('pay_increase')
+        .eq('id', contractorId)
+        .single()
+
+      if (contractor?.pay_increase) {
+        setContractorPayIncrease(contractor.pay_increase)
+      }
+
+      // Fetch any custom rates for this contractor
+      const { data: rates } = await supabase
+        .from('contractor_rates')
+        .select('service_type_id, contractor_pay')
+        .eq('contractor_id', contractorId)
+
+      if (rates && rates.length > 0) {
+        const ratesMap = new Map<string, number>()
+        for (const rate of rates) {
+          ratesMap.set(rate.service_type_id, rate.contractor_pay)
+        }
+        setContractorCustomRates(ratesMap)
+      }
+    }
+
+    loadContractorRates()
+  }, [contractorId, supabase])
+
   const storageKey = useMemo(() => {
     if (!organization?.id) return null
     return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId })
@@ -95,9 +131,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     ? parseInt(groupHeadcount) || 0
     : selectedClients.length
 
+  // Build contractor pricing overrides for this service type
+  const contractorOverrides: ContractorPricingOverrides | undefined = useMemo(() => {
+    if (!serviceTypeId) return undefined
+    const customPay = contractorCustomRates.get(serviceTypeId)
+    if (!customPay && !contractorPayIncrease) return undefined
+    return {
+      customContractorPay: customPay,
+      payIncrease: contractorPayIncrease,
+    }
+  }, [serviceTypeId, contractorCustomRates, contractorPayIncrease])
+
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
-    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration))
+    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides)
     : null
 
   // Duplicate detection

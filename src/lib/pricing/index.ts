@@ -15,6 +15,17 @@ export interface PricingCalculation {
 }
 
 /**
+ * Per-contractor pricing overrides
+ * These can be fetched from contractor_rates table and users.pay_increase
+ */
+export interface ContractorPricingOverrides {
+  /** Custom contractor pay for this service type (overrides calculated pay) */
+  customContractorPay?: number
+  /** Per-session bonus added on top of contractor pay */
+  payIncrease?: number
+}
+
+/**
  * Calculate pricing for a session based on service type, number of attendees, and duration
  *
  * Pricing rules from project_notes.md:
@@ -26,11 +37,17 @@ export interface PricingCalculation {
  * - Group Art: $40 flat + $15/person, 30% MCA
  *
  * Duration multiplier: base rates are for 30 minutes, scale proportionally
+ *
+ * @param serviceType - Service type configuration
+ * @param attendeeCount - Number of attendees
+ * @param durationMinutes - Session duration in minutes (default 30)
+ * @param contractorOverrides - Optional per-contractor pricing overrides
  */
 export function calculateSessionPricing(
   serviceType: ServiceType,
   attendeeCount: number,
-  durationMinutes: number = 30
+  durationMinutes: number = 30,
+  contractorOverrides?: ContractorPricingOverrides
 ): PricingCalculation {
   // Ensure at least 1 attendee
   const count = Math.max(1, attendeeCount)
@@ -55,15 +72,32 @@ export function calculateSessionPricing(
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
 
   // Calculate contractor pay
-  // Start with: total - MCA cut - rent
-  let contractorPay = totalAmount - mcaCut - rentAmount
+  let contractorPay: number
 
-  // Apply contractor cap if specified (e.g., In-Home Group caps at $105)
-  if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
-    // Contractor maxes out, MCA takes the remainder
-    const excess = contractorPay - serviceType.contractor_cap
-    contractorPay = serviceType.contractor_cap
-    mcaCut += excess
+  if (contractorOverrides?.customContractorPay !== undefined) {
+    // Use custom contractor pay rate (from contractor_rates table)
+    // Scale by duration multiplier since custom rates are for 30 min base
+    contractorPay = contractorOverrides.customContractorPay * durationMultiplier
+    // Recalculate MCA cut: total - contractor pay - rent
+    mcaCut = totalAmount - contractorPay - rentAmount
+  } else {
+    // Default: total - MCA cut - rent
+    contractorPay = totalAmount - mcaCut - rentAmount
+
+    // Apply contractor cap if specified (e.g., In-Home Group caps at $105)
+    if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
+      // Contractor maxes out, MCA takes the remainder
+      const excess = contractorPay - serviceType.contractor_cap
+      contractorPay = serviceType.contractor_cap
+      mcaCut += excess
+    }
+  }
+
+  // Add per-session pay increase bonus (from users.pay_increase)
+  if (contractorOverrides?.payIncrease && contractorOverrides.payIncrease > 0) {
+    contractorPay += contractorOverrides.payIncrease
+    // Pay increase comes out of MCA's portion
+    mcaCut -= contractorOverrides.payIncrease
   }
 
   return {
