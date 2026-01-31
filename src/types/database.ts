@@ -159,6 +159,7 @@ export interface Database {
           name: string
           phone: string | null
           payment_info: Json | null
+          pay_increase: number
           organization_id: string
           created_at: string
           updated_at: string
@@ -170,6 +171,7 @@ export interface Database {
           name: string
           phone?: string | null
           payment_info?: Json | null
+          pay_increase?: number
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -181,7 +183,35 @@ export interface Database {
           name?: string
           phone?: string | null
           payment_info?: Json | null
+          pay_increase?: number
           organization_id?: string
+          updated_at?: string
+        }
+      }
+      contractor_rates: {
+        Row: {
+          id: string
+          contractor_id: string
+          service_type_id: string
+          contractor_pay: number
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          contractor_id: string
+          service_type_id: string
+          contractor_pay: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          contractor_id?: string
+          service_type_id?: string
+          contractor_pay?: number
+          notes?: string | null
           updated_at?: string
         }
       }
@@ -350,6 +380,8 @@ export interface Database {
           client_notes: string | null
           contractor_paid_date: string | null
           contractor_paid_amount: number | null
+          group_headcount: number | null
+          group_member_names: string | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -366,6 +398,8 @@ export interface Database {
           client_notes?: string | null
           contractor_paid_date?: string | null
           contractor_paid_amount?: number | null
+          group_headcount?: number | null
+          group_member_names?: string | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -381,6 +415,8 @@ export interface Database {
           client_notes?: string | null
           contractor_paid_date?: string | null
           contractor_paid_amount?: number | null
+          group_headcount?: number | null
+          group_member_names?: string | null
           organization_id?: string
           updated_at?: string
         }
@@ -661,6 +697,7 @@ export type Session = Database['public']['Tables']['sessions']['Row']
 export type SessionAttendee = Database['public']['Tables']['session_attendees']['Row']
 export type Invoice = Database['public']['Tables']['invoices']['Row']
 export type ClientGoal = Database['public']['Tables']['client_goals']['Row']
+export type ContractorRate = Database['public']['Tables']['contractor_rates']['Row']
 
 // Client Portal types
 export type ClientAccessToken = Database['public']['Tables']['client_access_tokens']['Row']

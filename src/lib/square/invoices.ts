@@ -1,5 +1,11 @@
-import { squareClient, getDefaultLocationId, dollarsToCents } from './client'
+import { squareClient, getDefaultLocationId, dollarsToCents, isSquareSandbox } from './client'
 import { randomUUID } from 'crypto'
+
+// Development email for sandbox testing - prevents sending to real clients
+const DEV_EMAIL = process.env.SQUARE_DEV_EMAIL || 'dev-testing@example.com'
+
+// Re-export for convenience
+export { isSquareSandbox }
 
 interface CreateSquareInvoiceParams {
   clientName: string
@@ -56,6 +62,14 @@ async function findOrCreateCustomer(
 export async function createSquareInvoice(
   params: CreateSquareInvoiceParams
 ): Promise<SquareInvoiceResult> {
+  // In sandbox mode, redirect all emails to dev email
+  const customerEmail = isSquareSandbox() ? DEV_EMAIL : params.clientEmail
+  const customerName = isSquareSandbox() ? `[TEST] ${params.clientName}` : params.clientName
+
+  if (isSquareSandbox()) {
+    console.log(`[Square Sandbox] Redirecting invoice from ${params.clientEmail} to ${DEV_EMAIL}`)
+  }
+
   // Get location ID
   let locationId: string
   try {
@@ -68,7 +82,7 @@ export async function createSquareInvoice(
   // Find or create customer in Square
   let customerId: string
   try {
-    customerId = await findOrCreateCustomer(params.clientEmail, params.clientName)
+    customerId = await findOrCreateCustomer(customerEmail, customerName)
   } catch (error) {
     console.error('Failed to find/create Square customer:', error)
     throw new Error(`Square customer error: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -89,6 +103,7 @@ export async function createSquareInvoice(
               amount: dollarsToCents(params.amount),
               currency: 'USD',
             },
+            note: params.note || undefined,
           },
         ],
         state: 'OPEN',
@@ -139,15 +154,6 @@ export async function createSquareInvoice(
         invoiceNumber: params.invoiceNumber,
         title: 'Music Therapy Services',
         description: params.description,
-        customFields: params.note
-          ? [
-              {
-                label: 'Session Notes',
-                value: params.note,
-                placement: 'ABOVE_LINE_ITEMS',
-              },
-            ]
-          : undefined,
         deliveryMethod: 'EMAIL',
         acceptedPaymentMethods: {
           card: true,

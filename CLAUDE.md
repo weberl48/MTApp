@@ -70,9 +70,10 @@ npm run health https://your-app.vercel.app  # Check production
 
 Core tables with RLS policies:
 - `organizations` - Multi-tenant container with settings JSON
-- `users` - Extends Supabase auth, has role enum (developer/owner/admin/contractor)
+- `users` - Extends Supabase auth, has role enum + `pay_increase` field
 - `clients` - Patients with payment method
 - `service_types` - Pricing configuration per organization
+- `contractor_rates` - Per-contractor-per-service custom pay rates
 - `sessions` - Session logs with status workflow (draft → submitted → approved)
 - `session_attendees` - Many-to-many for group sessions
 - `invoices` - Generated from sessions, Square integration fields
@@ -152,4 +153,64 @@ SQUARE_ENVIRONMENT=sandbox|production
 # PHI Encryption (HIPAA compliance)
 # Generate with: openssl rand -hex 32
 ENCRYPTION_KEY=64-hex-character-key-here
+```
+
+## Development Principles
+
+### HIPAA Security
+
+When handling Protected Health Information (PHI):
+
+- **Encrypt PHI fields** using `src/lib/crypto/` utilities before storing in database
+- **PHI fields include**: session notes, client notes, goal descriptions, medical info
+- **Never log PHI** - use `hashForAudit()` from `src/lib/crypto/` for audit trails
+- **Validate and sanitize** all user inputs before processing
+- **Use parameterized queries** - Supabase client handles this automatically
+- **Apply RLS policies** on all tables containing PHI
+
+```typescript
+// Example: Encrypting before save
+import { encryptField } from '@/lib/crypto'
+const encryptedNotes = await encryptField(notes)
+
+// Example: Decrypting after read
+import { decryptField, isEncrypted } from '@/lib/crypto'
+const notes = isEncrypted(session.notes)
+  ? await decryptField(session.notes)
+  : session.notes
+```
+
+### Modularity
+
+Code should be organized for reusability and maintainability:
+
+- **Business logic** in `/lib/` - reusable across pages and components
+- **UI components** in `/components/` - stateless where possible
+- **Database queries** via Supabase client, not raw SQL in components
+- **Feature flags** in `organization.settings` JSON for gradual rollout
+- **Types** in `/types/database.ts` - single source of truth for data shapes
+
+### End-User Configurability
+
+The business owner should be able to customize the app without code changes:
+
+- **Service types, rates, pricing formulas** - managed via Settings > Services
+- **Per-contractor pay rates** - via `contractor_rates` table (links contractor + service type → custom rate)
+- **Organization settings** - branding, payment methods, MFA requirements
+- **Avoid hardcoded business rules** - use database-driven configuration
+- **New features** should be toggleable per-organization when possible
+
+### Contractor Pricing Model
+
+The app supports per-contractor-per-service pricing:
+
+- `users.pay_increase` - Contractor's per-session bonus (e.g., +$2)
+- `contractor_rates` table - Custom pay rates per contractor per service type
+- When calculating contractor pay, check `contractor_rates` first, then fall back to service type default
+
+```typescript
+// Pricing lookup priority:
+// 1. contractor_rates table (specific rate for this contractor + service)
+// 2. service_type defaults + user.pay_increase
+// 3. Calculated from service_type formula
 ```

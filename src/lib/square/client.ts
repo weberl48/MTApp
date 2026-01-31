@@ -5,10 +5,20 @@ export function isSquareConfigured(): boolean {
   return !!process.env.SQUARE_ACCESS_TOKEN && process.env.SQUARE_ACCESS_TOKEN !== 'your_square_access_token_here'
 }
 
+// Check if Square is in sandbox/test mode
+export function isSquareSandbox(): boolean {
+  return process.env.SQUARE_ENVIRONMENT !== 'production'
+}
+
+// Get current Square environment for display
+export function getSquareEnvironment(): 'sandbox' | 'production' {
+  return process.env.SQUARE_ENVIRONMENT === 'production' ? 'production' : 'sandbox'
+}
+
 // Initialize Square client
 const squareClient = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN || '',
-  environment: process.env.NODE_ENV === 'production'
+  environment: process.env.SQUARE_ENVIRONMENT === 'production'
     ? SquareEnvironment.Production
     : SquareEnvironment.Sandbox,
 })

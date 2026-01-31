@@ -39,6 +39,7 @@ import { AuditLogTable } from '@/components/tables/audit-log-table'
 import { MfaSetup } from '@/components/forms/mfa-setup'
 import { toast } from 'sonner'
 import { DeveloperRoleInvites } from '@/components/invites/developer-role-invites'
+import { SquareStatusBadge } from '@/components/square/status-badge'
 import type {
   User as UserType,
   ServiceType,
@@ -272,7 +273,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+          {(isOwner || isDeveloper) && <SquareStatusBadge />}
+        </div>
         <p className="text-gray-500 dark:text-gray-400">
           {isOwner
             ? 'Manage your organization and configure the application'

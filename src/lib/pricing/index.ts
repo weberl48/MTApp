@@ -1,11 +1,17 @@
 import type { ServiceType } from '@/types/database'
 
+/**
+ * Flat fee charged for no-show sessions regardless of service type or group size
+ */
+export const NO_SHOW_FEE = 50
+
 export interface PricingCalculation {
   totalAmount: number
   perPersonCost: number
   mcaCut: number
   contractorPay: number
   rentAmount: number
+  isNoShow?: boolean
 }
 
 /**
@@ -103,9 +109,30 @@ export function calculateContractorTotal(
 }
 
 /**
- * Get a human-readable description of the pricing for a service type
+ * Calculate pricing for a no-show session
+ * No-show sessions are charged a flat $50 fee regardless of service type or group size
+ * MCA takes their percentage, contractor gets the rest (no rent for no-shows)
  */
-export function getPricingDescription(serviceType: ServiceType): string {
+export function calculateNoShowPricing(serviceType: ServiceType): PricingCalculation {
+  const totalAmount = NO_SHOW_FEE
+  const mcaCut = round((totalAmount * serviceType.mca_percentage) / 100)
+  const contractorPay = round(totalAmount - mcaCut)
+
+  return {
+    totalAmount,
+    perPersonCost: totalAmount,
+    mcaCut,
+    contractorPay,
+    rentAmount: 0,
+    isNoShow: true,
+  }
+}
+
+/**
+ * Get a human-readable description of the pricing for a service type
+ * @param showFormula - If false, returns simplified pricing without formula details (for contractors)
+ */
+export function getPricingDescription(serviceType: ServiceType, showFormula: boolean = true): string {
   const isGroup = serviceType.per_person_rate > 0
 
   let description = `$${serviceType.base_rate}`
@@ -114,14 +141,17 @@ export function getPricingDescription(serviceType: ServiceType): string {
     description += ` + $${serviceType.per_person_rate}/additional person`
   }
 
-  description += ` (${serviceType.mca_percentage}% MCA)`
+  // Only show formula details (MCA %, cap, rent) if requested
+  if (showFormula) {
+    description += ` (${serviceType.mca_percentage}% MCA)`
 
-  if (serviceType.contractor_cap) {
-    description += `, contractor max $${serviceType.contractor_cap}`
-  }
+    if (serviceType.contractor_cap) {
+      description += `, contractor max $${serviceType.contractor_cap}`
+    }
 
-  if (serviceType.rent_percentage > 0) {
-    description += `, ${serviceType.rent_percentage}% rent`
+    if (serviceType.rent_percentage > 0) {
+      description += `, ${serviceType.rent_percentage}% rent`
+    }
   }
 
   return description
