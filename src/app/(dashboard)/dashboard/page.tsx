@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Calendar, Users, FileText, DollarSign, Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
-import { SessionRequestsManager } from '@/components/portal/session-requests-manager'
 import { useOrganization } from '@/contexts/organization-context'
 
 interface DashboardStats {
@@ -303,11 +302,6 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Session Requests - Admin Only */}
-      {stats?.isAdmin && stats?.organizationId && (
-        <SessionRequestsManager organizationId={stats.organizationId} />
       )}
 
       {/* Recent Sessions */}

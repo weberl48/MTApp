@@ -330,6 +330,8 @@ export interface Database {
           mca_percentage: number
           contractor_cap: number | null
           rent_percentage: number
+          minimum_attendees: number | null
+          scholarship_discount_percentage: number | null
           is_active: boolean
           display_order: number
           organization_id: string
@@ -346,6 +348,8 @@ export interface Database {
           mca_percentage: number
           contractor_cap?: number | null
           rent_percentage?: number
+          minimum_attendees?: number | null
+          scholarship_discount_percentage?: number | null
           is_active?: boolean
           display_order?: number
           organization_id: string
@@ -361,6 +365,8 @@ export interface Database {
           mca_percentage?: number
           contractor_cap?: number | null
           rent_percentage?: number
+          minimum_attendees?: number | null
+          scholarship_discount_percentage?: number | null
           is_active?: boolean
           display_order?: number
           organization_id?: string

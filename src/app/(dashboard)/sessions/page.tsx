@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { Plus, Calendar, List, Loader2, Search, X, Filter } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
+import { SessionExportDialog } from '@/components/sessions/export-dialog'
 
 interface Session {
   id: string
@@ -61,6 +62,7 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
+  const [organizationId, setOrganizationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
 
@@ -85,15 +87,16 @@ export default function SessionsPage() {
         return
       }
 
-      // Get user role
+      // Get user role and organization
       const { data: userProfile } = await supabase
         .from('users')
-        .select('role')
+        .select('role, organization_id')
         .eq('id', user.id)
-        .single<{ role: string }>()
+        .single<{ role: string; organization_id: string }>()
 
       const admin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
       setIsAdmin(admin)
+      setOrganizationId(userProfile?.organization_id || null)
 
       // Fetch sessions with related data
       let query = supabase
@@ -217,6 +220,9 @@ export default function SessionsPage() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          {isAdmin && organizationId && (
+            <SessionExportDialog organizationId={organizationId} />
+          )}
           <Link href="/sessions/new/">
             <Button className="w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4 mr-2" />

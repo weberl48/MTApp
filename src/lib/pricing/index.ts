@@ -11,6 +11,7 @@ export interface PricingCalculation {
   mcaCut: number
   contractorPay: number
   rentAmount: number
+  scholarshipDiscount?: number
   isNoShow?: boolean
 }
 
@@ -23,6 +24,30 @@ export interface ContractorPricingOverrides {
   customContractorPay?: number
   /** Per-session bonus added on top of contractor pay */
   payIncrease?: number
+}
+
+/**
+ * Validate if attendee count meets minimum requirements for service type
+ * @returns Error message if validation fails, null if valid
+ */
+export function validateMinimumAttendees(
+  serviceType: ServiceType,
+  attendeeCount: number
+): string | null {
+  if (serviceType.minimum_attendees && attendeeCount < serviceType.minimum_attendees) {
+    return `This service requires at least ${serviceType.minimum_attendees} attendees (currently ${attendeeCount})`
+  }
+  return null
+}
+
+/**
+ * Options for pricing calculation
+ */
+export interface PricingOptions {
+  /** Optional per-contractor pricing overrides */
+  contractorOverrides?: ContractorPricingOverrides
+  /** Client payment method - used for scholarship discounts */
+  paymentMethod?: 'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
 }
 
 /**
@@ -41,14 +66,20 @@ export interface ContractorPricingOverrides {
  * @param serviceType - Service type configuration
  * @param attendeeCount - Number of attendees
  * @param durationMinutes - Session duration in minutes (default 30)
- * @param contractorOverrides - Optional per-contractor pricing overrides
+ * @param contractorOverrides - Optional per-contractor pricing overrides (deprecated, use options)
+ * @param options - Additional pricing options
  */
 export function calculateSessionPricing(
   serviceType: ServiceType,
   attendeeCount: number,
   durationMinutes: number = 30,
-  contractorOverrides?: ContractorPricingOverrides
+  contractorOverrides?: ContractorPricingOverrides,
+  options?: PricingOptions
 ): PricingCalculation {
+  // Support both old and new API
+  const effectiveOverrides = options?.contractorOverrides || contractorOverrides
+  const paymentMethod = options?.paymentMethod
+
   // Ensure at least 1 attendee
   const count = Math.max(1, attendeeCount)
 
@@ -60,7 +91,14 @@ export function calculateSessionPricing(
   // "Additional person" means everyone after the first
   const additionalPeople = count > 1 ? count - 1 : 0
   const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
-  const totalAmount = baseAmount * durationMultiplier
+  let totalAmount = baseAmount * durationMultiplier
+
+  // Apply scholarship discount if applicable
+  let scholarshipDiscount = 0
+  if (paymentMethod === 'scholarship' && serviceType.scholarship_discount_percentage) {
+    scholarshipDiscount = round((totalAmount * serviceType.scholarship_discount_percentage) / 100)
+    totalAmount = totalAmount - scholarshipDiscount
+  }
 
   // Per-person cost (for billing purposes, divided evenly)
   const perPersonCost = totalAmount / count
@@ -74,10 +112,10 @@ export function calculateSessionPricing(
   // Calculate contractor pay
   let contractorPay: number
 
-  if (contractorOverrides?.customContractorPay !== undefined) {
+  if (effectiveOverrides?.customContractorPay !== undefined) {
     // Use custom contractor pay rate (from contractor_rates table)
     // Scale by duration multiplier since custom rates are for 30 min base
-    contractorPay = contractorOverrides.customContractorPay * durationMultiplier
+    contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
     // Recalculate MCA cut: total - contractor pay - rent
     mcaCut = totalAmount - contractorPay - rentAmount
   } else {
@@ -94,19 +132,25 @@ export function calculateSessionPricing(
   }
 
   // Add per-session pay increase bonus (from users.pay_increase)
-  if (contractorOverrides?.payIncrease && contractorOverrides.payIncrease > 0) {
-    contractorPay += contractorOverrides.payIncrease
+  if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
+    contractorPay += effectiveOverrides.payIncrease
     // Pay increase comes out of MCA's portion
-    mcaCut -= contractorOverrides.payIncrease
+    mcaCut -= effectiveOverrides.payIncrease
   }
 
-  return {
+  const result: PricingCalculation = {
     totalAmount: round(totalAmount),
     perPersonCost: round(perPersonCost),
     mcaCut: round(mcaCut),
     contractorPay: round(contractorPay),
     rentAmount: round(rentAmount),
   }
+
+  if (scholarshipDiscount > 0) {
+    result.scholarshipDiscount = scholarshipDiscount
+  }
+
+  return result
 }
 
 /**

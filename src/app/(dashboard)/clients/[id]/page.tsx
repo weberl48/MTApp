@@ -6,8 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
-import { ClientResourcesManager } from '@/components/portal/client-resources-manager'
-import { ClientPortalAccess } from '@/components/clients/client-portal-access'
 import { decryptField } from '@/lib/crypto'
 
 interface ClientDetailPageProps {
@@ -62,8 +60,6 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
 
   // Decrypt client notes if encrypted
   const decryptedNotes = client.notes ? await decryptField(client.notes) : null
-
-  const isAdmin = ['admin', 'owner', 'developer'].includes(profile.role)
 
   // Get session count for this client
   const { count: sessionCount } = await supabase
@@ -159,23 +155,14 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
           </CardContent>
         </Card>
 
-        {/* Portal Access Card */}
-        {isAdmin && (
-          <ClientPortalAccess clientId={id} clientEmail={client.contact_email} />
-        )}
       </div>
 
-      {/* Tabs for Resources and other sections */}
-      <Tabs defaultValue="resources" className="w-full">
+      {/* Tabs for Sessions and Invoices */}
+      <Tabs defaultValue="sessions" className="w-full">
         <TabsList>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="resources" className="mt-4">
-          <ClientResourcesManager clientId={id} clientName={client.name} />
-        </TabsContent>
 
         <TabsContent value="sessions" className="mt-4">
           <Card>

@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { X, Calculator, AlertTriangle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides } from '@/lib/pricing'
+import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -264,6 +264,15 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       // Require member names for submitted sessions
       if (status === 'submitted' && !groupMemberNames.trim()) {
         toast.error('Please enter participant names before submitting a group session')
+        return
+      }
+    }
+
+    // Validate minimum attendees for service type (e.g., 8-week programs)
+    if (selectedServiceType) {
+      const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
+      if (minAttendeesError) {
+        toast.error(minAttendeesError)
         return
       }
     }
