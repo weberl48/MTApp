@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X } from 'lucide-react'
+import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
+import { ContractorRatesForm } from '@/components/forms/contractor-rates-form'
 import {
   Select,
   SelectContent,
@@ -33,6 +34,8 @@ interface TeamMember {
   email: string
   role: string
   phone: string | null
+  organization_id: string
+  pay_increase: number
 }
 
 interface Session {
@@ -71,6 +74,7 @@ export default function TeamMemberPage() {
   const [editingRole, setEditingRole] = useState(false)
   const [newRole, setNewRole] = useState('')
   const [savingRole, setSavingRole] = useState(false)
+  const [currentUserRole, setCurrentUserRole] = useState<string>('')
 
   useEffect(() => {
     async function loadMemberData() {
@@ -85,17 +89,19 @@ export default function TeamMemberPage() {
         return
       }
 
-      // Check if user is admin
+      // Check if user is admin or above
       const { data: userProfile } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      if (userProfile?.role !== 'admin') {
+      const isAdminOrAbove = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+      if (!isAdminOrAbove) {
         router.push('/dashboard/')
         return
       }
+      setCurrentUserRole(userProfile?.role || '')
 
       // Fetch team member details
       const { data: memberData, error } = await supabase
@@ -382,6 +388,12 @@ export default function TeamMemberPage() {
             <TabsList className="mb-4">
               <TabsTrigger value="sessions">Sessions ({totalSessions})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices.length})</TabsTrigger>
+              {member.role === 'contractor' && ['owner', 'developer'].includes(currentUserRole) && (
+                <TabsTrigger value="rates" className="flex items-center gap-1">
+                  <Settings2 className="w-4 h-4" />
+                  Rates
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="sessions">
@@ -479,6 +491,20 @@ export default function TeamMemberPage() {
                 </div>
               )}
             </TabsContent>
+
+            {member.role === 'contractor' && ['owner', 'developer'].includes(currentUserRole) && (
+              <TabsContent value="rates">
+                <ContractorRatesForm
+                  contractorId={member.id}
+                  contractorName={member.name || member.email}
+                  organizationId={member.organization_id}
+                  currentPayIncrease={member.pay_increase || 0}
+                  onPayIncreaseUpdate={(newValue) => {
+                    setMember({ ...member, pay_increase: newValue })
+                  }}
+                />
+              </TabsContent>
+            )}
           </Tabs>
         </CardContent>
       </Card>
