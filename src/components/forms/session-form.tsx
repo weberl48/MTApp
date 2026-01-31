@@ -56,7 +56,8 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization } = useOrganization()
+  const { organization, user, isOwner, isDeveloper } = useOrganization()
+  const showFinancialDetails = isOwner || isDeveloper // Hide MCA cut etc from contractors/admins
   const isEditMode = !!existingSession
 
   const [loading, setLoading] = useState(false)
@@ -547,30 +548,36 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <div className="flex items-center gap-2 mb-3">
                   <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <span className="font-medium text-blue-900 dark:text-blue-100">
-                    Pricing Breakdown
+                    {showFinancialDetails ? 'Pricing Breakdown' : 'Session Summary'}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
-                  <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
+                  {showFinancialDetails && (
+                    <>
+                      <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
+                      <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
 
-                  <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
-                  <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
+                      <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
 
-                  <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
-                  <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
+                      <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
+                      <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
 
-                  <span className="text-gray-600 dark:text-gray-400">Contractor Pay:</span>
+                      {pricing.rentAmount > 0 && (
+                        <>
+                          <span className="text-gray-600 dark:text-gray-400">Rent:</span>
+                          <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {showFinancialDetails ? 'Contractor Pay:' : 'Your Earnings:'}
+                  </span>
                   <span className="font-medium text-green-600 dark:text-green-400">
                     {formatCurrency(pricing.contractorPay)}
                   </span>
-
-                  {pricing.rentAmount > 0 && (
-                    <>
-                      <span className="text-gray-600 dark:text-gray-400">Rent:</span>
-                      <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
-                    </>
-                  )}
                 </div>
               </CardContent>
             </Card>

@@ -14,6 +14,7 @@ import {
   BarChart3,
   Wallet,
   UsersRound,
+  DollarSign,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -23,30 +24,50 @@ type NavItem = {
   name: string
   href: string
   icon: React.ComponentType<{ className?: string }>
-  adminOnly?: boolean
+  adminOnly?: boolean      // Visible to admin, owner, developer
+  ownerOnly?: boolean      // Visible to owner, developer only (NOT admin)
+  contractorOnly?: boolean // Visible to contractor only
 }
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Sessions', href: '/sessions', icon: Calendar },
-  { name: 'Clients', href: '/clients', icon: Users },
-  { name: 'Invoices', href: '/invoices', icon: FileText },
+  { name: 'Clients', href: '/clients', icon: Users, adminOnly: true },
+  { name: 'Invoices', href: '/invoices', icon: FileText, adminOnly: true },
+  { name: 'Earnings', href: '/earnings', icon: DollarSign, contractorOnly: true },
   { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
-  { name: 'Payments', href: '/payments', icon: Wallet, adminOnly: true },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, adminOnly: true },
+  { name: 'Payments', href: '/payments', icon: Wallet, ownerOnly: true },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, ownerOnly: true },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { isAdmin, isDeveloper, isOwner } = useOrganization()
+  const { isAdmin, isDeveloper, isOwner, user } = useOrganization()
+
+  // Role checks
+  const isOwnerOrDev = isOwner || isDeveloper
+  const isAdminOrAbove = isAdmin || isOwnerOrDev
+  const isContractor = user?.role === 'contractor'
 
   // Filter navigation based on user role
-  const isAdminOrAbove = isAdmin || isOwner || isDeveloper
-  const filteredNavigation = navigation.filter(
-    (item) => !item.adminOnly || isAdminOrAbove
-  )
+  const filteredNavigation = navigation.filter((item) => {
+    // Contractor-only items: show only to contractors
+    if (item.contractorOnly) {
+      return isContractor
+    }
+    // Owner-only items: show to owner and developer, NOT admin
+    if (item.ownerOnly) {
+      return isOwnerOrDev
+    }
+    // Admin-only items: show to admin, owner, developer
+    if (item.adminOnly) {
+      return isAdminOrAbove
+    }
+    // Default: show to everyone
+    return true
+  })
 
   return (
     <>
