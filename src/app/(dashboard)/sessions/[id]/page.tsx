@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { decryptField, isEncrypted } from '@/lib/crypto'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 
 interface SessionAttendee {
   id: string
@@ -236,26 +237,23 @@ export default function SessionDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: 'Sessions', href: '/sessions' },
+        { label: session.service_type?.name || 'Session Details' },
+      ]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3 min-w-0">
-          <Link href="/sessions">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
-              {(session.service_type?.name || 'Session Details').replaceAll('-', '‑')}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              {new Date(session.date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
+            {(session.service_type?.name || 'Session Details').replaceAll('-', '‑')}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            {new Date(session.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Badge className={statusColors[session.status]}>

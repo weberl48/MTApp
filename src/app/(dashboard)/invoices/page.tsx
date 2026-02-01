@@ -14,13 +14,15 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, CheckCircle, Loader2, AlertTriangle, Eye, Download, Send, CheckCheck } from 'lucide-react'
+import { FileText, Clock, CheckCircle, AlertTriangle, Eye, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
+import { InvoicesListSkeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Invoice {
   id: string
@@ -414,11 +416,7 @@ export default function InvoicesPage() {
   const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    )
+    return <InvoicesListSkeleton />
   }
 
   return (

@@ -15,10 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Loader2, Search, X, Filter } from 'lucide-react'
+import { Plus, Calendar, List, Search, X, Filter } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
+import { SessionsListSkeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Session {
   id: string
@@ -191,11 +193,7 @@ export default function SessionsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    )
+    return <SessionsListSkeleton />
   }
 
   return (

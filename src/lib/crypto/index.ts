@@ -58,11 +58,11 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
  * Returns base64-encoded string: salt:iv:ciphertext
  */
 export async function encryptField(plaintext: string): Promise<string> {
-  const encryptionKey = process.env.ENCRYPTION_KEY || process.env.NEXT_PUBLIC_ENCRYPTION_KEY
+  // SECURITY: Only use server-side ENCRYPTION_KEY, never public env vars
+  const encryptionKey = process.env.ENCRYPTION_KEY
 
   if (!encryptionKey) {
-    console.warn('ENCRYPTION_KEY not set - storing data unencrypted')
-    return plaintext
+    throw new Error('ENCRYPTION_KEY environment variable is required for PHI encryption')
   }
 
   if (!plaintext || plaintext.trim() === '') {
@@ -101,11 +101,11 @@ export async function encryptField(plaintext: string): Promise<string> {
  * Expects base64-encoded string: enc:salt:iv:ciphertext
  */
 export async function decryptField(encrypted: string): Promise<string> {
-  const encryptionKey = process.env.ENCRYPTION_KEY || process.env.NEXT_PUBLIC_ENCRYPTION_KEY
+  // SECURITY: Only use server-side ENCRYPTION_KEY, never public env vars
+  const encryptionKey = process.env.ENCRYPTION_KEY
 
   if (!encryptionKey) {
-    console.warn('ENCRYPTION_KEY not set - returning data as-is')
-    return encrypted
+    throw new Error('ENCRYPTION_KEY environment variable is required for PHI decryption')
   }
 
   // Check if data is actually encrypted

@@ -5,9 +5,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Calendar, Users, FileText, DollarSign, Plus, Loader2, AlertTriangle } from 'lucide-react'
+import { Calendar, Users, FileText, DollarSign, Plus, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { useOrganization } from '@/contexts/organization-context'
+import { DashboardSkeleton } from '@/components/ui/skeleton'
 
 interface DashboardStats {
   sessionsCount: number
@@ -171,11 +172,7 @@ export default function DashboardPage() {
   }, [viewAsContractor, isViewingAsContractor])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   return (

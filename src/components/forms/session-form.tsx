@@ -387,7 +387,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           if (invoicesError) {
             console.error('Error creating invoices:', invoicesError)
-            // Don't fail the whole submission, just log the error
+            // Notify user that invoices weren't created (session still saved)
+            toast.error('Session saved but invoices could not be created. Please create invoices manually.')
           }
         }
 
