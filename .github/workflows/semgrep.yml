@@ -1,0 +1,57 @@
+# Semgrep Security Analysis
+# Additional SAST scanning with TypeScript/React-specific rules
+# Free tier: https://semgrep.dev/pricing
+# https://semgrep.dev/docs/semgrep-ci/overview/
+
+name: Semgrep Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # Run weekly on Saturdays at 3 AM UTC
+    - cron: "0 3 * * 6"
+
+jobs:
+  semgrep:
+    name: Scan
+    runs-on: ubuntu-latest
+
+    # Skip dependabot PRs to avoid noise
+    if: github.actor != 'dependabot[bot]'
+
+    container:
+      image: semgrep/semgrep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: semgrep ci
+        env:
+          # Use Semgrep's curated rulesets for JavaScript/TypeScript
+          # These cover OWASP Top 10, React security, and more
+          SEMGREP_RULES: >-
+            p/javascript
+            p/typescript
+            p/react
+            p/nextjs
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+
+      # Optional: Upload results to GitHub Security tab
+      # Requires SARIF support (available in Semgrep free tier)
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        continue-on-error: true
