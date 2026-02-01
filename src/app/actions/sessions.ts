@@ -44,6 +44,17 @@ export async function markSessionNoShow(sessionId: string) {
 export async function cancelSession(sessionId: string) {
   const supabase = await createClient()
 
+  // Delete any invoices for this session (they shouldn't exist for cancelled sessions)
+  const { error: invoicesError } = await supabase
+    .from('invoices')
+    .delete()
+    .eq('session_id', sessionId)
+
+  if (invoicesError) {
+    return { success: false, error: invoicesError.message }
+  }
+
+  // Update session status to cancelled
   const { error } = await supabase
     .from('sessions')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -56,6 +67,7 @@ export async function cancelSession(sessionId: string) {
   revalidatePath('/sessions')
   revalidatePath(`/sessions/${sessionId}`)
   revalidatePath('/dashboard')
+  revalidatePath('/invoices')
 
   return { success: true }
 }
