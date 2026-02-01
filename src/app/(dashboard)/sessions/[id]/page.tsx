@@ -19,6 +19,7 @@ import {
   cancelSession,
   deleteSession,
 } from '@/app/actions/sessions'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface SessionAttendee {
   id: string
@@ -61,35 +62,23 @@ const statusLabels: Record<string, string> = {
 export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { isAdmin, user, loading: contextLoading } = useOrganization()
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const currentUserId = user?.id || null
 
   useEffect(() => {
     async function loadSession() {
       const supabase = createClient()
       const sessionId = params.id as string
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
         router.push('/login/')
         return
       }
-
-      setCurrentUserId(user.id)
-
-      // Get user role
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single<{ role: string }>()
-
-      const admin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
-      setIsAdmin(admin)
 
       // Fetch session with related data
       const { data, error } = await supabase
@@ -122,12 +111,7 @@ export default function SessionDetailPage() {
         return
       }
 
-      // Check access - contractors can only see their own sessions
       const sessionData = data as unknown as SessionDetails
-      if (!admin && sessionData.contractor?.id !== user.id) {
-        router.push('/sessions/')
-        return
-      }
 
       setSession(sessionData)
       setLoading(false)
@@ -201,7 +185,7 @@ export default function SessionDetailPage() {
     })
   }
 
-  if (loading) {
+  if (loading || contextLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
@@ -222,6 +206,12 @@ export default function SessionDetailPage() {
         </Link>
       </div>
     )
+  }
+
+  // Check access - contractors can only see their own sessions
+  if (!isAdmin && session.contractor?.id !== currentUserId) {
+    router.push('/sessions/')
+    return null
   }
 
   const totalCost = session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0) || 0
