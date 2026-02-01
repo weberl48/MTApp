@@ -17,6 +17,7 @@ import {
 import Link from 'next/link'
 import { Plus, Calendar, List, Search, X, Filter } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
@@ -60,6 +61,8 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
+const ITEMS_PER_PAGE = 50
+
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
@@ -75,6 +78,9 @@ export default function SessionsPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  // Pagination state
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
 
   useEffect(() => {
     async function loadSessions() {
@@ -184,12 +190,24 @@ export default function SessionsPage() {
 
   const hasActiveFilters = searchQuery || statusFilter !== 'all' || contractorFilter !== 'all' || dateFrom || dateTo
 
+  // Paginated sessions (show only up to visibleCount)
+  const paginatedSessions = useMemo(() => {
+    return filteredSessions.slice(0, visibleCount)
+  }, [filteredSessions, visibleCount])
+
+  const hasMoreSessions = filteredSessions.length > visibleCount
+
+  function loadMoreSessions() {
+    setVisibleCount(prev => prev + ITEMS_PER_PAGE)
+  }
+
   function clearFilters() {
     setSearchQuery('')
     setStatusFilter('all')
     setContractorFilter('all')
     setDateFrom('')
     setDateTo('')
+    setVisibleCount(ITEMS_PER_PAGE) // Reset pagination when clearing filters
   }
 
   if (loading) {
@@ -306,6 +324,45 @@ export default function SessionsPage() {
                   )}
 
                   <div className="space-y-2">
+                    <label className="text-sm font-medium">Date range</label>
+                    <div className="flex flex-wrap gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const today = new Date()
+                          setDateFrom(format(startOfMonth(today), 'yyyy-MM-dd'))
+                          setDateTo(format(endOfMonth(today), 'yyyy-MM-dd'))
+                        }}
+                      >
+                        This Month
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const lastMonth = subMonths(new Date(), 1)
+                          setDateFrom(format(startOfMonth(lastMonth), 'yyyy-MM-dd'))
+                          setDateTo(format(endOfMonth(lastMonth), 'yyyy-MM-dd'))
+                        }}
+                      >
+                        Last Month
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const today = new Date()
+                          setDateFrom(format(subDays(today, 90), 'yyyy-MM-dd'))
+                          setDateTo(format(today, 'yyyy-MM-dd'))
+                        }}
+                      >
+                        Last 90 Days
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-sm font-medium">From date</label>
                     <Input
                       type="date"
@@ -337,12 +394,13 @@ export default function SessionsPage() {
               {filteredSessions.length === sessions.length
                 ? `${sessions.length} sessions total`
                 : `${filteredSessions.length} of ${sessions.length} sessions`}
+              {hasMoreSessions && ` (showing ${paginatedSessions.length})`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {filteredSessions.length > 0 ? (
+            {paginatedSessions.length > 0 ? (
               <div className="space-y-4">
-                {filteredSessions.map((session) => {
+                {paginatedSessions.map((session) => {
                   const totalCost = session.attendees?.reduce(
                     (sum, a) => sum + (a.individual_cost || 0),
                     0
@@ -400,6 +458,15 @@ export default function SessionsPage() {
                     </Link>
                   )
                 })}
+
+                {/* Load More Button */}
+                {hasMoreSessions && (
+                  <div className="flex justify-center pt-4">
+                    <Button variant="outline" onClick={loadMoreSessions}>
+                      Load More ({filteredSessions.length - paginatedSessions.length} remaining)
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">

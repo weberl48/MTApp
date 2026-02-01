@@ -18,7 +18,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X, Calculator, AlertTriangle } from 'lucide-react'
+import { X, Calculator, AlertTriangle, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
@@ -78,6 +78,25 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
   const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
+
+  // Field validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  function setFieldError(field: string, message: string) {
+    setErrors(prev => ({ ...prev, [field]: message }))
+  }
+
+  function clearFieldError(field: string) {
+    setErrors(prev => {
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
+  function clearAllErrors() {
+    setErrors({})
+  }
 
   // Contractor-specific pricing overrides
   const [contractorPayIncrease, setContractorPayIncrease] = useState<number>(0)
@@ -243,28 +262,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    clearAllErrors()
+
+    let hasErrors = false
 
     if (!serviceTypeId) {
-      toast.error('Please select a service type')
-      return
+      setFieldError('serviceType', 'Please select a service type')
+      hasErrors = true
     }
 
     if (selectedClients.length === 0) {
-      toast.error('Please add at least one client')
-      return
+      setFieldError('clients', 'Please add at least one client')
+      hasErrors = true
     }
 
     // Group session validation
     if (isGroupService) {
       const headcount = parseInt(groupHeadcount)
       if (!headcount || headcount < 1) {
-        toast.error('Please enter the number of attendees for this group session')
-        return
+        setFieldError('groupHeadcount', 'Please enter the number of attendees')
+        hasErrors = true
       }
       // Require member names for submitted sessions
       if (status === 'submitted' && !groupMemberNames.trim()) {
-        toast.error('Please enter participant names before submitting a group session')
-        return
+        setFieldError('groupMemberNames', 'Please enter participant names before submitting')
+        hasErrors = true
       }
     }
 
@@ -272,9 +294,14 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     if (selectedServiceType) {
       const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
       if (minAttendeesError) {
-        toast.error(minAttendeesError)
-        return
+        setFieldError('clients', minAttendeesError)
+        hasErrors = true
       }
+    }
+
+    if (hasErrors) {
+      toast.error('Please fix the errors below')
+      return
     }
 
     setLoading(true)
@@ -468,8 +495,14 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           {/* Service Type */}
           <div className="space-y-2">
             <Label htmlFor="serviceType">Service Type *</Label>
-            <Select value={serviceTypeId} onValueChange={setServiceTypeId}>
-              <SelectTrigger>
+            <Select
+              value={serviceTypeId}
+              onValueChange={(val) => {
+                setServiceTypeId(val)
+                clearFieldError('serviceType')
+              }}
+            >
+              <SelectTrigger className={errors.serviceType ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent>
@@ -480,6 +513,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 ))}
               </SelectContent>
             </Select>
+            {errors.serviceType && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.serviceType}
+              </p>
+            )}
             {selectedServiceType && showFinancialDetails && (
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {getPricingDescription(selectedServiceType)}
@@ -518,8 +557,17 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <ClientMultiSelect
                 clients={clients}
                 selectedIds={selectedClients}
-                onChange={setSelectedClients}
+                onChange={(ids) => {
+                  setSelectedClients(ids)
+                  if (ids.length > 0) clearFieldError('clients')
+                }}
               />
+            )}
+            {errors.clients && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.clients}
+              </p>
             )}
             {clients.length === 0 && (
               <p className="text-sm text-amber-600 dark:text-amber-400">
@@ -547,13 +595,23 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                     min="1"
                     max="50"
                     value={groupHeadcount}
-                    onChange={(e) => setGroupHeadcount(e.target.value)}
+                    onChange={(e) => {
+                      setGroupHeadcount(e.target.value)
+                      if (e.target.value) clearFieldError('groupHeadcount')
+                    }}
                     placeholder="Enter headcount"
-                    className="w-32"
+                    className={`w-32 ${errors.groupHeadcount ? 'border-red-500' : ''}`}
                   />
-                  <p className="text-xs text-gray-500">
-                    Total number of participants in this group session.
-                  </p>
+                  {errors.groupHeadcount ? (
+                    <p className="text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.groupHeadcount}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      Total number of participants in this group session.
+                    </p>
+                  )}
                 </div>
 
                 {/* Member Names */}
@@ -564,15 +622,26 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   <Textarea
                     id="groupMemberNames"
                     value={groupMemberNames}
-                    onChange={(e) => setGroupMemberNames(e.target.value)}
+                    onChange={(e) => {
+                      setGroupMemberNames(e.target.value)
+                      if (e.target.value.trim()) clearFieldError('groupMemberNames')
+                    }}
                     placeholder="List participant names (one per line or comma-separated)..."
                     rows={4}
+                    className={errors.groupMemberNames ? 'border-red-500' : ''}
                   />
-                  <p className="text-xs text-gray-500">
-                    {status === 'submitted'
-                      ? 'Required when submitting. List all participants for documentation.'
-                      : 'Optional for drafts. List all participants for documentation.'}
-                  </p>
+                  {errors.groupMemberNames ? (
+                    <p className="text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.groupMemberNames}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      {status === 'submitted'
+                        ? 'Required when submitting. List all participants for documentation.'
+                        : 'Optional for drafts. List all participants for documentation.'}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
