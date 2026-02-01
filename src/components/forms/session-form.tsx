@@ -302,6 +302,18 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       }
     }
 
+    // Require notes when submitting (not for drafts)
+    if (status === 'submitted') {
+      if (!notes.trim()) {
+        setFieldError('notes', 'Internal notes are required when submitting')
+        hasErrors = true
+      }
+      if (!clientNotes.trim()) {
+        setFieldError('clientNotes', 'Client notes are required when submitting')
+        hasErrors = true
+      }
+    }
+
     if (hasErrors) {
       toast.error('Please fix the errors below')
       return
@@ -748,32 +760,54 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Internal Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Internal Notes</Label>
+            <Label htmlFor="notes">Internal Notes {status === 'submitted' && '*'}</Label>
             <Textarea
               id="notes"
               placeholder="Internal notes (not visible to client)..."
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => {
+                setNotes(e.target.value)
+                if (e.target.value.trim()) clearFieldError('notes')
+              }}
               rows={3}
+              className={errors.notes ? 'border-red-500' : ''}
             />
-            <p className="text-xs text-gray-500">
-              These notes are for internal use only and will not be shared with the client.
-            </p>
+            {errors.notes ? (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.notes}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">
+                These notes are for internal use only and will not be shared with the client.
+              </p>
+            )}
           </div>
 
           {/* Client-Facing Notes */}
           <div className="space-y-2">
-            <Label htmlFor="clientNotes">Client Notes</Label>
+            <Label htmlFor="clientNotes">Client Notes {status === 'submitted' && '*'}</Label>
             <Textarea
               id="clientNotes"
               placeholder="Notes to share with the client in their portal..."
               value={clientNotes}
-              onChange={(e) => setClientNotes(e.target.value)}
+              onChange={(e) => {
+                setClientNotes(e.target.value)
+                if (e.target.value.trim()) clearFieldError('clientNotes')
+              }}
               rows={3}
+              className={errors.clientNotes ? 'border-red-500' : ''}
             />
-            <p className="text-xs text-gray-500">
-              These notes will be visible to the client in their portal.
-            </p>
+            {errors.clientNotes ? (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.clientNotes}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">
+                These notes will be visible to the client in their portal.
+              </p>
+            )}
           </div>
 
           {/* Status */}
