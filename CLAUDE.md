@@ -13,7 +13,7 @@ MCA App is a multi-tenant practice management system for May Creative Arts, hand
 - **Styling**: Tailwind CSS 4
 - **UI Components**: shadcn/ui (Radix primitives)
 - **Database & Auth**: Supabase (PostgreSQL + Row Level Security)
-- **Mobile**: Capacitor (Android & iOS)
+- **Mobile**: PWA (Progressive Web App)
 - **Testing**: Vitest + React Testing Library
 - **Email**: Resend
 - **Payments**: Square API
@@ -28,13 +28,16 @@ npm run test         # Run Vitest tests
 npm run test -- --watch  # Run tests in watch mode
 ```
 
-### Mobile Development
-```bash
-npm run cap:sync     # Sync web build to native projects
-npm run cap:ios      # Open in Xcode
-npm run cap:android  # Open in Android Studio
-npm run mobile:prepare  # Build + sync for mobile
-```
+### PWA (Mobile)
+
+The app is a Progressive Web App that can be installed on mobile devices:
+
+- **Install**: Users visit the site and tap "Add to Home Screen"
+- **Offline**: Service worker caches pages for offline access
+- **Icons**: Add 192x192 and 512x512 PNG icons to `public/icons/`
+- **Manifest**: Configuration in `public/manifest.json`
+
+Note: Native app builds (Capacitor) are shelved in `feature/capacitor-mobile` branch.
 
 ### Health Checks
 ```bash
