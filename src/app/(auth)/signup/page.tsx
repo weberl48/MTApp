@@ -56,7 +56,7 @@ export default function SignupPage() {
       return
     }
 
-    if (signupType === 'join-org' && !inviteCode.trim()) {
+    if (signupType === 'join-org' && !inviteCode.trim() && !inviteToken) {
       setError('Please enter an invite code or organization ID')
       setLoading(false)
       return
