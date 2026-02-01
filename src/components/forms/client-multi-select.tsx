@@ -28,9 +28,19 @@ export function ClientMultiSelect({ clients, selectedIds, onChange, disabled }: 
 
   const filteredClients = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return clients
-    return clients.filter((c) => c.name.toLowerCase().includes(q))
-  }, [clients, query])
+    let filtered = clients
+    if (q) {
+      filtered = clients.filter((c) => c.name.toLowerCase().includes(q))
+    }
+    // Sort: selected clients first, then alphabetically
+    return [...filtered].sort((a, b) => {
+      const aSelected = selectedSet.has(a.id)
+      const bSelected = selectedSet.has(b.id)
+      if (aSelected && !bSelected) return -1
+      if (!aSelected && bSelected) return 1
+      return a.name.localeCompare(b.name)
+    })
+  }, [clients, query, selectedSet])
 
   function setClientChecked(clientId: string, checked: boolean) {
     if (checked) {

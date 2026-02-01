@@ -18,7 +18,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X, Calculator, AlertTriangle, AlertCircle } from 'lucide-react'
+import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
 import type { ServiceType, Client } from '@/types/database'
@@ -81,6 +81,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Success state for "Log Another" flow
+  const [showSuccess, setShowSuccess] = useState(false)
 
   function setFieldError(field: string, message: string) {
     setErrors(prev => ({ ...prev, [field]: message }))
@@ -429,8 +432,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         }
 
         toast.success('Session logged successfully!')
-        router.push('/sessions/')
-        router.refresh()
+        setShowSuccess(true)
       }
     } catch (error) {
       console.error('Error saving session:', error)
@@ -445,6 +447,58 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     return clients.find((c) => c.id === clientId)?.name || 'Unknown'
   }
 
+  // Reset form for logging another session
+  function handleLogAnother() {
+    setDate(new Date().toISOString().split('T')[0])
+    setNotes('')
+    setClientNotes('')
+    setGroupHeadcount('')
+    setGroupMemberNames('')
+    setShowSuccess(false)
+    clearAllErrors()
+    // Keep: time, duration, serviceTypeId, selectedClients (remembered)
+  }
+
+  // Show success state with options after submission
+  if (showSuccess) {
+    return (
+      <Card className="border-green-200 dark:border-green-800">
+        <CardContent className="pt-8 pb-8">
+          <div className="text-center space-y-6">
+            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Session Logged!</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                Your session has been saved and submitted for approval.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                type="button"
+                size="lg"
+                onClick={handleLogAnother}
+                className="order-1 sm:order-2"
+              >
+                Log Another Session
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => router.push('/sessions/')}
+                className="order-2 sm:order-1"
+              >
+                View All Sessions
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <Card>
@@ -452,8 +506,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           <CardTitle>Session Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Date and Time - stacks on mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Date *</Label>
               <Input
@@ -462,6 +516,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
+                className="text-base" // Prevents zoom on iOS
               />
             </div>
             <div className="space-y-2">
@@ -472,6 +527,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required
+                className="text-base" // Prevents zoom on iOS
               />
             </div>
           </div>

@@ -12,6 +12,7 @@ import { BrandingProvider } from '@/components/providers/branding-provider'
 import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
+import { QuickSessionFab } from '@/components/layout/quick-session-fab'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -80,6 +81,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <Toaster />
+          <QuickSessionFab />
         </div>
       </ActivityTracker>
     </BrandingProvider>
