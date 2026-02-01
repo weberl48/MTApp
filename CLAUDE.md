@@ -246,3 +246,15 @@ Before implementing new functionality, always check for existing solutions:
 npm view <package> time modified  # Last publish date
 npm view <package> homepage       # Check GitHub stars/issues
 ```
+
+### Development Workflow
+
+**Before starting development each day:**
+- Run `npm outdated` to check for package updates
+- Review changelogs for major framework updates (Next.js, React, Tailwind)
+- Run `npm audit` to check for security vulnerabilities
+
+**When doing development work:**
+- Always reference the official Next.js documentation at https://nextjs.org/docs for current best practices
+- Check that code patterns match the latest stable Next.js version
+- When implementing new features, verify the approach against current docs before coding
