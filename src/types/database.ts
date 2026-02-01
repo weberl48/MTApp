@@ -294,6 +294,7 @@ export interface Database {
           contact_phone: string | null
           payment_method: PaymentMethod
           notes: string | null
+          square_customer_id: string | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -305,6 +306,7 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           notes?: string | null
+          square_customer_id?: string | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -315,6 +317,7 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           notes?: string | null
+          square_customer_id?: string | null
           organization_id?: string
           updated_at?: string
         }
