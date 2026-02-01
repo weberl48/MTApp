@@ -130,12 +130,12 @@ export default function PortalSessionsPage() {
           )}
 
           {session.client_notes && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-muted rounded-lg p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                 <FileText className="h-4 w-4" />
                 Session Notes
               </div>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {session.client_notes}
               </p>
             </div>
@@ -163,11 +163,11 @@ export default function PortalSessionsPage() {
   function getRequestStatusBadge(status: string) {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700">Pending</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Pending</Badge>
       case 'approved':
-        return <Badge className="bg-green-100 text-green-700">Approved</Badge>
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Approved</Badge>
       case 'declined':
-        return <Badge className="bg-red-100 text-red-700">Declined</Badge>
+        return <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Declined</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -192,7 +192,7 @@ export default function PortalSessionsPage() {
 
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Send className="h-5 w-5" />
@@ -207,7 +207,7 @@ export default function PortalSessionsPage() {
               {pendingRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="flex items-center justify-between p-3 bg-white rounded-lg border"
+                  className="flex items-center justify-between p-3 bg-card rounded-lg border"
                 >
                   <div>
                     <p className="font-medium">

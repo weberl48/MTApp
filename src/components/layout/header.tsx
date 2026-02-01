@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import type { User } from '@/types/database'
 
 interface HeaderProps {
@@ -319,6 +320,9 @@ export function Header({ user }: HeaderProps) {
           </DropdownMenu>
         )}
       </div>
+
+      {/* Theme toggle */}
+      <ThemeToggle />
 
       {/* User menu */}
       <DropdownMenu>

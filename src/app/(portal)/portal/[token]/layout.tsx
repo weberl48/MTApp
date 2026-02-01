@@ -46,7 +46,7 @@ function PortalHeader() {
   const { client, organization } = usePortal()
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b bg-background">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -84,10 +84,10 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-          <p className="mt-2 text-gray-600">Loading your portal...</p>
+          <p className="mt-2 text-muted-foreground">Loading your portal...</p>
         </div>
       </div>
     )
@@ -95,18 +95,18 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
   if (error || !isValid) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-6 w-6 text-red-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 text-center">
+          <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold text-foreground mb-2">
             Access Link Expired
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             {error || 'This portal link is no longer valid.'}
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-muted-foreground mb-6">
             Please request a new link by entering your email below, or contact your therapist.
           </p>
           <Button onClick={() => router.push('/portal/')} className="w-full">
@@ -118,7 +118,7 @@ function PortalContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <PortalHeader />
       <main className="container mx-auto px-4 py-6">{children}</main>
     </div>

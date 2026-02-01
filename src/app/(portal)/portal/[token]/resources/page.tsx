@@ -239,19 +239,19 @@ export default function PortalResourcesPage() {
             <div
               className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${
                 resource.resource_type === 'homework'
-                  ? 'bg-orange-100'
+                  ? 'bg-orange-100 dark:bg-orange-900/30'
                   : resource.resource_type === 'file'
-                  ? 'bg-blue-100'
-                  : 'bg-purple-100'
+                  ? 'bg-blue-100 dark:bg-blue-900/30'
+                  : 'bg-purple-100 dark:bg-purple-900/30'
               }`}
             >
               <Icon
                 className={`h-5 w-5 ${
                   resource.resource_type === 'homework'
-                    ? 'text-orange-600'
+                    ? 'text-orange-600 dark:text-orange-400'
                     : resource.resource_type === 'file'
-                    ? 'text-blue-600'
-                    : 'text-purple-600'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-purple-600 dark:text-purple-400'
                 }`}
               />
             </div>
@@ -273,7 +273,7 @@ export default function PortalResourcesPage() {
 
                 <div className="flex items-center gap-2">
                   {resource.is_completed && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Done
                     </Badge>

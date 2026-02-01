@@ -221,7 +221,7 @@ export function MfaSetup() {
 
           <div className="space-y-4">
             {enrollmentData?.totp.qr_code && (
-              <div className="flex justify-center p-4 bg-white rounded-lg">
+              <div className="flex justify-center p-4 bg-white dark:bg-gray-100 rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={enrollmentData.totp.qr_code}

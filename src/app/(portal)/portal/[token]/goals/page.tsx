@@ -77,11 +77,11 @@ export default function PortalGoalsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case 'met':
-        return <Badge className="bg-green-100 text-green-700">Goal Met</Badge>
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Goal Met</Badge>
       case 'not_met':
-        return <Badge className="bg-red-100 text-red-700">Not Met</Badge>
+        return <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Not Met</Badge>
       default:
-        return <Badge className="bg-blue-100 text-blue-700">In Progress</Badge>
+        return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">In Progress</Badge>
     }
   }
 
@@ -150,7 +150,7 @@ export default function PortalGoalsPage() {
               {/* Progress bar */}
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-100 rounded-full overflow-hidden flex">
+                  <div className="h-4 bg-muted rounded-full overflow-hidden flex">
                     <div
                       className="h-full bg-green-500 transition-all"
                       style={{
@@ -172,17 +172,17 @@ export default function PortalGoalsPage() {
 
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{summary.active}</p>
-                  <p className="text-xs text-gray-600">Active</p>
+                <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{summary.active}</p>
+                  <p className="text-xs text-muted-foreground">Active</p>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{summary.met}</p>
-                  <p className="text-xs text-gray-600">Met</p>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{summary.met}</p>
+                  <p className="text-xs text-muted-foreground">Met</p>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-gray-600">{summary.not_met}</p>
-                  <p className="text-xs text-gray-600">Not Met</p>
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <p className="text-2xl font-bold text-muted-foreground">{summary.not_met}</p>
+                  <p className="text-xs text-muted-foreground">Not Met</p>
                 </div>
               </div>
             </div>
