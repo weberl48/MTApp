@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { sendTeamInviteEmail } from '@/lib/email'
 
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('base64url')
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
     const role = body?.role
     const invitedEmail = typeof body?.email === 'string' ? body.email.trim() : ''
     const expiresInDaysRaw = body?.expiresInDays
+    const sendEmail = body?.sendEmail === true
 
     const expiresInDays =
       typeof expiresInDaysRaw === 'number' && Number.isFinite(expiresInDaysRaw)
@@ -55,16 +57,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Ensure org exists
+    // Ensure org exists and get its name
     const { data: org } = await supabase
       .from('organizations')
-      .select('id')
+      .select('id, name')
       .eq('id', organizationId)
       .single()
 
     if (!org) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
     }
+
+    // Get inviter's name for the email
+    const { data: inviterProfile } = await supabase
+      .from('users')
+      .select('name')
+      .eq('id', user.id)
+      .single()
+    const inviterName = inviterProfile?.name || 'Your administrator'
 
     const token = generateSecureToken()
     const expiresAt = calculateExpiryDate(expiresInDays)
@@ -89,9 +99,29 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
     const inviteUrl = `${baseUrl}/signup?invite=${token}`
 
+    // Send email if requested and email is provided
+    let emailSent = false
+    if (sendEmail && invitedEmail) {
+      try {
+        await sendTeamInviteEmail({
+          to: invitedEmail,
+          organizationName: org.name,
+          role,
+          inviteUrl,
+          expiresAt,
+          invitedBy: inviterName,
+        })
+        emailSent = true
+      } catch (emailError) {
+        console.error('Failed to send invite email:', emailError)
+        // Don't fail the request if email fails - invite is still valid
+      }
+    }
+
     return NextResponse.json({
       inviteUrl,
       expiresAt,
+      emailSent,
     })
   } catch (error) {
     console.error('Error creating user invite:', error)

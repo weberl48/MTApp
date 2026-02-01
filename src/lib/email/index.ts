@@ -414,3 +414,135 @@ export async function sendSessionRequestStatusEmail({
 
   return data
 }
+
+// Team Invite Email
+
+interface SendTeamInviteEmailParams {
+  to: string
+  inviteeName?: string
+  organizationName: string
+  role: 'owner' | 'admin' | 'contractor'
+  inviteUrl: string
+  expiresAt: string
+  invitedBy: string
+}
+
+export async function sendTeamInviteEmail({
+  to,
+  inviteeName,
+  organizationName,
+  role,
+  inviteUrl,
+  expiresAt,
+  invitedBy,
+}: SendTeamInviteEmailParams) {
+  const formattedExpiry = format(new Date(expiresAt), 'MMMM d, yyyy')
+  const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1)
+
+  const { data, error } = await resend.emails.send({
+    from: `${organizationName} <noreply@rattatata.xyz>`,
+    to: [to],
+    subject: `You're invited to join ${organizationName}`,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Invitation</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #1e40af; padding: 30px 40px;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">${organizationName}</h1>
+              <p style="margin: 8px 0 0; color: #93c5fd; font-size: 14px;">Team Invitation</p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 20px; color: #111827; font-size: 20px;">Hello${inviteeName ? ` ${inviteeName}` : ''},</h2>
+
+              <p style="margin: 0 0 24px; color: #4b5563; font-size: 16px; line-height: 24px;">
+                <strong>${invitedBy}</strong> has invited you to join <strong>${organizationName}</strong> as a <strong>${roleDisplay}</strong>.
+              </p>
+
+              <!-- Role Info Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0f9ff; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0 0 8px; color: #0369a1; font-size: 14px; font-weight: 600;">Your Role: ${roleDisplay}</p>
+                    <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
+                      ${role === 'owner' ? 'Full access to manage the organization, team, and all settings.' :
+                        role === 'admin' ? 'Manage sessions, invoices, clients, and team members.' :
+                        'Log sessions and view your invoices and earnings.'}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td align="center">
+                    <a href="${inviteUrl}" style="display: inline-block; background-color: #1e40af; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
+                      Accept Invitation
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 16px; color: #6b7280; font-size: 14px; line-height: 22px;">
+                Or copy and paste this link into your browser:
+              </p>
+              <p style="margin: 0 0 24px; color: #1e40af; font-size: 14px; word-break: break-all;">
+                ${inviteUrl}
+              </p>
+
+              <div style="background-color: #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0; color: #92400e; font-size: 14px;">
+                  <strong>Note:</strong> This invitation link expires on ${formattedExpiry} and can only be used once.
+                </p>
+              </div>
+
+              <p style="margin: 0; color: #4b5563; font-size: 14px;">
+                If you didn't expect this invitation, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center;">
+                ${organizationName}
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
+                This is an automated message. Please do not reply directly to this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `,
+  })
+
+  if (error) {
+    console.error('Team invite email error:', error)
+    throw error
+  }
+
+  return data
+}

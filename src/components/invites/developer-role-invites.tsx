@@ -5,14 +5,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { Check, Copy, Loader2 } from 'lucide-react'
+import { Check, Copy, Loader2, Mail } from 'lucide-react'
 
 type InviteRole = 'owner' | 'admin' | 'contractor'
 
 type InviteResult = {
   inviteUrl: string
   expiresAt: string
+  emailSent?: boolean
 }
 
 function RoleInviteSection(props: {
@@ -23,9 +25,11 @@ function RoleInviteSection(props: {
   defaultExpiresInDays: number
 }) {
   const [email, setEmail] = useState('')
+  const [sendEmail, setSendEmail] = useState(true)
   const [loading, setLoading] = useState(false)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
+  const [emailSent, setEmailSent] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const displayExpires = useMemo(() => {
@@ -39,6 +43,7 @@ function RoleInviteSection(props: {
 
   async function generateInvite() {
     setLoading(true)
+    setEmailSent(false)
     try {
       const response = await fetch('/api/invites/user', {
         method: 'POST',
@@ -48,6 +53,7 @@ function RoleInviteSection(props: {
           role: props.role,
           email: email.trim() || undefined,
           expiresInDays: props.defaultExpiresInDays,
+          sendEmail: sendEmail && !!email.trim(),
         }),
       })
 
@@ -61,7 +67,13 @@ function RoleInviteSection(props: {
 
       setInviteUrl(data.inviteUrl)
       setExpiresAt(data.expiresAt)
-      toast.success(`${props.title} link generated`)
+      setEmailSent(data.emailSent || false)
+
+      if (data.emailSent) {
+        toast.success(`Invite sent to ${email}`)
+      } else {
+        toast.success(`${props.title} link generated`)
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to generate invite')
     } finally {
@@ -85,7 +97,7 @@ function RoleInviteSection(props: {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`${props.role}_invite_email`}>Lock to email (optional)</Label>
+        <Label htmlFor={`${props.role}_invite_email`}>Email address</Label>
         <Input
           id={`${props.role}_invite_email`}
           type="email"
@@ -95,13 +107,39 @@ function RoleInviteSection(props: {
         />
       </div>
 
+      {email.trim() && (
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id={`${props.role}_send_email`}
+            checked={sendEmail}
+            onCheckedChange={(checked) => setSendEmail(checked === true)}
+          />
+          <Label htmlFor={`${props.role}_send_email`} className="text-sm font-normal cursor-pointer">
+            Send invite email automatically
+          </Label>
+        </div>
+      )}
+
       <Button onClick={generateInvite} disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Generate {props.role} invite link
+        {email.trim() && sendEmail ? (
+          <>
+            <Mail className="mr-2 h-4 w-4" />
+            Send Invite
+          </>
+        ) : (
+          `Generate ${props.role} invite link`
+        )}
       </Button>
 
       {inviteUrl && (
         <div className="space-y-2">
+          {emailSent && (
+            <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300 rounded-md flex items-center gap-2">
+              <Check className="h-4 w-4" />
+              Invite email sent successfully!
+            </div>
+          )}
           <Label>Invite link</Label>
           <div className="flex flex-col sm:flex-row gap-2">
             <Input value={inviteUrl} readOnly className="font-mono text-sm" />
