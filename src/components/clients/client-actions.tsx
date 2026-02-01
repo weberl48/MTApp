@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useTransition } from 'react'
+import { deleteClient } from '@/app/actions/clients'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -25,58 +24,20 @@ interface ClientActionsProps {
 }
 
 export function ClientActions({ client }: ClientActionsProps) {
-  const router = useRouter()
-  const supabase = createClient()
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
-  async function handleDelete() {
-    setDeleting(true)
-
-    try {
-      // Check if client has any sessions
-      const { count } = await supabase
-        .from('session_attendees')
-        .select('*', { count: 'exact', head: true })
-        .eq('client_id', client.id)
-
-      if (count && count > 0) {
-        toast.error(`Cannot delete: ${client.name} has ${count} session record(s). Remove them from sessions first.`)
+  function handleDelete() {
+    startTransition(async () => {
+      const result = await deleteClient(client.id)
+      if (result.success) {
+        toast.success('Client deleted successfully')
         setDeleteOpen(false)
-        setDeleting(false)
-        return
-      }
-
-      // Check if client has any invoices
-      const { count: invoiceCount } = await supabase
-        .from('invoices')
-        .select('*', { count: 'exact', head: true })
-        .eq('client_id', client.id)
-
-      if (invoiceCount && invoiceCount > 0) {
-        toast.error(`Cannot delete: ${client.name} has ${invoiceCount} invoice(s).`)
+      } else {
+        toast.error(result.error || 'Failed to delete client')
         setDeleteOpen(false)
-        setDeleting(false)
-        return
       }
-
-      // Safe to delete
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', client.id)
-
-      if (error) throw error
-
-      toast.success('Client deleted successfully')
-      setDeleteOpen(false)
-      router.refresh()
-    } catch (error) {
-      console.error('Error deleting client:', error)
-      toast.error('Failed to delete client')
-    } finally {
-      setDeleting(false)
-    }
+    })
   }
 
   return (
@@ -97,13 +58,13 @@ export function ClientActions({ client }: ClientActionsProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={isPending}
               className="bg-red-600 hover:bg-red-700"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

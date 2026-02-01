@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,13 @@ import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2,
 import { formatCurrency } from '@/lib/pricing'
 import { decryptField, isEncrypted } from '@/lib/crypto'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { toast } from 'sonner'
+import {
+  approveSession,
+  markSessionNoShow,
+  cancelSession,
+  deleteSession,
+} from '@/app/actions/sessions'
 
 interface SessionAttendee {
   id: string
@@ -59,6 +66,7 @@ export default function SessionDetailPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     async function loadSession() {
@@ -141,67 +149,56 @@ export default function SessionDetailPage() {
     decryptNotes()
   }, [session?.notes])
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
     if (!session) return
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('sessions')
-      .update({ status: 'approved', updated_at: new Date().toISOString() })
-      .eq('id', session.id)
-
-    if (!error) {
-      setSession({ ...session, status: 'approved' })
-    }
+    startTransition(async () => {
+      const result = await approveSession(session.id)
+      if (result.success) {
+        setSession({ ...session, status: 'approved' })
+        toast.success('Session approved')
+      } else {
+        toast.error(result.error || 'Failed to approve session')
+      }
+    })
   }
 
-  const handleMarkNoShow = async () => {
+  const handleMarkNoShow = () => {
     if (!session || !confirm('Mark this session as a no-show? This cannot be undone.')) return
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('sessions')
-      .update({ status: 'no_show', updated_at: new Date().toISOString() })
-      .eq('id', session.id)
-
-    if (!error) {
-      setSession({ ...session, status: 'no_show' })
-    }
+    startTransition(async () => {
+      const result = await markSessionNoShow(session.id)
+      if (result.success) {
+        setSession({ ...session, status: 'no_show' })
+        toast.success('Session marked as no-show')
+      } else {
+        toast.error(result.error || 'Failed to update session')
+      }
+    })
   }
 
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!session || !confirm('Cancel this session? This cannot be undone.')) return
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('sessions')
-      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-      .eq('id', session.id)
-
-    if (!error) {
-      setSession({ ...session, status: 'cancelled' })
-    }
+    startTransition(async () => {
+      const result = await cancelSession(session.id)
+      if (result.success) {
+        setSession({ ...session, status: 'cancelled' })
+        toast.success('Session cancelled')
+      } else {
+        toast.error(result.error || 'Failed to cancel session')
+      }
+    })
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!session || !confirm('Are you sure you want to delete this session?')) return
-    const supabase = createClient()
-
-    // Delete attendees first
-    await supabase
-      .from('session_attendees')
-      .delete()
-      .eq('session_id', session.id)
-
-    // Delete session
-    const { error } = await supabase
-      .from('sessions')
-      .delete()
-      .eq('id', session.id)
-
-    if (!error) {
-      router.push('/sessions/')
-    }
+    startTransition(async () => {
+      const result = await deleteSession(session.id)
+      if (result.success) {
+        toast.success('Session deleted')
+        router.push('/sessions/')
+      } else {
+        toast.error(result.error || 'Failed to delete session')
+      }
+    })
   }
 
   if (loading) {

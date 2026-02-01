@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { bulkUpdateInvoiceStatus } from '@/app/actions/invoices'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -213,12 +214,23 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const supabaseRef = useRef(createClient())
 
   const handleRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1)
     setSelectedIds(new Set()) // Clear selection on refresh
+  }, [])
+
+  // Refetch when page becomes visible (e.g., after navigating back)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshTrigger(prev => prev + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
   const handleSelectChange = useCallback((id: string, checked: boolean) => {
@@ -237,52 +249,30 @@ export default function InvoicesPage() {
   const selectedTotal = selectedInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
   // Bulk action handlers
-  const handleBulkMarkPaid = async () => {
+  const handleBulkMarkPaid = () => {
     if (selectedIds.size === 0) return
-    setBulkActionLoading(true)
-    try {
-      const supabase = supabaseRef.current
-      const today = new Date().toISOString().split('T')[0]
-
-      const { error } = await supabase
-        .from('invoices')
-        .update({ status: 'paid', paid_date: today })
-        .in('id', Array.from(selectedIds))
-
-      if (error) throw error
-
-      toast.success(`Marked ${selectedIds.size} invoice(s) as paid`)
-      handleRefresh()
-    } catch (error) {
-      console.error('Error marking invoices as paid:', error)
-      toast.error('Failed to mark invoices as paid')
-    } finally {
-      setBulkActionLoading(false)
-    }
+    startTransition(async () => {
+      const result = await bulkUpdateInvoiceStatus(Array.from(selectedIds), 'paid')
+      if (result.success) {
+        toast.success(`Marked ${selectedIds.size} invoice(s) as paid`)
+        handleRefresh()
+      } else {
+        toast.error(result.error || 'Failed to mark invoices as paid')
+      }
+    })
   }
 
-  const handleBulkMarkSent = async () => {
+  const handleBulkMarkSent = () => {
     if (selectedIds.size === 0) return
-    setBulkActionLoading(true)
-    try {
-      const supabase = supabaseRef.current
-
-      const { error } = await supabase
-        .from('invoices')
-        .update({ status: 'sent' })
-        .in('id', Array.from(selectedIds))
-        .eq('status', 'pending') // Only update pending invoices
-
-      if (error) throw error
-
-      toast.success(`Marked ${selectedIds.size} invoice(s) as sent`)
-      handleRefresh()
-    } catch (error) {
-      console.error('Error marking invoices as sent:', error)
-      toast.error('Failed to mark invoices as sent')
-    } finally {
-      setBulkActionLoading(false)
-    }
+    startTransition(async () => {
+      const result = await bulkUpdateInvoiceStatus(Array.from(selectedIds), 'sent')
+      if (result.success) {
+        toast.success(`Marked ${selectedIds.size} invoice(s) as sent`)
+        handleRefresh()
+      } else {
+        toast.error(result.error || 'Failed to mark invoices as sent')
+      }
+    })
   }
 
   const handleBulkExport = () => {
@@ -511,7 +501,7 @@ export default function InvoicesPage() {
                   variant="outline"
                   size="sm"
                   onClick={handleBulkExport}
-                  disabled={bulkActionLoading}
+                  disabled={isPending}
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Export CSV
@@ -520,7 +510,7 @@ export default function InvoicesPage() {
                   variant="outline"
                   size="sm"
                   onClick={handleBulkMarkSent}
-                  disabled={bulkActionLoading}
+                  disabled={isPending}
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Mark Sent
@@ -528,9 +518,9 @@ export default function InvoicesPage() {
                 <Button
                   size="sm"
                   onClick={handleBulkMarkPaid}
-                  disabled={bulkActionLoading}
+                  disabled={isPending}
                 >
-                  {bulkActionLoading ? (
+                  {isPending ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <CheckCheck className="w-4 h-4 mr-2" />
@@ -541,7 +531,7 @@ export default function InvoicesPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedIds(new Set())}
-                  disabled={bulkActionLoading}
+                  disabled={isPending}
                 >
                   Clear
                 </Button>

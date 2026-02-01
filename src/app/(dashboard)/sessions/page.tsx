@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -64,12 +65,25 @@ const statusLabels: Record<string, string> = {
 const ITEMS_PER_PAGE = 50
 
 export default function SessionsPage() {
+  const router = useRouter()
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [organizationId, setOrganizationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Refetch when page becomes visible (e.g., after navigating back)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshTrigger(prev => prev + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
@@ -148,7 +162,7 @@ export default function SessionsPage() {
     }
 
     loadSessions()
-  }, [])
+  }, [refreshTrigger])
 
   // Filter sessions based on current filters
   const filteredSessions = useMemo(() => {

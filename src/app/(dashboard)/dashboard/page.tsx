@@ -43,10 +43,22 @@ export default function DashboardPage() {
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([])
   const [overdueInvoices, setOverdueInvoices] = useState<OverdueInvoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const { viewAsContractor, viewAsRole } = useOrganization()
 
   // Determine if viewing as a contractor
   const isViewingAsContractor = viewAsRole === 'contractor' || !!viewAsContractor
+
+  // Refetch when page becomes visible (e.g., after navigating back)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshTrigger(prev => prev + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   useEffect(() => {
     async function loadDashboard() {
@@ -169,7 +181,7 @@ export default function DashboardPage() {
     }
 
     loadDashboard()
-  }, [viewAsContractor, isViewingAsContractor])
+  }, [viewAsContractor, isViewingAsContractor, refreshTrigger])
 
   if (loading) {
     return <DashboardSkeleton />

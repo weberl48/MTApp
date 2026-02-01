@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useTransition } from 'react'
+import { updateInvoiceStatus } from '@/app/actions/invoices'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -25,9 +24,8 @@ interface InvoiceActionsProps {
 }
 
 export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps) {
-  const router = useRouter()
-  const supabase = createClient()
   const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   async function downloadPdf() {
     setLoading(true)
@@ -72,7 +70,6 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
       }
 
       toast.success('Invoice sent successfully')
-      router.refresh()
       onStatusChange?.()
     } catch (error) {
       console.error('Error sending invoice:', error)
@@ -101,7 +98,6 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
       }
 
       toast.success('Square invoice created and sent to client!')
-      router.refresh()
       onStatusChange?.()
     } catch (error) {
       console.error('Error creating Square invoice:', error)
@@ -117,62 +113,46 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
     }
   }
 
-  async function updateStatus(status: 'sent' | 'paid' | 'pending') {
-    setLoading(true)
-
-    try {
-      const updates: Partial<Invoice> = { status }
-
-      if (status === 'paid') {
-        updates.paid_date = new Date().toISOString().split('T')[0]
+  function handleUpdateStatus(status: 'sent' | 'paid' | 'pending') {
+    startTransition(async () => {
+      const result = await updateInvoiceStatus(invoice.id, status)
+      if (result.success) {
+        toast.success(`Invoice marked as ${status}`)
+        onStatusChange?.()
+      } else {
+        toast.error(result.error || 'Failed to update invoice')
       }
-
-      const { error } = await supabase
-        .from('invoices')
-        .update(updates)
-        .eq('id', invoice.id)
-
-      if (error) throw error
-
-      toast.success(`Invoice marked as ${status}`)
-      router.refresh()
-      onStatusChange?.()
-    } catch (error) {
-      console.error('Error updating invoice:', error)
-      toast.error('Failed to update invoice')
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={loading} aria-label="Invoice actions menu">
+        <Button variant="ghost" size="icon" disabled={loading || isPending} aria-label="Invoice actions menu">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {invoice.status === 'pending' && (
-          <DropdownMenuItem onClick={() => updateStatus('sent')}>
+          <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
             <Send className="mr-2 h-4 w-4" />
             Mark as Sent
           </DropdownMenuItem>
         )}
         {invoice.status !== 'paid' && (
           <>
-            <DropdownMenuItem onClick={() => updateStatus('paid')}>
+            <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
               <CheckCircle className="mr-2 h-4 w-4" />
               Mark as Paid
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => updateStatus('paid')}>
+            <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
               <Smartphone className="mr-2 h-4 w-4" />
               Mark Paid (Venmo)
             </DropdownMenuItem>
           </>
         )}
         {invoice.status === 'paid' && (
-          <DropdownMenuItem onClick={() => updateStatus('sent')}>
+          <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
             <XCircle className="mr-2 h-4 w-4" />
             Mark as Unpaid
           </DropdownMenuItem>
