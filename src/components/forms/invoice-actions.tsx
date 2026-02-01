@@ -1,8 +1,19 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { updateInvoiceStatus } from '@/app/actions/invoices'
+import { useRouter } from 'next/navigation'
+import { updateInvoiceStatus, deleteInvoice } from '@/app/actions/invoices'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone } from 'lucide-react'
+import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Invoice } from '@/types/database'
 
@@ -21,11 +32,14 @@ interface InvoiceActionsProps {
     square_payment_url?: string | null
   }
   onStatusChange?: () => void
+  canDelete?: boolean
 }
 
-export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps) {
+export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: InvoiceActionsProps) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   async function downloadPdf() {
     setLoading(true)
@@ -125,7 +139,21 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
     })
   }
 
+  function handleDelete() {
+    startTransition(async () => {
+      const result = await deleteInvoice(invoice.id)
+      if (result.success) {
+        toast.success('Invoice deleted')
+        setDeleteOpen(false)
+        onStatusChange?.()
+      } else {
+        toast.error(result.error || 'Failed to delete invoice')
+      }
+    })
+  }
+
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={loading || isPending} aria-label="Invoice actions menu">
@@ -181,7 +209,45 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
             View Square Invoice
           </DropdownMenuItem>
         )}
+        {canDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600"
+              onSelect={(e) => {
+                e.preventDefault()
+                setDeleteOpen(true)
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Invoice
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this invoice for <strong>{invoice.client?.name || 'this client'}</strong>?
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isPending}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {isPending ? 'Deleting...' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

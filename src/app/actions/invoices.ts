@@ -3,6 +3,25 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
+export async function deleteInvoice(invoiceId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('invoices')
+    .delete()
+    .eq('id', invoiceId)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/invoices')
+  revalidatePath('/dashboard')
+  revalidatePath('/payments')
+
+  return { success: true }
+}
+
 export async function updateInvoiceStatus(
   invoiceId: string,
   status: 'pending' | 'sent' | 'paid'

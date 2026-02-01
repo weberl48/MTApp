@@ -197,7 +197,7 @@ function InvoiceTable({
               </TableCell>
               {showActions && isAdmin && (
                 <TableCell>
-                  <InvoiceActions invoice={invoice} onStatusChange={onRefresh} />
+                  <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
                 </TableCell>
               )}
             </TableRow>
