@@ -4,6 +4,28 @@ import crypto from 'crypto'
 import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
 
+// Types for Supabase join results
+interface ClientJoinResult {
+  name: string
+}
+
+interface ServiceTypeJoinResult {
+  name: string
+}
+
+interface SessionJoinResult {
+  date: string
+  service_type: ServiceTypeJoinResult | ServiceTypeJoinResult[] | null
+}
+
+interface InvoiceWithJoins {
+  id: string
+  amount: number
+  organization_id: string
+  client: ClientJoinResult | ClientJoinResult[] | null
+  session: SessionJoinResult | SessionJoinResult[] | null
+}
+
 // Use service role for webhooks since there's no user context
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,23 +55,24 @@ async function sendPaymentNotification(squareInvoiceId: string) {
 
     if (!invoice) return
 
+    // Cast to typed interface
+    const typedInvoice = invoice as InvoiceWithJoins
+
     // Fetch organization owner
     const { data: owner } = await supabaseAdmin
       .from('users')
       .select('email, name')
-      .eq('organization_id', invoice.organization_id)
+      .eq('organization_id', typedInvoice.organization_id)
       .eq('role', 'owner')
       .single()
 
     if (!owner?.email) return
 
     // Extract nested data (handle Supabase join types which can be arrays or objects)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const clientData = invoice.client as any
+    const clientData = typedInvoice.client
     const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sessionData = invoice.session as any
+    const sessionData = typedInvoice.session
     const session = Array.isArray(sessionData) ? sessionData[0] : sessionData
     const serviceType = session?.service_type
     const serviceTypeName = Array.isArray(serviceType) ? serviceType[0]?.name : serviceType?.name
@@ -58,7 +81,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
     await resend.emails.send({
       from: 'May Creative Arts <noreply@rattatata.xyz>',
       to: [owner.email],
-      subject: `Payment Received - ${formatCurrency(invoice.amount)}`,
+      subject: `Payment Received - ${formatCurrency(typedInvoice.amount)}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #059669;">Payment Received!</h2>
@@ -66,7 +89,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
           <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
             <p style="margin: 4px 0;"><strong>Client:</strong> ${clientName || 'Unknown'}</p>
             <p style="margin: 4px 0;"><strong>Service:</strong> ${serviceTypeName || 'Unknown'}</p>
-            <p style="margin: 4px 0;"><strong>Amount:</strong> ${formatCurrency(invoice.amount)}</p>
+            <p style="margin: 4px 0;"><strong>Amount:</strong> ${formatCurrency(typedInvoice.amount)}</p>
             ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${new Date(session.date).toLocaleDateString()}</p>` : ''}
           </div>
           <p style="color: #6b7280; font-size: 14px;">This is an automated notification from your MCA Manager.</p>

@@ -79,7 +79,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/clients">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Back to clients list">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>

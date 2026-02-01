@@ -3,6 +3,35 @@ import { createClient } from '@/lib/supabase/server'
 import { decryptField, isEncrypted } from '@/lib/crypto'
 import { format } from 'date-fns'
 
+// Types for Supabase join results
+interface NameJoinResult {
+  name: string
+}
+
+interface ClientJoinResult {
+  id: string
+  name: string
+}
+
+interface AttendeeJoinResult {
+  client: ClientJoinResult | ClientJoinResult[] | null
+}
+
+interface SessionWithJoins {
+  id: string
+  date: string
+  time: string | null
+  duration_minutes: number
+  status: string
+  notes: string | null
+  client_notes: string | null
+  group_headcount: number | null
+  group_member_names: string | null
+  contractor: NameJoinResult | NameJoinResult[] | null
+  service_type: NameJoinResult | NameJoinResult[] | null
+  attendees: AttendeeJoinResult[] | null
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -84,8 +113,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Decrypt notes and format data
+    const typedSessions = sessions as SessionWithJoins[] | null
     const exportData = await Promise.all(
-      (sessions || []).map(async (session) => {
+      (typedSessions || []).map(async (session) => {
         // Decrypt notes if encrypted
         let decryptedNotes = session.notes
         let decryptedClientNotes = session.client_notes
@@ -97,17 +127,14 @@ export async function GET(request: NextRequest) {
           decryptedClientNotes = await decryptField(session.client_notes)
         }
 
-        // Extract nested data
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const contractor = session.contractor as any
+        // Extract nested data (handle Supabase join types)
+        const contractor = session.contractor
         const contractorName = Array.isArray(contractor) ? contractor[0]?.name : contractor?.name
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const serviceType = session.service_type as any
+        const serviceType = session.service_type
         const serviceTypeName = Array.isArray(serviceType) ? serviceType[0]?.name : serviceType?.name
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const attendees = session.attendees as any[]
+        const attendees = session.attendees
         const clientNames = attendees
           ?.map(a => {
             const client = Array.isArray(a.client) ? a.client[0] : a.client

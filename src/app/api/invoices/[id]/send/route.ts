@@ -22,12 +22,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin/owner/developer
+    // Check if user is admin/owner/developer and get their organization
     const { data: userProfile } = await supabase
       .from('users')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
-      .single<{ role: string }>()
+      .single<{ role: string; organization_id: string }>()
 
     const role = userProfile?.role
     if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
@@ -54,6 +54,11 @@ export async function POST(
 
     if (error || !invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+    }
+
+    // Verify organization ownership (developers can access all)
+    if (role !== 'developer' && invoice.organization_id !== userProfile?.organization_id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Check if client has email

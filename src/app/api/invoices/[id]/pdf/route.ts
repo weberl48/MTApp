@@ -21,6 +21,19 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get user profile with role and organization
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, organization_id')
+      .eq('id', user.id)
+      .single<{ role: string; organization_id: string }>()
+
+    if (!userProfile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 403 })
+    }
+
+    const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile.role)
+
     // Fetch invoice with related data
     const { data: invoice, error } = await supabase
       .from('invoices')
@@ -32,6 +45,7 @@ export async function GET(
           date,
           duration_minutes,
           notes,
+          contractor_id,
           contractor:users(id, name),
           service_type:service_types(name)
         )
@@ -41,6 +55,15 @@ export async function GET(
 
     if (error || !invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+    }
+
+    // Authorization: developers can access all, admins can access their org, contractors can access their own sessions
+    const isDeveloper = userProfile.role === 'developer'
+    const isOrgAdmin = isAdmin && invoice.organization_id === userProfile.organization_id
+    const isOwnSession = (invoice.session as { contractor_id?: string })?.contractor_id === user.id
+
+    if (!isDeveloper && !isOrgAdmin && !isOwnSession) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Generate PDF

@@ -155,7 +155,7 @@ export function InvoiceActions({ invoice, onStatusChange }: InvoiceActionsProps)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={loading}>
+        <Button variant="ghost" size="icon" disabled={loading} aria-label="Invoice actions menu">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

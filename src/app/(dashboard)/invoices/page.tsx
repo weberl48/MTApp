@@ -189,7 +189,7 @@ function InvoiceTable({
               </TableCell>
               <TableCell>
                 <Link href={`/invoices/${invoice.id}`}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="View invoice details">
                     <Eye className="w-4 h-4" />
                   </Button>
                 </Link>
