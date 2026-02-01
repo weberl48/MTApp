@@ -39,6 +39,7 @@ import { AuditLogTable } from '@/components/tables/audit-log-table'
 import { MfaSetup } from '@/components/forms/mfa-setup'
 import { toast } from 'sonner'
 import { DeveloperRoleInvites } from '@/components/invites/developer-role-invites'
+import { ContractorInvite } from '@/components/invites/contractor-invite'
 import { SquareStatusBadge } from '@/components/square/status-badge'
 import type {
   User as UserType,
@@ -818,23 +819,11 @@ export default function SettingsPage() {
                 <CardHeader>
                   <CardTitle>Invite Team Members</CardTitle>
                   <CardDescription>
-                    Share this link to invite contractors to join your practice
+                    Invite contractors to join your practice via secure invite link
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/signup?org=${organization.id}`}
-                      readOnly
-                      className="font-mono text-sm"
-                    />
-                    <Button onClick={copyInviteLink} variant="outline" className="w-full sm:w-auto">
-                      {copiedInvite ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Anyone with this link can create an account and join your practice as a contractor
-                  </p>
+                  <ContractorInvite organizationId={organization.id} />
 
                   {isDeveloper && (
                     <>

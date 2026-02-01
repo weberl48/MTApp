@@ -46,14 +46,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
-    // Developer or owner only
+    // Check permissions: developers/owners can create any invite, admins can only create contractor invites
     const { data: profile } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (!profile || (profile.role !== 'developer' && profile.role !== 'owner')) {
+    if (!profile) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const isDevOrOwner = profile.role === 'developer' || profile.role === 'owner'
+    const isAdmin = profile.role === 'admin'
+
+    // Admins can only create contractor invites
+    if (!isDevOrOwner && !(isAdmin && role === 'contractor')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
