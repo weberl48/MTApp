@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
 import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
-import Link from 'next/link'
 import { AdminGuard } from '@/components/guards/admin-guard'
+import { TeamMemberActions } from '@/components/team/team-member-actions'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -27,6 +27,7 @@ export default async function TeamPage() {
 
   // Check if user is admin
   let isAdmin = false
+  let currentUserRole = ''
   if (user) {
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
@@ -36,6 +37,7 @@ export default async function TeamPage() {
 
     console.log('Team page - User profile:', userProfile, 'Error:', profileError)
     const role = userProfile?.role
+    currentUserRole = role || ''
     isAdmin = role === 'admin' || role === 'owner' || role === 'developer'
   }
 
@@ -242,11 +244,15 @@ export default async function TeamPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Link href={`/team/${member.id}`}>
-                          <Button variant="ghost" size="sm">
-                            View Details
-                          </Button>
-                        </Link>
+                        <TeamMemberActions
+                          member={{
+                            id: member.id,
+                            name: member.name,
+                            role: member.role,
+                          }}
+                          currentUserId={user?.id || ''}
+                          currentUserRole={currentUserRole}
+                        />
                       </TableCell>
                     </TableRow>
                   )
