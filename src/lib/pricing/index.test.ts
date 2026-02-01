@@ -12,6 +12,8 @@ describe('calculateSessionPricing', () => {
     mca_percentage: 23,
     contractor_cap: null,
     rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
