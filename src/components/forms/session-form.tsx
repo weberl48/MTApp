@@ -31,7 +31,7 @@ import {
   loadSessionFormDefaults,
   saveSessionFormDefaults,
 } from '@/lib/session-form/defaults'
-import { encryptField } from '@/lib/crypto'
+import { encryptPHI } from '@/lib/crypto/actions'
 
 interface ExistingSession {
   id: string
@@ -310,9 +310,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setLoading(true)
 
     try {
-      // Encrypt PHI fields before saving
-      const encryptedNotes = notes ? await encryptField(notes) : null
-      const encryptedClientNotes = clientNotes ? await encryptField(clientNotes) : null
+      // Encrypt PHI fields before saving (server action has access to ENCRYPTION_KEY)
+      const encrypted = await encryptPHI({ notes, clientNotes })
+      const encryptedNotes = encrypted.notes
+      const encryptedClientNotes = encrypted.clientNotes
 
       if (isEditMode && existingSession) {
         // UPDATE existing session
