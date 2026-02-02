@@ -331,11 +331,13 @@ export default function SettingsPage() {
                 <Bell className="w-4 h-4" />
                 Notifications
               </TabsTrigger>
-              <TabsTrigger value="audit" className="flex items-center gap-2">
-                <History className="w-4 h-4" />
-                Audit Log
-              </TabsTrigger>
             </>
+          )}
+          {(isDeveloper || isOwner) && (
+            <TabsTrigger value="audit" className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              Audit Log
+            </TabsTrigger>
           )}
         </TabsList>
 
@@ -1229,8 +1231,8 @@ export default function SettingsPage() {
           </TabsContent>
         )}
 
-        {/* Audit Log Tab */}
-        {isAdmin && (
+        {/* Audit Log Tab - Only visible to developers and owners */}
+        {(isDeveloper || isOwner) && (
           <TabsContent value="audit">
             <Card>
               <CardHeader>

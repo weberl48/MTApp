@@ -10,6 +10,7 @@ export interface PricingCalculation {
   perPersonCost: number
   mcaCut: number
   contractorPay: number
+  /** @deprecated Rent is no longer used in pricing calculations */
   rentAmount: number
   scholarshipDiscount?: number
   isNoShow?: boolean
@@ -103,8 +104,8 @@ export function calculateSessionPricing(
   // Per-person cost (for billing purposes, divided evenly)
   const perPersonCost = totalAmount / count
 
-  // Calculate rent (Matt's Music gets 10% rent)
-  const rentAmount = (totalAmount * serviceType.rent_percentage) / 100
+  // Rent is no longer used - keeping field for backwards compatibility
+  const rentAmount = 0
 
   // Calculate MCA cut (percentage of total)
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
@@ -116,11 +117,11 @@ export function calculateSessionPricing(
     // Use custom contractor pay rate (from contractor_rates table)
     // Scale by duration multiplier since custom rates are for 30 min base
     contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
-    // Recalculate MCA cut: total - contractor pay - rent
-    mcaCut = totalAmount - contractorPay - rentAmount
+    // Recalculate MCA cut: total - contractor pay
+    mcaCut = totalAmount - contractorPay
   } else {
-    // Default: total - MCA cut - rent
-    contractorPay = totalAmount - mcaCut - rentAmount
+    // Default: total - MCA cut
+    contractorPay = totalAmount - mcaCut
 
     // Apply contractor cap if specified (e.g., In-Home Group caps at $105)
     if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
@@ -219,16 +220,12 @@ export function getPricingDescription(serviceType: ServiceType, showFormula: boo
     description += ` + $${serviceType.per_person_rate}/additional person`
   }
 
-  // Only show formula details (MCA %, cap, rent) if requested
+  // Only show formula details (MCA %, cap) if requested
   if (showFormula) {
     description += ` (${serviceType.mca_percentage}% MCA)`
 
     if (serviceType.contractor_cap) {
       description += `, contractor max $${serviceType.contractor_cap}`
-    }
-
-    if (serviceType.rent_percentage > 0) {
-      description += `, ${serviceType.rent_percentage}% rent`
     }
   }
 
