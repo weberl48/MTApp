@@ -13,6 +13,7 @@ import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
 import { QuickSessionFab } from '@/components/layout/quick-session-fab'
+import { WalkthroughProvider } from '@/components/walkthroughs/walkthrough-provider'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -67,22 +68,24 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
     <BrandingProvider>
       <ActivityTracker>
-        <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
-          <div className="flex flex-1 overflow-hidden">
-            <Sidebar />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <Header user={user} />
-              <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-6">
-                <MfaEnforcementGuard>
-                  <OwnerOnboardingGate />
-                  {children}
-                </MfaEnforcementGuard>
-              </main>
+        <WalkthroughProvider>
+          <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <Header user={user} />
+                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-6">
+                  <MfaEnforcementGuard>
+                    <OwnerOnboardingGate />
+                    {children}
+                  </MfaEnforcementGuard>
+                </main>
+              </div>
             </div>
+            <Toaster />
+            <QuickSessionFab />
           </div>
-          <Toaster />
-          <QuickSessionFab />
-        </div>
+        </WalkthroughProvider>
       </ActivityTracker>
     </BrandingProvider>
   )

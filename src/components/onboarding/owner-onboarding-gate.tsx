@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
+import { Button } from '@/components/ui/button'
+import { HelpCircle, X } from 'lucide-react'
 import {
   OWNER_ONBOARDING_STEPS,
   OWNER_ONBOARDING_WIZARD_KEY,
@@ -25,6 +27,8 @@ export function OwnerOnboardingGate() {
   const [ready, setReady] = useState(false)
   const [open, setOpen] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
+  const [showButton, setShowButton] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
 
   const userId = user?.id
   const organizationId = organization?.id
@@ -61,7 +65,7 @@ export function OwnerOnboardingGate() {
       if (!userId || !organizationId || !isOwner) {
         if (!cancelled) {
           setReady(true)
-          setOpen(false)
+          setShowButton(false)
         }
         return
       }
@@ -79,7 +83,8 @@ export function OwnerOnboardingGate() {
       const row = (data as OnboardingRow | null) ?? null
       const done = Boolean(row?.completed_at || row?.skipped_at)
       setStepIndex(row?.step ?? 0)
-      setOpen(!done)
+      // Show the floating button instead of auto-opening the wizard
+      setShowButton(!done)
       setReady(true)
     }
 
@@ -121,6 +126,7 @@ export function OwnerOnboardingGate() {
   const handleSkip = useCallback(async () => {
     await upsertProgress({ step: stepIndex, skipped_at: new Date().toISOString() })
     setOpen(false)
+    setShowButton(false)
   }, [stepIndex, upsertProgress])
 
   const handleComplete = useCallback(async () => {
@@ -130,20 +136,56 @@ export function OwnerOnboardingGate() {
       skipped_at: null,
     })
     setOpen(false)
+    setShowButton(false)
   }, [upsertProgress])
+
+  const handleDismissButton = useCallback(() => {
+    setDismissed(true)
+    setShowButton(false)
+  }, [])
+
+  const handleOpenWizard = useCallback(() => {
+    setOpen(true)
+  }, [])
 
   if (!ready || !isOwner) return null
 
   return (
-    <OwnerOnboardingWizard
-      open={open}
-      onOpenChange={handleOpenChange}
-      stepIndex={stepIndex}
-      onStepIndexChange={handleStepIndexChange}
-      onNavigate={handleNavigate}
-      onSkip={handleSkip}
-      onComplete={handleComplete}
-    />
+    <>
+      {/* Floating "Learn More" button - only shown when wizard hasn't been completed */}
+      {showButton && !dismissed && !open && (
+        <div className="fixed bottom-20 right-6 z-50 lg:bottom-6 flex items-center gap-2">
+          <Button
+            onClick={handleOpenWizard}
+            className="animate-bounce shadow-lg hover:shadow-xl transition-shadow rounded-full h-12 px-4 gap-2"
+            aria-label="Open getting started guide"
+          >
+            <HelpCircle className="h-5 w-5" />
+            <span className="hidden sm:inline">Need help getting started?</span>
+            <span className="sm:hidden">Get Started</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDismissButton}
+            className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm shadow-sm hover:bg-background"
+            aria-label="Dismiss getting started button"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <OwnerOnboardingWizard
+        open={open}
+        onOpenChange={handleOpenChange}
+        stepIndex={stepIndex}
+        onStepIndexChange={handleStepIndexChange}
+        onNavigate={handleNavigate}
+        onSkip={handleSkip}
+        onComplete={handleComplete}
+      />
+    </>
   )
 }
 

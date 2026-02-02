@@ -1,0 +1,137 @@
+'use client'
+
+import { use } from 'react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import { ArrowLeft, PlayCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { useOrganization } from '@/contexts/organization-context'
+import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { getArticleBySlug, getArticlesByCategory, HELP_CATEGORIES } from '../_data/help-articles'
+
+export default function HelpArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = use(params)
+  const { isAdmin, isOwner, isDeveloper } = useOrganization()
+  const { startWalkthrough } = useWalkthrough()
+
+  const isAdminOrAbove = isAdmin || isOwner || isDeveloper
+
+  const article = getArticleBySlug(slug)
+
+  if (!article) {
+    notFound()
+  }
+
+  // Check if user has access to this article
+  if (article.adminOnly && !isAdminOrAbove) {
+    notFound()
+  }
+
+  // Get related articles
+  const relatedArticles = article.relatedArticles
+    ?.map(slug => getArticleBySlug(slug))
+    .filter((a): a is NonNullable<typeof a> => a != null && (!a.adminOnly || isAdminOrAbove))
+
+  // Get other articles in the same category
+  const categoryArticles = getArticlesByCategory(article.category)
+    .filter(a => a.slug !== article.slug && (!a.adminOnly || isAdminOrAbove))
+    .slice(0, 3)
+
+  const categoryName = HELP_CATEGORIES.find(c => c.id === article.category)?.name
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* Back Link */}
+      <Link
+        href="/help"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Help Center
+      </Link>
+
+      {/* Article Header */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">{categoryName}</Badge>
+          {article.adminOnly && <Badge variant="secondary">Admin</Badge>}
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          {article.title}
+        </h1>
+        <p className="text-lg text-muted-foreground">{article.description}</p>
+
+        {/* Walkthrough Button */}
+        {article.walkthrough && (
+          <Button
+            onClick={() => startWalkthrough(article.walkthrough!)}
+            className="gap-2"
+          >
+            <PlayCircle className="h-4 w-4" />
+            Start Interactive Walkthrough
+          </Button>
+        )}
+      </div>
+
+      {/* Article Content */}
+      <Card>
+        <CardContent className="py-6">
+          <article className="prose prose-gray dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-p:leading-7 prose-li:leading-7 prose-ul:my-4 prose-ol:my-4 prose-strong:font-semibold prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
+            <ReactMarkdown>{article.content}</ReactMarkdown>
+          </article>
+        </CardContent>
+      </Card>
+
+      {/* Related Articles */}
+      {relatedArticles && relatedArticles.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Related Articles</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {relatedArticles.map(related => (
+              <Link key={related.slug} href={`/help/${related.slug}`}>
+                <Card className="h-full hover:bg-muted/50 transition-colors">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{related.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="line-clamp-2">
+                      {related.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* More in this Category */}
+      {categoryArticles.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">More in {categoryName}</h2>
+          <div className="space-y-2">
+            {categoryArticles.map(catArticle => (
+              <Link
+                key={catArticle.slug}
+                href={`/help/${catArticle.slug}`}
+                className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <h3 className="font-medium">{catArticle.title}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                  {catArticle.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
