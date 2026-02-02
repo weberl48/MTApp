@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, CheckCircle, AlertTriangle, Eye, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
+import { FileText, Clock, AlertTriangle, Eye, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -419,7 +419,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className={`grid gap-4 ${overdueInvoices.length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -438,7 +438,7 @@ export default function InvoicesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Sent / Awaiting Payment
+              Awaiting Payment
             </CardTitle>
             <FileText className="w-4 h-4 text-blue-500" />
           </CardHeader>
@@ -466,21 +466,6 @@ export default function InvoicesPage() {
             </CardContent>
           </Card>
         )}
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Paid This Month
-            </CardTitle>
-            <CheckCircle className="w-4 h-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(paidTotal)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {paidInvoices.length} invoice{paidInvoices.length !== 1 ? 's' : ''}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Bulk Action Bar */}

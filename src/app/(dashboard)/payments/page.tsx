@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { DollarSign, Users, Calendar, TrendingUp, Loader2, AlertCircle, Receipt, Filter } from 'lucide-react'
+import { DollarSign, Users, Calendar, Loader2, AlertCircle, Receipt, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -275,7 +275,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -286,19 +286,6 @@ export default function PaymentsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalContractorPay)}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">All time</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Paid Out
-            </CardTitle>
-            <TrendingUp className="w-4 h-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaidOut)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Completed payments</p>
           </CardContent>
         </Card>
 
@@ -318,19 +305,6 @@ export default function PaymentsPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)} sessions awaiting payment
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              MCA Revenue
-            </CardTitle>
-            <TrendingUp className="w-4 h-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalMcaCut)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total commission</p>
           </CardContent>
         </Card>
       </div>
