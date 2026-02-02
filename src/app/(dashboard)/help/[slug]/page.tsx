@@ -3,7 +3,7 @@
 import { use } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { Components } from 'react-markdown'
 import { ArrowLeft, PlayCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +11,39 @@ import { Badge } from '@/components/ui/badge'
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import { getArticleBySlug, getArticlesByCategory, HELP_CATEGORIES } from '../_data/help-articles'
+
+const markdownComponents: Components = {
+  h1: ({ children }) => (
+    <h1 className="text-2xl font-bold text-foreground mt-8 mb-4 first:mt-0">{children}</h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-xl font-semibold text-foreground mt-8 mb-4 pb-2 border-b">{children}</h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">{children}</h3>
+  ),
+  p: ({ children }) => (
+    <p className="text-muted-foreground leading-7 mb-4">{children}</p>
+  ),
+  ul: ({ children }) => (
+    <ul className="list-disc list-outside ml-6 mb-4 space-y-2 text-muted-foreground">{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="list-decimal list-outside ml-6 mb-4 space-y-2 text-muted-foreground">{children}</ol>
+  ),
+  li: ({ children }) => (
+    <li className="leading-7">{children}</li>
+  ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-foreground">{children}</strong>
+  ),
+  code: ({ children }) => (
+    <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+  ),
+  hr: () => (
+    <hr className="my-8 border-border" />
+  ),
+}
 
 export default function HelpArticlePage({
   params,
@@ -82,9 +115,11 @@ export default function HelpArticlePage({
 
       {/* Article Content */}
       <Card>
-        <CardContent className="py-6">
-          <article className="prose prose-gray dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-p:leading-7 prose-li:leading-7 prose-ul:my-4 prose-ol:my-4 prose-strong:font-semibold prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
-            <ReactMarkdown>{article.content}</ReactMarkdown>
+        <CardContent className="py-6 px-6">
+          <article>
+            <ReactMarkdown components={markdownComponents}>
+              {article.content.trim()}
+            </ReactMarkdown>
           </article>
         </CardContent>
       </Card>
