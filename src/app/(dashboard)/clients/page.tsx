@@ -70,7 +70,7 @@ export default async function ClientsPage() {
 
       {/* Quick Stats */}
       {canManageClients && clients && clients.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -80,21 +80,6 @@ export default async function ClientsPage() {
                 <div>
                   <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{clients.length}</p>
                   <p className="text-sm text-blue-600 dark:text-blue-400">Total Clients</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-                  <Mail className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {clients.filter(c => c.contact_email).length}
-                  </p>
-                  <p className="text-sm text-green-600 dark:text-green-400">With Email</p>
                 </div>
               </div>
             </CardContent>
