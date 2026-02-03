@@ -51,7 +51,7 @@ jobs:
       # Requires SARIF support (available in Semgrep free tier)
       - name: Upload SARIF results
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: semgrep.sarif
         continue-on-error: true
