@@ -6,7 +6,7 @@ import { useOrganization } from '@/contexts/organization-context'
 import { hasMfaEnabled } from '@/lib/supabase/mfa'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Shield, AlertTriangle, Loader2 } from 'lucide-react'
+import { Shield, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
 /**
@@ -17,7 +17,7 @@ import Link from 'next/link'
  */
 export function MfaEnforcementGuard({ children }: { children: React.ReactNode }) {
   const { user, settings, isOwner, isAdmin } = useOrganization()
-  const router = useRouter()
+  useRouter() // Router available for navigation if needed
   const pathname = usePathname()
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null)
   const [checking, setChecking] = useState(true)
