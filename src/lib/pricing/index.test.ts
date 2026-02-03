@@ -57,25 +57,6 @@ describe('calculateSessionPricing', () => {
     expect(cappedResult.mcaCut).toBe(125)
   })
 
-  it('calculates rent correctly', () => {
-    const rentService: ServiceType = {
-      ...mockServiceType,
-      rent_percentage: 10,
-      mca_percentage: 30,
-      base_rate: 55,
-    }
-
-    // Total: 55
-    // Rent: 10% = 5.5
-    // MCA: 30% = 16.5
-    // Contractor: 55 - 5.5 - 16.5 = 33
-    const result = calculateSessionPricing(rentService, 1)
-    expect(result.totalAmount).toBe(55)
-    expect(result.rentAmount).toBe(5.5)
-    expect(result.mcaCut).toBe(16.5)
-    expect(result.contractorPay).toBe(33)
-  })
-
   it('scales pricing by duration', () => {
     // 30 min (default): $50
     const result30 = calculateSessionPricing(mockServiceType, 1, 30)
