@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Utility scripts (Node.js CommonJS)
     "scripts/**",
+    // Nested app folder (separate project copy)
+    "mca-app/**",
   ]),
 ]);
 

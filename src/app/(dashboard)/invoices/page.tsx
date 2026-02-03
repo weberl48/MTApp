@@ -401,8 +401,6 @@ export default function InvoicesPage() {
   // Calculate totals
   const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
   const sentTotal = sentInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  // paidTotal intentionally unused - keeping for future totals display
-  const _paidTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
   const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
   if (loading) {
