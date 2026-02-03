@@ -132,15 +132,30 @@ Service types control pricing with these fields:
 
 ## Testing
 
-Tests use Vitest with jsdom. Run a single test file:
+### Unit Tests (Vitest)
 ```bash
-npm run test -- src/lib/pricing/index.test.ts
+npm run test                              # Run all unit tests
+npm run test -- --watch                   # Watch mode
+npm run test -- src/lib/pricing/index.test.ts  # Single file
+npm run test -- --run                     # CI mode (no watch)
 ```
 
-Existing tests cover:
+Unit tests cover:
 - Pricing calculations (`src/lib/pricing/index.test.ts`)
 - Session form defaults (`src/lib/session-form/defaults.test.ts`)
 - Client multi-select component (`src/components/forms/client-multi-select.test.tsx`)
+- Owner onboarding steps (`src/components/onboarding/owner-onboarding-steps.test.ts`)
+
+### E2E Tests (Playwright)
+```bash
+npm run test:e2e          # Run e2e tests (starts dev server automatically)
+npm run test:e2e:ui       # Interactive UI mode
+npm run test:e2e:headed   # Run with visible browser
+```
+
+E2E tests are in `tests/e2e/` and cover auth, sessions, invoices, settings, and navigation flows.
+
+**Note**: Full e2e coverage requires `TEST_USER_PASSWORD` environment variable for authenticated tests.
 
 ## Environment Variables
 
