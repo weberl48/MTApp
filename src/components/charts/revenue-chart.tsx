@@ -53,7 +53,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
-                formatter={(value: number) => [`$${value.toFixed(2)}`, '']}
+                formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`, '']}
               />
               <Area
                 type="monotone"
