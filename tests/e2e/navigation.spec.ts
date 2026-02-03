@@ -88,7 +88,7 @@ test.describe('Dashboard', () => {
     await page.goto('/dashboard')
 
     // Should show some stats/cards
-    await expect(page.locator('[class*="card"]')).toHaveCount({ minimum: 1 })
+    expect(await page.locator('[class*="card"]').count()).toBeGreaterThanOrEqual(1)
   })
 
   test('dashboard shows recent activity', async ({ page }) => {
