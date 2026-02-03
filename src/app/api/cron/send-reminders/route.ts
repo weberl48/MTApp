@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
-// Use service role for cron jobs since there's no user context
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy initialize clients to avoid build-time errors
+let supabaseAdmin: SupabaseClient | null = null
+let resend: Resend | null = null
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+      throw new Error('Missing Supabase environment variables')
+    }
+    supabaseAdmin = createClient(url, key)
+  }
+  return supabaseAdmin
+}
+
+function getResend(): Resend | null {
+  if (resend === null && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 // Verify the cron secret to ensure this is called by Vercel Cron
 function verifyCronSecret(request: NextRequest): boolean {
@@ -32,7 +47,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get pending reminders that are due
-    const { data: reminders, error: fetchError } = await supabaseAdmin
+    const { data: reminders, error: fetchError } = await getSupabaseAdmin()
       .from('session_reminders')
       .select(`
         id,
@@ -71,9 +86,10 @@ export async function GET(request: NextRequest) {
     for (const reminder of reminders) {
       try {
         // Skip if no email configured
-        if (!resend) {
+        const resendClient = getResend()
+        if (!resendClient) {
           console.log('Resend not configured, skipping reminder:', reminder.id)
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -108,7 +124,7 @@ export async function GET(request: NextRequest) {
         const org = orgData?.[0] || null
 
         if (!session) {
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -160,7 +176,7 @@ export async function GET(request: NextRequest) {
         `
 
         // Send email
-        const { error: emailError } = await resend.emails.send({
+        const { error: emailError } = await resendClient.emails.send({
           from: org?.email || 'noreply@maycreativearts.com',
           to: reminder.recipient_email,
           subject,
@@ -169,7 +185,7 @@ export async function GET(request: NextRequest) {
 
         if (emailError) {
           console.error('Error sending reminder email:', emailError)
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -182,7 +198,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Mark as sent
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('session_reminders')
           .update({
             status: 'sent',
@@ -194,7 +210,7 @@ export async function GET(request: NextRequest) {
         successCount++
       } catch (error) {
         console.error('Error processing reminder:', reminder.id, error)
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('session_reminders')
           .update({
             status: 'failed',
