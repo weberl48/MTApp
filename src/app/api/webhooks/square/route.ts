@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
@@ -26,19 +26,38 @@ interface InvoiceWithJoins {
   session: SessionJoinResult | SessionJoinResult[] | null
 }
 
-// Use service role for webhooks since there's no user context
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy initialize clients to avoid build-time errors
+let supabaseAdmin: SupabaseClient | null = null
+let resendClient: Resend | null = null
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+      throw new Error('Missing Supabase environment variables')
+    }
+    supabaseAdmin = createClient(url, key)
+  }
+  return supabaseAdmin
+}
+
+function getResend(): Resend {
+  if (!resendClient) {
+    const key = process.env.RESEND_API_KEY
+    if (!key) {
+      throw new Error('Missing RESEND_API_KEY environment variable')
+    }
+    resendClient = new Resend(key)
+  }
+  return resendClient
+}
 
 // Send payment notification to organization owner
 async function sendPaymentNotification(squareInvoiceId: string) {
   try {
     // Fetch invoice with related data
-    const { data: invoice } = await supabaseAdmin
+    const { data: invoice } = await getSupabaseAdmin()
       .from('invoices')
       .select(`
         id,
@@ -59,7 +78,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
     const typedInvoice = invoice as InvoiceWithJoins
 
     // Fetch organization owner
-    const { data: owner } = await supabaseAdmin
+    const { data: owner } = await getSupabaseAdmin()
       .from('users')
       .select('email, name')
       .eq('organization_id', typedInvoice.organization_id)
@@ -78,7 +97,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
     const serviceTypeName = Array.isArray(serviceType) ? serviceType[0]?.name : serviceType?.name
 
     // Send notification email
-    await resend.emails.send({
+    await getResend().emails.send({
       from: 'May Creative Arts <noreply@rattatata.xyz>',
       to: [owner.email],
       subject: `Payment Received - ${formatCurrency(typedInvoice.amount)}`,
@@ -177,7 +196,7 @@ export async function POST(request: NextRequest) {
         updateData.paid_date = paidDate
       }
 
-      const { error } = await supabaseAdmin
+      const { error } = await getSupabaseAdmin()
         .from('invoices')
         .update(updateData)
         .eq('square_invoice_id', squareInvoiceId)
@@ -203,7 +222,7 @@ export async function POST(request: NextRequest) {
       const invoiceId = paymentData?.invoice_id
 
       if (invoiceId) {
-        const { error } = await supabaseAdmin
+        const { error } = await getSupabaseAdmin()
           .from('invoices')
           .update({
             status: 'paid',
