@@ -170,7 +170,14 @@ export async function POST(request: NextRequest) {
     if (event.type === 'invoice.payment_made' || event.type === 'invoice.updated') {
       const invoiceData = event.data?.object?.invoice
 
+      console.log('[Square Webhook] Invoice event received:', {
+        type: event.type,
+        invoiceId: invoiceData?.id,
+        status: invoiceData?.status,
+      })
+
       if (!invoiceData?.id) {
+        console.error('[Square Webhook] No invoice ID in event data')
         return NextResponse.json({ error: 'Invalid invoice data' }, { status: 400 })
       }
 
@@ -190,16 +197,30 @@ export async function POST(request: NextRequest) {
         ourStatus = 'pending'
       }
 
+      console.log('[Square Webhook] Mapped status:', { squareStatus, ourStatus, paidDate })
+
+      // First check if we have this invoice
+      const { data: existingInvoice, error: findError } = await getSupabaseAdmin()
+        .from('invoices')
+        .select('id, status, square_invoice_id')
+        .eq('square_invoice_id', squareInvoiceId)
+        .single()
+
+      console.log('[Square Webhook] Found invoice:', existingInvoice, 'Error:', findError)
+
       // Update our invoice
       const updateData: Record<string, unknown> = { status: ourStatus }
       if (paidDate) {
         updateData.paid_date = paidDate
       }
 
-      const { error } = await getSupabaseAdmin()
+      const { error, count } = await getSupabaseAdmin()
         .from('invoices')
         .update(updateData)
         .eq('square_invoice_id', squareInvoiceId)
+        .select()
+
+      console.log('[Square Webhook] Update result:', { error, count, updateData })
 
       if (error) {
         console.error('Error updating invoice from webhook:', error)
