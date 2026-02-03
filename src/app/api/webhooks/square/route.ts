@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
       }
 
-      const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/square`
+      const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/square/`
       const isValid = verifySquareSignature(
         body,
         signature,
