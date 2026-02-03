@@ -29,7 +29,7 @@ test.describe('Invoices Page', () => {
     await page.goto('/invoices')
 
     // Should have tabs for filtering by status
-    await expect(page.getByRole('tab')).toHaveCount({ minimum: 2 })
+    expect(await page.getByRole('tab').count()).toBeGreaterThanOrEqual(2)
   })
 
   test('can search invoices', async ({ page }) => {
