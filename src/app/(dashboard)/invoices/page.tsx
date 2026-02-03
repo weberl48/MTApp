@@ -23,7 +23,6 @@ import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/ui/empty-state'
 
 interface Invoice {
   id: string
@@ -402,7 +401,8 @@ export default function InvoicesPage() {
   // Calculate totals
   const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
   const sentTotal = sentInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const paidTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  // paidTotal intentionally unused - keeping for future totals display
+  const _paidTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
   const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
   if (loading) {

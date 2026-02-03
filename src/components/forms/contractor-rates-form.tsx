@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, calculateSessionPricing } from '@/lib/pricing'
-import { Loader2, Save, DollarSign, Pencil, X, Check } from 'lucide-react'
+import { Loader2, DollarSign, Pencil, X, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ServiceType } from '@/types/database'
 

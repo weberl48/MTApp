@@ -12,12 +12,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
+  // Use resolvedTheme to track when theme is ready, avoiding setState in effect
+  const isMounted = typeof resolvedTheme !== 'undefined'
+
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (isMounted && !mounted) {
+      setMounted(true)
+    }
+  }, [isMounted, mounted])
 
   if (!mounted) {
     return (

@@ -66,7 +66,7 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const currentUserId = user?.id || null
 
   useEffect(() => {

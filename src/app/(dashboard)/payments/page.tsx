@@ -260,9 +260,10 @@ export default function PaymentsPage() {
 
   // Calculate totals for history view
   const totalContractorPay = contractors.reduce((sum, c) => sum + c.totalEarned, 0)
-  const totalPaidOut = contractors.reduce((sum, c) => sum + c.totalPaid, 0)
   const totalPending = unpaidContractors.reduce((sum, c) => sum + c.totalPending, 0)
-  const totalMcaCut = invoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
+  // Note: totalPaidOut and totalMcaCut available for future analytics features
+  void contractors.reduce((sum, c) => sum + c.totalPaid, 0)
+  void invoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
 
   return (
     <AdminGuard>

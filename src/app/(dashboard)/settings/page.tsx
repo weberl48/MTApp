@@ -26,8 +26,6 @@ import {
   Loader2,
   Save,
   Users,
-  Copy,
-  Check,
   Palette,
   Globe,
   History,
@@ -55,7 +53,6 @@ export default function SettingsPage() {
   const [teamMembers, setTeamMembers] = useState<UserType[]>([])
   const [editingServiceType, setEditingServiceType] = useState<ServiceType | null>(null)
   const [isServiceTypeFormOpen, setIsServiceTypeFormOpen] = useState(false)
-  const [copiedInvite, setCopiedInvite] = useState(false)
 
   // Local form state
   const [orgName, setOrgName] = useState('')
@@ -218,14 +215,6 @@ export default function SettingsPage() {
     }
   }
 
-  async function copyInviteLink() {
-    if (!organization) return
-    const inviteUrl = `${window.location.origin}/signup?org=${organization.id}`
-    await navigator.clipboard.writeText(inviteUrl)
-    setCopiedInvite(true)
-    toast.success('Invite link copied!')
-    setTimeout(() => setCopiedInvite(false), 2000)
-  }
 
   async function saveBranding() {
     setSaving(true)

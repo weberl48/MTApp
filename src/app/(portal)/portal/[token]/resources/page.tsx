@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   Loader2,
   Eye,
-  X,
 } from 'lucide-react'
 import {
   Dialog,
@@ -441,6 +440,7 @@ export default function PortalResourcesPage() {
                 <span className="ml-2 text-gray-500">Loading preview...</span>
               </div>
             ) : previewUrl && previewResource?.mime_type?.startsWith('image/') ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl}
                 alt={previewResource.title}

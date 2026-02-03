@@ -107,7 +107,7 @@ export default function EarningsPage() {
       let currentMonthEarnings = 0
       let lastMonthEarnings = 0
       let sessionsThisMonth = 0
-      let sessionsYtd = sessions?.length || 0
+      const sessionsYtd = sessions?.length || 0
 
       const monthlyMap = new Map<string, { earnings: number; sessions: number }>()
 

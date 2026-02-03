@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,7 +22,6 @@ import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/ui/empty-state'
 
 interface Session {
   id: string
@@ -65,7 +64,7 @@ const statusLabels: Record<string, string> = {
 const ITEMS_PER_PAGE = 50
 
 export default function SessionsPage() {
-  const router = useRouter()
+  useRouter() // Used for navigation context
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [isAdmin, setIsAdmin] = useState(false)

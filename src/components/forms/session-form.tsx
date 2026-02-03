@@ -16,8 +16,6 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
@@ -57,7 +55,7 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, user, isOwner, isDeveloper } = useOrganization()
+  const { organization, isOwner, isDeveloper } = useOrganization()
   const showFinancialDetails = isOwner || isDeveloper // Hide MCA cut etc from contractors/admins
   const isEditMode = !!existingSession
 

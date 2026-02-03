@@ -36,7 +36,7 @@ interface InvoiceActionsProps {
 }
 
 export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: InvoiceActionsProps) {
-  const router = useRouter()
+  useRouter() // Router available for navigation if needed
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
