@@ -143,7 +143,9 @@ export async function POST(request: NextRequest) {
 
     const event = JSON.parse(body)
 
-    console.log('Square webhook event:', event.type)
+    // Sanitize log output to prevent log injection
+    const eventType = String(event.type).replace(/[\r\n]/g, '')
+    console.log('Square webhook event:', eventType)
 
     // Handle invoice events
     if (event.type === 'invoice.payment_made' || event.type === 'invoice.updated') {
@@ -185,7 +187,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
       }
 
-      console.log(`Updated invoice ${squareInvoiceId} to status ${ourStatus}`)
+      // Sanitize IDs before logging
+      const safeInvoiceId = String(squareInvoiceId).replace(/[\r\n]/g, '')
+      console.log(`Updated invoice ${safeInvoiceId} to status ${ourStatus}`)
 
       // Send notification to owner when invoice is paid
       if (ourStatus === 'paid') {
@@ -208,7 +212,8 @@ export async function POST(request: NextRequest) {
           .eq('square_invoice_id', invoiceId)
 
         if (!error) {
-          console.log(`Marked invoice ${invoiceId} as paid from payment event`)
+          const safeId = String(invoiceId).replace(/[\r\n]/g, '')
+          console.log(`Marked invoice ${safeId} as paid from payment event`)
           await sendPaymentNotification(invoiceId)
         }
       }

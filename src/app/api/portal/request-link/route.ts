@@ -69,7 +69,9 @@ export async function POST(request: NextRequest) {
         organizationName: orgName,
         portalUrl: tokenInfo.portalUrl,
       })
-      console.log(`[Portal Magic Link] Email sent to ${normalizedEmail}`)
+      // Sanitize email before logging to prevent log injection
+      const safeEmail = normalizedEmail.replace(/[\r\n]/g, '')
+      console.log(`[Portal Magic Link] Email sent to ${safeEmail}`)
     } catch (emailError) {
       console.error('Failed to send magic link email:', emailError)
       // In development, still return the URL for testing
