@@ -1,7 +1,6 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,18 +12,9 @@ import {
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
 
-  // Use resolvedTheme to track when theme is ready, avoiding setState in effect
-  const isMounted = typeof resolvedTheme !== 'undefined'
-
-  useEffect(() => {
-    if (isMounted && !mounted) {
-      setMounted(true)
-    }
-  }, [isMounted, mounted])
-
-  if (!mounted) {
+  // Wait for client-side hydration - resolvedTheme is undefined during SSR
+  if (typeof resolvedTheme === 'undefined') {
     return (
       <Button variant="ghost" size="icon" className="h-9 w-9">
         <Sun className="h-4 w-4" />
