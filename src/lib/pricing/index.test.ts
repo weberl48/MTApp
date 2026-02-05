@@ -1,4 +1,4 @@
-import { calculateSessionPricing } from './index'
+import { calculateSessionPricing, calculateNoShowPricing, NO_SHOW_FEE } from './index'
 import type { ServiceType } from '@/types/database'
 
 describe('calculateSessionPricing', () => {
@@ -14,6 +14,7 @@ describe('calculateSessionPricing', () => {
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
+    scholarship_rate: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -23,7 +24,7 @@ describe('calculateSessionPricing', () => {
 
   it('calculates individual session correctly', () => {
     const result = calculateSessionPricing(mockServiceType, 1)
-    
+
     expect(result.totalAmount).toBe(50)
     expect(result.mcaCut).toBe(11.5) // 23% of 50
     expect(result.contractorPay).toBe(38.5) // 50 - 11.5
@@ -78,3 +79,155 @@ describe('calculateSessionPricing', () => {
   })
 })
 
+describe('scholarship pricing', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'In-Home Individual',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: 60,
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses flat scholarship rate when payment method is scholarship', () => {
+    // Service with $80 base rate, scholarship rate $60
+    const service: ServiceType = {
+      ...mockServiceType,
+      base_rate: 80,
+      scholarship_rate: 60,
+    }
+
+    // Normal: $80 total, 23% MCA = $18.40, contractor = $61.60
+    // Scholarship: total = $60, contractor still gets $61.60
+    // MCA cut = $60 - $61.60 = -$1.60 (MCA absorbs the loss)
+    const result = calculateSessionPricing(service, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+
+    expect(result.totalAmount).toBe(60)
+    expect(result.contractorPay).toBe(61.6) // Same as non-scholarship
+    expect(result.mcaCut).toBe(-1.6) // MCA absorbs the difference
+    expect(result.scholarshipDiscount).toBe(20) // $80 - $60
+  })
+
+  it('contractor gets normal pay when scholarship rate matches normal rate', () => {
+    // scholarship_rate = $60, base_rate = $50 → scholarship is higher
+    // Normal: $50, 23% MCA = $11.50, contractor = $38.50
+    // Scholarship: total = $60, contractor still = $38.50, MCA = $21.50
+    const result = calculateSessionPricing(mockServiceType, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+
+    expect(result.totalAmount).toBe(60)
+    expect(result.contractorPay).toBe(38.5) // Same as non-scholarship
+    expect(result.mcaCut).toBe(21.5) // $60 - $38.50
+  })
+
+  it('does not apply scholarship when payment method is not scholarship', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, undefined, {
+      paymentMethod: 'private_pay',
+    })
+
+    expect(result.totalAmount).toBe(50)
+    expect(result.scholarshipDiscount).toBeUndefined()
+  })
+
+  it('does not apply scholarship when scholarship_rate is null', () => {
+    const service: ServiceType = {
+      ...mockServiceType,
+      scholarship_rate: null,
+    }
+
+    const result = calculateSessionPricing(service, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+
+    expect(result.totalAmount).toBe(50) // Normal pricing
+    expect(result.scholarshipDiscount).toBeUndefined()
+  })
+
+  it('scholarship rate is flat per session regardless of duration', () => {
+    // 60 min: scholarship_rate is flat $60 (not scaled by duration)
+    const result = calculateSessionPricing(mockServiceType, 1, 60, undefined, {
+      paymentMethod: 'scholarship',
+    })
+
+    expect(result.totalAmount).toBe(60) // Flat $60 regardless of duration
+    // Normal 60-min contractor pay: $100 * 77% = $77
+    expect(result.contractorPay).toBe(77)
+    // MCA absorbs: $60 - $77 = -$17
+    expect(result.mcaCut).toBe(-17)
+  })
+})
+
+describe('calculateNoShowPricing', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'In-Home Individual',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('charges $60 no-show fee', () => {
+    expect(NO_SHOW_FEE).toBe(60)
+
+    const result = calculateNoShowPricing(mockServiceType)
+    expect(result.totalAmount).toBe(60)
+    expect(result.isNoShow).toBe(true)
+  })
+
+  it('gives contractor their normal 30-min session pay', () => {
+    // Normal 30-min: $50 total, 23% MCA = $11.50, contractor = $38.50
+    // No-show: total = $60, contractor = $38.50, MCA = $21.50
+    const result = calculateNoShowPricing(mockServiceType)
+
+    expect(result.contractorPay).toBe(38.5) // Same as normal session
+    expect(result.mcaCut).toBe(21.5) // $60 - $38.50
+    expect(result.totalAmount).toBe(60)
+    expect(result.rentAmount).toBe(0)
+  })
+
+  it('respects contractor overrides for no-show pay', () => {
+    // Custom contractor rate: $40 per 30 min
+    const result = calculateNoShowPricing(mockServiceType, {
+      customContractorPay: 40,
+    })
+
+    expect(result.contractorPay).toBe(40)
+    expect(result.mcaCut).toBe(20) // $60 - $40
+  })
+
+  it('respects pay increase bonus for no-show pay', () => {
+    // Normal pay $38.50 + $2 bonus = $40.50
+    const result = calculateNoShowPricing(mockServiceType, {
+      payIncrease: 2,
+    })
+
+    expect(result.contractorPay).toBe(40.5)
+    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
+  })
+})

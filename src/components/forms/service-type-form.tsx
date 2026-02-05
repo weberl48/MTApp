@@ -58,6 +58,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     mca_percentage: serviceType?.mca_percentage?.toString() || '25',
     contractor_cap: serviceType?.contractor_cap?.toString() || '',
     rent_percentage: serviceType?.rent_percentage?.toString() || '0',
+    scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
     is_active: serviceType?.is_active ?? true,
   })
 
@@ -78,6 +79,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       mca_percentage: parseFloat(formData.mca_percentage),
       contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
       rent_percentage: parseFloat(formData.rent_percentage) || 0,
+      scholarship_rate: formData.scholarship_rate ? parseFloat(formData.scholarship_rate) : null,
       is_active: formData.is_active,
     }
 
@@ -249,6 +251,23 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             />
             <p className="text-xs text-gray-500">
               Percentage of session that goes to rent (e.g., for Matt&apos;s Music location)
+            </p>
+          </div>
+
+          {/* Scholarship Rate */}
+          <div className="space-y-2">
+            <Label htmlFor="scholarship_rate">Scholarship Rate ($)</Label>
+            <Input
+              id="scholarship_rate"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.scholarship_rate}
+              onChange={(e) => setFormData({ ...formData, scholarship_rate: e.target.value })}
+              placeholder="Leave empty to use normal rate"
+            />
+            <p className="text-xs text-gray-500">
+              Flat rate charged to scholarship clients. Contractor still gets normal pay; MCA absorbs the discount.
             </p>
           </div>
 

@@ -16,7 +16,7 @@ export default async function NewSessionPage() {
   // Fetch service types and clients for the form
   const [{ data: serviceTypes }, { data: clients }] = await Promise.all([
     supabase.from('service_types').select('*').order('name'),
-    supabase.from('clients').select('id, name').order('name'),
+    supabase.from('clients').select('id, name, payment_method').order('name'),
   ])
 
   return (

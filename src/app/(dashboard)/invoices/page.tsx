@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback, useTransition } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus } from '@/app/actions/invoices'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -397,6 +397,32 @@ export default function InvoicesPage() {
   const groupHomeUnpaid = invoices?.filter(
     (inv) => inv.payment_method === 'group_home' && inv.status !== 'paid'
   ) || []
+  const scholarshipUnpaid = invoices?.filter(
+    (inv) => inv.payment_method === 'scholarship' && inv.status !== 'paid'
+  ) || []
+
+  // Group scholarship invoices by client and month for batch billing
+  const scholarshipByClientMonth = useMemo(() => {
+    const groups = new Map<string, { clientName: string; month: string; invoices: Invoice[]; total: number }>()
+    for (const inv of scholarshipUnpaid) {
+      const date = inv.session?.date ? new Date(inv.session.date) : new Date(inv.created_at)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      const clientName = inv.client?.name || 'Unknown'
+      const key = `${clientName}::${monthKey}`
+      const existing = groups.get(key)
+      if (existing) {
+        existing.invoices.push(inv)
+        existing.total += inv.amount
+      } else {
+        groups.set(key, { clientName, month: monthKey, invoices: [inv], total: inv.amount })
+      }
+    }
+    return Array.from(groups.values()).sort((a, b) => {
+      const monthCmp = b.month.localeCompare(a.month)
+      if (monthCmp !== 0) return monthCmp
+      return a.clientName.localeCompare(b.clientName)
+    })
+  }, [scholarshipUnpaid])
 
   // Calculate totals
   const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
@@ -563,6 +589,11 @@ export default function InvoicesPage() {
                   Group Home ({groupHomeUnpaid.length})
                 </TabsTrigger>
               )}
+              {scholarshipUnpaid.length > 0 && (
+                <TabsTrigger value="scholarship" className="text-purple-600 dark:text-purple-400">
+                  Scholarship ({scholarshipUnpaid.length})
+                </TabsTrigger>
+              )}
             </TabsList>
             {overdueInvoices.length > 0 && (
               <TabsContent value="overdue">
@@ -589,6 +620,89 @@ export default function InvoicesPage() {
             {groupHomeUnpaid.length > 0 && (
               <TabsContent value="group-home">
                 <InvoiceTable invoices={groupHomeUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              </TabsContent>
+            )}
+            {scholarshipUnpaid.length > 0 && (
+              <TabsContent value="scholarship">
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Scholarship invoices grouped by client and month for end-of-month billing.
+                  </p>
+                  {scholarshipByClientMonth.map((group) => {
+                    const monthLabel = new Date(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    const allGroupIds = group.invoices.map(inv => inv.id)
+                    const allSelected = allGroupIds.every(id => selectedIds.has(id))
+                    return (
+                      <Card key={`${group.clientName}::${group.month}`} className="border-purple-100 dark:border-purple-900/30">
+                        <CardHeader className="py-3 px-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              {isAdmin && (
+                                <Checkbox
+                                  checked={allSelected}
+                                  onCheckedChange={(checked) => {
+                                    allGroupIds.forEach(id => handleSelectChange(id, !!checked))
+                                  }}
+                                  aria-label={`Select all for ${group.clientName}`}
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium">{group.clientName}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{monthLabel}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="font-bold">{formatCurrency(group.total)}</p>
+                                <p className="text-xs text-gray-500">{group.invoices.length} session{group.invoices.length !== 1 ? 's' : ''}</p>
+                              </div>
+                              {isAdmin && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    allGroupIds.forEach(id => handleSelectChange(id, true))
+                                  }}
+                                >
+                                  <Send className="w-3 h-3 mr-1" />
+                                  Select for Billing
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="px-4 pb-3 pt-0">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Service</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                                <TableHead>Status</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {group.invoices.map((inv) => (
+                                <TableRow key={inv.id}>
+                                  <TableCell>{inv.session?.service_type?.name}</TableCell>
+                                  <TableCell>
+                                    {inv.session?.date
+                                      ? new Date(inv.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                      : '-'}
+                                  </TableCell>
+                                  <TableCell className="text-right">{formatCurrency(inv.amount)}</TableCell>
+                                  <TableCell>
+                                    <Badge className={statusColors[inv.status]}>{inv.status}</Badge>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
               </TabsContent>
             )}
           </Tabs>
