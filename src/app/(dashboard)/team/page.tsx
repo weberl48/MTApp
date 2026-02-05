@@ -223,7 +223,16 @@ export default async function TeamPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={member.role === 'contractor' ? 'secondary' : 'default'}
+                          className={
+                            member.role === 'developer'
+                              ? 'bg-purple-600 text-white dark:bg-purple-500'
+                              : member.role === 'owner'
+                                ? 'bg-amber-600 text-white dark:bg-amber-500'
+                                : undefined
+                          }
+                        >
                           {member.role}
                         </Badge>
                       </TableCell>
