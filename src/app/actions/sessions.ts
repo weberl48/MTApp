@@ -75,7 +75,17 @@ export async function cancelSession(sessionId: string) {
 export async function deleteSession(sessionId: string) {
   const supabase = await createClient()
 
-  // Delete attendees first
+  // Delete invoices first (foreign key constraint)
+  const { error: invoicesError } = await supabase
+    .from('invoices')
+    .delete()
+    .eq('session_id', sessionId)
+
+  if (invoicesError) {
+    return { success: false, error: invoicesError.message }
+  }
+
+  // Delete attendees
   const { error: attendeesError } = await supabase
     .from('session_attendees')
     .delete()
@@ -97,6 +107,7 @@ export async function deleteSession(sessionId: string) {
 
   revalidatePath('/sessions')
   revalidatePath('/dashboard')
+  revalidatePath('/invoices')
 
   return { success: true }
 }
