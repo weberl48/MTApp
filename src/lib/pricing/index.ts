@@ -3,7 +3,7 @@ import type { ServiceType } from '@/types/database'
 /**
  * Flat fee charged for no-show sessions regardless of service type or group size
  */
-export const NO_SHOW_FEE = 50
+export const NO_SHOW_FEE = 60
 
 export interface PricingCalculation {
   totalAmount: number
@@ -94,16 +94,6 @@ export function calculateSessionPricing(
   const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
   let totalAmount = baseAmount * durationMultiplier
 
-  // Apply scholarship discount if applicable
-  let scholarshipDiscount = 0
-  if (paymentMethod === 'scholarship' && serviceType.scholarship_discount_percentage) {
-    scholarshipDiscount = round((totalAmount * serviceType.scholarship_discount_percentage) / 100)
-    totalAmount = totalAmount - scholarshipDiscount
-  }
-
-  // Per-person cost (for billing purposes, divided evenly)
-  const perPersonCost = totalAmount / count
-
   // Rent is no longer used - keeping field for backwards compatibility
   const rentAmount = 0
 
@@ -138,6 +128,30 @@ export function calculateSessionPricing(
     // Pay increase comes out of MCA's portion
     mcaCut -= effectiveOverrides.payIncrease
   }
+
+  // Apply scholarship pricing AFTER contractor pay is calculated
+  // Contractor gets their normal pay regardless of scholarship; MCA absorbs the discount
+  let scholarshipDiscount = 0
+  if (paymentMethod === 'scholarship') {
+    if (serviceType.scholarship_rate != null) {
+      // Flat scholarship rate per session (e.g., $60 regardless of duration)
+      const normalTotal = totalAmount
+      totalAmount = serviceType.scholarship_rate
+      scholarshipDiscount = round(normalTotal - totalAmount)
+      // Contractor pay stays the same; MCA absorbs the difference
+      mcaCut = totalAmount - contractorPay
+    } else if (serviceType.scholarship_discount_percentage) {
+      // Legacy: percentage-based discount (backward compatibility)
+      const normalTotal = totalAmount
+      scholarshipDiscount = round((normalTotal * serviceType.scholarship_discount_percentage) / 100)
+      totalAmount = normalTotal - scholarshipDiscount
+      // Contractor pay stays the same; MCA absorbs the difference
+      mcaCut = totalAmount - contractorPay
+    }
+  }
+
+  // Per-person cost (for billing purposes, divided evenly)
+  const perPersonCost = totalAmount / count
 
   const result: PricingCalculation = {
     totalAmount: round(totalAmount),
@@ -189,13 +203,22 @@ export function calculateContractorTotal(
 
 /**
  * Calculate pricing for a no-show session
- * No-show sessions are charged a flat $50 fee regardless of service type or group size
- * MCA takes their percentage, contractor gets the rest (no rent for no-shows)
+ * No-show sessions are charged a flat $60 fee regardless of service type or group size
+ * Contractor gets their normal session pay (as if the session happened for 30 min)
+ * MCA cut = no-show fee - contractor pay
  */
-export function calculateNoShowPricing(serviceType: ServiceType): PricingCalculation {
+export function calculateNoShowPricing(
+  serviceType: ServiceType,
+  contractorOverrides?: ContractorPricingOverrides
+): PricingCalculation {
   const totalAmount = NO_SHOW_FEE
-  const mcaCut = round((totalAmount * serviceType.mca_percentage) / 100)
-  const contractorPay = round(totalAmount - mcaCut)
+
+  // Calculate contractor pay as if a normal 30-min session happened
+  const normalPricing = calculateSessionPricing(serviceType, 1, 30, contractorOverrides)
+  const contractorPay = normalPricing.contractorPay
+
+  // MCA gets whatever is left from the no-show fee after contractor pay
+  const mcaCut = round(totalAmount - contractorPay)
 
   return {
     totalAmount,

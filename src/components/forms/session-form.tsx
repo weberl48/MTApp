@@ -47,7 +47,7 @@ interface ExistingSession {
 
 interface SessionFormProps {
   serviceTypes: ServiceType[]
-  clients: Array<Pick<Client, 'id' | 'name'>>
+  clients: Array<Pick<Client, 'id' | 'name' | 'payment_method'>>
   contractorId: string
   existingSession?: ExistingSession
 }
@@ -162,9 +162,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     }
   }, [serviceTypeId, contractorCustomRates, contractorPayIncrease])
 
+  // Determine payment method for pricing (scholarship affects pricing)
+  // For single-client sessions, use that client's payment method
+  // For groups/mixed, show normal pricing (scholarship handled per-client at invoice time)
+  const selectedPaymentMethod = useMemo(() => {
+    if (selectedClients.length === 1) {
+      const client = clients.find(c => c.id === selectedClients[0])
+      return client?.payment_method
+    }
+    return undefined
+  }, [selectedClients, clients])
+
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
-    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides)
+    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod })
     : null
 
   // Duplicate detection
@@ -409,18 +420,38 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         if (attendeesError) throw attendeesError
 
         // If submitted, create invoices for each client
-        if (status === 'submitted' && pricing) {
-          const invoices = (clientData.data || []).map((client) => ({
-            session_id: session.id,
-            client_id: client.id,
-            amount: pricing.perPersonCost,
-            mca_cut: pricing.mcaCut / selectedClients.length,
-            contractor_pay: pricing.contractorPay / selectedClients.length,
-            rent_amount: pricing.rentAmount / selectedClients.length,
-            payment_method: client.payment_method,
-            status: 'pending' as const,
-            organization_id: organization!.id,
-          }))
+        if (status === 'submitted' && pricing && selectedServiceType) {
+          const invoices = (clientData.data || []).map((client) => {
+            // Recalculate per-client if scholarship (different rate for scholarship clients)
+            if (client.payment_method === 'scholarship' && selectedPaymentMethod !== 'scholarship') {
+              const scholarshipPricing = calculateSessionPricing(
+                selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides,
+                { paymentMethod: 'scholarship' }
+              )
+              return {
+                session_id: session.id,
+                client_id: client.id,
+                amount: scholarshipPricing.perPersonCost,
+                mca_cut: scholarshipPricing.mcaCut / selectedClients.length,
+                contractor_pay: scholarshipPricing.contractorPay / selectedClients.length,
+                rent_amount: scholarshipPricing.rentAmount / selectedClients.length,
+                payment_method: client.payment_method,
+                status: 'pending' as const,
+                organization_id: organization!.id,
+              }
+            }
+            return {
+              session_id: session.id,
+              client_id: client.id,
+              amount: pricing.perPersonCost,
+              mca_cut: pricing.mcaCut / selectedClients.length,
+              contractor_pay: pricing.contractorPay / selectedClients.length,
+              rent_amount: pricing.rentAmount / selectedClients.length,
+              payment_method: client.payment_method,
+              status: 'pending' as const,
+              organization_id: organization!.id,
+            }
+          })
 
           const { error: invoicesError } = await supabase
             .from('invoices')
