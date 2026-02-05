@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
+import { PWAInstallPrompt } from "@/components/pwa/install-prompt";
 import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
@@ -18,13 +19,20 @@ export const metadata: Metadata = {
   title: "May Creative Arts",
   description: "Practice management system for May Creative Arts",
   manifest: "/manifest.json",
+  applicationName: "MCA Manager",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "MCA Manager",
   },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
-    apple: "/icons/icon-192.png",
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", sizes: "512x512" },
+    ],
   },
 };
 
@@ -47,6 +55,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ServiceWorkerProvider />
+          <PWAInstallPrompt />
           {children}
         </ThemeProvider>
       </body>
