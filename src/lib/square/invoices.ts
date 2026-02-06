@@ -21,6 +21,7 @@ interface SquareInvoiceResult {
   invoiceId: string
   invoiceUrl: string | null
   status: string
+  customerId: string
 }
 
 // Find or create a Square customer by email
@@ -193,6 +194,7 @@ export async function createSquareInvoice(
     invoiceId,
     invoiceUrl: publishResult?.invoice?.publicUrl || null,
     status: publishResult?.invoice?.status || 'UNKNOWN',
+    customerId,
   }
 }
 

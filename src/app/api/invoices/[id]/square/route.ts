@@ -128,6 +128,14 @@ export async function POST(
       })
       .eq('id', id)
 
+    // Save Square customer ID on the client for future auto-send
+    if (squareResult.customerId && invoice.client?.id) {
+      await supabase
+        .from('clients')
+        .update({ square_customer_id: squareResult.customerId })
+        .eq('id', invoice.client.id)
+    }
+
     return NextResponse.json({
       success: true,
       squareInvoiceId: squareResult.invoiceId,
