@@ -23,6 +23,13 @@ const paymentMethodLabels: Record<string, string> = {
   scholarship: 'Scholarship',
 }
 
+const billingMethodLabels: Record<string, string> = {
+  square: 'Square',
+  check: 'Check',
+  email: 'Email',
+  other: 'Other',
+}
+
 export default async function ClientsPage() {
   const supabase = await createClient()
 
@@ -120,6 +127,7 @@ export default async function ClientsPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Payment Method</TableHead>
+                  <TableHead>Billing</TableHead>
                   <TableHead>Notes</TableHead>
                   {canManageClients && <TableHead className="w-20">Actions</TableHead>}
                 </TableRow>
@@ -165,6 +173,11 @@ export default async function ClientsPage() {
                     <TableCell>
                       <Badge variant="outline">
                         {paymentMethodLabels[client.payment_method] || client.payment_method}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {billingMethodLabels[client.billing_method] || 'Square'}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
