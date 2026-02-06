@@ -1,9 +1,5 @@
-const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
-
-// Read the Excel file
-const workbook = XLSX.readFile(path.join(__dirname, '../../May Creative Arts Session Tracker (Responses) (2).xlsx'));
 
 // Known contractors from the data
 const contractors = [

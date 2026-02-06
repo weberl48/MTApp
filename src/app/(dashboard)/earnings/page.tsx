@@ -28,7 +28,7 @@ interface MonthlyBreakdown {
 }
 
 export default function EarningsPage() {
-  const { user, organization, viewAsContractor, effectiveUserId, viewAsRole, actualRole } = useOrganization()
+  const { user, organization, viewAsContractor, viewAsRole, actualRole } = useOrganization()
   const [summary, setSummary] = useState<EarningsSummary | null>(null)
   const [monthlyBreakdown, setMonthlyBreakdown] = useState<MonthlyBreakdown[]>([])
   const [loading, setLoading] = useState(true)
