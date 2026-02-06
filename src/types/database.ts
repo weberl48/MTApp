@@ -19,6 +19,11 @@ export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individu
 export type SessionRequestStatus = 'pending' | 'approved' | 'declined' | 'cancelled'
 export type ResourceType = 'homework' | 'file' | 'link'
 
+// Feature flags for toggling major features per organization
+export interface FeatureFlags {
+  client_portal: boolean
+}
+
 // Organization settings structure
 export interface OrganizationSettings {
   invoice: {
@@ -54,6 +59,7 @@ export interface OrganizationSettings {
   portal: {
     token_expiry_days: number
   }
+  features: FeatureFlags
 }
 
 // Social links structure

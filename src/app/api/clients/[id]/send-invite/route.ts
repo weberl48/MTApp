@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateAccessToken, getClientTokens } from '@/lib/portal/token'
 import { sendMagicLinkEmail } from '@/lib/email'
+import { isFeatureEnabled } from '@/lib/features'
 
 /**
  * POST /api/clients/[id]/send-invite
@@ -41,6 +42,17 @@ export async function POST(
     const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
     if (!allowedRoles.includes(profile.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Check if portal feature is enabled
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', profile.organization_id)
+      .single()
+
+    if (!isFeatureEnabled(org?.settings as Record<string, unknown>, 'client_portal')) {
+      return NextResponse.json({ error: 'Client portal is not enabled' }, { status: 404 })
     }
 
     // Get client details

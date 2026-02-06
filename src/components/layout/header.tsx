@@ -57,7 +57,8 @@ export function Header({ user }: HeaderProps) {
     viewAsContractor,
     setViewAsContractor,
     allOrganizations,
-    switchOrganization
+    switchOrganization,
+    feature
   } = useOrganization()
 
   const [contractors, setContractors] = useState<ContractorOption[]>([])
@@ -282,8 +283,8 @@ export function Header({ user }: HeaderProps) {
             </DropdownMenu>
         )}
 
-        {/* Client Portal Preview - Developer only */}
-        {showDevOnlyTools && clients.length > 0 && (
+        {/* Client Portal Preview - Developer only, hidden when portal feature is disabled */}
+        {showDevOnlyTools && clients.length > 0 && feature('client_portal') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2 px-2 sm:px-3">

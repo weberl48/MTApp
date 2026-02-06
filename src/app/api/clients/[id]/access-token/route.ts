@@ -6,6 +6,7 @@ import {
   revokeAccessToken,
   revokeAllClientTokens,
 } from '@/lib/portal/token'
+import { isFeatureEnabled } from '@/lib/features'
 
 /**
  * GET /api/clients/[id]/access-token
@@ -45,6 +46,17 @@ export async function GET(
     const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
     if (!allowedRoles.includes(profile.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Check if portal feature is enabled
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', profile.organization_id)
+      .single()
+
+    if (!isFeatureEnabled(org?.settings as Record<string, unknown>, 'client_portal')) {
+      return NextResponse.json({ error: 'Client portal is not enabled' }, { status: 404 })
     }
 
     // Verify client belongs to the same organization
@@ -113,6 +125,17 @@ export async function POST(
     const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
     if (!allowedRoles.includes(profile.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Check if portal feature is enabled
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', profile.organization_id)
+      .single()
+
+    if (!isFeatureEnabled(org?.settings as Record<string, unknown>, 'client_portal')) {
+      return NextResponse.json({ error: 'Client portal is not enabled' }, { status: 404 })
     }
 
     // Verify client belongs to the same organization
@@ -199,6 +222,17 @@ export async function DELETE(
     const allowedRoles = ['developer', 'owner', 'admin']
     if (!allowedRoles.includes(profile.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Check if portal feature is enabled
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', profile.organization_id)
+      .single()
+
+    if (!isFeatureEnabled(org?.settings as Record<string, unknown>, 'client_portal')) {
+      return NextResponse.json({ error: 'Client portal is not enabled' }, { status: 404 })
     }
 
     // Verify client belongs to the same organization

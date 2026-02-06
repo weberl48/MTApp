@@ -33,6 +33,7 @@ import {
   Eye,
   Mail,
   ExternalLink,
+  ToggleLeft,
 } from 'lucide-react'
 import Image from 'next/image'
 import { LogoUpload } from '@/components/forms/logo-upload'
@@ -48,10 +49,12 @@ import type {
   ServiceType,
   OrganizationSettings,
   SocialLinks,
+  FeatureFlags,
 } from '@/types/database'
+import { FEATURE_DEFINITIONS } from '@/lib/features'
 
 export default function SettingsPage() {
-  const { organization, user, settings, can, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
+  const { organization, user, settings, can, feature, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
   const isOwner = can('settings:edit')
   const isAdmin = can('session:view-all')
   const isDeveloper = can('settings:edit')
@@ -333,6 +336,12 @@ export default function SettingsPage() {
             <TabsTrigger value="audit" className="flex items-center gap-2">
               <History className="w-4 h-4" />
               Audit Log
+            </TabsTrigger>
+          )}
+          {isOwner && (
+            <TabsTrigger value="features" className="flex items-center gap-2">
+              <ToggleLeft className="w-4 h-4" />
+              Features
             </TabsTrigger>
           )}
         </TabsList>
@@ -697,54 +706,58 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <Separator />
+                  {feature('client_portal') && (
+                    <>
+                      <Separator />
 
-                  {/* Portal Header Preview */}
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client Portal</span>
-                    </div>
-                    <div className="rounded-lg border bg-white">
-                      <div className="flex items-center justify-between px-4 py-3 border-b">
-                        <div className="flex items-center gap-3">
-                          {organization.logo_url ? (
-                            <Image
-                              src={organization.logo_url}
-                              alt="Logo"
-                              width={36}
-                              height={36}
-                              className="h-9 w-9 rounded-lg object-cover"
-                            />
-                          ) : (
+                      {/* Portal Header Preview */}
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client Portal</span>
+                        </div>
+                        <div className="rounded-lg border bg-white">
+                          <div className="flex items-center justify-between px-4 py-3 border-b">
+                            <div className="flex items-center gap-3">
+                              {organization.logo_url ? (
+                                <Image
+                                  src={organization.logo_url}
+                                  alt="Logo"
+                                  width={36}
+                                  height={36}
+                                  className="h-9 w-9 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div
+                                  className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                                  style={{ backgroundColor: primaryColor }}
+                                >
+                                  {(orgName || organization.name).charAt(0)}
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-semibold text-sm">{orgName || organization.name}</p>
+                                <p className="text-xs text-muted-foreground">Welcome, Jane Doe</p>
+                              </div>
+                            </div>
                             <div
-                              className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                              className="rounded px-2.5 py-1 text-xs font-medium text-white"
                               style={{ backgroundColor: primaryColor }}
                             >
-                              {(orgName || organization.name).charAt(0)}
+                              Sign Out
                             </div>
-                          )}
-                          <div>
-                            <p className="font-semibold text-sm">{orgName || organization.name}</p>
-                            <p className="text-xs text-muted-foreground">Welcome, Jane Doe</p>
+                          </div>
+                          <div className="px-4 py-3">
+                            <div className="space-y-1.5">
+                              <div className="h-2 w-1/2 rounded bg-gray-200" />
+                              <div className="h-2 w-full rounded bg-gray-100" />
+                              <div className="h-2 w-2/3 rounded bg-gray-100" />
+                            </div>
                           </div>
                         </div>
-                        <div
-                          className="rounded px-2.5 py-1 text-xs font-medium text-white"
-                          style={{ backgroundColor: primaryColor }}
-                        >
-                          Sign Out
-                        </div>
                       </div>
-                      <div className="px-4 py-3">
-                        <div className="space-y-1.5">
-                          <div className="h-2 w-1/2 rounded bg-gray-200" />
-                          <div className="h-2 w-full rounded bg-gray-100" />
-                          <div className="h-2 w-2/3 rounded bg-gray-100" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1326,28 +1339,32 @@ export default function SettingsPage() {
                   />
                   <p className="text-xs text-gray-500">Service type base rates are for this many minutes</p>
                 </div>
-                <Separator />
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Client Portal</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="token_expiry_days">Portal Link Expiry (days)</Label>
-                  <Input
-                    id="token_expiry_days"
-                    type="number"
-                    min="1"
-                    max="365"
-                    value={localSettings.portal?.token_expiry_days ?? 90}
-                    onChange={(e) =>
-                      setLocalSettings({
-                        ...localSettings,
-                        portal: {
-                          ...localSettings.portal,
-                          token_expiry_days: parseInt(e.target.value) || 90,
-                        },
-                      })
-                    }
-                  />
-                  <p className="text-xs text-gray-500">How many days before client portal access links expire</p>
-                </div>
+                {feature('client_portal') && (
+                  <>
+                    <Separator />
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Client Portal</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="token_expiry_days">Portal Link Expiry (days)</Label>
+                      <Input
+                        id="token_expiry_days"
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={localSettings.portal?.token_expiry_days ?? 90}
+                        onChange={(e) =>
+                          setLocalSettings({
+                            ...localSettings,
+                            portal: {
+                              ...localSettings.portal,
+                              token_expiry_days: parseInt(e.target.value) || 90,
+                            },
+                          })
+                        }
+                      />
+                      <p className="text-xs text-gray-500">How many days before client portal access links expire</p>
+                    </div>
+                  </>
+                )}
                 <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
@@ -1435,6 +1452,51 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 <AuditLogTable />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Features Tab - Only visible to owners */}
+        {isOwner && localSettings && (
+          <TabsContent value="features">
+            <Card className="max-w-2xl">
+              <CardHeader>
+                <CardTitle>Feature Toggles</CardTitle>
+                <CardDescription>
+                  Enable or disable major features for your organization.
+                  Disabled features are hidden from all users.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {(Object.entries(FEATURE_DEFINITIONS) as [keyof FeatureFlags, (typeof FEATURE_DEFINITIONS)[keyof FeatureFlags]][]).map(
+                  ([key, def]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>{def.label}</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{def.description}</p>
+                      </div>
+                      <Switch
+                        checked={localSettings.features?.[key] ?? true}
+                        onCheckedChange={(checked) =>
+                          setLocalSettings({
+                            ...localSettings,
+                            features: {
+                              ...localSettings.features,
+                              [key]: checked,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  )
+                )}
+                <Separator />
+                <Button onClick={() => saveSettings()} disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Feature Settings
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>

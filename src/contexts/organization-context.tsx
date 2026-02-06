@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Organization, User, UserRole, OrganizationSettings } from '@/types/database'
+import type { Organization, User, UserRole, OrganizationSettings, FeatureFlags } from '@/types/database'
 import { can, type Permission } from '@/lib/auth/permissions'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
@@ -34,6 +34,7 @@ interface OrganizationContextType {
   updateOrganization: (updates: Partial<Organization>) => Promise<void>
   updateSettings: (settings: OrganizationSettings) => Promise<void>
   can: (permission: Permission) => boolean
+  feature: (flag: keyof FeatureFlags) => boolean
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined)
@@ -72,6 +73,9 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
   },
   portal: {
     token_expiry_days: 90,
+  },
+  features: {
+    client_portal: true,
   },
 }
 
@@ -128,6 +132,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         portal: {
           ...DEFAULT_SETTINGS.portal,
           ...((organization.settings as OrganizationSettings)?.portal || {}),
+        },
+        features: {
+          ...DEFAULT_SETTINGS.features,
+          ...((organization.settings as OrganizationSettings)?.features || {}),
         },
       }
     : null
@@ -306,6 +314,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         updateOrganization,
         updateSettings,
         can: (permission: Permission) => can(effectiveRole as UserRole, permission),
+        feature: (flag: keyof FeatureFlags) => settings?.features?.[flag] ?? true,
       }}
     >
       {children}
