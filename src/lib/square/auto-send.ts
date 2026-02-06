@@ -48,7 +48,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
   // Fetch pending invoices for this session that haven't been sent via Square
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('id, amount, due_date, client:clients(name, contact_email)')
+    .select('id, amount, due_date, client:clients(id, name, contact_email, square_customer_id)')
     .eq('session_id', sessionId)
     .eq('status', 'pending')
     .is('square_invoice_id', null)
@@ -67,7 +67,13 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
   for (const invoice of invoices) {
     const client = Array.isArray(invoice.client) ? invoice.client[0] : invoice.client
 
-    if (!client?.contact_email) {
+    // Only auto-send to clients who have been set up in Square (have a square_customer_id)
+    if (!client?.square_customer_id) {
+      result.skipped++
+      continue
+    }
+
+    if (!client.contact_email) {
       result.skipped++
       continue
     }
@@ -95,6 +101,14 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
           status: 'sent',
         })
         .eq('id', invoice.id)
+
+      // Save Square customer ID on the client if not already set
+      if (squareResult.customerId && client.id && !client.square_customer_id) {
+        await supabase
+          .from('clients')
+          .update({ square_customer_id: squareResult.customerId })
+          .eq('id', client.id)
+      }
 
       result.sent++
     } catch (err) {
