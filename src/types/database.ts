@@ -11,6 +11,7 @@ export type PlanType = 'free' | 'starter' | 'professional'
 export type SessionStatus = 'draft' | 'submitted' | 'approved' | 'no_show' | 'cancelled'
 export type InvoiceStatus = 'pending' | 'sent' | 'paid'
 export type PaymentMethod = 'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
+export type BillingMethod = 'square' | 'check' | 'email' | 'other'
 export type GoalStatus = 'active' | 'met' | 'not_met'
 export type LocationType = 'in_home' | 'matts_music' | 'other'
 export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individual' | 'art_group'
@@ -307,6 +308,7 @@ export interface Database {
           contact_email: string | null
           contact_phone: string | null
           payment_method: PaymentMethod
+          billing_method: BillingMethod
           notes: string | null
           square_customer_id: string | null
           organization_id: string
@@ -319,6 +321,7 @@ export interface Database {
           contact_email?: string | null
           contact_phone?: string | null
           payment_method?: PaymentMethod
+          billing_method?: BillingMethod
           notes?: string | null
           square_customer_id?: string | null
           organization_id: string
@@ -330,6 +333,7 @@ export interface Database {
           contact_email?: string | null
           contact_phone?: string | null
           payment_method?: PaymentMethod
+          billing_method?: BillingMethod
           notes?: string | null
           square_customer_id?: string | null
           organization_id?: string

@@ -26,7 +26,7 @@ import {
 import { Plus, Pencil, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import type { PaymentMethod, Client } from '@/types/database'
+import type { PaymentMethod, BillingMethod, Client } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
 
 const paymentMethods: { value: PaymentMethod; label: string }[] = [
@@ -34,6 +34,13 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
   { value: 'self_directed', label: 'Self-Directed Reimbursement' },
   { value: 'group_home', label: 'Group Home Billing' },
   { value: 'scholarship', label: 'Scholarship Fund' },
+]
+
+const billingMethods: { value: BillingMethod; label: string }[] = [
+  { value: 'square', label: 'Square (Auto-Send)' },
+  { value: 'check', label: 'Check' },
+  { value: 'email', label: 'Email Invoice' },
+  { value: 'other', label: 'Other' },
 ]
 
 interface ClientDialogProps {
@@ -54,6 +61,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('private_pay')
+  const [billingMethod, setBillingMethod] = useState<BillingMethod>('square')
   const [notes, setNotes] = useState('')
   const [sendInvite, setSendInvite] = useState(false)
 
@@ -64,6 +72,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       setEmail(client.contact_email || '')
       setPhone(client.contact_phone || '')
       setPaymentMethod(client.payment_method)
+      setBillingMethod(client.billing_method || 'square')
       setNotes(client.notes || '')
     }
   }, [client, open])
@@ -73,6 +82,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
     setEmail('')
     setPhone('')
     setPaymentMethod('private_pay')
+    setBillingMethod('square')
     setNotes('')
     setSendInvite(false)
   }
@@ -97,6 +107,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
             contact_email: email.trim() || null,
             contact_phone: phone.trim() || null,
             payment_method: paymentMethod,
+            billing_method: billingMethod,
             notes: notes.trim() || null,
             updated_at: new Date().toISOString(),
           })
@@ -113,6 +124,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
             contact_email: email.trim() || null,
             contact_phone: phone.trim() || null,
             payment_method: paymentMethod,
+            billing_method: billingMethod,
             notes: notes.trim() || null,
             organization_id: organization!.id,
           })
@@ -219,6 +231,24 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                 </SelectTrigger>
                 <SelectContent>
                   {paymentMethods.map((method) => (
+                    <SelectItem key={method.value} value={method.value}>
+                      {method.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billingMethod">Billing Method</Label>
+              <Select
+                value={billingMethod}
+                onValueChange={(value) => setBillingMethod(value as BillingMethod)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select billing method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {billingMethods.map((method) => (
                     <SelectItem key={method.value} value={method.value}>
                       {method.label}
                     </SelectItem>
