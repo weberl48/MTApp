@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
+import { portalTokenSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/portal/sessions
@@ -14,14 +15,14 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('Authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json(
         { error: 'Token is required' },
         { status: 401 }
       )
     }
 
-    const validation = await validateAccessToken(token)
+    const validation = await validateAccessToken(token!)
     if (!validation.valid || !validation.clientId) {
       return NextResponse.json(
         { error: validation.error || 'Invalid token' },

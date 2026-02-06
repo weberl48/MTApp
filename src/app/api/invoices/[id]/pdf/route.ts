@@ -4,6 +4,7 @@ import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { createElement, ReactElement } from 'react'
 import { can } from '@/lib/auth/permissions'
+import { uuidSchema } from '@/lib/validation/schemas'
 import type { UserRole } from '@/types/database'
 
 export async function GET(
@@ -12,6 +13,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    if (!uuidSchema.safeParse(id).success) {
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Check authentication

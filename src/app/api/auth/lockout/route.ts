@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkLockout, recordLoginAttempt } from '@/lib/auth/lockout'
 import { createServiceClient } from '@/lib/supabase/service'
+import { lockoutBodySchema } from '@/lib/validation/schemas'
 import type { OrganizationSettings } from '@/types/database'
 
 /**
@@ -38,11 +39,14 @@ async function getOrgSecuritySettings(email: string) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { email, action, success } = await request.json()
+    const body = await request.json()
+    const parsed = lockoutBodySchema.safeParse(body)
 
-    if (!email || typeof email !== 'string') {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
+
+    const { email, action, success } = parsed.data
 
     // Look up org-specific lockout settings
     const security = await getOrgSecuritySettings(email)

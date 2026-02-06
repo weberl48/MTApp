@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
+import { portalTokenSchema } from '@/lib/validation/schemas'
 
 /**
  * POST /api/portal/validate
@@ -18,14 +19,14 @@ export async function POST(request: NextRequest) {
       token = body.token
     }
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json(
         { valid: false, error: 'Token is required' },
         { status: 401 }
       )
     }
 
-    const result = await validateAccessToken(token)
+    const result = await validateAccessToken(token!)
 
     if (!result.valid) {
       return NextResponse.json(
