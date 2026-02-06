@@ -17,15 +17,31 @@ updates:
       - "security"
     # Group minor and patch updates to reduce PR noise
     groups:
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+        update-types:
+          - "minor"
+          - "patch"
       production-dependencies:
         patterns:
           - "*"
         exclude-patterns:
+          - "@radix-ui/*"
           - "@types/*"
           - "eslint*"
-          - "prettier*"
           - "vitest*"
           - "@testing-library/*"
+          - "@playwright/*"
+          - "supabase"
+          - "jsdom"
+          - "@vitejs/*"
+          - "@tailwindcss/*"
+          - "tailwindcss"
+          - "tw-animate-css"
+          - "tsx"
+          - "cross-env"
+          - "typescript"
         update-types:
           - "minor"
           - "patch"
@@ -33,12 +49,25 @@ updates:
         patterns:
           - "@types/*"
           - "eslint*"
-          - "prettier*"
           - "vitest*"
           - "@testing-library/*"
+          - "@playwright/*"
+          - "@vitejs/*"
+          - "@tailwindcss/*"
+          - "tailwindcss"
+          - "tw-animate-css"
+          - "supabase"
+          - "jsdom"
+          - "tsx"
+          - "cross-env"
+          - "typescript"
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # Square SDK majors require manual API migration
+      - dependency-name: "square"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
