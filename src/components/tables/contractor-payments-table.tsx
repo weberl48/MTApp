@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpDown, Search, FileSpreadsheet } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 interface ContractorData {
   id: string
@@ -169,43 +169,62 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
     },
   })
 
-  function exportToExcel() {
-    // Create summary sheet
-    const summaryData = contractors.map((c) => ({
-      'Contractor Name': c.name,
-      'Email': c.email,
-      'Sessions': c.sessionCount,
-      'Total Earned': c.totalEarned,
-      'Paid Out': c.totalPaid,
-      'Pending': c.totalPending,
-    }))
-
-    // Create detailed invoice sheet
-    const invoiceData = invoices.map((inv) => ({
-      'Date': inv.session?.date || '',
-      'Contractor': inv.session?.contractor?.name || '',
-      'Client': inv.client?.name || '',
-      'Service': inv.session?.service_type?.name || '',
-      'Total Amount': inv.amount,
-      'MCA Cut': inv.mca_cut,
-      'Contractor Pay': inv.contractor_pay,
-      'Status': inv.status,
-      'Paid Date': inv.paid_date || '',
-    }))
-
-    const wb = XLSX.utils.book_new()
+  async function exportToExcel() {
+    const wb = new ExcelJS.Workbook()
 
     // Add summary sheet
-    const summaryWs = XLSX.utils.json_to_sheet(summaryData)
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary')
+    const summaryWs = wb.addWorksheet('Summary')
+    summaryWs.columns = [
+      { header: 'Contractor Name', key: 'name', width: 25 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Sessions', key: 'sessions', width: 12 },
+      { header: 'Total Earned', key: 'earned', width: 15 },
+      { header: 'Paid Out', key: 'paid', width: 15 },
+      { header: 'Pending', key: 'pending', width: 15 },
+    ]
+    for (const c of contractors) {
+      summaryWs.addRow({
+        name: c.name, email: c.email, sessions: c.sessionCount,
+        earned: c.totalEarned, paid: c.totalPaid, pending: c.totalPending,
+      })
+    }
 
-    // Add detailed sheet
-    const detailWs = XLSX.utils.json_to_sheet(invoiceData)
-    XLSX.utils.book_append_sheet(wb, detailWs, 'Invoice Details')
+    // Add detailed invoice sheet
+    const detailWs = wb.addWorksheet('Invoice Details')
+    detailWs.columns = [
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Contractor', key: 'contractor', width: 25 },
+      { header: 'Client', key: 'client', width: 25 },
+      { header: 'Service', key: 'service', width: 20 },
+      { header: 'Total Amount', key: 'amount', width: 14 },
+      { header: 'MCA Cut', key: 'mcaCut', width: 12 },
+      { header: 'Contractor Pay', key: 'contractorPay', width: 15 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Paid Date', key: 'paidDate', width: 14 },
+    ]
+    for (const inv of invoices) {
+      detailWs.addRow({
+        date: inv.session?.date || '',
+        contractor: inv.session?.contractor?.name || '',
+        client: inv.client?.name || '',
+        service: inv.session?.service_type?.name || '',
+        amount: inv.amount,
+        mcaCut: inv.mca_cut,
+        contractorPay: inv.contractor_pay,
+        status: inv.status,
+        paidDate: inv.paid_date || '',
+      })
+    }
 
-    // Generate filename with date
-    const date = new Date().toISOString().split('T')[0]
-    XLSX.writeFile(wb, `contractor-payments-${date}.xlsx`)
+    // Generate and download
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `contractor-payments-${new Date().toISOString().split('T')[0]}.xlsx`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (

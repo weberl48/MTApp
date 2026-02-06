@@ -25,7 +25,7 @@ import { ChevronDown, ChevronRight, Search, FileSpreadsheet, DollarSign, Loader2
 import { formatCurrency } from '@/lib/pricing'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
 
 export interface UnpaidSession {
@@ -126,40 +126,53 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
     }
   }
 
-  function exportToExcel() {
-    // Create summary sheet
-    const summaryData = contractors.map((c) => ({
-      'Contractor Name': c.name,
-      Email: c.email,
-      'Unpaid Sessions': c.sessionCount,
-      'Total Pending': c.totalPending,
-    }))
-
-    // Create detailed session sheet
-    const sessionData = contractors.flatMap((c) =>
-      c.unpaidSessions.map((s) => ({
-        Contractor: c.name,
-        Date: s.date,
-        Service: s.service_type?.name || '',
-        'Duration (min)': s.duration_minutes,
-        Clients: s.clients.join(', '),
-        'Contractor Pay': s.contractor_pay,
-      }))
-    )
-
-    const wb = XLSX.utils.book_new()
+  async function exportToExcel() {
+    const wb = new ExcelJS.Workbook()
 
     // Add summary sheet
-    const summaryWs = XLSX.utils.json_to_sheet(summaryData)
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Unpaid Summary')
+    const summaryWs = wb.addWorksheet('Unpaid Summary')
+    summaryWs.columns = [
+      { header: 'Contractor Name', key: 'name', width: 25 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Unpaid Sessions', key: 'sessions', width: 16 },
+      { header: 'Total Pending', key: 'pending', width: 15 },
+    ]
+    for (const c of contractors) {
+      summaryWs.addRow({ name: c.name, email: c.email, sessions: c.sessionCount, pending: c.totalPending })
+    }
 
-    // Add detailed sheet
-    const detailWs = XLSX.utils.json_to_sheet(sessionData)
-    XLSX.utils.book_append_sheet(wb, detailWs, 'Session Details')
+    // Add detailed session sheet
+    const detailWs = wb.addWorksheet('Session Details')
+    detailWs.columns = [
+      { header: 'Contractor', key: 'contractor', width: 25 },
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Service', key: 'service', width: 20 },
+      { header: 'Duration (min)', key: 'duration', width: 15 },
+      { header: 'Clients', key: 'clients', width: 30 },
+      { header: 'Contractor Pay', key: 'pay', width: 15 },
+    ]
+    for (const c of contractors) {
+      for (const s of c.unpaidSessions) {
+        detailWs.addRow({
+          contractor: c.name,
+          date: s.date,
+          service: s.service_type?.name || '',
+          duration: s.duration_minutes,
+          clients: s.clients.join(', '),
+          pay: s.contractor_pay,
+        })
+      }
+    }
 
-    // Generate filename with date
-    const date = new Date().toISOString().split('T')[0]
-    XLSX.writeFile(wb, `unpaid-payroll-${date}.xlsx`)
+    // Generate and download
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `unpaid-payroll-${new Date().toISOString().split('T')[0]}.xlsx`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const totalUnpaid = contractors.reduce((sum, c) => sum + c.totalPending, 0)
