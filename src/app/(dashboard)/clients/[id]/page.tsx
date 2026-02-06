@@ -19,6 +19,13 @@ const paymentMethodLabels: Record<string, string> = {
   scholarship: 'Scholarship',
 }
 
+const billingMethodLabels: Record<string, string> = {
+  square: 'Square',
+  check: 'Check',
+  email: 'Email',
+  other: 'Other',
+}
+
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
@@ -118,6 +125,14 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
               <CreditCard className="h-4 w-4 text-gray-400" />
               <Badge variant="outline">
                 {paymentMethodLabels[client.payment_method] || client.payment_method}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <FileText className="h-4 w-4 text-gray-400" />
+              <span className="text-sm text-gray-500">Billing:</span>
+              <Badge variant="secondary">
+                {billingMethodLabels[client.billing_method] || 'Square'}
               </Badge>
             </div>
 
