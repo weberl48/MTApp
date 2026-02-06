@@ -30,7 +30,11 @@ import {
   Globe,
   History,
   Shield,
+  Eye,
+  Mail,
+  ExternalLink,
 } from 'lucide-react'
+import Image from 'next/image'
 import { LogoUpload } from '@/components/forms/logo-upload'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { AuditLogTable } from '@/components/tables/audit-log-table'
@@ -593,6 +597,157 @@ export default function SettingsPage() {
         {isOwner && (
           <TabsContent value="branding">
             <div className="space-y-6 max-w-2xl">
+              {/* Live Preview Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Live Preview
+                  </CardTitle>
+                  <CardDescription>
+                    See how your branding looks across invoices, emails, and the client portal
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Invoice Header Preview */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Invoice</span>
+                    </div>
+                    <div className="rounded-lg border bg-white p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          {organization.logo_url ? (
+                            <Image
+                              src={organization.logo_url}
+                              alt="Logo"
+                              width={48}
+                              height={48}
+                              className="h-12 w-12 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                              style={{ backgroundColor: primaryColor }}
+                            >
+                              {(orgName || organization.name).charAt(0)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-base" style={{ color: primaryColor }}>
+                              {orgName || organization.name}
+                            </p>
+                            <p className="text-xs" style={{ color: secondaryColor }}>
+                              {tagline || 'Your tagline here'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground">
+                          <p className="font-semibold text-sm" style={{ color: primaryColor }}>INVOICE</p>
+                          <p>#INV-001</p>
+                          <p>Feb 5, 2026</p>
+                        </div>
+                      </div>
+                      {orgEmail || orgPhone ? (
+                        <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
+                          {orgEmail && <span>{orgEmail}</span>}
+                          {orgEmail && orgPhone && <span className="mx-1.5">·</span>}
+                          {orgPhone && <span>{orgPhone}</span>}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Email Header Preview */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</span>
+                    </div>
+                    <div className="rounded-lg border overflow-hidden">
+                      <div
+                        className="px-4 py-3 text-center"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        <p className="font-bold text-white text-sm">
+                          {orgName || organization.name}
+                        </p>
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                          {tagline || 'Your tagline here'}
+                        </p>
+                      </div>
+                      <div className="bg-white px-4 py-3">
+                        <div className="space-y-1.5">
+                          <div className="h-2 w-3/4 rounded bg-gray-200" />
+                          <div className="h-2 w-full rounded bg-gray-100" />
+                          <div className="h-2 w-5/6 rounded bg-gray-100" />
+                        </div>
+                        <div className="mt-3">
+                          <div
+                            className="inline-block rounded px-3 py-1.5 text-xs font-medium text-white"
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            View Invoice
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Portal Header Preview */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client Portal</span>
+                    </div>
+                    <div className="rounded-lg border bg-white">
+                      <div className="flex items-center justify-between px-4 py-3 border-b">
+                        <div className="flex items-center gap-3">
+                          {organization.logo_url ? (
+                            <Image
+                              src={organization.logo_url}
+                              alt="Logo"
+                              width={36}
+                              height={36}
+                              className="h-9 w-9 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                              style={{ backgroundColor: primaryColor }}
+                            >
+                              {(orgName || organization.name).charAt(0)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-sm">{orgName || organization.name}</p>
+                            <p className="text-xs text-muted-foreground">Welcome, Jane Doe</p>
+                          </div>
+                        </div>
+                        <div
+                          className="rounded px-2.5 py-1 text-xs font-medium text-white"
+                          style={{ backgroundColor: primaryColor }}
+                        >
+                          Sign Out
+                        </div>
+                      </div>
+                      <div className="px-4 py-3">
+                        <div className="space-y-1.5">
+                          <div className="h-2 w-1/2 rounded bg-gray-200" />
+                          <div className="h-2 w-full rounded bg-gray-100" />
+                          <div className="h-2 w-2/3 rounded bg-gray-100" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Logo Upload Card */}
               <Card>
                 <CardHeader>
@@ -630,25 +785,6 @@ export default function SettingsPage() {
                       value={secondaryColor}
                       onChange={setSecondaryColor}
                     />
-                  </div>
-                  <div className="pt-2">
-                    <Label className="text-xs text-muted-foreground">Preview</Label>
-                    <div className="flex items-center gap-3 mt-2 p-4 rounded-lg border">
-                      <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        {organization.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-semibold" style={{ color: primaryColor }}>
-                          {organization.name}
-                        </p>
-                        <p className="text-sm" style={{ color: secondaryColor }}>
-                          {tagline || 'Your tagline here'}
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
