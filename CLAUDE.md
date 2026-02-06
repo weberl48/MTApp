@@ -17,6 +17,7 @@ MCA App is a multi-tenant practice management system for May Creative Arts, hand
 - **Testing**: Vitest + React Testing Library
 - **Email**: Resend
 - **Payments**: Square API
+- **Rate Limiting**: Upstash Redis
 
 ## Development Commands
 
@@ -67,7 +68,9 @@ npm run health https://your-app.vercel.app  # Check production
 
 **Pricing Logic** (`src/lib/pricing/index.ts`):
 - `calculateSessionPricing()` - Computes total, MCA cut, contractor pay, rent
-- Handles duration scaling (30-min base), per-person rates for groups, contractor caps
+- `calculateNoShowPricing()` - Flat no-show fee with normal contractor pay
+- Handles duration scaling (configurable base), per-person rates for groups, contractor caps
+- No-show fee and duration base are configurable via `organization.settings.pricing`
 
 ### Database Schema
 
@@ -83,14 +86,48 @@ Core tables with RLS policies:
 
 Schema is in `supabase/schema.sql`. Run migrations via Supabase Dashboard or CLI.
 
+### Configurable Organization Settings
+
+Business rules are stored in `organization.settings` (JSONB) rather than hardcoded. The `OrganizationSettings` type in `src/types/database.ts` defines all sections:
+
+| Section | Fields | Defaults |
+|---------|--------|----------|
+| `invoice` | `footer_text`, `payment_instructions`, `due_days`, `send_reminders`, `reminder_days` | 30 days, reminders at 7 and 1 day |
+| `session` | `default_duration`, `duration_options`, `require_notes`, `auto_submit`, `reminder_hours`, `send_reminders` | 30 min, [30,45,60,90] |
+| `notification` | `email_on_session_submit`, `email_on_invoice_paid`, `admin_email` | Both enabled |
+| `security` | `session_timeout_minutes`, `require_mfa`, `max_login_attempts`, `lockout_duration_minutes` | 30 min, 5 attempts, 15 min lockout |
+| `pricing` | `no_show_fee`, `duration_base_minutes` | $60, 30 min |
+| `portal` | `token_expiry_days` | 90 days |
+
+Defaults are applied via deep merge in `OrganizationContext` — organizations without new fields automatically get default values.
+
 ### User Roles & Permissions
+
+Permissions are centralized in `src/lib/auth/permissions.ts` using a `can(role, permission)` function.
 
 | Role | Access |
 |------|--------|
 | `developer` | Full system access + all organizations |
 | `owner` | Full org access, manage team, branding |
-| `admin` | Same as owner except org deletion |
+| `admin` | Session/invoice management, team view, invites |
 | `contractor` | Own sessions/invoices only |
+
+**Permission checks:**
+- **Client components**: Use `can()` from `useOrganization()` context (bound to effective role)
+- **Server components/API routes**: Import `can` directly from `@/lib/auth/permissions`
+
+```typescript
+// Client component
+const { can } = useOrganization()
+if (can('session:approve')) { /* ... */ }
+
+// Server component / API route
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
+const allowed = can(userProfile.role as UserRole, 'session:approve')
+```
+
+**Available permissions**: `session:approve`, `session:delete`, `session:cancel`, `session:mark-no-show`, `session:view-all`, `invoice:bulk-action`, `invoice:delete`, `invoice:send`, `team:view`, `team:manage`, `team:invite`, `settings:edit`, `analytics:view`, `payments:view`, `financial:view-details`
 
 ### Service Types
 
@@ -117,10 +154,39 @@ Service types control pricing with these fields:
 | `/api/invoices/[id]/square` | POST | Create Square invoice |
 | `/api/webhooks/square` | POST | Square payment webhooks |
 | `/api/cron/send-reminders` | GET | Invoice reminder cron |
+| `/api/auth/lockout` | POST | Account lockout check/record |
 | `/api/portal/*` | Various | Client portal endpoints |
 | `/api/health` | GET | Full health check (all services) |
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
+
+## Security Infrastructure
+
+### Rate Limiting
+- `src/lib/rate-limit.ts` — Upstash Redis sliding window rate limiter
+- Auth routes: 5 requests/60s per IP
+- API routes: 60 requests/60s per IP
+- Gracefully disabled if Upstash env vars are not set
+
+### Account Lockout
+- `src/lib/auth/lockout.ts` — checks/records login attempts
+- `src/app/api/auth/lockout/route.ts` — API endpoint (pre-auth, uses service role)
+- `login_attempts` table tracks failed/successful logins
+- Lockout settings are per-organization via `settings.security`
+
+### Error Boundaries
+- `src/app/global-error.tsx` — Root error boundary (inline styles, own `<html>`)
+- `src/app/(dashboard)/error.tsx` — Dashboard errors
+- `src/app/(auth)/error.tsx` — Auth flow errors
+- `src/app/(portal)/error.tsx` — Client portal errors
+
+### Safe Logging
+- `src/lib/logger.ts` — Use instead of raw `console.error` for anything that might contain PHI
+- Strips error objects to `{ name, message }` only — never logs stack traces or request bodies
+
+### Next.js 16 Proxy (Middleware)
+- **File must be `src/proxy.ts`** exporting `proxy` function (NOT `middleware.ts`)
+- Next.js 16 renamed middleware to "proxy" — using the old convention triggers a deprecation warning
 
 ## Key Components
 
@@ -170,7 +236,12 @@ SQUARE_ENVIRONMENT=sandbox|production
 
 # PHI Encryption (HIPAA compliance)
 # Generate with: openssl rand -hex 32
+# IMPORTANT: Never use NEXT_PUBLIC_ prefix — this key must stay server-side only
 ENCRYPTION_KEY=64-hex-character-key-here
+
+# Rate Limiting (optional — gracefully disabled if not set)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 ```
 
 ## Development Principles
@@ -182,6 +253,7 @@ When handling Protected Health Information (PHI):
 - **Encrypt PHI fields** using `src/lib/crypto/` utilities before storing in database
 - **PHI fields include**: session notes, client notes, goal descriptions, medical info
 - **Never log PHI** - use `hashForAudit()` from `src/lib/crypto/` for audit trails
+- **Use safe logger** - `import { logger } from '@/lib/logger'` instead of raw `console.error` in server code
 - **Validate and sanitize** all user inputs before processing
 - **Use parameterized queries** - Supabase client handles this automatically
 - **Apply RLS policies** on all tables containing PHI
@@ -214,8 +286,8 @@ The business owner should be able to customize the app without code changes:
 
 - **Service types, rates, pricing formulas** - managed via Settings > Services
 - **Per-contractor pay rates** - via `contractor_rates` table (links contractor + service type → custom rate)
-- **Organization settings** - branding, payment methods, MFA requirements
-- **Avoid hardcoded business rules** - use database-driven configuration
+- **Organization settings** - branding, payment methods, MFA requirements, pricing, portal, security
+- **Avoid hardcoded business rules** - use `organization.settings` JSONB (see Configurable Organization Settings above)
 - **New features** should be toggleable per-organization when possible
 
 ### Contractor Pricing Model
