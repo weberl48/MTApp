@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { autoSendInvoicesViaSquare, type AutoSendResult } from '@/lib/square/auto-send'
+import { logger } from '@/lib/logger'
 
 export async function approveSession(sessionId: string) {
   const supabase = await createClient()
@@ -12,14 +14,23 @@ export async function approveSession(sessionId: string) {
     .eq('id', sessionId)
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false as const, error: error.message }
+  }
+
+  // Auto-send invoices via Square (non-blocking — approval always succeeds)
+  let squareAutoSend: AutoSendResult | null = null
+  try {
+    squareAutoSend = await autoSendInvoicesViaSquare(sessionId)
+  } catch (err) {
+    logger.error('Auto-send Square invoices failed', err)
   }
 
   revalidatePath('/sessions')
   revalidatePath(`/sessions/${sessionId}`)
   revalidatePath('/dashboard')
+  revalidatePath('/invoices')
 
-  return { success: true }
+  return { success: true as const, squareAutoSend }
 }
 
 export async function markSessionNoShow(sessionId: string) {
