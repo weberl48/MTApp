@@ -55,7 +55,7 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, can, settings, viewAsContractor } = useOrganization()
+  const { organization, can, viewAsContractor } = useOrganization()
 
   // When "view as" a specific contractor, use their ID for new sessions
   const effectiveContractorId = (!existingSession && viewAsContractor?.id) ? viewAsContractor.id : contractorId
