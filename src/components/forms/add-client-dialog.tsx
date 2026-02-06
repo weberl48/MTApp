@@ -45,7 +45,7 @@ interface ClientDialogProps {
 export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization } = useOrganization()
+  const { organization, feature } = useOrganization()
   const isEditMode = !!client
 
   const [open, setOpen] = useState(false)
@@ -237,8 +237,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
               />
             </div>
 
-            {/* Send Portal Invite Option (only for new clients with email) */}
-            {!isEditMode && (
+            {/* Send Portal Invite Option (only for new clients with email, and portal enabled) */}
+            {!isEditMode && feature('client_portal') && (
               <div className="flex items-center space-x-2 pt-2 border-t">
                 <Checkbox
                   id="sendInvite"
