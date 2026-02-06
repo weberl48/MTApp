@@ -20,6 +20,7 @@ import {
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOrganization } from '@/contexts/organization-context'
+import type { FeatureFlags } from '@/types/database'
 
 type NavItem = {
   name: string
@@ -28,6 +29,7 @@ type NavItem = {
   adminOnly?: boolean      // Visible to admin, owner, developer
   ownerOnly?: boolean      // Visible to owner, developer only (NOT admin)
   contractorOnly?: boolean // Visible to contractor only
+  feature?: keyof FeatureFlags // Hide when this feature is disabled
 }
 
 const navigation: NavItem[] = [
@@ -46,12 +48,16 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { can, user } = useOrganization()
+  const { can, user, feature } = useOrganization()
 
   const isContractor = user?.role === 'contractor'
 
-  // Filter navigation based on user role
+  // Filter navigation based on user role and feature flags
   const filteredNavigation = navigation.filter((item) => {
+    // Feature gate: hide if the feature is disabled
+    if (item.feature && !feature(item.feature)) {
+      return false
+    }
     // Contractor-only items: show only to contractors
     if (item.contractorOnly) {
       return isContractor

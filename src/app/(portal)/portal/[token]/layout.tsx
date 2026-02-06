@@ -94,6 +94,8 @@ function PortalContent({ children }: { children: React.ReactNode }) {
   }
 
   if (error || !isValid) {
+    const isPortalDisabled = error?.includes('currently unavailable')
+
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 text-center">
@@ -101,17 +103,23 @@ function PortalContent({ children }: { children: React.ReactNode }) {
             <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <h1 className="text-xl font-semibold text-foreground mb-2">
-            Access Link Expired
+            {isPortalDisabled ? 'Portal Unavailable' : 'Access Link Expired'}
           </h1>
           <p className="text-muted-foreground mb-6">
-            {error || 'This portal link is no longer valid.'}
+            {isPortalDisabled
+              ? 'The client portal is not currently available. Please contact your provider for assistance.'
+              : error || 'This portal link is no longer valid.'}
           </p>
-          <p className="text-sm text-muted-foreground mb-6">
-            Please request a new link by entering your email below, or contact your therapist.
-          </p>
-          <Button onClick={() => router.push('/portal/')} className="w-full">
-            Request New Link
-          </Button>
+          {!isPortalDisabled && (
+            <>
+              <p className="text-sm text-muted-foreground mb-6">
+                Please request a new link by entering your email below, or contact your therapist.
+              </p>
+              <Button onClick={() => router.push('/portal/')} className="w-full">
+                Request New Link
+              </Button>
+            </>
+          )}
         </div>
       </div>
     )

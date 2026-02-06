@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/service'
-import { ClientAccessToken } from '@/types/database'
+import type { ClientAccessToken, OrganizationSettings } from '@/types/database'
 import crypto from 'crypto'
 
 const DEFAULT_EXPIRY_DAYS = 90
@@ -98,7 +98,7 @@ export async function validateAccessToken(token: string): Promise<TokenValidatio
       expires_at,
       is_revoked,
       client:clients(id, name, contact_email),
-      organization:organizations(id, name, logo_url, primary_color)
+      organization:organizations(id, name, logo_url, primary_color, settings)
     `)
     .eq('token', token)
     .single()
@@ -118,22 +118,33 @@ export async function validateAccessToken(token: string): Promise<TokenValidatio
     return { valid: false, error: 'Token has expired' }
   }
 
+  // Relations come back as arrays from the join, take the first element
+  const client = Array.isArray(tokenData.client) ? tokenData.client[0] : tokenData.client
+  const organization = Array.isArray(tokenData.organization) ? tokenData.organization[0] : tokenData.organization
+
+  // Check if the client portal feature is enabled for this organization
+  const orgSettings = (organization as { settings?: OrganizationSettings })?.settings
+  if (orgSettings?.features?.client_portal === false) {
+    return { valid: false, error: 'The client portal is currently unavailable' }
+  }
+
   // Update last accessed time
   await supabase
     .from('client_access_tokens')
     .update({ last_accessed_at: new Date().toISOString() })
     .eq('id', tokenData.id)
 
-  // Relations come back as arrays from the join, take the first element
-  const client = Array.isArray(tokenData.client) ? tokenData.client[0] : tokenData.client
-  const organization = Array.isArray(tokenData.organization) ? tokenData.organization[0] : tokenData.organization
-
   return {
     valid: true,
     clientId: tokenData.client_id,
     organizationId: tokenData.organization_id,
     client: client as TokenValidationResult['client'],
-    organization: organization as TokenValidationResult['organization'],
+    organization: {
+      id: (organization as { id: string }).id,
+      name: (organization as { name: string }).name,
+      logo_url: (organization as { logo_url: string | null }).logo_url,
+      primary_color: (organization as { primary_color: string }).primary_color,
+    },
   }
 }
 
