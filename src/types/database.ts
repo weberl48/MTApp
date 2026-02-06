@@ -32,6 +32,7 @@ export interface OrganizationSettings {
     due_days: number
     send_reminders: boolean
     reminder_days: number[]
+    auto_send_square_on_approve: boolean
   }
   session: {
     default_duration: number

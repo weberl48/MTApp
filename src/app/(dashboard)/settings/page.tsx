@@ -1167,6 +1167,24 @@ export default function SettingsPage() {
                     }
                   />
                 </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Auto-Send via Square on Approval</Label>
+                    <p className="text-xs text-gray-500">
+                      Automatically create and send Square invoices when a session is approved
+                    </p>
+                  </div>
+                  <Switch
+                    checked={localSettings.invoice.auto_send_square_on_approve ?? false}
+                    onCheckedChange={(checked) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        invoice: { ...localSettings.invoice, auto_send_square_on_approve: checked },
+                      })
+                    }
+                  />
+                </div>
                 <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
