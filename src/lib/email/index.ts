@@ -172,7 +172,7 @@ export async function sendInvoiceEmail({
   })
 
   if (error) {
-    console.error('Email send error:', error)
+    console.error('[MCA] Email send error')
     throw error
   }
 
@@ -281,7 +281,7 @@ export async function sendMagicLinkEmail({
   })
 
   if (error) {
-    console.error('Magic link email error:', error)
+    console.error('[MCA] Magic link email error')
     throw error
   }
 
@@ -419,7 +419,7 @@ export async function sendSessionRequestStatusEmail({
   })
 
   if (error) {
-    console.error('Session request status email error:', error)
+    console.error('[MCA] Session request status email error')
     throw error
   }
 
@@ -551,7 +551,7 @@ export async function sendTeamInviteEmail({
   })
 
   if (error) {
-    console.error('Team invite email error:', error)
+    console.error('[MCA] Team invite email error')
     throw error
   }
 

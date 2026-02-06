@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { decryptField, isEncrypted } from '@/lib/crypto'
 import { format } from 'date-fns'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 // Types for Supabase join results
 interface NameJoinResult {
@@ -48,7 +50,14 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (!userProfile || !['admin', 'owner', 'developer'].includes(userProfile.role)) {
+    if (!userProfile) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const isAdmin = can(userProfile.role as UserRole, 'session:view-all')
+    const isContractor = userProfile.role === 'contractor'
+
+    if (!isAdmin && !isContractor) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -81,6 +90,11 @@ export async function GET(request: NextRequest) {
       .eq('organization_id', userProfile.organization_id)
       .order('date', { ascending: false })
 
+    // Contractors can only export their own sessions
+    if (isContractor) {
+      query = query.eq('contractor_id', user.id)
+    }
+
     // Apply filters
     if (clientId) {
       // Get sessions where this client is an attendee
@@ -108,7 +122,7 @@ export async function GET(request: NextRequest) {
     const { data: sessions, error } = await query
 
     if (error) {
-      console.error('Error fetching sessions:', error)
+      console.error('[MCA] Error fetching sessions')
       return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
     }
 
@@ -205,7 +219,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Export error:', error)
+    console.error('[MCA] Export error')
     return NextResponse.json({ error: 'Export failed' }, { status: 500 })
   }
 }

@@ -22,7 +22,8 @@ export function OwnerOnboardingGate() {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
-  const { user, organization, isOwner } = useOrganization()
+  const { user, organization, can } = useOrganization()
+  const isOwner = can('settings:edit')
 
   const [ready, setReady] = useState(false)
   const [open, setOpen] = useState(false)

@@ -80,7 +80,7 @@ export function LogoUpload({ organizationId, currentLogoUrl, onUploadComplete }:
       onUploadComplete(urlWithCacheBuster)
       toast.success('Logo uploaded successfully')
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('[MCA] Upload error')
       toast.error('Failed to upload logo')
       setPreview(currentLogoUrl)
     } finally {
@@ -107,7 +107,7 @@ export function LogoUpload({ organizationId, currentLogoUrl, onUploadComplete }:
       onUploadComplete(null)
       toast.success('Logo removed')
     } catch (error) {
-      console.error('Remove error:', error)
+      console.error('[MCA] Remove error')
       toast.error('Failed to remove logo')
     } finally {
       setUploading(false)

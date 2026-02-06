@@ -119,7 +119,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
       setMarkPaidDialog({ isOpen: false, contractor: null })
       onPayoutComplete()
     } catch (error) {
-      console.error('Error marking sessions as paid:', error)
+      console.error('[MCA] Error marking sessions as paid')
       toast.error('Failed to mark sessions as paid')
     } finally {
       setIsProcessing(false)

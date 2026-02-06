@@ -9,6 +9,8 @@ import { Calendar, Users, FileText, DollarSign, Plus, AlertTriangle } from 'luci
 import { formatCurrency } from '@/lib/pricing'
 import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface DashboardStats {
   sessionsCount: number
@@ -80,7 +82,7 @@ export default function DashboardPage() {
         .eq('id', user.id)
         .single<{ role: string; organization_id: string }>()
 
-      const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+      const isAdmin = can(userProfile?.role as UserRole, 'session:view-all')
 
       // When viewing as contractor, use their ID for filtering
       const effectiveContractorId = viewAsContractor

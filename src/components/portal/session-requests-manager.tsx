@@ -81,7 +81,7 @@ export function SessionRequestsManager({
         .order('created_at', { ascending: true })
 
       if (error) {
-        console.error('Error loading session requests:', error)
+        console.error('[MCA] Error loading session requests')
       } else {
         const transformed = (data || []).map((req) => ({
           ...req,

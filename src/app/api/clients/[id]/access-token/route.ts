@@ -67,7 +67,7 @@ export async function GET(
 
     return NextResponse.json({ tokens })
   } catch (error) {
-    console.error('Error fetching client tokens:', error)
+    console.error('[MCA] Error fetching client tokens')
     return NextResponse.json(
       { error: 'Failed to fetch tokens' },
       { status: 500 }
@@ -150,7 +150,7 @@ export async function POST(
       clientName: client.name,
     })
   } catch (error) {
-    console.error('Error generating client token:', error)
+    console.error('[MCA] Error generating client token')
     return NextResponse.json(
       { error: 'Failed to generate token' },
       { status: 500 }
@@ -239,7 +239,7 @@ export async function DELETE(
       )
     }
   } catch (error) {
-    console.error('Error revoking client token:', error)
+    console.error('[MCA] Error revoking client token')
     return NextResponse.json(
       { error: 'Failed to revoke token' },
       { status: 500 }

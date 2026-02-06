@@ -49,6 +49,8 @@ export interface PricingOptions {
   contractorOverrides?: ContractorPricingOverrides
   /** Client payment method - used for scholarship discounts */
   paymentMethod?: 'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
+  /** Base duration in minutes for rate scaling (default: 30) */
+  durationBaseMinutes?: number
 }
 
 /**
@@ -84,8 +86,9 @@ export function calculateSessionPricing(
   // Ensure at least 1 attendee
   const count = Math.max(1, attendeeCount)
 
-  // Duration multiplier (base rates are for 30 minutes)
-  const durationMultiplier = durationMinutes / 30
+  // Duration multiplier (base rates are for the configured base duration)
+  const durationBase = options?.durationBaseMinutes ?? 30
+  const durationMultiplier = durationMinutes / durationBase
 
   // Calculate total amount
   // For groups: base_rate + (per_person_rate * additional people)
@@ -209,9 +212,10 @@ export function calculateContractorTotal(
  */
 export function calculateNoShowPricing(
   serviceType: ServiceType,
-  contractorOverrides?: ContractorPricingOverrides
+  contractorOverrides?: ContractorPricingOverrides,
+  noShowFee?: number
 ): PricingCalculation {
-  const totalAmount = NO_SHOW_FEE
+  const totalAmount = noShowFee ?? NO_SHOW_FEE
 
   // Calculate contractor pay as if a normal 30-min session happened
   const normalPricing = calculateSessionPricing(serviceType, 1, 30, contractorOverrides)

@@ -108,7 +108,7 @@ export async function POST(
       message: `Portal invite sent to ${client.contact_email}`,
     })
   } catch (error) {
-    console.error('Error sending portal invite:', error)
+    console.error('[MCA] Error sending portal invite')
     return NextResponse.json(
       { error: 'Failed to send portal invite' },
       { status: 500 }

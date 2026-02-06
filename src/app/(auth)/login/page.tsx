@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Clock } from 'lucide-react'
+import { AlertCircle, Clock, Lock } from 'lucide-react'
 import { MfaChallenge } from '@/components/forms/mfa-challenge'
 import { needsMfaVerification } from '@/lib/supabase/mfa'
 
@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [sessionExpired, setSessionExpired] = useState(false)
   const [mfaRequired, setMfaRequired] = useState(false)
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
+  const [lockoutMinutes, setLockoutMinutes] = useState(0)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -32,21 +33,66 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutMinutes <= 0) return
+    const timer = setInterval(() => {
+      setLockoutMinutes(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 60000)
+    return () => clearInterval(timer)
+  }, [lockoutMinutes])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
     try {
+      // Check lockout status before attempting login
+      const lockoutRes = await fetch('/api/auth/lockout/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, action: 'check' }),
+      })
+
+      if (lockoutRes.ok) {
+        const lockoutStatus = await lockoutRes.json()
+        if (lockoutStatus.locked) {
+          setLockoutMinutes(lockoutStatus.remainingMinutes)
+          setError(`Account temporarily locked due to too many failed attempts. Try again in ${lockoutStatus.remainingMinutes} minute${lockoutStatus.remainingMinutes === 1 ? '' : 's'}.`)
+          return
+        }
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
+        // Record failed attempt
+        fetch('/api/auth/lockout/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, action: 'record', success: false }),
+        })
+
         setError(error.message)
         return
       }
+
+      // Record successful login
+      fetch('/api/auth/lockout/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, action: 'record', success: true }),
+      })
 
       // Check if MFA verification is needed
       const { needsVerification, factorId } = await needsMfaVerification()
@@ -79,6 +125,8 @@ export default function LoginPage() {
     return <MfaChallenge factorId={mfaFactorId} onCancel={handleMfaCancel} />
   }
 
+  const isLockedOut = lockoutMinutes > 0
+
   return (
     <Card>
       <CardHeader>
@@ -95,7 +143,13 @@ export default function LoginPage() {
               <span>Your session has expired due to inactivity. Please sign in again.</span>
             </div>
           )}
-          {error && (
+          {isLockedOut && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md flex items-center gap-2">
+              <Lock className="h-4 w-4 flex-shrink-0" />
+              <span>Account locked. Try again in {lockoutMinutes} minute{lockoutMinutes === 1 ? '' : 's'}.</span>
+            </div>
+          )}
+          {error && !isLockedOut && (
             <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md flex items-center gap-2">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{error}</span>
@@ -134,8 +188,8 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+          <Button type="submit" className="w-full" disabled={loading || isLockedOut}>
+            {loading ? 'Signing in...' : isLockedOut ? 'Account Locked' : 'Sign in'}
           </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{' '}

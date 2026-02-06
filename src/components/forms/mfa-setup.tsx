@@ -45,7 +45,7 @@ export function MfaSetup() {
       const data = await getMfaFactors()
       setFactors(data)
     } catch (error) {
-      console.error('Error loading MFA factors:', error)
+      console.error('[MCA] Error loading MFA factors')
     } finally {
       setLoading(false)
     }

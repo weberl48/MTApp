@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ sessions: transformedSessions })
   } catch (error) {
-    console.error('Error fetching portal sessions:', error)
+    console.error('[MCA] Error fetching portal sessions')
     return NextResponse.json(
       { error: 'Failed to fetch sessions' },
       { status: 500 }

@@ -144,8 +144,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       setOpen(false)
       onSuccess?.()
       router.refresh()
-    } catch (error) {
-      console.error('Error saving client:', error)
+    } catch {
       toast.error(isEditMode ? 'Failed to update client' : 'Failed to add client')
     } finally {
       setLoading(false)

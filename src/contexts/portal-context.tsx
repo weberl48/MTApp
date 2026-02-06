@@ -63,8 +63,7 @@ export function PortalProvider({ children, token }: PortalProviderProps) {
         setClient(data.client)
         setOrganization(data.organization)
         setIsValid(true)
-      } catch (err) {
-        console.error('Error validating portal token:', err)
+      } catch {
         setError('Failed to validate access')
         setIsValid(false)
       } finally {

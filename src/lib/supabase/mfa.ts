@@ -27,7 +27,7 @@ export async function getMfaFactors(): Promise<MfaFactor[]> {
   const { data, error } = await supabase.auth.mfa.listFactors()
 
   if (error) {
-    console.error('Error listing MFA factors:', error)
+    console.error('[MCA] Error listing MFA factors')
     return []
   }
 
@@ -54,7 +54,7 @@ export async function enrollMfa(friendlyName?: string): Promise<EnrollMfaRespons
   })
 
   if (error) {
-    console.error('Error enrolling MFA:', error)
+    console.error('[MCA] Error enrolling MFA')
     throw new Error(error.message)
   }
 
@@ -72,7 +72,7 @@ export async function verifyMfaEnrollment(factorId: string, code: string): Promi
   })
 
   if (challengeError) {
-    console.error('Error creating MFA challenge:', challengeError)
+    console.error('[MCA] Error creating MFA challenge')
     throw new Error(challengeError.message)
   }
 
@@ -83,7 +83,7 @@ export async function verifyMfaEnrollment(factorId: string, code: string): Promi
   })
 
   if (verifyError) {
-    console.error('Error verifying MFA:', verifyError)
+    console.error('[MCA] Error verifying MFA')
     throw new Error(verifyError.message)
   }
 
@@ -101,7 +101,7 @@ export async function unenrollMfa(factorId: string): Promise<boolean> {
   })
 
   if (error) {
-    console.error('Error unenrolling MFA:', error)
+    console.error('[MCA] Error unenrolling MFA')
     throw new Error(error.message)
   }
 
@@ -119,7 +119,7 @@ export async function createMfaChallenge(factorId: string): Promise<string> {
   })
 
   if (error) {
-    console.error('Error creating MFA challenge:', error)
+    console.error('[MCA] Error creating MFA challenge')
     throw new Error(error.message)
   }
 
@@ -143,7 +143,7 @@ export async function verifyMfaChallenge(
   })
 
   if (error) {
-    console.error('Error verifying MFA challenge:', error)
+    console.error('[MCA] Error verifying MFA challenge')
     throw new Error(error.message)
   }
 
@@ -161,7 +161,7 @@ export async function getAuthenticatorAssuranceLevel(): Promise<'aal1' | 'aal2' 
   const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
 
   if (error) {
-    console.error('Error getting AAL:', error)
+    console.error('[MCA] Error getting AAL')
     return null
   }
 

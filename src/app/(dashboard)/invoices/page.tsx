@@ -305,7 +305,8 @@ export default function InvoicesPage() {
   }
 
   // Get context values for view-as filtering
-  const { isAdmin: contextIsAdmin, effectiveUserId, viewAsContractor } = useOrganization()
+  const { can, effectiveUserId, viewAsContractor } = useOrganization()
+  const contextIsAdmin = can('invoice:bulk-action')
 
   useEffect(() => {
     let cancelled = false

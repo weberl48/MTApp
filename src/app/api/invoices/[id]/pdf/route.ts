@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { createElement, ReactElement } from 'react'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 export async function GET(
   request: NextRequest,
@@ -32,7 +34,7 @@ export async function GET(
       return NextResponse.json({ error: 'User profile not found' }, { status: 403 })
     }
 
-    const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile.role)
+    const isAdmin = can(userProfile.role as UserRole, 'invoice:bulk-action')
 
     // Fetch invoice with related data
     const { data: invoice, error } = await supabase
@@ -81,7 +83,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('PDF generation error:', error)
+    console.error('[MCA] PDF generation error')
     return NextResponse.json(
       { error: 'Failed to generate PDF' },
       { status: 500 }

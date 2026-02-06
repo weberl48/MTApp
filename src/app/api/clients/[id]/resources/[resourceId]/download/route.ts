@@ -66,7 +66,7 @@ export async function GET(
       .download(resource.content)
 
     if (downloadError || !fileData) {
-      console.error('Download error:', downloadError)
+      console.error('[MCA] Download error')
       return NextResponse.json(
         { error: 'Failed to download file' },
         { status: 500 }
@@ -85,7 +85,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Error downloading file:', error)
+    console.error('[MCA] Error downloading file')
     return NextResponse.json(
       { error: 'Failed to download file' },
       { status: 500 }

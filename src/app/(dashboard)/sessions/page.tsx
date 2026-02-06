@@ -22,6 +22,8 @@ import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface Session {
   id: string
@@ -68,6 +70,7 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const [organizationId, setOrganizationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
@@ -115,8 +118,9 @@ export default function SessionsPage() {
         .eq('id', user.id)
         .single<{ role: string; organization_id: string }>()
 
-      const admin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+      const admin = can(userProfile?.role as UserRole, 'session:view-all')
       setIsAdmin(admin)
+      setUserId(user.id)
       setOrganizationId(userProfile?.organization_id || null)
 
       // Fetch sessions with related data
@@ -249,8 +253,11 @@ export default function SessionsPage() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {isAdmin && organizationId && (
-            <SessionExportDialog organizationId={organizationId} />
+          {organizationId && (
+            <SessionExportDialog
+              organizationId={organizationId}
+              contractorId={!isAdmin ? userId || undefined : undefined}
+            />
           )}
           <Link href="/sessions/new/">
             <Button className="w-full sm:w-auto justify-center">

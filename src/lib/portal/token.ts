@@ -229,7 +229,8 @@ export async function findClientByEmail(
  */
 export async function getOrCreateClientToken(
   clientId: string,
-  organizationId: string
+  organizationId: string,
+  expiryDays: number = DEFAULT_EXPIRY_DAYS
 ): Promise<GeneratedToken> {
   const supabase = createServiceClient()
 
@@ -267,5 +268,5 @@ export async function getOrCreateClientToken(
     throw new Error('No admin user found to create token')
   }
 
-  return generateAccessToken(clientId, adminUser.id, organizationId)
+  return generateAccessToken(clientId, adminUser.id, organizationId, expiryDays)
 }

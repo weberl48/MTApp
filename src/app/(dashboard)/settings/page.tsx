@@ -47,7 +47,10 @@ import type {
 } from '@/types/database'
 
 export default function SettingsPage() {
-  const { organization, user, settings, isOwner, isAdmin, isDeveloper, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
+  const { organization, user, settings, can, updateOrganization, updateSettings, refreshOrganization } = useOrganization()
+  const isOwner = can('settings:edit')
+  const isAdmin = can('session:view-all')
+  const isDeveloper = can('settings:edit')
   const [saving, setSaving] = useState(false)
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([])
   const [teamMembers, setTeamMembers] = useState<UserType[]>([])
@@ -210,7 +213,7 @@ export default function SettingsPage() {
       toast.success('Service type deleted')
       loadData()
     } catch (error) {
-      console.error('Error deleting service type:', error)
+      console.error('[MCA] Error deleting service type')
       toast.error('Failed to delete service type. It may be in use by existing sessions.')
     }
   }
@@ -1145,6 +1148,70 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 )}
+                <Separator />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Pricing</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="no_show_fee">No-Show Fee ($)</Label>
+                  <Input
+                    id="no_show_fee"
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={localSettings.pricing?.no_show_fee ?? 60}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        pricing: {
+                          ...localSettings.pricing,
+                          no_show_fee: parseFloat(e.target.value) || 60,
+                        },
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500">Flat fee charged for no-show sessions</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="duration_base_minutes">Base Duration for Rate Scaling (minutes)</Label>
+                  <Input
+                    id="duration_base_minutes"
+                    type="number"
+                    min="15"
+                    max="120"
+                    value={localSettings.pricing?.duration_base_minutes ?? 30}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        pricing: {
+                          ...localSettings.pricing,
+                          duration_base_minutes: parseInt(e.target.value) || 30,
+                        },
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500">Service type base rates are for this many minutes</p>
+                </div>
+                <Separator />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Client Portal</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="token_expiry_days">Portal Link Expiry (days)</Label>
+                  <Input
+                    id="token_expiry_days"
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={localSettings.portal?.token_expiry_days ?? 90}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        portal: {
+                          ...localSettings.portal,
+                          token_expiry_days: parseInt(e.target.value) || 90,
+                        },
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500">How many days before client portal access links expire</p>
+                </div>
                 <Button onClick={() => saveSettings()} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />

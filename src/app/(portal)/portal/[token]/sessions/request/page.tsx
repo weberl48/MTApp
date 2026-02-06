@@ -71,7 +71,7 @@ export default function RequestSessionPage() {
       setSubmitted(true)
       toast.success('Session request submitted!')
     } catch (error) {
-      console.error('Error submitting request:', error)
+      console.error('[MCA] Error submitting request')
       toast.error(error instanceof Error ? error.message : 'Failed to submit request')
     } finally {
       setLoading(false)

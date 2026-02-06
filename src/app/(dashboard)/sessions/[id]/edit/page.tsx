@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { decryptField } from '@/lib/crypto'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface EditSessionPageProps {
   params: Promise<{ id: string }>
@@ -29,7 +31,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     .eq('id', user.id)
     .single<{ role: string }>()
 
-  const isAdmin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+  const isAdmin = can(userProfile?.role as UserRole, 'session:approve')
 
   // Fetch the session with attendees
   const { data: session, error } = await supabase

@@ -59,7 +59,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
 
       toast.success('PDF downloaded successfully')
     } catch (error) {
-      console.error('Error downloading PDF:', error)
+      console.error('[MCA] Error downloading PDF')
       toast.error('Failed to download PDF')
     } finally {
       setLoading(false)
@@ -86,7 +86,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
       toast.success('Invoice sent successfully')
       onStatusChange?.()
     } catch (error) {
-      console.error('Error sending invoice:', error)
+      console.error('[MCA] Error sending invoice')
       toast.error(error instanceof Error ? error.message : 'Failed to send invoice')
     } finally {
       setLoading(false)
@@ -114,7 +114,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
       toast.success('Square invoice created and sent to client!')
       onStatusChange?.()
     } catch (error) {
-      console.error('Error creating Square invoice:', error)
+      console.error('[MCA] Error creating Square invoice')
       toast.error(error instanceof Error ? error.message : 'Failed to create Square invoice')
     } finally {
       setLoading(false)

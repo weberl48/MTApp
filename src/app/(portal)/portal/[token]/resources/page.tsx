@@ -64,7 +64,7 @@ export default function PortalResourcesPage() {
           setResources(data.resources || [])
         }
       } catch (error) {
-        console.error('Error loading resources:', error)
+        console.error('[MCA] Error loading resources')
       } finally {
         setLoading(false)
       }
@@ -99,7 +99,7 @@ export default function PortalResourcesPage() {
         toast.error('Failed to update')
       }
     } catch (error) {
-      console.error('Error updating resource:', error)
+      console.error('[MCA] Error updating resource')
       toast.error('Failed to update')
     } finally {
       setUpdatingId(null)
@@ -127,7 +127,7 @@ export default function PortalResourcesPage() {
       const url = window.URL.createObjectURL(blob)
       setPreviewUrl(url)
     } catch (error) {
-      console.error('Preview error:', error)
+      console.error('[MCA] Preview error')
       toast.error('Failed to load preview')
       setPreviewResource(null)
     } finally {
@@ -172,7 +172,7 @@ export default function PortalResourcesPage() {
 
       toast.success('Download started')
     } catch (error) {
-      console.error('Download error:', error)
+      console.error('[MCA] Download error')
       toast.error(error instanceof Error ? error.message : 'Failed to download file')
     } finally {
       setDownloadingId(null)

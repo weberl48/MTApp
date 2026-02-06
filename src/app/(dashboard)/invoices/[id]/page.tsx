@@ -22,6 +22,8 @@ import {
   Trash2,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 import { format } from 'date-fns'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
@@ -140,7 +142,7 @@ export default function InvoiceDetailPage() {
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      const admin = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+      const admin = can(userProfile?.role as UserRole, 'invoice:bulk-action')
       setIsAdmin(admin)
 
       // Fetch invoice with related data
@@ -162,7 +164,7 @@ export default function InvoiceDetailPage() {
         .single()
 
       if (error || !invoiceData) {
-        console.error('Error loading invoice:', error)
+        console.error('[MCA] Error loading invoice')
         setLoading(false)
         return
       }

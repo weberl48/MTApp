@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       summary,
     })
   } catch (error) {
-    console.error('Error fetching portal goals:', error)
+    console.error('[MCA] Error fetching portal goals')
     return NextResponse.json(
       { error: 'Failed to fetch goals' },
       { status: 500 }

@@ -28,10 +28,10 @@ const CATEGORY_ICONS: Record<HelpCategory, React.ComponentType<{ className?: str
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<HelpCategory | null>(null)
-  const { isAdmin, isOwner, isDeveloper } = useOrganization()
+  const { can } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
 
-  const isAdminOrAbove = isAdmin || isOwner || isDeveloper
+  const isAdminOrAbove = can('session:view-all')
 
   // Filter articles based on user role
   const accessibleArticles = useMemo(() => {

@@ -47,6 +47,13 @@ export interface OrganizationSettings {
     max_login_attempts: number
     lockout_duration_minutes: number
   }
+  pricing: {
+    no_show_fee: number
+    duration_base_minutes: number
+  }
+  portal: {
+    token_expiry_days: number
+  }
 }
 
 // Social links structure
@@ -621,6 +628,28 @@ export interface Database {
           created_session_id?: string | null
           organization_id?: string
           updated_at?: string
+        }
+      }
+      login_attempts: {
+        Row: {
+          id: string
+          email: string
+          ip_address: string | null
+          attempted_at: string
+          success: boolean
+        }
+        Insert: {
+          id?: string
+          email: string
+          ip_address?: string | null
+          attempted_at?: string
+          success?: boolean
+        }
+        Update: {
+          email?: string
+          ip_address?: string | null
+          attempted_at?: string
+          success?: boolean
         }
       }
       client_resources: {

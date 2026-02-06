@@ -32,9 +32,11 @@ interface Client {
 
 interface ExportDialogProps {
   organizationId: string
+  /** If provided, limits client list to clients this contractor has worked with */
+  contractorId?: string
 }
 
-export function SessionExportDialog({ organizationId }: ExportDialogProps) {
+export function SessionExportDialog({ organizationId, contractorId }: ExportDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<Client[]>([])
@@ -48,13 +50,35 @@ export function SessionExportDialog({ organizationId }: ExportDialogProps) {
 
     async function loadClients() {
       const supabase = createClient()
-      const { data } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('organization_id', organizationId)
-        .order('name')
 
-      setClients(data || [])
+      if (contractorId) {
+        // Contractor: only show clients they've had sessions with
+        const { data: sessions } = await supabase
+          .from('sessions')
+          .select('attendees:session_attendees(client:clients(id, name))')
+          .eq('contractor_id', contractorId)
+
+        // Extract unique clients from session attendees
+        const clientMap = new Map<string, Client>()
+        sessions?.forEach((session: { attendees: { client: { id: string; name: string } | { id: string; name: string }[] | null }[] | null }) => {
+          session.attendees?.forEach((a) => {
+            const client = Array.isArray(a.client) ? a.client[0] : a.client
+            if (client) {
+              clientMap.set(client.id, { id: client.id, name: client.name })
+            }
+          })
+        })
+        setClients(Array.from(clientMap.values()).sort((a, b) => a.name.localeCompare(b.name)))
+      } else {
+        // Admin: show all clients
+        const { data } = await supabase
+          .from('clients')
+          .select('id, name')
+          .eq('organization_id', organizationId)
+          .order('name')
+
+        setClients(data || [])
+      }
     }
 
     loadClients()
@@ -63,7 +87,7 @@ export function SessionExportDialog({ organizationId }: ExportDialogProps) {
     const lastMonth = subMonths(new Date(), 1)
     setStartDate(format(startOfMonth(lastMonth), 'yyyy-MM-dd'))
     setEndDate(format(endOfMonth(lastMonth), 'yyyy-MM-dd'))
-  }, [open, organizationId])
+  }, [open, organizationId, contractorId])
 
   async function handleExport() {
     setLoading(true)
@@ -101,7 +125,7 @@ export function SessionExportDialog({ organizationId }: ExportDialogProps) {
       toast.success('Sessions exported successfully')
       setOpen(false)
     } catch (error) {
-      console.error('Export error:', error)
+      console.error('[MCA] Export error')
       toast.error('Failed to export sessions')
     } finally {
       setLoading(false)
@@ -120,7 +144,7 @@ export function SessionExportDialog({ organizationId }: ExportDialogProps) {
         <DialogHeader>
           <DialogTitle>Export Sessions</DialogTitle>
           <DialogDescription>
-            Export session data including notes to CSV format.
+            Export {contractorId ? 'your' : ''} session data including notes to CSV format.
           </DialogDescription>
         </DialogHeader>
 

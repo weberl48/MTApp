@@ -51,10 +51,10 @@ export default function HelpArticlePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = use(params)
-  const { isAdmin, isOwner, isDeveloper } = useOrganization()
+  const { can } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
 
-  const isAdminOrAbove = isAdmin || isOwner || isDeveloper
+  const isAdminOrAbove = can('session:view-all')
 
   const article = getArticleBySlug(slug)
 
