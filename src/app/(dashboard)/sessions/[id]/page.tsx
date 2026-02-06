@@ -62,12 +62,12 @@ const statusLabels: Record<string, string> = {
 export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { can, user, loading: contextLoading } = useOrganization()
+  const { can, user, effectiveUserId, loading: contextLoading } = useOrganization()
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
   const [, startTransition] = useTransition()
-  const currentUserId = user?.id || null
+  const currentUserId = effectiveUserId || user?.id || null
 
   useEffect(() => {
     async function loadSession() {
