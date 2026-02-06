@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       .limit(50) // Process in batches
 
     if (fetchError) {
-      console.error('Error fetching reminders:', fetchError)
+      console.error('[MCA] Error fetching reminders')
       return NextResponse.json({ error: 'Failed to fetch reminders' }, { status: 500 })
     }
 
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
         })
 
         if (emailError) {
-          console.error('Error sending reminder email:', emailError)
+          console.error('[MCA] Error sending reminder email')
           await getSupabaseAdmin()
             .from('session_reminders')
             .update({
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
 
         successCount++
       } catch (error) {
-        console.error('Error processing reminder:', reminder.id, error)
+        console.error('[MCA] Error processing reminder:', reminder.id)
         await getSupabaseAdmin()
           .from('session_reminders')
           .update({
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
       failed: failCount,
     })
   } catch (error) {
-    console.error('Cron job error:', error)
+    console.error('[MCA] Cron job error')
     return NextResponse.json(
       { error: 'Cron job failed' },
       { status: 500 }

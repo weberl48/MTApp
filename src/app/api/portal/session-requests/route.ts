@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ requests: transformedRequests })
   } catch (error) {
-    console.error('Error fetching session requests:', error)
+    console.error('[MCA] Error fetching session requests')
     return NextResponse.json(
       { error: 'Failed to fetch requests' },
       { status: 500 }
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       request: newRequest,
     })
   } catch (error) {
-    console.error('Error creating session request:', error)
+    console.error('[MCA] Error creating session request')
     return NextResponse.json(
       { error: 'Failed to create request' },
       { status: 500 }

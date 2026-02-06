@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
 import { ContractorRatesForm } from '@/components/forms/contractor-rates-form'
 import {
@@ -96,7 +98,7 @@ export default function TeamMemberPage() {
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      const isAdminOrAbove = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+      const isAdminOrAbove = can(userProfile?.role as UserRole, 'team:view')
       if (!isAdminOrAbove) {
         router.push('/dashboard/')
         return
@@ -172,7 +174,7 @@ export default function TeamMemberPage() {
       .eq('id', member.id)
 
     if (error) {
-      console.error('Error updating role:', error)
+      console.error('[MCA] Error updating role')
       toast.error('Failed to update role')
     } else {
       setMember({ ...member, role: newRole })

@@ -11,6 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
 import { TeamMemberActions } from '@/components/team/team-member-actions'
@@ -22,8 +24,6 @@ export default async function TeamPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log('Team page - Auth user:', user?.id, user?.email)
-
   // Check if user is admin
   let isAdmin = false
   let currentUserRole = ''
@@ -34,13 +34,13 @@ export default async function TeamPage() {
       .eq('id', user.id)
       .single<{ role: string }>()
 
-    console.log('Team page - User profile:', userProfile, 'Error:', profileError)
+    if (profileError) {
+      console.error('[MCA] Failed to load user profile for team page')
+    }
     const role = userProfile?.role
     currentUserRole = role || ''
-    isAdmin = role === 'admin' || role === 'owner' || role === 'developer'
+    isAdmin = can(role as UserRole, 'team:view')
   }
-
-  console.log('Team page - isAdmin:', isAdmin)
 
   if (!isAdmin) {
     redirect('/dashboard/')
@@ -52,7 +52,9 @@ export default async function TeamPage() {
     .select('*')
     .order('name')
 
-  console.log('Users fetched:', users?.length, 'Error:', usersError)
+  if (usersError) {
+    console.error('[MCA] Failed to fetch team members')
+  }
 
   // Get session counts per contractor
   const { data: sessionCounts } = await supabase

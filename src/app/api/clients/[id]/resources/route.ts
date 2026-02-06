@@ -81,7 +81,7 @@ export async function GET(
 
     return NextResponse.json({ resources: transformed })
   } catch (error) {
-    console.error('Error fetching client resources:', error)
+    console.error('[MCA] Error fetching client resources')
     return NextResponse.json(
       { error: 'Failed to fetch resources' },
       { status: 500 }
@@ -207,7 +207,7 @@ export async function POST(
 
     return NextResponse.json({ resource })
   } catch (error) {
-    console.error('Error creating client resource:', error)
+    console.error('[MCA] Error creating client resource')
     return NextResponse.json(
       { error: 'Failed to create resource' },
       { status: 500 }
@@ -303,7 +303,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting client resource:', error)
+    console.error('[MCA] Error deleting client resource')
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

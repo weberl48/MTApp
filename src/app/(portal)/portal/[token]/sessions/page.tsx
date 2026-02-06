@@ -56,7 +56,7 @@ export default function PortalSessionsPage() {
           setRequests(data.requests || [])
         }
       } catch (error) {
-        console.error('Error loading data:', error)
+        console.error('[MCA] Error loading data')
       } finally {
         setLoading(false)
       }

@@ -137,8 +137,7 @@ export async function decryptField(encrypted: string): Promise<string> {
     )
 
     return decoder.decode(plaintext)
-  } catch (error) {
-    console.error('Decryption failed:', error)
+  } catch {
     // Return original if decryption fails (could be unencrypted legacy data)
     return encrypted
   }

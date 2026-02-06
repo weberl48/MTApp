@@ -96,7 +96,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'Invoice sent successfully' })
   } catch (error) {
-    console.error('Send invoice error:', error)
+    console.error('[MCA] Send invoice error')
     return NextResponse.json(
       { error: 'Failed to send invoice' },
       { status: 500 }

@@ -37,7 +37,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
           setTokens(data.tokens || [])
         }
       } catch (error) {
-        console.error('Error loading tokens:', error)
+        console.error('[MCA] Error loading tokens')
       } finally {
         setLoading(false)
       }
@@ -53,7 +53,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
         setTokens(data.tokens || [])
       }
     } catch (error) {
-      console.error('Error loading tokens:', error)
+      console.error('[MCA] Error loading tokens')
     }
   }
 
@@ -73,7 +73,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       toast.success('Portal access link generated!')
       await refreshTokens()
     } catch (error) {
-      console.error('Error generating token:', error)
+      console.error('[MCA] Error generating token')
       toast.error(error instanceof Error ? error.message : 'Failed to generate token')
     } finally {
       setGenerating(false)
@@ -100,7 +100,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       toast.success('Portal access revoked')
       setTokens((prev) => prev.filter((t) => t.id !== tokenId))
     } catch (error) {
-      console.error('Error revoking token:', error)
+      console.error('[MCA] Error revoking token')
       toast.error(error instanceof Error ? error.message : 'Failed to revoke token')
     }
   }
@@ -126,7 +126,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       toast.success(`Portal invite sent to ${clientEmail}`)
       await refreshTokens() // Refresh tokens in case a new one was created
     } catch (error) {
-      console.error('Error sending invite:', error)
+      console.error('[MCA] Error sending invite')
       toast.error(error instanceof Error ? error.message : 'Failed to send invite')
     } finally {
       setSendingInvite(false)

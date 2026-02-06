@@ -131,7 +131,7 @@ export async function POST(
       message: 'Square invoice created and sent to client',
     })
   } catch (error) {
-    console.error('Square invoice creation error:', error)
+    console.error('[MCA] Square invoice creation error')
     return NextResponse.json(
       { error: 'Failed to create Square invoice', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

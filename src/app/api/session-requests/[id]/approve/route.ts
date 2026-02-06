@@ -50,11 +50,7 @@ export async function POST(
       .single()
 
     if (fetchError || !sessionRequest) {
-      console.error('Session request fetch error:', {
-        requestId,
-        fetchError,
-        userOrgId: profile.organization_id,
-      })
+      console.error('[MCA] Session request not found:', requestId)
       return NextResponse.json(
         { error: 'Request not found', details: fetchError?.message },
         { status: 404 }
@@ -183,8 +179,7 @@ export async function POST(
           portalUrl,
         })
         console.log(`[Session Request] Approval email sent to ${client.contact_email}`)
-      } catch (emailError) {
-        console.error('Failed to send approval email:', emailError)
+      } catch {
         // Don't fail the request if email fails
       }
     }
@@ -194,8 +189,7 @@ export async function POST(
       request: updatedRequest,
       created_session_id: createdSessionId,
     })
-  } catch (error) {
-    console.error('Error approving session request:', error)
+  } catch {
     return NextResponse.json(
       { error: 'Failed to approve request' },
       { status: 500 }

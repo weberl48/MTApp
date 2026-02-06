@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       const safeEmail = normalizedEmail.replace(/[\r\n]/g, '')
       console.log(`[Portal Magic Link] Email sent to ${safeEmail}`)
     } catch (emailError) {
-      console.error('Failed to send magic link email:', emailError)
+      console.error('[MCA] Failed to send magic link email')
       // In development, still return the URL for testing
       if (process.env.NODE_ENV === 'development') {
         return NextResponse.json({
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       message: 'If an account exists with this email, a portal link will be sent.',
     })
   } catch (error) {
-    console.error('Error requesting portal link:', error)
+    console.error('[MCA] Error requesting portal link')
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 500 }

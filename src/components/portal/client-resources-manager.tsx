@@ -78,7 +78,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
           setResources(data.resources || [])
         }
       } catch (error) {
-        console.error('Error loading resources:', error)
+        console.error('[MCA] Error loading resources')
       } finally {
         setLoading(false)
       }
@@ -179,7 +179,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
 
       closeDialog()
     } catch (error) {
-      console.error('Error creating resource:', error)
+      console.error('[MCA] Error creating resource')
       toast.error(error instanceof Error ? error.message : 'Failed to create resource')
     } finally {
       setSaving(false)
@@ -204,7 +204,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Error downloading file:', error)
+      console.error('[MCA] Error downloading file')
       toast.error('Failed to download file')
     }
   }
@@ -229,7 +229,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
       toast.success('Resource deleted')
       setResources((prev) => prev.filter((r) => r.id !== resource.id))
     } catch (error) {
-      console.error('Error deleting resource:', error)
+      console.error('[MCA] Error deleting resource')
       toast.error(error instanceof Error ? error.message : 'Failed to delete')
     } finally {
       setDeletingId(null)

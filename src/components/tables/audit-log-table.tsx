@@ -123,7 +123,7 @@ export function AuditLogTable() {
       const { data, count, error } = await query
 
       if (error) {
-        console.error('Error loading audit logs:', error)
+        console.error('[MCA] Error loading audit logs')
         setLogs([])
       } else {
         setLogs(data || [])

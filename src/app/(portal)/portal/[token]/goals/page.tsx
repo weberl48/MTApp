@@ -46,7 +46,7 @@ export default function PortalGoalsPage() {
           setSummary(data.summary || { total: 0, active: 0, met: 0, not_met: 0 })
         }
       } catch (error) {
-        console.error('Error loading goals:', error)
+        console.error('[MCA] Error loading goals')
       } finally {
         setLoading(false)
       }

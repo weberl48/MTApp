@@ -119,7 +119,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
     console.log(`Payment notification sent to ${owner.email}`)
   } catch (error) {
     // Don't fail the webhook if notification fails
-    console.error('Failed to send payment notification:', error)
+    console.error('[MCA] Failed to send payment notification')
   }
 }
 
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       console.log('[Square Webhook] Update result:', { error, count, updateData })
 
       if (error) {
-        console.error('Error updating invoice from webhook:', error)
+        console.error('[MCA] Error updating invoice from webhook')
         return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
       }
 
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Square webhook error:', error)
+    console.error('[MCA] Square webhook error')
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

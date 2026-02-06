@@ -159,7 +159,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
     const { data, count, error } = await query
 
     if (error) {
-      console.error('Error loading invoices:', error)
+      console.error('[MCA] Error loading invoices')
       setInvoices([])
     } else {
       setInvoices((data as unknown as InvoiceWithDetails[]) || [])
@@ -215,7 +215,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       loadInvoices()
       onRefresh?.()
     } catch (error) {
-      console.error('Error marking invoice as paid:', error)
+      console.error('[MCA] Error marking invoice as paid')
       toast.error('Failed to mark invoice as paid')
     } finally {
       setIsProcessing(false)

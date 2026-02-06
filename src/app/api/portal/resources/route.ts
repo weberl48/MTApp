@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ resources: transformedResources })
   } catch (error) {
-    console.error('Error fetching portal resources:', error)
+    console.error('[MCA] Error fetching portal resources')
     return NextResponse.json(
       { error: 'Failed to fetch resources' },
       { status: 500 }
@@ -168,7 +168,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ resource: updated })
   } catch (error) {
-    console.error('Error updating portal resource:', error)
+    console.error('[MCA] Error updating portal resource')
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }

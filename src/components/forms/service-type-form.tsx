@@ -105,7 +105,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       onSaved()
       onClose()
     } catch (error) {
-      console.error('Error saving service type:', error)
+      console.error('[MCA] Error saving service type')
       toast.error('Failed to save service type')
     } finally {
       setLoading(false)

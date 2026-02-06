@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Organization, User, OrganizationSettings } from '@/types/database'
+import type { Organization, User, UserRole, OrganizationSettings } from '@/types/database'
+import { can, type Permission } from '@/lib/auth/permissions'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
 
@@ -32,6 +33,7 @@ interface OrganizationContextType {
   refreshOrganization: () => Promise<void>
   updateOrganization: (updates: Partial<Organization>) => Promise<void>
   updateSettings: (settings: OrganizationSettings) => Promise<void>
+  can: (permission: Permission) => boolean
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined)
@@ -63,6 +65,13 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
     require_mfa: false,
     max_login_attempts: 5,
     lockout_duration_minutes: 15,
+  },
+  pricing: {
+    no_show_fee: 60,
+    duration_base_minutes: 30,
+  },
+  portal: {
+    token_expiry_days: 90,
   },
 }
 
@@ -111,6 +120,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         security: {
           ...DEFAULT_SETTINGS.security,
           ...((organization.settings as OrganizationSettings)?.security || {}),
+        },
+        pricing: {
+          ...DEFAULT_SETTINGS.pricing,
+          ...((organization.settings as OrganizationSettings)?.pricing || {}),
+        },
+        portal: {
+          ...DEFAULT_SETTINGS.portal,
+          ...((organization.settings as OrganizationSettings)?.portal || {}),
         },
       }
     : null
@@ -194,8 +211,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       }
 
       setError(null)
-    } catch (err) {
-      console.error('Error loading organization:', err)
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -289,6 +305,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         refreshOrganization,
         updateOrganization,
         updateSettings,
+        can: (permission: Permission) => can(effectiveRole as UserRole, permission),
       }}
     >
       {children}

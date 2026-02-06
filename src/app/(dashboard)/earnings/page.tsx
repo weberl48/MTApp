@@ -77,7 +77,7 @@ export default function EarningsPage() {
         .order('date', { ascending: false })
 
       if (error) {
-        console.error('Error fetching earnings:', error)
+        console.error('[MCA] Error fetching earnings')
         setLoading(false)
         return
       }

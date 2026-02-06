@@ -55,8 +55,8 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, isOwner, isDeveloper } = useOrganization()
-  const showFinancialDetails = isOwner || isDeveloper // Hide MCA cut etc from contractors/admins
+  const { organization, can, settings } = useOrganization()
+  const showFinancialDetails = can('financial:view-details')
   const isEditMode = !!existingSession
 
   const [loading, setLoading] = useState(false)
@@ -213,7 +213,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           .limit(10)
 
         if (error) {
-          console.error('Error checking duplicates:', error)
           return
         }
 
@@ -236,8 +235,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         }
 
         setDuplicateWarning(null)
-      } catch (err) {
-        console.error('Error checking duplicates:', err)
+      } catch {
+        // Duplicate check is non-critical; silently ignore
       }
     }
 
@@ -458,8 +457,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             .insert(invoices)
 
           if (invoicesError) {
-            console.error('Error creating invoices:', invoicesError)
-            // Notify user that invoices weren't created (session still saved)
             toast.error('Session saved but invoices could not be created. Please create invoices manually.')
           }
         }
@@ -476,8 +473,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         toast.success('Session logged successfully!')
         setShowSuccess(true)
       }
-    } catch (error) {
-      console.error('Error saving session:', error)
+    } catch {
       toast.error(isEditMode ? 'Failed to update session' : 'Failed to create session')
     } finally {
       setLoading(false)

@@ -78,7 +78,7 @@ export async function decryptPhiArray<T extends Record<string, unknown>>(
  * Check if encryption is enabled
  */
 export function isEncryptionEnabled(): boolean {
-  const key = process.env.ENCRYPTION_KEY || process.env.NEXT_PUBLIC_ENCRYPTION_KEY
+  const key = process.env.ENCRYPTION_KEY
   return !!key && key.length > 0
 }
 

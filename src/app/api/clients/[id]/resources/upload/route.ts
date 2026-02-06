@@ -118,7 +118,7 @@ export async function POST(
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
+      console.error('[MCA] Upload error')
       return NextResponse.json(
         { error: 'Failed to upload file' },
         { status: 500 }
@@ -151,7 +151,7 @@ export async function POST(
 
     return NextResponse.json({ resource })
   } catch (error) {
-    console.error('Error uploading file:', error)
+    console.error('[MCA] Error uploading file')
     return NextResponse.json(
       { error: 'Failed to upload file' },
       { status: 500 }

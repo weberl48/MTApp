@@ -50,11 +50,7 @@ export async function POST(
       .single()
 
     if (fetchError || !sessionRequest) {
-      console.error('Session request fetch error:', {
-        requestId,
-        fetchError,
-        userOrgId: profile.organization_id,
-      })
+      console.error('[MCA] Session request not found:', requestId)
       return NextResponse.json(
         { error: 'Request not found', details: fetchError?.message },
         { status: 404 }
@@ -127,8 +123,7 @@ export async function POST(
           portalUrl,
         })
         console.log(`[Session Request] Decline email sent to ${client.contact_email}`)
-      } catch (emailError) {
-        console.error('Failed to send decline email:', emailError)
+      } catch {
         // Don't fail the request if email fails
       }
     }
@@ -137,8 +132,7 @@ export async function POST(
       success: true,
       request: updatedRequest,
     })
-  } catch (error) {
-    console.error('Error declining session request:', error)
+  } catch {
     return NextResponse.json(
       { error: 'Failed to decline request' },
       { status: 500 }

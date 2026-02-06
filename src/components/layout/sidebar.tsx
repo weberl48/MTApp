@@ -46,11 +46,8 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { isAdmin, isDeveloper, isOwner, user } = useOrganization()
+  const { can, user } = useOrganization()
 
-  // Role checks
-  const isOwnerOrDev = isOwner || isDeveloper
-  const isAdminOrAbove = isAdmin || isOwnerOrDev
   const isContractor = user?.role === 'contractor'
 
   // Filter navigation based on user role
@@ -61,11 +58,14 @@ export function Sidebar() {
     }
     // Owner-only items: show to owner and developer, NOT admin
     if (item.ownerOnly) {
-      return isOwnerOrDev
+      if (item.href === '/payments') return can('payments:view')
+      if (item.href === '/analytics') return can('analytics:view')
+      return can('settings:edit')
     }
     // Admin-only items: show to admin, owner, developer
     if (item.adminOnly) {
-      return isAdminOrAbove
+      if (item.href === '/team') return can('team:view')
+      return can('session:view-all')
     }
     // Default: show to everyone
     return true

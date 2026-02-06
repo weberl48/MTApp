@@ -75,7 +75,7 @@ export async function createSquareInvoice(
   try {
     locationId = await getDefaultLocationId()
   } catch (error) {
-    console.error('Failed to get Square location:', error)
+    console.error('[MCA] Failed to get Square location')
     throw new Error(`Square location error: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
@@ -84,7 +84,7 @@ export async function createSquareInvoice(
   try {
     customerId = await findOrCreateCustomer(customerEmail, customerName)
   } catch (error) {
-    console.error('Failed to find/create Square customer:', error)
+    console.error('[MCA] Failed to find/create Square customer')
     throw new Error(`Square customer error: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
@@ -116,7 +116,7 @@ export async function createSquareInvoice(
     }
     orderId = orderResult.order.id
   } catch (error) {
-    console.error('Failed to create Square order:', error)
+    console.error('[MCA] Failed to create Square order')
     throw new Error(`Square order creation error: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
@@ -166,7 +166,7 @@ export async function createSquareInvoice(
       idempotencyKey: randomUUID(),
     })
   } catch (error) {
-    console.error('Failed to create Square invoice:', error)
+    console.error('[MCA] Failed to create Square invoice')
     throw new Error(`Square invoice creation error: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
@@ -185,7 +185,7 @@ export async function createSquareInvoice(
       idempotencyKey: randomUUID(),
     })
   } catch (error) {
-    console.error('Failed to publish Square invoice:', error)
+    console.error('[MCA] Failed to publish Square invoice')
     throw new Error(`Square invoice publish error: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 

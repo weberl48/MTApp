@@ -62,7 +62,7 @@ const statusLabels: Record<string, string> = {
 export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { isAdmin, user, loading: contextLoading } = useOrganization()
+  const { can, user, loading: contextLoading } = useOrganization()
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
@@ -106,7 +106,7 @@ export default function SessionDetailPage() {
         .single()
 
       if (error || !data) {
-        console.error('Error loading session:', error)
+        console.error('[MCA] Error loading session')
         setLoading(false)
         return
       }
@@ -209,18 +209,19 @@ export default function SessionDetailPage() {
   }
 
   // Check access - contractors can only see their own sessions
-  if (!isAdmin && session.contractor?.id !== currentUserId) {
+  if (!can('session:view-all') && session.contractor?.id !== currentUserId) {
     router.push('/sessions/')
     return null
   }
 
   const totalCost = session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0) || 0
   const isActiveSession = !['no_show', 'cancelled'].includes(session.status)
-  const canEdit = isActiveSession && (isAdmin || (session.contractor?.id === currentUserId && session.status === 'draft'))
-  const canDelete = isActiveSession && (isAdmin || (session.contractor?.id === currentUserId && session.status === 'draft'))
-  const canApprove = isAdmin && session.status === 'submitted'
-  const canMarkNoShow = isAdmin && isActiveSession && session.status !== 'draft'
-  const canCancel = isActiveSession && (isAdmin || (session.contractor?.id === currentUserId && session.status === 'draft'))
+  const isOwnDraft = session.contractor?.id === currentUserId && session.status === 'draft'
+  const canEdit = isActiveSession && (can('session:approve') || isOwnDraft)
+  const canDelete = isActiveSession && (can('session:delete') || isOwnDraft)
+  const canApprove = can('session:approve') && session.status === 'submitted'
+  const canMarkNoShow = can('session:mark-no-show') && isActiveSession && session.status !== 'draft'
+  const canCancel = isActiveSession && (can('session:cancel') || isOwnDraft)
 
   return (
     <div className="space-y-6">

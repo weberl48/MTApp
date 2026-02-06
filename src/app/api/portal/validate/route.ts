@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       organization: result.organization,
     })
   } catch (error) {
-    console.error('Error validating token:', error)
+    console.error('[MCA] Error validating token')
     return NextResponse.json(
       { valid: false, error: 'Failed to validate token' },
       { status: 500 }

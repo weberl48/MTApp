@@ -3,6 +3,8 @@ import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendTeamInviteEmail } from '@/lib/email'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('base64url')
@@ -57,11 +59,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const isDevOrOwner = profile.role === 'developer' || profile.role === 'owner'
-    const isAdmin = profile.role === 'admin'
+    const canManageTeam = can(profile.role as UserRole, 'team:manage')
+    const canInvite = can(profile.role as UserRole, 'team:invite')
 
-    // Admins can only create contractor invites
-    if (!isDevOrOwner && !(isAdmin && role === 'contractor')) {
+    // Team managers can create any invite, others with invite permission can only create contractor invites
+    if (!canManageTeam && !(canInvite && role === 'contractor')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -121,7 +123,7 @@ export async function POST(request: NextRequest) {
         })
         emailSent = true
       } catch (emailError) {
-        console.error('Failed to send invite email:', emailError)
+        console.error('[MCA] Failed to send invite email')
         // Don't fail the request if email fails - invite is still valid
       }
     }
@@ -132,7 +134,7 @@ export async function POST(request: NextRequest) {
       emailSent,
     })
   } catch (error) {
-    console.error('Error creating user invite:', error)
+    console.error('[MCA] Error creating user invite')
     return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 })
   }
 }

@@ -16,7 +16,7 @@ import Link from 'next/link'
  * Shows a warning banner and optionally blocks access until MFA is set up.
  */
 export function MfaEnforcementGuard({ children }: { children: React.ReactNode }) {
-  const { user, settings, isOwner, isAdmin } = useOrganization()
+  const { user, settings, can } = useOrganization()
   useRouter() // Router available for navigation if needed
   const pathname = usePathname()
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null)
@@ -24,7 +24,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
 
   // Check if MFA is required for this user's role
   const requireMfa = settings?.security?.require_mfa ?? false
-  const isPrivilegedUser = isOwner || isAdmin
+  const isPrivilegedUser = can('session:view-all')
 
   useEffect(() => {
     async function checkMfa() {
@@ -37,7 +37,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
         const enabled = await hasMfaEnabled()
         setMfaEnabled(enabled)
       } catch (error) {
-        console.error('Error checking MFA status:', error)
+        console.error('[MCA] Error checking MFA status')
         setMfaEnabled(false)
       } finally {
         setChecking(false)

@@ -76,7 +76,7 @@ export default function PortalDashboard() {
           setGoalSummary(goalsData.summary || { total: 0, active: 0, met: 0 })
         }
       } catch (error) {
-        console.error('Error loading dashboard:', error)
+        console.error('[MCA] Error loading dashboard')
       } finally {
         setLoading(false)
       }

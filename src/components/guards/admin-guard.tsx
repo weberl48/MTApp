@@ -11,14 +11,15 @@ interface AdminGuardProps {
 
 export function AdminGuard({ children }: AdminGuardProps) {
   const router = useRouter()
-  const { isAdmin, loading, viewAsRole } = useOrganization()
+  const { can, loading, viewAsRole } = useOrganization()
+  const hasAccess = can('session:view-all')
 
   useEffect(() => {
     // Only redirect if we're simulating a non-admin role
-    if (!loading && viewAsRole && !isAdmin) {
+    if (!loading && viewAsRole && !hasAccess) {
       router.push('/dashboard/')
     }
-  }, [isAdmin, loading, viewAsRole, router])
+  }, [hasAccess, loading, viewAsRole, router])
 
   // Show loading while context is initializing
   if (loading) {
@@ -30,7 +31,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
   }
 
   // If viewing as a non-admin role, show access denied briefly before redirect
-  if (viewAsRole && !isAdmin) {
+  if (viewAsRole && !hasAccess) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
         <p className="text-lg font-medium">Access Denied</p>

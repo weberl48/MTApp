@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       expiresAt: data.expires_at,
     })
   } catch (error) {
-    console.error('Error validating invite:', error)
+    console.error('[MCA] Error validating invite')
     return NextResponse.json({ valid: false }, { status: 500 })
   }
 }
