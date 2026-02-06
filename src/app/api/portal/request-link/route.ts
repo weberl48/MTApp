@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { findClientByEmail, getOrCreateClientToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendMagicLinkEmail } from '@/lib/email'
+import { portalRequestLinkSchema } from '@/lib/validation/schemas'
+import { isFeatureEnabled } from '@/lib/features'
 
 /**
  * POST /api/portal/request-link
@@ -13,16 +15,16 @@ import { sendMagicLinkEmail } from '@/lib/email'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email } = body
+    const parsed = portalRequestLinkSchema.safeParse(body)
 
-    if (!email || typeof email !== 'string') {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Email is required' },
+        { error: 'Valid email is required' },
         { status: 400 }
       )
     }
 
-    const normalizedEmail = email.toLowerCase().trim()
+    const normalizedEmail = parsed.data.email
 
     // Find client by email
     const clientInfo = await findClientByEmail(normalizedEmail)
@@ -30,6 +32,22 @@ export async function POST(request: NextRequest) {
     if (!clientInfo) {
       // Don't reveal whether the email exists for security
       // Just return success message either way
+      return NextResponse.json({
+        success: true,
+        message: 'If an account exists with this email, a portal link will be sent.',
+      })
+    }
+
+    // Check if portal feature is enabled for this organization
+    const supabaseCheck = createServiceClient()
+    const { data: orgCheck } = await supabaseCheck
+      .from('organizations')
+      .select('settings')
+      .eq('id', clientInfo.organizationId)
+      .single()
+
+    if (!isFeatureEnabled(orgCheck?.settings as Record<string, unknown>, 'client_portal')) {
+      // Don't reveal that portal is disabled — same generic message
       return NextResponse.json({
         success: true,
         message: 'If an account exists with this email, a portal link will be sent.',

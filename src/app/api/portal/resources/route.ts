@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
+import { portalTokenSchema, resourcePatchSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/portal/resources
@@ -13,14 +14,14 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('Authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json(
         { error: 'Token is required' },
         { status: 401 }
       )
     }
 
-    const validation = await validateAccessToken(token)
+    const validation = await validateAccessToken(token!)
     if (!validation.valid || !validation.clientId) {
       return NextResponse.json(
         { error: validation.error || 'Invalid token' },
@@ -95,14 +96,14 @@ export async function PATCH(request: NextRequest) {
     const authHeader = request.headers.get('Authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json(
         { error: 'Token is required' },
         { status: 401 }
       )
     }
 
-    const validation = await validateAccessToken(token)
+    const validation = await validateAccessToken(token!)
     if (!validation.valid || !validation.clientId) {
       return NextResponse.json(
         { error: validation.error || 'Invalid token' },
@@ -111,14 +112,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { resourceId, is_completed } = body
+    const parsed = resourcePatchSchema.safeParse(body)
 
-    if (!resourceId) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Resource ID is required' },
+        { error: 'Invalid request' },
         { status: 400 }
       )
     }
+
+    const { resourceId, is_completed } = parsed.data
 
     const supabase = createServiceClient()
 

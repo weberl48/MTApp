@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSquareInvoice } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 export async function POST(
   request: NextRequest,
@@ -20,6 +21,9 @@ export async function POST(
     }
 
     const { id } = await params
+    if (!uuidSchema.safeParse(id).success) {
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Check authentication

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { sendInvoiceEmail } from '@/lib/email'
+import { uuidSchema } from '@/lib/validation/schemas'
 import { createElement, ReactElement } from 'react'
 
 export async function POST(
@@ -11,6 +12,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params
+    if (!uuidSchema.safeParse(id).success) {
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Check authentication

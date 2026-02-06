@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
+import { portalTokenSchema, sessionRequestSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/portal/session-requests
@@ -12,11 +13,11 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('Authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json({ error: 'Token is required' }, { status: 401 })
     }
 
-    const validation = await validateAccessToken(token)
+    const validation = await validateAccessToken(token!)
     if (!validation.valid || !validation.clientId) {
       return NextResponse.json(
         { error: validation.error || 'Invalid token' },
@@ -77,11 +78,11 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('Authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!token) {
+    if (!portalTokenSchema.safeParse(token).success) {
       return NextResponse.json({ error: 'Token is required' }, { status: 401 })
     }
 
-    const validation = await validateAccessToken(token)
+    const validation = await validateAccessToken(token!)
     if (!validation.valid || !validation.clientId || !validation.organizationId) {
       return NextResponse.json(
         { error: validation.error || 'Invalid token' },
@@ -90,6 +91,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    const parsed = sessionRequestSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid request' },
+        { status: 400 }
+      )
+    }
+
     const {
       preferred_date,
       preferred_time,
@@ -98,14 +108,7 @@ export async function POST(request: NextRequest) {
       duration_minutes,
       service_type_id,
       notes,
-    } = body
-
-    if (!preferred_date) {
-      return NextResponse.json(
-        { error: 'Preferred date is required' },
-        { status: 400 }
-      )
-    }
+    } = parsed.data
 
     const supabase = createServiceClient()
 
