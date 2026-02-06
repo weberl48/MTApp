@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
-import { decryptField, isEncrypted } from '@/lib/crypto'
+import { decryptPHI } from '@/lib/crypto/actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { toast } from 'sonner'
 import {
@@ -34,6 +34,7 @@ interface SessionDetails {
   duration_minutes: number
   status: string
   notes: string | null
+  client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
   created_at: string
@@ -66,6 +67,7 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
+  const [decryptedClientNotes, setDecryptedClientNotes] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const currentUserId = effectiveUserId || user?.id || null
 
@@ -90,6 +92,7 @@ export default function SessionDetailPage() {
           duration_minutes,
           status,
           notes,
+          client_notes,
           group_headcount,
           group_member_names,
           created_at,
@@ -120,18 +123,19 @@ export default function SessionDetailPage() {
     loadSession()
   }, [params.id, router])
 
-  // Decrypt notes when session loads
+  // Decrypt notes when session loads (via server action since ENCRYPTION_KEY is server-only)
   useEffect(() => {
     async function decryptNotes() {
-      if (session?.notes && isEncrypted(session.notes)) {
-        const decrypted = await decryptField(session.notes)
-        setDecryptedNotes(decrypted)
-      } else {
-        setDecryptedNotes(session?.notes || null)
-      }
+      if (!session) return
+      const decrypted = await decryptPHI({
+        notes: session.notes,
+        clientNotes: session.client_notes,
+      })
+      setDecryptedNotes(decrypted.notes)
+      setDecryptedClientNotes(decrypted.clientNotes)
     }
     decryptNotes()
-  }, [session?.notes])
+  }, [session?.notes, session?.client_notes])
 
   const handleApprove = () => {
     if (!session) return
@@ -458,13 +462,24 @@ export default function SessionDetailPage() {
         </CardContent>
       </Card>
 
-      {decryptedNotes && (
+      {(decryptedNotes || decryptedClientNotes) && (
         <Card>
           <CardHeader>
             <CardTitle>Session Notes</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap">{decryptedNotes}</p>
+          <CardContent className="space-y-4">
+            {decryptedNotes && (
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Internal Notes</p>
+                <p className="whitespace-pre-wrap">{decryptedNotes}</p>
+              </div>
+            )}
+            {decryptedClientNotes && (
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Client Notes</p>
+                <p className="whitespace-pre-wrap">{decryptedClientNotes}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
