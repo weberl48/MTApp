@@ -55,7 +55,10 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, can, settings } = useOrganization()
+  const { organization, can, settings, viewAsContractor } = useOrganization()
+
+  // When "view as" a specific contractor, use their ID for new sessions
+  const effectiveContractorId = (!existingSession && viewAsContractor?.id) ? viewAsContractor.id : contractorId
   const showFinancialDetails = can('financial:view-details')
   const isEditMode = !!existingSession
 
@@ -110,7 +113,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       const { data: contractor } = await supabase
         .from('users')
         .select('pay_increase')
-        .eq('id', contractorId)
+        .eq('id', effectiveContractorId)
         .single()
 
       if (contractor?.pay_increase) {
@@ -121,7 +124,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       const { data: rates } = await supabase
         .from('contractor_rates')
         .select('service_type_id, contractor_pay')
-        .eq('contractor_id', contractorId)
+        .eq('contractor_id', effectiveContractorId)
 
       if (rates && rates.length > 0) {
         const ratesMap = new Map<string, number>()
@@ -133,12 +136,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     }
 
     loadContractorRates()
-  }, [contractorId, supabase])
+  }, [effectiveContractorId, supabase])
 
   const storageKey = useMemo(() => {
     if (!organization?.id) return null
-    return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId })
-  }, [organization?.id, contractorId])
+    return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId: effectiveContractorId })
+  }, [organization?.id, effectiveContractorId])
 
   // Get selected service type for pricing calculation
   const selectedServiceType = serviceTypes.find((st) => st.id === serviceTypeId)
@@ -392,7 +395,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             time: time + ':00',
             duration_minutes: parseInt(duration),
             service_type_id: serviceTypeId,
-            contractor_id: contractorId,
+            contractor_id: effectiveContractorId,
             status,
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,

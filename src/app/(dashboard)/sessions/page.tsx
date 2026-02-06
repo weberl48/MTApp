@@ -22,8 +22,7 @@ import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
-import { can } from '@/lib/auth/permissions'
-import type { UserRole } from '@/types/database'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface Session {
   id: string
@@ -67,14 +66,18 @@ const ITEMS_PER_PAGE = 50
 
 export default function SessionsPage() {
   useRouter() // Used for navigation context
+  const { can, effectiveUserId, viewAsContractor, organization } = useOrganization()
   const [sessions, setSessions] = useState<Session[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [organizationId, setOrganizationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Use effective permissions (respects "view as" role)
+  const isAdmin = can('session:view-all')
+  // When viewing as a specific contractor, filter to their sessions even if effective role is still admin
+  const shouldFilterByContractor = viewAsContractor || !isAdmin
+  const contractorIdToFilter = viewAsContractor?.id || effectiveUserId
 
   // Refetch when page becomes visible (e.g., after navigating back)
   useEffect(() => {
@@ -111,18 +114,6 @@ export default function SessionsPage() {
         return
       }
 
-      // Get user role and organization
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('role, organization_id')
-        .eq('id', user.id)
-        .single<{ role: string; organization_id: string }>()
-
-      const admin = can(userProfile?.role as UserRole, 'session:view-all')
-      setIsAdmin(admin)
-      setUserId(user.id)
-      setOrganizationId(userProfile?.organization_id || null)
-
       // Fetch sessions with related data
       let query = supabase
         .from('sessions')
@@ -144,28 +135,30 @@ export default function SessionsPage() {
         `)
         .order('date', { ascending: false })
 
-      if (!admin) {
-        query = query.eq('contractor_id', user.id)
+      if (shouldFilterByContractor && contractorIdToFilter) {
+        query = query.eq('contractor_id', contractorIdToFilter)
       }
 
       const { data } = await query
       setSessions((data as unknown as Session[]) || [])
 
-      // Fetch contractors for filter (admin only)
-      if (admin) {
+      // Fetch contractors for filter (admin only, not when viewing as contractor)
+      if (!shouldFilterByContractor) {
         const { data: contractorData } = await supabase
           .from('users')
           .select('id, name')
           .in('role', ['contractor', 'admin', 'owner'])
           .order('name')
         setContractors(contractorData || [])
+      } else {
+        setContractors([])
       }
 
       setLoading(false)
     }
 
     loadSessions()
-  }, [refreshTrigger])
+  }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter])
 
   // Filter sessions based on current filters
   const filteredSessions = useMemo(() => {
@@ -253,10 +246,10 @@ export default function SessionsPage() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {organizationId && (
+          {organization?.id && (
             <SessionExportDialog
-              organizationId={organizationId}
-              contractorId={!isAdmin ? userId || undefined : undefined}
+              organizationId={organization.id}
+              contractorId={shouldFilterByContractor ? contractorIdToFilter || undefined : undefined}
             />
           )}
           <Link href="/sessions/new/">

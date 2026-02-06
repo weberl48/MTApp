@@ -28,19 +28,23 @@ interface MonthlyBreakdown {
 }
 
 export default function EarningsPage() {
-  const { user, organization } = useOrganization()
+  const { user, organization, viewAsContractor, effectiveUserId, viewAsRole, actualRole } = useOrganization()
   const [summary, setSummary] = useState<EarningsSummary | null>(null)
   const [monthlyBreakdown, setMonthlyBreakdown] = useState<MonthlyBreakdown[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Only contractors should see this page
-  if (user && user.role !== 'contractor') {
+  // Use effective contractor ID (respects "view as" impersonation)
+  const contractorId = viewAsContractor?.id || user?.id
+
+  // Only contractors (or those viewing as a contractor) should see this page
+  const effectiveRole = viewAsRole || actualRole
+  if (user && effectiveRole !== 'contractor' && !viewAsContractor) {
     redirect('/dashboard')
   }
 
   useEffect(() => {
     async function fetchEarnings() {
-      if (!user || !organization) return
+      if (!contractorId || !organization) return
 
       const supabase = createClient()
       const yearStart = startOfYear(new Date()).toISOString().split('T')[0]
@@ -70,7 +74,7 @@ export default function EarningsPage() {
           ),
           attendees:session_attendees(id)
         `)
-        .eq('contractor_id', user.id)
+        .eq('contractor_id', contractorId)
         .eq('organization_id', organization.id)
         .gte('date', yearStart)
         .in('status', ['submitted', 'approved'])
@@ -87,12 +91,12 @@ export default function EarningsPage() {
         supabase
           .from('users')
           .select('pay_increase')
-          .eq('id', user.id)
+          .eq('id', contractorId)
           .single(),
         supabase
           .from('contractor_rates')
           .select('service_type_id, contractor_pay')
-          .eq('contractor_id', user.id)
+          .eq('contractor_id', contractorId)
       ])
 
       const payIncrease = contractorData?.pay_increase || 0
@@ -189,7 +193,7 @@ export default function EarningsPage() {
     }
 
     fetchEarnings()
-  }, [user, organization])
+  }, [contractorId, organization])
 
   if (loading) {
     return (
