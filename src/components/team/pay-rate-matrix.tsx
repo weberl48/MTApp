@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, calculateSessionPricing } from '@/lib/pricing'
 import { Button } from '@/components/ui/button'
@@ -51,45 +51,51 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   const rateKey = (contractorId: string, serviceTypeId: string) =>
     `${contractorId}:${serviceTypeId}`
 
-  const loadData = useCallback(async () => {
-    const supabase = createClient()
-
-    const [
-      { data: contractorsData },
-      { data: serviceTypesData },
-      { data: ratesData },
-    ] = await Promise.all([
-      supabase
-        .from('users')
-        .select('id, name, email')
-        .eq('organization_id', organizationId)
-        .eq('role', 'contractor')
-        .order('name'),
-      supabase
-        .from('service_types')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .order('display_order', { ascending: true }),
-      supabase
-        .from('contractor_rates')
-        .select('id, contractor_id, service_type_id, contractor_pay'),
-    ])
-
-    setContractors(contractorsData || [])
-    setServiceTypes((serviceTypesData as ServiceType[]) || [])
-
-    const ratesMap = new Map<string, RateEntry>()
-    for (const rate of ratesData || []) {
-      ratesMap.set(rateKey(rate.contractor_id, rate.service_type_id), rate)
-    }
-    setRates(ratesMap)
-    setLoading(false)
-  }, [organizationId])
-
+  // Initial data load
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    let cancelled = false
+
+    async function init() {
+      const supabase = createClient()
+
+      const [
+        { data: contractorsData },
+        { data: serviceTypesData },
+        { data: ratesData },
+      ] = await Promise.all([
+        supabase
+          .from('users')
+          .select('id, name, email')
+          .eq('organization_id', organizationId)
+          .eq('role', 'contractor')
+          .order('name'),
+        supabase
+          .from('service_types')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true }),
+        supabase
+          .from('contractor_rates')
+          .select('id, contractor_id, service_type_id, contractor_pay'),
+      ])
+
+      if (cancelled) return
+
+      setContractors(contractorsData || [])
+      setServiceTypes((serviceTypesData as ServiceType[]) || [])
+
+      const ratesMap = new Map<string, RateEntry>()
+      for (const rate of ratesData || []) {
+        ratesMap.set(rateKey(rate.contractor_id, rate.service_type_id), rate)
+      }
+      setRates(ratesMap)
+      setLoading(false)
+    }
+
+    init()
+    return () => { cancelled = true }
+  }, [organizationId])
 
   function getDefaultPay(serviceType: ServiceType): number {
     const pricing = calculateSessionPricing(serviceType, 1, 30)
