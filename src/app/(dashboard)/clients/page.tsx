@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, Mail, Phone, ChevronRight, UserPlus } from 'lucide-react'
+import { Users, Mail, Phone, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AddClientDialog } from '@/components/forms/add-client-dialog'
 import { ClientActions } from '@/components/clients/client-actions'
@@ -134,14 +134,13 @@ export default async function ClientsPage() {
               </TableHeader>
               <TableBody>
                 {clients.map((client) => (
-                  <TableRow key={client.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <TableRow key={client.id} className="relative cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <TableCell className="font-medium">
-                      <Link href={`/clients/${client.id}`} className="flex items-center gap-2 hover:text-blue-600">
+                      <Link href={`/clients/${client.id}`} className="after:absolute after:inset-0">
                         {client.name}
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
                       </Link>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="relative z-10">
                       <div className="space-y-1">
                         {client.contact_email && (
                           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -184,7 +183,7 @@ export default async function ClientsPage() {
                       {client.notes || '-'}
                     </TableCell>
                     {canManageClients && (
-                      <TableCell>
+                      <TableCell className="relative z-10">
                         <ClientActions client={client as Client} />
                       </TableCell>
                     )}

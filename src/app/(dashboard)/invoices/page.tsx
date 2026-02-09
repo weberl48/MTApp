@@ -15,10 +15,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, AlertTriangle, Eye, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
+import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
@@ -104,6 +104,8 @@ function InvoiceTable({
   onSelectChange?: (id: string, checked: boolean) => void
   showSelection?: boolean
 }) {
+  const router = useRouter()
+
   if (invoices.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -138,7 +140,6 @@ function InvoiceTable({
           <TableHead>Payment Method</TableHead>
           <TableHead className="text-right">Amount</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead></TableHead>
           {showActions && isAdmin && <TableHead>Actions</TableHead>}
         </TableRow>
       </TableHeader>
@@ -146,9 +147,13 @@ function InvoiceTable({
         {invoices.map((invoice) => {
           const { status, isOverdue, daysOverdue } = getInvoiceStatus(invoice)
           return (
-            <TableRow key={invoice.id} className={selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}>
+            <TableRow
+              key={invoice.id}
+              className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+              onClick={() => router.push(`/invoices/${invoice.id}`)}
+            >
               {showSelection && isAdmin && (
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selectedIds?.has(invoice.id) || false}
                     onCheckedChange={(checked) => onSelectChange?.(invoice.id, !!checked)}
@@ -187,15 +192,8 @@ function InvoiceTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell>
-                <Link href={`/invoices/${invoice.id}`}>
-                  <Button variant="ghost" size="icon" aria-label="View invoice details">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </TableCell>
               {showActions && isAdmin && (
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
                 </TableCell>
               )}
@@ -215,6 +213,7 @@ export default function InvoicesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
   const supabaseRef = useRef(createClient())
+  const router = useRouter()
 
   const handleRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1)
@@ -684,7 +683,11 @@ export default function InvoicesPage() {
                             </TableHeader>
                             <TableBody>
                               {group.invoices.map((inv) => (
-                                <TableRow key={inv.id}>
+                                <TableRow
+                                  key={inv.id}
+                                  className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                  onClick={() => router.push(`/invoices/${inv.id}`)}
+                                >
                                   <TableCell>{inv.session?.service_type?.name}</TableCell>
                                   <TableCell>
                                     {inv.session?.date
