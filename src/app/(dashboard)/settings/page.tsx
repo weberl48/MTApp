@@ -1088,6 +1088,7 @@ export default function SettingsPage() {
             </Card>
 
             <ServiceTypeForm
+              key={editingServiceType?.id || 'new'}
               serviceType={editingServiceType}
               isOpen={isServiceTypeFormOpen}
               onClose={() => setIsServiceTypeFormOpen(false)}

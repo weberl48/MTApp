@@ -412,6 +412,7 @@ export interface Database {
           contractor_paid_amount: number | null
           group_headcount: number | null
           group_member_names: string | null
+          rejection_reason: string | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -430,6 +431,7 @@ export interface Database {
           contractor_paid_amount?: number | null
           group_headcount?: number | null
           group_member_names?: string | null
+          rejection_reason?: string | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -447,6 +449,7 @@ export interface Database {
           contractor_paid_amount?: number | null
           group_headcount?: number | null
           group_member_names?: string | null
+          rejection_reason?: string | null
           organization_id?: string
           updated_at?: string
         }
