@@ -365,6 +365,7 @@ export interface Database {
           minimum_attendees: number | null
           scholarship_discount_percentage: number | null
           scholarship_rate: number | null
+          contractor_pay_schedule: Record<string, number> | null
           is_active: boolean
           display_order: number
           organization_id: string
@@ -384,6 +385,7 @@ export interface Database {
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
           display_order?: number
           organization_id: string
@@ -402,6 +404,7 @@ export interface Database {
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
           display_order?: number
           organization_id?: string

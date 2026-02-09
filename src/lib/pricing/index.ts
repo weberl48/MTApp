@@ -102,13 +102,24 @@ export function calculateSessionPricing(
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
 
   // Calculate contractor pay
+  // Priority: 1) custom rate (30-min only), 2) pay schedule, 3) formula
   let contractorPay: number
 
-  if (effectiveOverrides?.customContractorPay !== undefined) {
-    // Use custom contractor pay rate (from contractor_rates table)
-    // Scale by duration multiplier since custom rates are for 30 min base
+  // Check for explicit pay schedule amount for this duration
+  const scheduleKey = String(durationMinutes)
+  const schedulePay = serviceType.contractor_pay_schedule?.[scheduleKey]
+
+  if (effectiveOverrides?.customContractorPay !== undefined && durationMinutes === durationBase) {
+    // Custom contractor rate applies at the base duration only (e.g., 30 min)
+    contractorPay = effectiveOverrides.customContractorPay
+    mcaCut = totalAmount - contractorPay
+  } else if (schedulePay !== undefined) {
+    // Use explicit pay schedule amount for this duration
+    contractorPay = schedulePay
+    mcaCut = totalAmount - contractorPay
+  } else if (effectiveOverrides?.customContractorPay !== undefined) {
+    // Custom rate exists but not at this duration — scale linearly from it
     contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
-    // Recalculate MCA cut: total - contractor pay
     mcaCut = totalAmount - contractorPay
   } else {
     // Default: total - MCA cut
@@ -123,13 +134,12 @@ export function calculateSessionPricing(
     }
   }
 
-  // NOTE: pay_increase feature disabled — kept for reference in case we re-enable
-  // Per-session bonus from users.pay_increase was applied here on top of contractor pay
-  // if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
-  //   contractorPay += effectiveOverrides.payIncrease
-  //   // Pay increase comes out of MCA's portion
-  //   mcaCut -= effectiveOverrides.payIncrease
-  // }
+  // Add per-session pay increase bonus (from users.pay_increase)
+  if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
+    contractorPay += effectiveOverrides.payIncrease
+    // Pay increase comes out of MCA's portion
+    mcaCut -= effectiveOverrides.payIncrease
+  }
 
   // Apply scholarship pricing AFTER contractor pay is calculated
   // Contractor gets their normal pay regardless of scholarship; MCA absorbs the discount

@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import type { ServiceType, ServiceCategory, LocationType } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
+import { calculateSessionPricing, formatCurrency } from '@/lib/pricing'
 
 interface ServiceTypeFormProps {
   serviceType?: ServiceType | null
@@ -49,6 +50,18 @@ const LOCATION_TYPES: { value: LocationType; label: string }[] = [
 export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: ServiceTypeFormProps) {
   const { organization } = useOrganization()
   const [loading, setLoading] = useState(false)
+  const durationOptions = organization?.settings?.session?.duration_options || [30, 45, 60, 90]
+
+  // Initialize pay schedule from existing data, or empty strings for all durations
+  const initPaySchedule = (): Record<string, string> => {
+    const schedule: Record<string, string> = {}
+    for (const dur of durationOptions) {
+      const existing = serviceType?.contractor_pay_schedule?.[String(dur)]
+      schedule[String(dur)] = existing !== undefined ? String(existing) : ''
+    }
+    return schedule
+  }
+
   const [formData, setFormData] = useState({
     name: serviceType?.name || '',
     category: serviceType?.category || ('music_individual' as ServiceCategory),
@@ -60,6 +73,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     rent_percentage: serviceType?.rent_percentage?.toString() || '0',
     scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
     is_active: serviceType?.is_active ?? true,
+    pay_schedule: initPaySchedule(),
   })
 
   const isEditing = !!serviceType
@@ -69,6 +83,17 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     setLoading(true)
 
     const supabase = createClient()
+
+    // Build contractor_pay_schedule from form values (only include filled-in durations)
+    const paySchedule: Record<string, number> = {}
+    let hasAnyScheduleValue = false
+    for (const [dur, val] of Object.entries(formData.pay_schedule)) {
+      const parsed = parseFloat(val)
+      if (!isNaN(parsed) && parsed > 0) {
+        paySchedule[dur] = parsed
+        hasAnyScheduleValue = true
+      }
+    }
 
     const data = {
       name: formData.name,
@@ -81,6 +106,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       rent_percentage: parseFloat(formData.rent_percentage) || 0,
       scholarship_rate: formData.scholarship_rate ? parseFloat(formData.scholarship_rate) : null,
       is_active: formData.is_active,
+      contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
     }
 
     try {
@@ -114,7 +140,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Service Type' : 'Add Service Type'}</DialogTitle>
           <DialogDescription>
@@ -256,6 +282,63 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             <p className="text-xs text-gray-500">
               Flat rate charged to scholarship clients. Contractor still gets normal pay; MCA absorbs the discount.
             </p>
+          </div>
+
+          {/* Contractor Pay by Duration */}
+          <div className="space-y-2">
+            <Label>Contractor Pay by Duration</Label>
+            <p className="text-xs text-gray-500">
+              Set the default contractor pay for each session duration. Leave empty to calculate automatically from MCA %.
+            </p>
+            <div className="border rounded-lg divide-y">
+              {durationOptions.map((dur) => {
+                const durKey = String(dur)
+                // Calculate what auto-formula would give
+                const autoCalc = calculateSessionPricing(
+                  {
+                    ...({} as ServiceType),
+                    base_rate: parseFloat(formData.base_rate) || 0,
+                    per_person_rate: 0,
+                    mca_percentage: parseFloat(formData.mca_percentage) || 0,
+                    contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
+                    contractor_pay_schedule: null,
+                    rent_percentage: 0,
+                    scholarship_rate: null,
+                    scholarship_discount_percentage: 0,
+                    minimum_attendees: 1,
+                  } as ServiceType,
+                  1,
+                  dur
+                )
+                return (
+                  <div key={dur} className="flex items-center justify-between px-3 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-medium w-14">{dur} min</span>
+                      <span className="text-xs text-gray-400">
+                        auto: {formatCurrency(autoCalc.contractorPay)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-gray-500">$</span>
+                      <Input
+                        type="number"
+                        step="0.50"
+                        min="0"
+                        value={formData.pay_schedule[durKey] || ''}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            pay_schedule: { ...formData.pay_schedule, [durKey]: e.target.value },
+                          })
+                        }
+                        placeholder={autoCalc.contractorPay.toFixed(2)}
+                        className="w-24 h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           {/* Active Toggle */}
