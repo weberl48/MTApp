@@ -35,12 +35,6 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     groupHeadcount, pricing,
   } = params
 
-  // Get client payment methods for invoicing
-  const { data: clientData } = await supabase
-    .from('clients')
-    .select('id, payment_method')
-    .in('id', clientIds)
-
   // Create the session
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
@@ -62,39 +56,47 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
 
   if (sessionError) throw sessionError
 
-  // Add attendees
-  const attendees = clientIds.map((clientId) => ({
-    session_id: session.id,
-    client_id: clientId,
-    individual_cost: pricing.totalAmount,
-  }))
-
-  const { error: attendeesError } = await supabase
-    .from('session_attendees')
-    .insert(attendees)
-
-  if (attendeesError) throw attendeesError
-
-  // If submitted, create invoices for each non-scholarship client
   let invoiceError = false
-  if (status === 'submitted' || status === 'approved') {
-    const invoices = (clientData || [])
-      .filter((client) => client.payment_method !== 'scholarship')
-      .map((client) => ({
-        session_id: session.id,
-        client_id: client.id,
-        amount: pricing.totalAmount,
-        mca_cut: pricing.mcaCut,
-        contractor_pay: pricing.contractorPay,
-        rent_amount: pricing.rentAmount,
-        payment_method: client.payment_method,
-        status: 'pending' as const,
-        organization_id: organizationId,
-      }))
 
-    if (invoices.length > 0) {
-      const { error } = await supabase.from('invoices').insert(invoices)
-      if (error) invoiceError = true
+  // Add attendees and create invoices (individual sessions only)
+  if (clientIds.length > 0) {
+    const attendees = clientIds.map((clientId) => ({
+      session_id: session.id,
+      client_id: clientId,
+      individual_cost: pricing.totalAmount,
+    }))
+
+    const { error: attendeesError } = await supabase
+      .from('session_attendees')
+      .insert(attendees)
+
+    if (attendeesError) throw attendeesError
+
+    // If submitted, create invoices for each non-scholarship client
+    if (status === 'submitted' || status === 'approved') {
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('id, payment_method')
+        .in('id', clientIds)
+
+      const invoices = (clientData || [])
+        .filter((client) => client.payment_method !== 'scholarship')
+        .map((client) => ({
+          session_id: session.id,
+          client_id: client.id,
+          amount: pricing.totalAmount,
+          mca_cut: pricing.mcaCut,
+          contractor_pay: pricing.contractorPay,
+          rent_amount: pricing.rentAmount,
+          payment_method: client.payment_method,
+          status: 'pending' as const,
+          organization_id: organizationId,
+        }))
+
+      if (invoices.length > 0) {
+        const { error } = await supabase.from('invoices').insert(invoices)
+        if (error) invoiceError = true
+      }
     }
   }
 

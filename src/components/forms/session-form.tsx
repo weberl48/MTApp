@@ -243,7 +243,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Collapsible setup: contractors with remembered defaults start collapsed on mobile
   const hasPopulatedDefaults = didApplyDefaults && !isEditMode && !showFinancialDetails
-    && !!serviceTypeId && selectedClients.length > 0
+    && !!serviceTypeId && (isGroupService || selectedClients.length > 0)
   const [setupExpanded, setSetupExpanded] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -262,26 +262,25 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       hasErrors = true
     }
 
-    if (selectedClients.length === 0) {
-      setFieldError('clients', 'Please add at least one client')
-      hasErrors = true
-    }
-
-    // Group session validation
     if (isGroupService) {
       const headcount = parseInt(groupHeadcount)
       if (!headcount || headcount < 1) {
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
         hasErrors = true
       }
-    }
-
-    // Validate minimum attendees for service type (e.g., 8-week programs)
-    if (selectedServiceType) {
-      const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
-      if (minAttendeesError) {
-        setFieldError('clients', minAttendeesError)
+    } else {
+      if (selectedClients.length === 0) {
+        setFieldError('clients', 'Please add at least one client')
         hasErrors = true
+      }
+
+      // Validate minimum attendees for service type (e.g., 8-week programs)
+      if (selectedServiceType) {
+        const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
+        if (minAttendeesError) {
+          setFieldError('clients', minAttendeesError)
+          hasErrors = true
+        }
       }
     }
 
@@ -331,23 +330,25 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
         if (sessionError) throw sessionError
 
-        // Delete old attendees and add new ones
+        // Delete old attendees and add new ones (individual sessions only)
         await supabase
           .from('session_attendees')
           .delete()
           .eq('session_id', existingSession.id)
 
-        const attendees = selectedClients.map((clientId) => ({
-          session_id: existingSession.id,
-          client_id: clientId,
-          individual_cost: pricing?.totalAmount || 0,
-        }))
+        if (!isGroupService && selectedClients.length > 0) {
+          const attendees = selectedClients.map((clientId) => ({
+            session_id: existingSession.id,
+            client_id: clientId,
+            individual_cost: pricing?.totalAmount || 0,
+          }))
 
-        const { error: attendeesError } = await supabase
-          .from('session_attendees')
-          .insert(attendees)
+          const { error: attendeesError } = await supabase
+            .from('session_attendees')
+            .insert(attendees)
 
-        if (attendeesError) throw attendeesError
+          if (attendeesError) throw attendeesError
+        }
 
         toast.success('Session updated successfully!')
         router.push(`/sessions/${existingSession.id}/`)
@@ -368,7 +369,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           serviceTypeId,
           contractorId: effectiveContractorId,
           organizationId: organization!.id,
-          clientIds: selectedClients,
+          clientIds: isGroupService ? [] : selectedClients,
           encryptedNotes,
           encryptedClientNotes,
           status: effectiveStatus,
@@ -479,7 +480,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                     {selectedServiceType?.name || 'Unknown Service'}
                     {' \u00B7 '}
-                    {selectedClients.map(id => getClientName(id)).join(', ')}
+                    {isGroupService
+                      ? `${groupHeadcount || '?'} attendees`
+                      : selectedClients.map(id => getClientName(id)).join(', ')}
                   </p>
                   {pricing && (
                     <p className="text-sm font-medium text-green-600 dark:text-green-400">
@@ -549,6 +552,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               onValueChange={(val) => {
                 setServiceTypeId(val)
                 clearFieldError('serviceType')
+                // Clear client selection when switching to a group service
+                const st = serviceTypes.find((s) => s.id === val)
+                if (st && st.per_person_rate > 0) {
+                  setSelectedClients([])
+                }
               }}
             >
               <SelectTrigger className={errors.serviceType ? 'border-red-500' : ''}>
@@ -581,14 +589,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
           </div>
 
-          {/* Clients - For billing entity (e.g., People Inc, BryLin) */}
+          {/* Clients - Only for individual (non-group) sessions */}
+          {!isGroupService && (
           <div className="space-y-2">
-            <Label>{isGroupService ? 'Billing Client *' : 'Clients *'}</Label>
-            {isGroupService && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select the organization or client being billed for this group session.
-              </p>
-            )}
+            <Label>Clients *</Label>
             <div className="flex flex-wrap gap-2 mb-2">
               {selectedClients.map((clientId) => (
                 <Badge
@@ -613,7 +617,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 clients={clients}
                 selectedIds={selectedClients}
                 onChange={(ids) => {
-                  setSelectedClients(isGroupService ? ids.slice(-1) : ids)
+                  setSelectedClients(ids)
                   if (ids.length > 0) clearFieldError('clients')
                 }}
               />
@@ -630,6 +634,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+          )}
 
           {/* Group Headcount - Only show for group service types */}
           {isGroupService && (
