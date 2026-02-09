@@ -48,8 +48,6 @@ export const billingMethodLabels: Record<string, string> = {
 
 import type { OrganizationSettings } from '@/types/database'
 
-type ListItemConfig = { label: string; visible: boolean }
-
 /**
  * Get visible payment methods with org-customized labels.
  * Falls back to default labels if no org overrides exist.

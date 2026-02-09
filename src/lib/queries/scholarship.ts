@@ -21,8 +21,8 @@ export interface UnbilledGroup {
  * Fetch all scholarship sessions that haven't been invoiced yet.
  * Works with both client-side and server-side Supabase clients.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function fetchUnbilledScholarshipSessions(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any, any, any>
 ): Promise<UnbilledScholarshipSession[]> {
   // Get scholarship clients
