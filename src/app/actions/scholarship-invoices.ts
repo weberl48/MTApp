@@ -1,7 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateInvoicePaths } from '@/lib/actions/helpers'
 import { calculateSessionPricing } from '@/lib/pricing'
 import type { ServiceType } from '@/types/database'
 
@@ -191,8 +191,7 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: itemsError.message }
   }
 
-  revalidatePath('/invoices')
-  revalidatePath('/dashboard')
+  revalidateInvoicePaths()
 
   return { success: true as const, invoiceId: invoice.id }
 }

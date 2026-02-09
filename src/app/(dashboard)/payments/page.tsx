@@ -14,6 +14,8 @@ import { ContractorPaymentsTable } from '@/components/tables/contractor-payments
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
 import { AdminGuard } from '@/components/guards/admin-guard'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface InvoiceData {
   id: string
@@ -96,8 +98,8 @@ export default function PaymentsPage() {
       .eq('id', user.id)
       .single<{ role: string }>()
 
-    const role = userProfile?.role
-    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+    const role = userProfile?.role as UserRole | undefined
+    if (!can(role ?? null, 'payments:view')) {
       router.push('/dashboard/')
       return
     }

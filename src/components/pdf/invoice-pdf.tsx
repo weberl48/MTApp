@@ -5,6 +5,8 @@ import {
   View,
   StyleSheet,
 } from '@react-pdf/renderer'
+import { paymentMethodLabels, formatInvoiceNumber } from '@/lib/constants/display'
+import { formatCurrency } from '@/lib/pricing'
 
 const styles = StyleSheet.create({
   page: {
@@ -218,19 +220,6 @@ interface InvoicePDFProps {
   invoice: InvoiceData
 }
 
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount)
-}
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -248,7 +237,7 @@ function formatShortDate(dateString: string): string {
 }
 
 export function InvoicePDF({ invoice }: InvoicePDFProps) {
-  const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+  const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
 
   const titleText = isBatch && invoice.billing_period

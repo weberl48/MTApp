@@ -4,6 +4,9 @@ import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { sendInvoiceEmail } from '@/lib/email'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
+import { formatInvoiceNumber } from '@/lib/constants/display'
 import { createElement, ReactElement } from 'react'
 
 export async function POST(
@@ -33,8 +36,8 @@ export async function POST(
       .eq('id', user.id)
       .single<{ role: string; organization_id: string }>()
 
-    const role = userProfile?.role
-    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+    const role = userProfile?.role as UserRole | undefined
+    if (!can(role ?? null, 'invoice:send')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -92,7 +95,7 @@ export async function POST(
     )
 
     // Send email
-    const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+    const invoiceNumber = formatInvoiceNumber(invoice.id)
     const isBatch = invoice.invoice_type === 'batch'
 
     await sendInvoiceEmail({

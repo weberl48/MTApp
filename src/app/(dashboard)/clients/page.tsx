@@ -14,21 +14,9 @@ import { Users, Mail, Phone, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AddClientDialog } from '@/components/forms/add-client-dialog'
 import { ClientActions } from '@/components/clients/client-actions'
-import type { Client } from '@/types/database'
-
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-}
-
-const billingMethodLabels: Record<string, string> = {
-  square: 'Square',
-  check: 'Check',
-  email: 'Email',
-  other: 'Other',
-}
+import type { Client, UserRole } from '@/types/database'
+import { paymentMethodLabels, billingMethodLabels } from '@/lib/constants/display'
+import { can } from '@/lib/auth/permissions'
 
 export default async function ClientsPage() {
   const supabase = await createClient()
@@ -45,7 +33,7 @@ export default async function ClientsPage() {
       .select('role')
       .eq('id', user.id)
       .single<{ role: string }>()
-    canManageClients = ['admin', 'owner', 'developer'].includes(userProfile?.role || '')
+    canManageClients = can(userProfile?.role as UserRole ?? null, 'team:view')
   }
 
   // Fetch all clients

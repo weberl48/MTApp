@@ -1,7 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { handleSupabaseError, revalidateInvoicePaths } from '@/lib/actions/helpers'
 
 export async function deleteInvoice(invoiceId: string) {
   const supabase = await createClient()
@@ -11,15 +11,12 @@ export async function deleteInvoice(invoiceId: string) {
     .delete()
     .eq('id', invoiceId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/invoices')
-  revalidatePath('/dashboard')
-  revalidatePath('/payments')
+  revalidateInvoicePaths()
 
-  return { success: true }
+  return { success: true as const }
 }
 
 export async function updateInvoiceStatus(
@@ -39,16 +36,12 @@ export async function updateInvoiceStatus(
     .update(updates)
     .eq('id', invoiceId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/invoices')
-  revalidatePath(`/invoices/${invoiceId}`)
-  revalidatePath('/dashboard')
-  revalidatePath('/payments')
+  revalidateInvoicePaths(invoiceId)
 
-  return { success: true }
+  return { success: true as const }
 }
 
 export async function bulkUpdateInvoiceStatus(
@@ -68,13 +61,10 @@ export async function bulkUpdateInvoiceStatus(
     .update(updates)
     .in('id', invoiceIds)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/invoices')
-  revalidatePath('/dashboard')
-  revalidatePath('/payments')
+  revalidateInvoicePaths()
 
-  return { success: true }
+  return { success: true as const }
 }

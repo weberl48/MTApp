@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/pricing'
 import { DollarSign, TrendingUp, Users, Calendar, Loader2 } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface Invoice {
   amount: number
@@ -73,8 +75,8 @@ export default function AnalyticsPage() {
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      const role = userProfile?.role
-      if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+      const role = userProfile?.role as UserRole | undefined
+      if (!can(role ?? null, 'analytics:view')) {
         router.push('/dashboard/')
         return
       }

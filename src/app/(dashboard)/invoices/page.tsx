@@ -24,6 +24,7 @@ import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
+import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
 
 interface Invoice {
   id: string
@@ -63,12 +64,6 @@ interface UnbilledScholarshipSession {
   contractorName: string
 }
 
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
 
 function getInvoiceStatus(invoice: Invoice): { status: string; isOverdue: boolean; daysOverdue: number } {
   if (invoice.status === 'paid') {
@@ -91,13 +86,6 @@ function getInvoiceStatus(invoice: Invoice): { status: string; isOverdue: boolea
   return { status: invoice.status, isOverdue: false, daysOverdue: 0 }
 }
 
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-  venmo: 'Venmo',
-}
 
 // Moved outside the component to avoid re-creating during render
 function InvoiceTable({
@@ -201,7 +189,7 @@ function InvoiceTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  <Badge className={statusColors[status]}>
+                  <Badge className={invoiceStatusColors[status]}>
                     {isOverdue ? 'overdue' : invoice.status}
                   </Badge>
                   {isOverdue && (
