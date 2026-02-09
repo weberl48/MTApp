@@ -247,7 +247,9 @@ export function getPricingDescription(serviceType: ServiceType, showFormula: boo
 
   // Only show formula details (MCA %, cap) if requested
   if (showFormula) {
-    description += ` (${serviceType.mca_percentage}% MCA)`
+    if (serviceType.mca_percentage > 0) {
+      description += ` (${serviceType.mca_percentage}% MCA)`
+    }
 
     if (serviceType.contractor_cap) {
       description += `, contractor max $${serviceType.contractor_cap}`

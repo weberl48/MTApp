@@ -3,7 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import { SessionForm } from '@/components/forms/session-form'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, AlertTriangle } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { decryptField } from '@/lib/crypto'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
@@ -48,6 +49,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
       client_notes,
       group_headcount,
       group_member_names,
+      rejection_reason,
       attendees:session_attendees(client_id)
     `)
     .eq('id', id)
@@ -89,6 +91,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     client_notes: decryptedClientNotes,
     group_headcount: session.group_headcount,
     group_member_names: session.group_member_names,
+    rejection_reason: session.rejection_reason,
     attendees: (session.attendees as { client_id: string }[]) || [],
   }
 
@@ -107,6 +110,16 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
           Update session details. Changes will be saved immediately.
         </p>
       </div>
+
+      {session.rejection_reason && (
+        <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800 dark:text-amber-200">Revision Requested</AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-300">
+            {session.rejection_reason}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <SessionForm
         serviceTypes={serviceTypes || []}

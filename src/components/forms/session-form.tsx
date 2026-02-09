@@ -165,6 +165,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     }
   }, [serviceTypeId, contractorCustomRates, contractorPayIncrease])
 
+  // Check if custom rate exists for the selected service type
+  const missingCustomRate = serviceTypeId && contractorCustomRates.size > 0
+    ? !contractorCustomRates.has(serviceTypeId)
+    : serviceTypeId && contractorCustomRates.size === 0
+
   // Determine payment method for pricing (scholarship affects pricing)
   // For single-client sessions, use that client's payment method
   // For groups/mixed, show normal pricing (scholarship handled per-client at invoice time)
@@ -285,6 +290,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       hasErrors = true
     }
 
+    if (serviceTypeId && missingCustomRate) {
+      setFieldError('serviceType', 'No custom rate set for this contractor and service type. Please set a rate in Team > Rates.')
+      hasErrors = true
+    }
+
     if (selectedClients.length === 0) {
       setFieldError('clients', 'Please add at least one client')
       hasErrors = true
@@ -347,6 +357,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
             group_member_names: null,
+            rejection_reason: status === 'submitted' ? null : undefined,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id)
@@ -608,6 +619,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {errors.serviceType}
+              </p>
+            )}
+            {missingCustomRate && !errors.serviceType && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                No custom rate set for this service type. Set one in Team &gt; Rates.
               </p>
             )}
             {selectedServiceType && showFinancialDetails && (

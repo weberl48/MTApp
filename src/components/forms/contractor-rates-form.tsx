@@ -272,7 +272,7 @@ export function ContractorRatesForm({
         <CardHeader>
           <CardTitle>Service Type Rates</CardTitle>
           <CardDescription>
-            Set custom pay rates for {contractorName} per service type. Leave blank to use default rates.
+            Set custom pay rates for {contractorName} per service type. A rate is required for each active service type.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -292,8 +292,13 @@ export function ContractorRatesForm({
                 const isEditing = editingRateId === serviceType.id
 
                 return (
-                  <TableRow key={serviceType.id}>
-                    <TableCell className="font-medium">{serviceType.name}</TableCell>
+                  <TableRow key={serviceType.id} className={!customRate ? 'bg-amber-50/50 dark:bg-amber-950/10' : ''}>
+                    <TableCell className="font-medium">
+                      {serviceType.name}
+                      {!customRate && (
+                        <span className="ml-2 text-xs text-amber-600 dark:text-amber-400 font-normal">Rate required</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right text-gray-500">
                       {formatCurrency(defaultPay)}
                     </TableCell>
@@ -315,7 +320,7 @@ export function ContractorRatesForm({
                           {formatCurrency(customRate.contractor_pay)}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Using default</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">Not set</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

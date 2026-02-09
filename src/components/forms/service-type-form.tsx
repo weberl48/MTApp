@@ -55,7 +55,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     location: serviceType?.location || ('in_home' as LocationType),
     base_rate: serviceType?.base_rate?.toString() || '50',
     per_person_rate: serviceType?.per_person_rate?.toString() || '0',
-    mca_percentage: serviceType?.mca_percentage?.toString() || '25',
+    mca_percentage: serviceType?.mca_percentage?.toString() || '0',
     contractor_cap: serviceType?.contractor_cap?.toString() || '',
     rent_percentage: serviceType?.rent_percentage?.toString() || '0',
     scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
@@ -206,34 +206,21 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             </div>
           </div>
 
-          {/* MCA Cut */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="mca_percentage">MCA Percentage (%) *</Label>
-              <Input
-                id="mca_percentage"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={formData.mca_percentage}
-                onChange={(e) => setFormData({ ...formData, mca_percentage: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contractor_cap">Contractor Cap ($)</Label>
-              <Input
-                id="contractor_cap"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.contractor_cap}
-                onChange={(e) => setFormData({ ...formData, contractor_cap: e.target.value })}
-                placeholder="Leave empty for no cap"
-              />
-            </div>
+          {/* Contractor Cap */}
+          <div className="space-y-2">
+            <Label htmlFor="contractor_cap">Contractor Cap ($)</Label>
+            <Input
+              id="contractor_cap"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.contractor_cap}
+              onChange={(e) => setFormData({ ...formData, contractor_cap: e.target.value })}
+              placeholder="Leave empty for no cap"
+            />
+            <p className="text-xs text-gray-500">
+              Maximum contractor pay per session. Leave empty for no cap.
+            </p>
           </div>
 
           {/* Rent */}
