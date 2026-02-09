@@ -3,9 +3,9 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
+import { Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { decryptField } from '@/lib/crypto'
 import { formatCurrency } from '@/lib/pricing'
 
@@ -101,17 +101,14 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: 'Clients', href: '/clients' },
+        { label: client.name },
+      ]} />
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/clients">
-          <Button variant="ghost" size="icon" aria-label="Back to clients list">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{client.name}</h1>
-          <p className="text-gray-500 dark:text-gray-400">Client Details</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold">{client.name}</h1>
+        <p className="text-muted-foreground">Client Details</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

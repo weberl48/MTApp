@@ -164,8 +164,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
             {viewAsContractor
               ? `Viewing ${viewAsContractor.name}'s dashboard`
               : "Welcome back! Here's an overview of your practice."}
@@ -184,12 +184,12 @@ export default function DashboardPage() {
       {/* Stats Grid - Clickable */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/sessions">
-          <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Sessions This Month
               </CardTitle>
-              <Calendar className="w-4 h-4 text-gray-400" />
+              <Calendar className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.sessionsCount || 0}</div>
@@ -198,12 +198,12 @@ export default function DashboardPage() {
         </Link>
 
         <Link href="/clients">
-          <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Clients
               </CardTitle>
-              <Users className="w-4 h-4 text-gray-400" />
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.clientsCount || 0}</div>
@@ -214,12 +214,12 @@ export default function DashboardPage() {
         {stats?.isAdmin && (
           <>
             <Link href="/invoices">
-              <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     Pending Invoices
                   </CardTitle>
-                  <FileText className="w-4 h-4 text-gray-400" />
+                  <FileText className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.pendingInvoicesCount}</div>
@@ -228,12 +228,12 @@ export default function DashboardPage() {
             </Link>
 
             <Link href="/invoices">
-              <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     Pending Amount
                   </CardTitle>
-                  <DollarSign className="w-4 h-4 text-gray-400" />
+                  <DollarSign className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
               {recentSessions.map((session) => (
                 <div
                   key={session.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-muted rounded-lg"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -283,13 +283,13 @@ export default function DashboardPage() {
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                             : session.status === 'submitted'
                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {session.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {new Date(session.date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
@@ -318,7 +318,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-muted-foreground">
               <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>No sessions yet</p>
               <Link href="/sessions/new/">

@@ -10,6 +10,8 @@ import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { redirect } from 'next/navigation'
+import { EarningsChart } from '@/components/charts/earnings-chart'
+import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
 
 interface EarningsSummary {
   ytdEarnings: number
@@ -192,12 +194,24 @@ export default function EarningsPage() {
     fetchEarnings()
   }, [contractorId, organization])
 
+  // Prepare chart data (reverse for chronological order)
+  const chartData = [...monthlyBreakdown].reverse()
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Earnings</h1>
-          <p className="text-gray-500 dark:text-gray-400">Loading your earnings data...</p>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="rounded-lg border bg-card p-6">
+          <Skeleton className="h-[250px] w-full" />
         </div>
       </div>
     )
@@ -206,8 +220,8 @@ export default function EarningsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Earnings</h1>
-        <p className="text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold">My Earnings</h1>
+        <p className="text-muted-foreground">
           Track your earnings and payment status
         </p>
       </div>
@@ -266,6 +280,9 @@ export default function EarningsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Earnings Chart */}
+      <EarningsChart data={chartData} />
 
       {/* Monthly Breakdown */}
       <Card>

@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 import type {
   ServiceType,
   OrganizationSettings,
@@ -44,6 +45,7 @@ export default function BusinessSettingsPage() {
   const [editingServiceType, setEditingServiceType] = useState<ServiceType | null>(null)
   const [isServiceTypeFormOpen, setIsServiceTypeFormOpen] = useState(false)
   const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(settings)
+  const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
 
   useEffect(() => {
     if (settings) setLocalSettings(settings)
@@ -77,17 +79,23 @@ export default function BusinessSettingsPage() {
     }
   }
 
-  async function handleDeleteServiceType(serviceType: ServiceType) {
-    if (!confirm(`Are you sure you want to delete "${serviceType.name}"? This cannot be undone.`)) return
-    const supabase = createClient()
-    try {
-      const { error } = await supabase.from('service_types').delete().eq('id', serviceType.id)
-      if (error) throw error
-      toast.success('Service type deleted')
-      loadData()
-    } catch {
-      toast.error('Failed to delete service type. It may be in use by existing sessions.')
-    }
+  function handleDeleteServiceType(serviceType: ServiceType) {
+    openConfirm({
+      title: 'Delete Service Type',
+      description: `Are you sure you want to delete "${serviceType.name}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        const supabase = createClient()
+        try {
+          const { error } = await supabase.from('service_types').delete().eq('id', serviceType.id)
+          if (error) throw error
+          toast.success('Service type deleted')
+          loadData()
+        } catch {
+          toast.error('Failed to delete service type. It may be in use by existing sessions.')
+        }
+      },
+    })
   }
 
   if (!organization) {
@@ -585,6 +593,7 @@ export default function BusinessSettingsPage() {
           </TabsContent>
         )}
       </Tabs>
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   )
 }
