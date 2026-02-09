@@ -28,20 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import type { PaymentMethod, BillingMethod, Client } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
-
-const paymentMethods: { value: PaymentMethod; label: string }[] = [
-  { value: 'private_pay', label: 'Private Pay (Cash/Check)' },
-  { value: 'self_directed', label: 'Self-Directed Reimbursement' },
-  { value: 'group_home', label: 'Group Home Billing' },
-  { value: 'scholarship', label: 'Scholarship Fund' },
-]
-
-const billingMethods: { value: BillingMethod; label: string }[] = [
-  { value: 'square', label: 'Square (Auto-Send)' },
-  { value: 'check', label: 'Check' },
-  { value: 'email', label: 'Email Invoice' },
-  { value: 'other', label: 'Other' },
-]
+import { getPaymentMethodOptions, getBillingMethodOptions } from '@/lib/constants/display'
 
 interface ClientDialogProps {
   client?: Client
@@ -52,7 +39,9 @@ interface ClientDialogProps {
 export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, feature } = useOrganization()
+  const { organization, settings, feature } = useOrganization()
+  const paymentMethods = getPaymentMethodOptions(settings)
+  const billingMethods = getBillingMethodOptions(settings)
   const isEditMode = !!client
 
   const [open, setOpen] = useState(false)

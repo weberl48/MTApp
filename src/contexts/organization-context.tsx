@@ -78,6 +78,28 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
   features: {
     client_portal: true,
   },
+  custom_lists: {
+    payment_methods: {
+      private_pay: { label: 'Private Pay', visible: true },
+      self_directed: { label: 'Self-Directed', visible: true },
+      group_home: { label: 'Group Home', visible: true },
+      scholarship: { label: 'Scholarship', visible: true },
+      venmo: { label: 'Venmo', visible: true },
+    },
+    billing_methods: {
+      square: { label: 'Square', visible: true },
+      check: { label: 'Check', visible: true },
+      email: { label: 'Email', visible: true },
+      other: { label: 'Other', visible: true },
+    },
+  },
+  automation: {
+    auto_approve_sessions: false,
+    auto_send_invoice_on_approve: false,
+    auto_send_invoice_method: 'none',
+    auto_generate_scholarship_invoices: false,
+    scholarship_invoice_day: 1,
+  },
 }
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
@@ -137,6 +159,20 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         features: {
           ...DEFAULT_SETTINGS.features,
           ...((organization.settings as OrganizationSettings)?.features || {}),
+        },
+        custom_lists: {
+          payment_methods: {
+            ...DEFAULT_SETTINGS.custom_lists.payment_methods,
+            ...((organization.settings as OrganizationSettings)?.custom_lists?.payment_methods || {}),
+          },
+          billing_methods: {
+            ...DEFAULT_SETTINGS.custom_lists.billing_methods,
+            ...((organization.settings as OrganizationSettings)?.custom_lists?.billing_methods || {}),
+          },
+        },
+        automation: {
+          ...DEFAULT_SETTINGS.automation,
+          ...((organization.settings as OrganizationSettings)?.automation || {}),
         },
       }
     : null

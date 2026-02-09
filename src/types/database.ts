@@ -62,6 +62,17 @@ export interface OrganizationSettings {
     token_expiry_days: number
   }
   features: FeatureFlags
+  custom_lists: {
+    payment_methods: Record<string, { label: string; visible: boolean }>
+    billing_methods: Record<string, { label: string; visible: boolean }>
+  }
+  automation: {
+    auto_approve_sessions: boolean
+    auto_send_invoice_on_approve: boolean
+    auto_send_invoice_method: 'email' | 'square' | 'none'
+    auto_generate_scholarship_invoices: boolean
+    scholarship_invoice_day: number
+  }
 }
 
 // Social links structure

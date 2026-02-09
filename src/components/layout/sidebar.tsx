@@ -11,11 +11,10 @@ import {
   Settings,
   Menu,
   X,
-  BarChart3,
   Wallet,
   UsersRound,
   DollarSign,
-  HelpCircle,
+  ChevronRight,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -30,30 +29,37 @@ type NavItem = {
   ownerOnly?: boolean      // Visible to owner, developer only (NOT admin)
   contractorOnly?: boolean // Visible to contractor only
   feature?: keyof FeatureFlags // Hide when this feature is disabled
+  children?: NavItem[]     // Sub-navigation items
 }
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Sessions', href: '/sessions', icon: Calendar },
   { name: 'Clients', href: '/clients', icon: Users, adminOnly: true },
-  { name: 'Invoices', href: '/invoices', icon: FileText, adminOnly: true },
+  {
+    name: 'Billing',
+    href: '/invoices',
+    icon: FileText,
+    adminOnly: true,
+    children: [
+      { name: 'Invoices', href: '/invoices', icon: FileText },
+      { name: 'Payroll', href: '/payments', icon: Wallet, ownerOnly: true },
+    ],
+  },
   { name: 'Earnings', href: '/earnings', icon: DollarSign, contractorOnly: true },
   { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
-  { name: 'Payments', href: '/payments', icon: Wallet, ownerOnly: true },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, ownerOnly: true },
   { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Help', href: '/help', icon: HelpCircle },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const { can, user, feature } = useOrganization()
 
   const isContractor = user?.role === 'contractor'
 
-  // Filter navigation based on user role and feature flags
-  const filteredNavigation = navigation.filter((item) => {
+  function shouldShowItem(item: NavItem): boolean {
     // Feature gate: hide if the feature is disabled
     if (item.feature && !feature(item.feature)) {
       return false
@@ -65,7 +71,6 @@ export function Sidebar() {
     // Owner-only items: show to owner and developer, NOT admin
     if (item.ownerOnly) {
       if (item.href === '/payments') return can('payments:view')
-      if (item.href === '/analytics') return can('analytics:view')
       return can('settings:edit')
     }
     // Admin-only items: show to admin, owner, developer
@@ -75,7 +80,102 @@ export function Sidebar() {
     }
     // Default: show to everyone
     return true
+  }
+
+  // Filter navigation based on user role and feature flags
+  const filteredNavigation = navigation.filter((item) => {
+    if (!shouldShowItem(item)) return false
+    // For items with children, filter children too
+    if (item.children) {
+      item = { ...item, children: item.children.filter(shouldShowItem) }
+    }
+    return true
   })
+
+  // Auto-expand Billing when on a billing sub-route
+  const isBillingActive = pathname.startsWith('/invoices') || pathname.startsWith('/payments')
+
+  function toggleExpanded(name: string) {
+    setExpandedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
+
+  function renderNavItem(item: NavItem) {
+    const hasChildren = item.children && item.children.length > 0
+
+    if (hasChildren) {
+      const isExpanded = expandedItems.has(item.name) || isBillingActive
+      const isActive = item.children!.some((child) => pathname.startsWith(child.href))
+
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleExpanded(item.name)}
+            className={cn(
+              'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+              isActive
+                ? 'text-blue-700 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+            )}
+          >
+            <item.icon className="w-5 h-5 mr-3" />
+            {item.name}
+            <ChevronRight
+              className={cn(
+                'w-4 h-4 ml-auto transition-transform',
+                isExpanded && 'rotate-90'
+              )}
+            />
+          </button>
+          {isExpanded && (
+            <div className="ml-4 mt-1 space-y-1">
+              {item.children!.filter(shouldShowItem).map((child) => {
+                const childActive = pathname.startsWith(child.href)
+                return (
+                  <Link
+                    key={child.name}
+                    href={child.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
+                      childActive
+                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    <child.icon className="w-4 h-4 mr-3" />
+                    {child.name}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    const isActive = pathname.startsWith(item.href)
+    return (
+      <Link
+        key={item.name}
+        href={item.href}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(
+          'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+          isActive
+            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        )}
+      >
+        <item.icon className="w-5 h-5 mr-3" />
+        {item.name}
+      </Link>
+    )
+  }
 
   return (
     <>
@@ -122,25 +222,7 @@ export function Sidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            {filteredNavigation.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                  )}
-                >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  {item.name}
-                </Link>
-              )
-            })}
+            {filteredNavigation.map(renderNavItem)}
           </nav>
         </div>
       </aside>

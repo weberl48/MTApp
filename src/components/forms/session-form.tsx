@@ -55,7 +55,7 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, can, viewAsContractor } = useOrganization()
+  const { organization, settings, can, viewAsContractor } = useOrganization()
 
   // When "view as" a specific contractor, use their ID for new sessions
   const effectiveContractorId = (!existingSession && viewAsContractor?.id) ? viewAsContractor.id : contractorId
@@ -393,6 +393,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           .select('id, payment_method')
           .in('id', selectedClients)
 
+        // Auto-approve: if automation enabled and user chose 'submitted', set to 'approved'
+        const effectiveStatus =
+          status === 'submitted' && settings?.automation?.auto_approve_sessions
+            ? 'approved'
+            : status
+
         // Create the session
         const { data: session, error: sessionError } = await supabase
           .from('sessions')
@@ -402,7 +408,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             duration_minutes: parseInt(duration),
             service_type_id: serviceTypeId,
             contractor_id: effectiveContractorId,
-            status,
+            status: effectiveStatus,
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
