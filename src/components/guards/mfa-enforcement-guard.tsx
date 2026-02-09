@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useOrganization } from '@/contexts/organization-context'
 import { hasMfaEnabled } from '@/lib/supabase/mfa'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,7 +17,6 @@ import Link from 'next/link'
  */
 export function MfaEnforcementGuard({ children }: { children: React.ReactNode }) {
   const { user, settings, can } = useOrganization()
-  useRouter() // Router available for navigation if needed
   const pathname = usePathname()
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null)
   const [checking, setChecking] = useState(true)
@@ -50,8 +49,12 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
   // Don't block on settings page (so they can set up MFA)
   const isSettingsPage = pathname?.startsWith('/settings')
 
-  // If checking, show nothing extra
+  // Show children while checking for non-privileged users or when MFA isn't required
+  // For privileged users with MFA required, show nothing to prevent content flash
   if (checking) {
+    if (requireMfa && isPrivilegedUser) {
+      return null
+    }
     return <>{children}</>
   }
 

@@ -14,11 +14,20 @@ export default function MfaVerifyPage() {
 
   useEffect(() => {
     async function check() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login/')
+        return
+      }
+
       const { needsVerification, factorId: fid } = await needsMfaVerification()
 
       if (!needsVerification || !fid) {
         // Already verified or no MFA — go to dashboard
         router.push('/dashboard/')
+        router.refresh()
         return
       }
 
@@ -29,9 +38,9 @@ export default function MfaVerifyPage() {
     check()
   }, [router])
 
-  function handleCancel() {
+  async function handleCancel() {
     const supabase = createClient()
-    supabase.auth.signOut()
+    await supabase.auth.signOut()
     router.push('/login/')
   }
 

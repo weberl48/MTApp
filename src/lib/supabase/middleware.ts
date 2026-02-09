@@ -44,34 +44,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // MFA enforcement: if user is authenticated on a protected route,
-  // check that they've completed MFA verification (AAL2) when required
+  // MFA enforcement: check AAL level once for all authenticated user redirects
   const isMfaVerifyPath = request.nextUrl.pathname.startsWith('/mfa-verify')
-
-  if (isProtectedPath && user) {
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-
-    if (aalData && aalData.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
-      // User has MFA enrolled but hasn't verified this session — redirect to MFA
-      const url = request.nextUrl.clone()
-      url.pathname = '/mfa-verify'
-      return NextResponse.redirect(url)
-    }
-  }
-
-  // Redirect logged-in users away from auth pages
   const authPaths = ['/login', '/signup']
   const isAuthPath = authPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
 
-  if (isAuthPath && user) {
-    // If user needs MFA, send them to verify instead of dashboard
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  // Fetch AAL once for any authenticated path that needs it
+  const needsAalCheck = user && (isProtectedPath || isAuthPath || isMfaVerifyPath)
+  const aalData = needsAalCheck
+    ? (await supabase.auth.mfa.getAuthenticatorAssuranceLevel()).data
+    : null
+  const needsMfaVerify = aalData?.currentLevel === 'aal1' && aalData?.nextLevel === 'aal2'
 
-    if (aalData && aalData.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
+  if (isProtectedPath && user && needsMfaVerify) {
+    // User has MFA enrolled but hasn't verified this session — redirect to MFA
+    const url = request.nextUrl.clone()
+    url.pathname = '/mfa-verify/'
+    return NextResponse.redirect(url)
+  }
+
+  if (isAuthPath && user) {
+    if (needsMfaVerify) {
       const url = request.nextUrl.clone()
-      url.pathname = '/mfa-verify'
+      url.pathname = '/mfa-verify/'
       return NextResponse.redirect(url)
     }
 
@@ -80,7 +77,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If on MFA verify page but no user or already AAL2, redirect appropriately
+  // If on MFA verify page, redirect appropriately
   if (isMfaVerifyPath) {
     if (!user) {
       const url = request.nextUrl.clone()
@@ -88,8 +85,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    if (aalData && aalData.currentLevel === 'aal2') {
+    if (aalData?.currentLevel === 'aal2') {
       // Already verified, go to dashboard
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard/'
