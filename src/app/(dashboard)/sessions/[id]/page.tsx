@@ -398,9 +398,9 @@ export default function SessionDetailPage() {
               </div>
             </div>
 
-            {session.attendees?.length > 1 && (
+            {session.group_headcount && session.group_headcount > 1 && (
               <div className="text-sm text-gray-500">
-                {formatCurrency(totalCost / session.attendees.length)} per person
+                {formatCurrency(totalCost / session.group_headcount)} per person
               </div>
             )}
 
@@ -432,22 +432,14 @@ export default function SessionDetailPage() {
               </div>
             </div>
 
-            {session.group_member_names && (
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Participant Names</p>
-                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <p className="whitespace-pre-wrap text-sm">{session.group_member_names}</p>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Attendees</CardTitle>
-          <CardDescription>Clients who attended this session</CardDescription>
+          <CardTitle>{session.group_headcount ? 'Billing Client' : 'Attendees'}</CardTitle>
+          <CardDescription>{session.group_headcount ? 'Client billed for this group session' : 'Clients who attended this session'}</CardDescription>
         </CardHeader>
         <CardContent>
           {session.attendees && session.attendees.length > 0 ? (

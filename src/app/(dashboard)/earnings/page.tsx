@@ -63,6 +63,7 @@ export default function EarningsPage() {
           contractor_paid_date,
           contractor_paid_amount,
           duration_minutes,
+          group_headcount,
           service_type:service_types(
             id,
             name,
@@ -125,7 +126,8 @@ export default function EarningsPage() {
 
         if (!serviceType) continue
 
-        const attendeeCount = Math.max(1, (session.attendees as { id: string }[])?.length || 1)
+        const attendeeCount = session.group_headcount
+          || Math.max(1, (session.attendees as { id: string }[])?.length || 1)
 
         // Build contractor pricing overrides
         const customPay = customRatesMap.get(serviceType.id)
