@@ -19,7 +19,8 @@ import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
 import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
-import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
+import { Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ContractorRatesForm } from '@/components/forms/contractor-rates-form'
 import {
   Select,
@@ -200,7 +201,7 @@ export default function TeamMemberPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -219,16 +220,15 @@ export default function TeamMemberPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: 'Team', href: '/team' },
+        { label: member.name || 'Team Member' },
+      ]} />
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/team">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        </Link>
+      <div>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold break-words min-w-0">
               {member.name || 'Unnamed User'}
             </h1>
             {editingRole ? (
