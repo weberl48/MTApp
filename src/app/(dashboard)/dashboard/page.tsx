@@ -15,6 +15,7 @@ import { PendingApprovals } from '@/components/dashboard/pending-approvals'
 import { UnbilledSessions } from '@/components/dashboard/unbilled-sessions'
 import { UnsentInvoices } from '@/components/dashboard/unsent-invoices'
 import { OverdueInvoices } from '@/components/dashboard/overdue-invoices'
+import { MissingRates } from '@/components/dashboard/missing-rates'
 import { AnalyticsSummary } from '@/components/dashboard/analytics-summary'
 
 interface DashboardStats {
@@ -249,6 +250,7 @@ export default function DashboardPage() {
       {/* Action Center - Admin Only */}
       {stats?.isAdmin && (
         <div className="space-y-4">
+          <MissingRates />
           <PendingApprovals />
           <UnbilledSessions organizationId={stats.organizationId || ''} />
           <UnsentInvoices />
