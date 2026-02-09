@@ -7,12 +7,25 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
 import { decryptField } from '@/lib/crypto'
+import { formatCurrency } from '@/lib/pricing'
 
 interface ClientDetailPageProps {
   params: Promise<{ id: string }>
 }
 
 import { paymentMethodLabels, billingMethodLabels } from '@/lib/constants/display'
+
+const statusStyles: Record<string, string> = {
+  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  no_show: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params
@@ -56,18 +69,47 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   // Decrypt client notes if encrypted
   const decryptedNotes = client.notes ? await decryptField(client.notes) : null
 
-  // Get session count for this client
-  const { count: sessionCount } = await supabase
+  // Fetch sessions for this client via session_attendees
+  const { data: attendeeRows } = await supabase
     .from('session_attendees')
-    .select('*', { count: 'exact', head: true })
+    .select(`
+      session:sessions(
+        id,
+        date,
+        status,
+        duration_minutes,
+        service_type:service_types(name),
+        contractor:users(name)
+      )
+    `)
     .eq('client_id', id)
+    .order('created_at', { ascending: false })
+    .limit(20)
 
-  // Get pending invoice count
-  const { count: pendingInvoiceCount } = await supabase
+  type SessionRow = {
+    id: string
+    date: string
+    status: string
+    duration_minutes: number
+    service_type: { name: string } | null
+    contractor: { name: string } | null
+  }
+
+  const clientSessions = (attendeeRows || [])
+    .map((row) => row.session as unknown as SessionRow)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  // Fetch invoices for this client
+  const { data: clientInvoices } = await supabase
     .from('invoices')
-    .select('*', { count: 'exact', head: true })
+    .select('id, amount, status, due_date, created_at, payment_method, invoice_type')
     .eq('client_id', id)
-    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  const sessionCount = clientSessions.length
+  const pendingInvoiceCount = (clientInvoices || []).filter((inv) => inv.status === 'pending').length
 
   return (
     <div className="space-y-6">
@@ -143,7 +185,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                 <Calendar className="h-4 w-4" />
                 <span>Total Sessions</span>
               </div>
-              <span className="font-semibold">{sessionCount || 0}</span>
+              <span className="font-semibold">{sessionCount}</span>
             </div>
 
             <div className="flex items-center justify-between">
@@ -151,8 +193,8 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                 <FileText className="h-4 w-4" />
                 <span>Pending Invoices</span>
               </div>
-              <Badge variant={pendingInvoiceCount && pendingInvoiceCount > 0 ? 'destructive' : 'secondary'}>
-                {pendingInvoiceCount || 0}
+              <Badge variant={pendingInvoiceCount > 0 ? 'destructive' : 'secondary'}>
+                {pendingInvoiceCount}
               </Badge>
             </div>
           </CardContent>
@@ -163,8 +205,8 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
       {/* Tabs for Sessions and Invoices */}
       <Tabs defaultValue="sessions" className="w-full">
         <TabsList>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions ({sessionCount})</TabsTrigger>
+          <TabsTrigger value="invoices">Invoices ({clientInvoices?.length || 0})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sessions" className="mt-4">
@@ -174,9 +216,42 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
               <CardDescription>Recent sessions with {client.name}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-500 text-center py-8">
-                View sessions on the <Link href="/sessions" className="text-blue-600 hover:underline">Sessions page</Link>
-              </p>
+              {clientSessions.length > 0 ? (
+                <div className="space-y-2">
+                  {clientSessions.map((session) => (
+                    <Link
+                      key={session.id}
+                      href={`/sessions/${session.id}/`}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {session.service_type?.name || 'Unknown Service'}
+                          </span>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${statusStyles[session.status] || statusStyles.draft}`}>
+                            {session.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {new Date(session.date).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                          {' · '}{session.duration_minutes} min
+                          {session.contractor?.name && ` · ${session.contractor.name}`}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  No sessions found for this client.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -188,9 +263,43 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
               <CardDescription>Invoice history for {client.name}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-500 text-center py-8">
-                View invoices on the <Link href="/invoices" className="text-blue-600 hover:underline">Invoices page</Link>
-              </p>
+              {clientInvoices && clientInvoices.length > 0 ? (
+                <div className="space-y-2">
+                  {clientInvoices.map((invoice) => (
+                    <Link
+                      key={invoice.id}
+                      href={`/invoices/${invoice.id}`}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {formatCurrency(invoice.amount)}
+                          </span>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${statusStyles[invoice.status] || statusStyles.pending}`}>
+                            {invoice.status}
+                          </span>
+                          <Badge variant="outline" className="text-xs">
+                            {paymentMethodLabels[invoice.payment_method] || invoice.payment_method}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {new Date(invoice.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                          {invoice.due_date && ` · Due ${new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  No invoices found for this client.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

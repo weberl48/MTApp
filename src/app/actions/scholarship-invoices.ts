@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidateInvoicePaths } from '@/lib/actions/helpers'
 import { calculateSessionPricing } from '@/lib/pricing'
+import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
 import type { ServiceType } from '@/types/database'
 
 interface GenerateBatchInvoiceParams {
@@ -194,4 +195,33 @@ export async function generateScholarshipBatchInvoice({
   revalidateInvoicePaths()
 
   return { success: true as const, invoiceId: invoice.id }
+}
+
+export async function generateAllUnbilledScholarshipInvoices(organizationId: string) {
+  const supabase = await createClient()
+
+  const unbilled = await fetchUnbilledScholarshipSessions(supabase)
+  const groups = groupUnbilledByClientMonth(unbilled)
+
+  if (groups.length === 0) {
+    return { success: true as const, generated: 0, failed: [] as string[] }
+  }
+
+  const results: { generated: number; failed: string[] } = { generated: 0, failed: [] }
+
+  for (const group of groups) {
+    const result = await generateScholarshipBatchInvoice({
+      clientId: group.clientId,
+      billingPeriod: group.month,
+      organizationId,
+    })
+
+    if (result.success) {
+      results.generated++
+    } else {
+      results.failed.push(`${group.clientName} (${group.month}): ${result.error}`)
+    }
+  }
+
+  return { success: true as const, ...results }
 }
