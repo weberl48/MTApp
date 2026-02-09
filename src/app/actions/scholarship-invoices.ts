@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidateInvoicePaths } from '@/lib/actions/helpers'
+import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
 import { calculateSessionPricing } from '@/lib/pricing'
 import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
 import type { ServiceType } from '@/types/database'
@@ -198,6 +198,9 @@ export async function generateScholarshipBatchInvoice({
 }
 
 export async function generateAllUnbilledScholarshipInvoices(organizationId: string) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const unbilled = await fetchUnbilledScholarshipSessions(supabase)

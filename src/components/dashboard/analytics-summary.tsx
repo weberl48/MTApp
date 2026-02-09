@@ -27,16 +27,21 @@ export function AnalyticsSummary() {
         .split('T')[0]
 
       // Fetch this month's invoices for revenue/MCA cut
-      const { data: invoices } = await supabase
+      const { data: invoices, error: invoiceError } = await supabase
         .from('invoices')
         .select('amount, mca_cut')
         .gte('created_at', firstDayOfMonth)
 
       // Fetch this month's session count
-      const { count: sessionCount } = await supabase
+      const { count: sessionCount, error: sessionError } = await supabase
         .from('sessions')
         .select('id', { count: 'exact' })
         .gte('date', firstDayOfMonth)
+
+      if (invoiceError || sessionError) {
+        setLoading(false)
+        return
+      }
 
       const revenue = invoices?.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0
       const mcaEarnings = invoices?.reduce((sum, inv) => sum + Number(inv.mca_cut), 0) || 0

@@ -11,6 +11,7 @@ import { bulkUpdateInvoiceStatus } from '@/app/actions/invoices'
 import { bulkSendInvoices } from '@/app/actions/invoices'
 import { formatCurrency } from '@/lib/pricing'
 import { paymentMethodLabels } from '@/lib/constants/display'
+import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -27,13 +28,16 @@ interface PendingInvoice {
 export function UnsentInvoices() {
   const [invoices, setInvoices] = useState<PendingInvoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
+  const { can } = useOrganization()
+  const canSend = can('invoice:send')
 
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error: queryError } = await supabase
         .from('invoices')
         .select(`
           id, amount, payment_method, invoice_type, billing_period,
@@ -44,13 +48,17 @@ export function UnsentInvoices() {
         .order('created_at', { ascending: false })
         .limit(20)
 
-      setInvoices((data as unknown as PendingInvoice[]) || [])
+      if (queryError) {
+        setError('Failed to load unsent invoices')
+      } else {
+        setInvoices((data as unknown as PendingInvoice[]) || [])
+      }
       setLoading(false)
     }
     load()
   }, [])
 
-  if (loading || invoices.length === 0) return null
+  if (loading || error || invoices.length === 0) return null
 
   const total = invoices.reduce((sum, inv) => sum + inv.amount, 0)
   const allSelected = invoices.length > 0 && invoices.every((inv) => selectedIds.has(inv.id))
@@ -115,7 +123,7 @@ export function UnsentInvoices() {
             <CardTitle>Unsent Invoices</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            {selectedIds.size > 0 && (
+            {canSend && selectedIds.size > 0 && (
               <>
                 <Button
                   size="sm"

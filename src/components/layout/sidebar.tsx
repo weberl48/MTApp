@@ -14,6 +14,7 @@ import {
   Wallet,
   UsersRound,
   DollarSign,
+  BarChart3,
   ChevronRight,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -46,6 +47,7 @@ const navigation: NavItem[] = [
       { name: 'Payroll', href: '/payments', icon: Wallet, ownerOnly: true },
     ],
   },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, ownerOnly: true },
   { name: 'Earnings', href: '/earnings', icon: DollarSign, contractorOnly: true },
   { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -71,6 +73,7 @@ export function Sidebar() {
     // Owner-only items: show to owner and developer, NOT admin
     if (item.ownerOnly) {
       if (item.href === '/payments') return can('payments:view')
+      if (item.href === '/analytics') return can('analytics:view')
       return can('settings:edit')
     }
     // Admin-only items: show to admin, owner, developer

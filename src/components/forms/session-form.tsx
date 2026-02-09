@@ -16,9 +16,10 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
+import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
+import { useContractorRates } from '@/hooks/use-contractor-rates'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -29,6 +30,7 @@ import {
   loadSessionFormDefaults,
   saveSessionFormDefaults,
 } from '@/lib/session-form/defaults'
+import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
 
 interface ExistingSession {
@@ -103,40 +105,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }
 
   // Contractor-specific pricing overrides
-  const [contractorPayIncrease, setContractorPayIncrease] = useState<number>(0)
-  const [contractorCustomRates, setContractorCustomRates] = useState<Map<string, number>>(new Map())
-
-  // Fetch contractor-specific rates on mount
-  useEffect(() => {
-    async function loadContractorRates() {
-      // Fetch contractor's pay_increase
-      const { data: contractor } = await supabase
-        .from('users')
-        .select('pay_increase')
-        .eq('id', effectiveContractorId)
-        .single()
-
-      if (contractor?.pay_increase) {
-        setContractorPayIncrease(contractor.pay_increase)
-      }
-
-      // Fetch any custom rates for this contractor
-      const { data: rates } = await supabase
-        .from('contractor_rates')
-        .select('service_type_id, contractor_pay')
-        .eq('contractor_id', effectiveContractorId)
-
-      if (rates && rates.length > 0) {
-        const ratesMap = new Map<string, number>()
-        for (const rate of rates) {
-          ratesMap.set(rate.service_type_id, rate.contractor_pay)
-        }
-        setContractorCustomRates(ratesMap)
-      }
-    }
-
-    loadContractorRates()
-  }, [effectiveContractorId, supabase])
+  const { getOverrides: getContractorOverrides, hasMissingRate } = useContractorRates(effectiveContractorId)
 
   const storageKey = useMemo(() => {
     if (!organization?.id) return null
@@ -149,26 +118,19 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Check if this is a group service type (has per_person_rate > 0)
   const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
 
+  // Whether notes are required on submit (configurable via org settings)
+  const notesRequired = settings?.session?.require_notes !== false
+
   // For groups, use headcount; for individuals, use selected clients count
   const attendeeCount = isGroupService
     ? parseInt(groupHeadcount) || 0
     : selectedClients.length
 
   // Build contractor pricing overrides for this service type
-  const contractorOverrides: ContractorPricingOverrides | undefined = useMemo(() => {
-    if (!serviceTypeId) return undefined
-    const customPay = contractorCustomRates.get(serviceTypeId)
-    if (!customPay && !contractorPayIncrease) return undefined
-    return {
-      customContractorPay: customPay,
-      payIncrease: contractorPayIncrease,
-    }
-  }, [serviceTypeId, contractorCustomRates, contractorPayIncrease])
+  const contractorOverrides = serviceTypeId ? getContractorOverrides(serviceTypeId) : undefined
 
   // Check if custom rate exists for the selected service type
-  const missingCustomRate = serviceTypeId && contractorCustomRates.size > 0
-    ? !contractorCustomRates.has(serviceTypeId)
-    : serviceTypeId && contractorCustomRates.size === 0
+  const missingCustomRate = serviceTypeId ? hasMissingRate(serviceTypeId) : false
 
   // Determine payment method for pricing (scholarship affects pricing)
   // For single-client sessions, use that client's payment method
@@ -279,6 +241,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setDidApplyDefaults(true)
   }, [clientIdSet, didApplyDefaults, isEditMode, storageKey])
 
+  // Collapsible setup: contractors with remembered defaults start collapsed on mobile
+  const hasPopulatedDefaults = didApplyDefaults && !isEditMode && !showFinancialDetails
+    && !!serviceTypeId && selectedClients.length > 0
+  const [setupExpanded, setSetupExpanded] = useState(false)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     clearAllErrors()
@@ -318,8 +285,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       }
     }
 
-    // Require notes when submitting (not for drafts)
-    if (status === 'submitted') {
+    // Require notes when submitting (not for drafts), if enabled in settings
+    if (status === 'submitted' && notesRequired) {
       if (!notes.trim()) {
         setFieldError('notes', 'Internal notes are required when submitting')
         hasErrors = true
@@ -387,75 +354,30 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         router.refresh()
       } else {
         // CREATE new session
-        // Get client payment methods for invoicing
-        const clientData = await supabase
-          .from('clients')
-          .select('id, payment_method')
-          .in('id', selectedClients)
-
         // Auto-approve: if automation enabled and user chose 'submitted', set to 'approved'
         const effectiveStatus =
           status === 'submitted' && settings?.automation?.auto_approve_sessions
             ? 'approved'
             : status
 
-        // Create the session
-        const { data: session, error: sessionError } = await supabase
-          .from('sessions')
-          .insert({
-            date,
-            time: time + ':00',
-            duration_minutes: parseInt(duration),
-            service_type_id: serviceTypeId,
-            contractor_id: effectiveContractorId,
-            status: effectiveStatus,
-            notes: encryptedNotes,
-            client_notes: encryptedClientNotes,
-            group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: null,
-            organization_id: organization!.id,
-          })
-          .select()
-          .single()
+        const result = await createNewSession({
+          supabase,
+          date,
+          time,
+          durationMinutes: parseInt(duration),
+          serviceTypeId,
+          contractorId: effectiveContractorId,
+          organizationId: organization!.id,
+          clientIds: selectedClients,
+          encryptedNotes,
+          encryptedClientNotes,
+          status: effectiveStatus,
+          groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+          pricing: pricing!,
+        })
 
-        if (sessionError) throw sessionError
-
-        // Add attendees
-        const attendees = selectedClients.map((clientId) => ({
-          session_id: session.id,
-          client_id: clientId,
-          individual_cost: pricing?.totalAmount || 0,
-        }))
-
-        const { error: attendeesError } = await supabase
-          .from('session_attendees')
-          .insert(attendees)
-
-        if (attendeesError) throw attendeesError
-
-        // If submitted, create invoices for each client
-        if (status === 'submitted' && pricing && selectedServiceType) {
-          const invoices = (clientData.data || [])
-            .filter((client) => client.payment_method !== 'scholarship') // Scholarship clients get monthly batch invoices
-            .map((client) => ({
-              session_id: session.id,
-              client_id: client.id,
-              amount: pricing.totalAmount,
-              mca_cut: pricing.mcaCut,
-              contractor_pay: pricing.contractorPay,
-              rent_amount: pricing.rentAmount,
-              payment_method: client.payment_method,
-              status: 'pending' as const,
-              organization_id: organization!.id,
-            }))
-
-          const { error: invoicesError } = await supabase
-            .from('invoices')
-            .insert(invoices)
-
-          if (invoicesError) {
-            toast.error('Session saved but invoices could not be created. Please create invoices manually.')
-          }
+        if (result.invoiceError) {
+          toast.error('Session saved but invoices could not be created. Please create invoices manually.')
         }
 
         if (storageKey) {
@@ -540,10 +462,47 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           <CardTitle>Session Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date and Time - stacks on mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Collapsed summary for contractors with remembered defaults (mobile only) */}
+          {hasPopulatedDefaults && !setupExpanded && (
+            <button
+              type="button"
+              onClick={() => setSetupExpanded(true)}
+              className="w-full text-left p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 lg:hidden"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {date === new Date().toISOString().split('T')[0] ? 'Today' : new Date(date + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {', '}{new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    {' \u00B7 '}{duration} min
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {selectedServiceType?.name || 'Unknown Service'}
+                    {' \u00B7 '}
+                    {selectedClients.map(id => getClientName(id)).join(', ')}
+                  </p>
+                  {pricing && (
+                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                      Your Earnings: {formatCurrency(pricing.contractorPay)}
+                    </p>
+                  )}
+                </div>
+                <Pencil className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+              </div>
+            </button>
+          )}
+
+          {/* Setup fields: always visible on desktop, collapsible on mobile for contractors */}
+          <div className={hasPopulatedDefaults && !setupExpanded ? 'hidden lg:contents' : 'contents'}>
+          {/* Date and Time - always side-by-side */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date *</Label>
+              <Label htmlFor="date" className="flex items-center gap-2">
+                Date *
+                {date === new Date().toISOString().split('T')[0] && (
+                  <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
+                )}
+              </Label>
               <Input
                 id="date"
                 type="date"
@@ -699,39 +658,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           )}
 
           {/* Pricing Preview */}
-          {pricing && (
+          {pricing && showFinancialDetails && (
             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-900 dark:text-blue-100">
-                    {showFinancialDetails ? 'Pricing Breakdown' : 'Session Summary'}
-                  </span>
+                  <span className="font-medium text-blue-900 dark:text-blue-100">Pricing Breakdown</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {showFinancialDetails && (
+                  <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
+                  <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
+
+                  <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
+                  <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
+
+                  <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
+                  <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
+
+                  {pricing.rentAmount > 0 && (
                     <>
-                      <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
-                      <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
-
-                      <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
-                      <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
-
-                      <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
-                      <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
-
-                      {pricing.rentAmount > 0 && (
-                        <>
-                          <span className="text-gray-600 dark:text-gray-400">Rent:</span>
-                          <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
-                        </>
-                      )}
+                      <span className="text-gray-600 dark:text-gray-400">Rent:</span>
+                      <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
                     </>
                   )}
 
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {showFinancialDetails ? 'Contractor Pay:' : 'Your Earnings:'}
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Contractor Pay:</span>
                   <span className="font-medium text-green-600 dark:text-green-400">
                     {formatCurrency(pricing.contractorPay)}
                   </span>
@@ -739,10 +690,19 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </CardContent>
             </Card>
           )}
+          {pricing && !showFinancialDetails && (
+            <div className="flex items-center justify-between py-2 px-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Your Earnings</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">
+                {formatCurrency(pricing.contractorPay)}
+              </span>
+            </div>
+          )}
+          </div>{/* end collapsible setup fields wrapper */}
 
           {/* Internal Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Internal Notes {status === 'submitted' && '*'}</Label>
+            <Label htmlFor="notes">Internal Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
               id="notes"
               placeholder="Internal notes (not visible to client)..."
@@ -751,75 +711,82 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 setNotes(e.target.value)
                 if (e.target.value.trim()) clearFieldError('notes')
               }}
-              rows={3}
+              rows={2}
               className={errors.notes ? 'border-red-500' : ''}
             />
-            {errors.notes ? (
+            {errors.notes && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {errors.notes}
-              </p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                These notes are for internal use only and will not be shared with the client.
               </p>
             )}
           </div>
 
           {/* Client-Facing Notes */}
           <div className="space-y-2">
-            <Label htmlFor="clientNotes">Client Notes {status === 'submitted' && '*'}</Label>
+            <Label htmlFor="clientNotes">Client Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
               id="clientNotes"
-              placeholder="Notes to share with the client in their portal..."
+              placeholder="Notes visible to client in their portal..."
               value={clientNotes}
               onChange={(e) => {
                 setClientNotes(e.target.value)
                 if (e.target.value.trim()) clearFieldError('clientNotes')
               }}
-              rows={3}
+              rows={2}
               className={errors.clientNotes ? 'border-red-500' : ''}
             />
-            {errors.clientNotes ? (
+            {errors.clientNotes && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {errors.clientNotes}
-              </p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                These notes will be visible to the client in their portal.
               </p>
             )}
           </div>
 
           {/* Status */}
-          <div className="space-y-2">
-            <Label>Save as</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value="submitted"
-                  checked={status === 'submitted'}
-                  onChange={() => setStatus('submitted')}
-                  className="w-4 h-4"
-                />
-                <span>Submit for approval</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value="draft"
-                  checked={status === 'draft'}
-                  onChange={() => setStatus('draft')}
-                  className="w-4 h-4"
-                />
-                <span>Save as draft</span>
-              </label>
+          {showFinancialDetails ? (
+            <div className="space-y-2">
+              <Label>Save as</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="submitted"
+                    checked={status === 'submitted'}
+                    onChange={() => setStatus('submitted')}
+                    className="w-4 h-4"
+                  />
+                  <span>Submit for approval</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="draft"
+                    checked={status === 'draft'}
+                    onChange={() => setStatus('draft')}
+                    className="w-4 h-4"
+                  />
+                  <span>Save as draft</span>
+                </label>
+              </div>
             </div>
-          </div>
+          ) : (
+            status === 'draft' ? (
+              <div className="flex items-center justify-between text-sm py-1">
+                <span className="text-amber-600 dark:text-amber-400">Saving as draft (not submitted)</span>
+                <button type="button" onClick={() => setStatus('submitted')} className="text-blue-600 dark:text-blue-400 underline">
+                  Submit instead
+                </button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => setStatus('draft')} className="text-xs text-gray-500 dark:text-gray-400 underline">
+                Save as draft instead?
+              </button>
+            )
+          )}
 
           {/* Duplicate Warning */}
           {duplicateWarning && (

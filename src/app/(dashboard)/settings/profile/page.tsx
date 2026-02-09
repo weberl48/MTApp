@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +27,10 @@ export default function ProfileSettingsPage() {
 
   // Security settings
   const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(settings)
+
+  useEffect(() => {
+    if (settings) setLocalSettings(settings)
+  }, [settings])
 
   async function saveProfile() {
     setSaving(true)

@@ -12,6 +12,7 @@ import {
   groupUnbilledByClientMonth,
   type UnbilledGroup,
 } from '@/lib/queries/scholarship'
+import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -22,20 +23,27 @@ interface Props {
 export function UnbilledSessions({ organizationId }: Props) {
   const [groups, setGroups] = useState<UnbilledGroup[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [generatingKey, setGeneratingKey] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { can } = useOrganization()
+  const canBulkAction = can('invoice:bulk-action')
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const unbilled = await fetchUnbilledScholarshipSessions(supabase)
-      setGroups(groupUnbilledByClientMonth(unbilled))
+      try {
+        const supabase = createClient()
+        const unbilled = await fetchUnbilledScholarshipSessions(supabase)
+        setGroups(groupUnbilledByClientMonth(unbilled))
+      } catch {
+        setError('Failed to load unbilled sessions')
+      }
       setLoading(false)
     }
     load()
   }, [])
 
-  if (loading || groups.length === 0) return null
+  if (loading || error || groups.length === 0) return null
 
   const totalSessions = groups.reduce((sum, g) => sum + g.sessions.length, 0)
 
@@ -81,18 +89,20 @@ export function UnbilledSessions({ organizationId }: Props) {
             <CardTitle>Unbilled Scholarship Sessions</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={handleGenerateAll}
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4 mr-1" />
-              )}
-              Generate All ({groups.length})
-            </Button>
+            {canBulkAction && (
+              <Button
+                size="sm"
+                onClick={handleGenerateAll}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-1" />
+                )}
+                Generate All ({groups.length})
+              </Button>
+            )}
             <Link href="/invoices?tab=scholarship">
               <Button variant="outline" size="sm">View Details</Button>
             </Link>
@@ -123,19 +133,21 @@ export function UnbilledSessions({ organizationId }: Props) {
                     {monthLabel} &middot; {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  disabled={isGenerating || isPending}
-                  onClick={() => handleGenerateOne(group)}
-                >
-                  {isGenerating ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    'Generate'
-                  )}
-                </Button>
+                {canBulkAction && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    disabled={isGenerating || isPending}
+                    onClick={() => handleGenerateOne(group)}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Generate'
+                    )}
+                  </Button>
+                )}
               </div>
             )
           })}

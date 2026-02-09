@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { autoSendInvoicesViaSquare, type AutoSendResult } from '@/lib/square/auto-send'
 import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
-import { handleSupabaseError, revalidateSessionPaths } from '@/lib/actions/helpers'
+import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import type { OrganizationSettings } from '@/types/database'
 
 async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string) {
@@ -84,6 +84,9 @@ export async function approveSession(sessionId: string) {
 export async function bulkApproveSessions(sessionIds: string[]) {
   if (sessionIds.length === 0) return { success: true as const, count: 0 }
 
+  const permErr = await requirePermission('session:approve')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -130,7 +133,7 @@ export async function markSessionNoShow(sessionId: string) {
  * If removing the item leaves the batch invoice empty, delete the invoice.
  * Otherwise, recalculate the batch invoice totals.
  */
-async function removeSesssionFromBatchInvoices(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string) {
+async function removeSessionFromBatchInvoices(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string) {
   // Find invoice_items referencing this session
   const { data: items } = await supabase
     .from('invoice_items')
@@ -190,7 +193,7 @@ export async function rejectSession(sessionId: string, reason: string) {
   if (invoiceErr) return invoiceErr
 
   // Remove from any pending batch invoices (scholarship)
-  await removeSesssionFromBatchInvoices(supabase, sessionId)
+  await removeSessionFromBatchInvoices(supabase, sessionId)
 
   // Revert to draft with rejection reason
   const { error } = await supabase
@@ -223,7 +226,7 @@ export async function cancelSession(sessionId: string) {
   if (invoiceErr) return invoiceErr
 
   // Remove from any pending batch invoices (scholarship)
-  await removeSesssionFromBatchInvoices(supabase, sessionId)
+  await removeSessionFromBatchInvoices(supabase, sessionId)
 
   // Update session status to cancelled
   const { error } = await supabase
@@ -243,7 +246,7 @@ export async function deleteSession(sessionId: string) {
   const supabase = await createClient()
 
   // Remove from any pending batch invoices (scholarship)
-  await removeSesssionFromBatchInvoices(supabase, sessionId)
+  await removeSessionFromBatchInvoices(supabase, sessionId)
 
   // Delete per-session invoices (foreign key constraint)
   const { error: invoicesError } = await supabase

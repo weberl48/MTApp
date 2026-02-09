@@ -447,7 +447,7 @@ export default function SessionsPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
