@@ -78,7 +78,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
-  const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
+  // groupMemberNames removed — groups now use headcount only
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -297,11 +297,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
         hasErrors = true
       }
-      // Require member names for submitted sessions
-      if (status === 'submitted' && !groupMemberNames.trim()) {
-        setFieldError('groupMemberNames', 'Please enter participant names before submitting')
-        hasErrors = true
-      }
     }
 
     // Validate minimum attendees for service type (e.g., 8-week programs)
@@ -351,7 +346,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: isGroupService ? groupMemberNames.trim() || null : null,
+            group_member_names: null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id)
@@ -367,7 +362,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         const attendees = selectedClients.map((clientId) => ({
           session_id: existingSession.id,
           client_id: clientId,
-          individual_cost: pricing?.perPersonCost || 0,
+          individual_cost: pricing?.totalAmount || 0,
         }))
 
         const { error: attendeesError } = await supabase
@@ -400,7 +395,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: isGroupService ? groupMemberNames.trim() || null : null,
+            group_member_names: null,
             organization_id: organization!.id,
           })
           .select()
@@ -412,7 +407,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         const attendees = selectedClients.map((clientId) => ({
           session_id: session.id,
           client_id: clientId,
-          individual_cost: pricing?.perPersonCost || 0,
+          individual_cost: pricing?.totalAmount || 0,
         }))
 
         const { error: attendeesError } = await supabase
@@ -424,7 +419,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         // If submitted, create invoices for each client
         if (status === 'submitted' && pricing && selectedServiceType) {
           const invoices = (clientData.data || []).map((client) => {
-            // Recalculate per-client if scholarship (different rate for scholarship clients)
+            // Recalculate if scholarship (different rate for scholarship clients)
             if (client.payment_method === 'scholarship' && selectedPaymentMethod !== 'scholarship') {
               const scholarshipPricing = calculateSessionPricing(
                 selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides,
@@ -433,10 +428,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               return {
                 session_id: session.id,
                 client_id: client.id,
-                amount: scholarshipPricing.perPersonCost,
-                mca_cut: scholarshipPricing.mcaCut / selectedClients.length,
-                contractor_pay: scholarshipPricing.contractorPay / selectedClients.length,
-                rent_amount: scholarshipPricing.rentAmount / selectedClients.length,
+                amount: scholarshipPricing.totalAmount,
+                mca_cut: scholarshipPricing.mcaCut,
+                contractor_pay: scholarshipPricing.contractorPay,
+                rent_amount: scholarshipPricing.rentAmount,
                 payment_method: client.payment_method,
                 status: 'pending' as const,
                 organization_id: organization!.id,
@@ -445,10 +440,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             return {
               session_id: session.id,
               client_id: client.id,
-              amount: pricing.perPersonCost,
-              mca_cut: pricing.mcaCut / selectedClients.length,
-              contractor_pay: pricing.contractorPay / selectedClients.length,
-              rent_amount: pricing.rentAmount / selectedClients.length,
+              amount: pricing.totalAmount,
+              mca_cut: pricing.mcaCut,
+              contractor_pay: pricing.contractorPay,
+              rent_amount: pricing.rentAmount,
               payment_method: client.payment_method,
               status: 'pending' as const,
               organization_id: organization!.id,
@@ -494,7 +489,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setNotes('')
     setClientNotes('')
     setGroupHeadcount('')
-    setGroupMemberNames('')
     setShowSuccess(false)
     clearAllErrors()
     // Keep: time, duration, serviceTypeId, selectedClients (remembered)
@@ -655,7 +649,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 clients={clients}
                 selectedIds={selectedClients}
                 onChange={(ids) => {
-                  setSelectedClients(ids)
+                  setSelectedClients(isGroupService ? ids.slice(-1) : ids)
                   if (ids.length > 0) clearFieldError('clients')
                 }}
               />
@@ -711,35 +705,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   )}
                 </div>
 
-                {/* Member Names */}
-                <div className="space-y-2">
-                  <Label htmlFor="groupMemberNames">
-                    Participant Names {status === 'submitted' && '*'}
-                  </Label>
-                  <Textarea
-                    id="groupMemberNames"
-                    value={groupMemberNames}
-                    onChange={(e) => {
-                      setGroupMemberNames(e.target.value)
-                      if (e.target.value.trim()) clearFieldError('groupMemberNames')
-                    }}
-                    placeholder="List participant names (one per line or comma-separated)..."
-                    rows={4}
-                    className={errors.groupMemberNames ? 'border-red-500' : ''}
-                  />
-                  {errors.groupMemberNames ? (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.groupMemberNames}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      {status === 'submitted'
-                        ? 'Required when submitting. List all participants for documentation.'
-                        : 'Optional for drafts. List all participants for documentation.'}
-                    </p>
-                  )}
-                </div>
               </CardContent>
             </Card>
           )}

@@ -39,23 +39,23 @@ describe('calculateSessionPricing', () => {
       contractor_cap: 105,
     }
 
-    // 4 people: 50 + (20 * 3) = 110
-    // MCA Cut: 30% of 110 = 33
-    // Contractor: 110 - 33 = 77 (under cap)
+    // 4 people: 50 + (20 * 4) = 130
+    // MCA Cut: 30% of 130 = 39
+    // Contractor: 130 - 39 = 91 (under cap)
     const result = calculateSessionPricing(groupService, 4)
-    expect(result.totalAmount).toBe(110)
-    expect(result.mcaCut).toBe(33)
-    expect(result.contractorPay).toBe(77)
+    expect(result.totalAmount).toBe(130)
+    expect(result.mcaCut).toBe(39)
+    expect(result.contractorPay).toBe(91)
 
-    // 10 people: 50 + (20 * 9) = 230
-    // MCA Cut: 30% of 230 = 69
-    // Contractor: 230 - 69 = 161 (over cap of 105)
+    // 10 people: 50 + (20 * 10) = 250
+    // MCA Cut: 30% of 250 = 75
+    // Contractor: 250 - 75 = 175 (over cap of 105)
     // Capped Contractor: 105
-    // Adjusted MCA: 30% cut + (161 - 105) = 69 + 56 = 125
+    // Adjusted MCA: 250 - 105 = 145
     const cappedResult = calculateSessionPricing(groupService, 10)
-    expect(cappedResult.totalAmount).toBe(230)
+    expect(cappedResult.totalAmount).toBe(250)
     expect(cappedResult.contractorPay).toBe(105)
-    expect(cappedResult.mcaCut).toBe(125)
+    expect(cappedResult.mcaCut).toBe(145)
   })
 
   it('scales pricing by duration', () => {

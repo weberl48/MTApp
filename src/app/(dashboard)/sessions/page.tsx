@@ -32,6 +32,7 @@ interface Session {
   status: string
   notes: string | null
   created_at: string
+  group_headcount: number | null
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number } | null
   contractor: { id: string; name: string } | null
   attendees: {
@@ -125,6 +126,7 @@ export default function SessionsPage() {
           status,
           notes,
           created_at,
+          group_headcount,
           service_type:service_types(id, name, base_rate, per_person_rate),
           contractor:users(id, name),
           attendees:session_attendees(
@@ -445,12 +447,14 @@ export default function SessionsPage() {
                               })}
                             </span>
                             <span>{session.duration_minutes} min</span>
-                            {session.attendees?.length > 0 && (
-                              <span>
-                                {session.attendees.length} attendee
-                                {session.attendees.length !== 1 ? 's' : ''}
-                              </span>
-                            )}
+                            {(() => {
+                              const count = session.group_headcount || session.attendees?.length || 0
+                              return count > 0 ? (
+                                <span>
+                                  {count} attendee{count !== 1 ? 's' : ''}
+                                </span>
+                              ) : null
+                            })()}
                             {isAdmin && session.contractor && (
                               <span>by {session.contractor.name}</span>
                             )}

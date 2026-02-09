@@ -91,10 +91,8 @@ export function calculateSessionPricing(
   const durationMultiplier = durationMinutes / durationBase
 
   // Calculate total amount
-  // For groups: base_rate + (per_person_rate * additional people)
-  // "Additional person" means everyone after the first
-  const additionalPeople = count > 1 ? count - 1 : 0
-  const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * additionalPeople)
+  // For groups: base_rate + (per_person_rate * total attendees)
+  const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * count)
   let totalAmount = baseAmount * durationMultiplier
 
   // Rent is no longer used - keeping field for backwards compatibility
@@ -244,7 +242,7 @@ export function getPricingDescription(serviceType: ServiceType, showFormula: boo
   let description = `$${serviceType.base_rate}`
 
   if (isGroup) {
-    description += ` + $${serviceType.per_person_rate}/additional person`
+    description += ` + $${serviceType.per_person_rate}/person`
   }
 
   // Only show formula details (MCA %, cap) if requested
