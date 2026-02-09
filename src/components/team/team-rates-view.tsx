@@ -1,10 +1,13 @@
 'use client'
 
+// NOTE: pay_increase functionality disabled — rates are now managed via PayRateMatrix.
+// Keeping component for backward compatibility. pay_increase code commented out below.
+
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { formatCurrency } from '@/lib/pricing'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+// import { createClient } from '@/lib/supabase/client'
+// import { formatCurrency } from '@/lib/pricing'
+// import { Button } from '@/components/ui/button'
+// import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -13,15 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Pencil, Check, X, Loader2, ExternalLink } from 'lucide-react'
-import { toast } from 'sonner'
+// import { Pencil, Check, X, Loader2, ExternalLink } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
+// import { toast } from 'sonner'
 import Link from 'next/link'
 
 interface Contractor {
   id: string
   name: string | null
   email: string
-  pay_increase: number
+  // pay_increase: number  // NOTE: disabled — managed via PayRateMatrix
 }
 
 interface TeamRatesViewProps {
@@ -29,48 +33,49 @@ interface TeamRatesViewProps {
   canEdit: boolean
 }
 
-export function TeamRatesView({ contractors, canEdit }: TeamRatesViewProps) {
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [localValues, setLocalValues] = useState<Record<string, number>>(() => {
-    const map: Record<string, number> = {}
-    contractors.forEach((c) => {
-      map[c.id] = c.pay_increase
-    })
-    return map
-  })
+export function TeamRatesView({ contractors }: TeamRatesViewProps) {
+  // NOTE: pay_increase editing state disabled — managed via PayRateMatrix
+  // const [editingId, setEditingId] = useState<string | null>(null)
+  // const [editValue, setEditValue] = useState('')
+  // const [saving, setSaving] = useState(false)
+  // const [localValues, setLocalValues] = useState<Record<string, number>>(() => {
+  //   const map: Record<string, number> = {}
+  //   contractors.forEach((c) => {
+  //     map[c.id] = c.pay_increase
+  //   })
+  //   return map
+  // })
 
-  function startEditing(contractor: Contractor) {
-    setEditingId(contractor.id)
-    setEditValue((localValues[contractor.id] ?? contractor.pay_increase).toString())
-  }
+  // function startEditing(contractor: Contractor) {
+  //   setEditingId(contractor.id)
+  //   setEditValue((localValues[contractor.id] ?? contractor.pay_increase).toString())
+  // }
 
-  function cancelEditing() {
-    setEditingId(null)
-    setEditValue('')
-  }
+  // function cancelEditing() {
+  //   setEditingId(null)
+  //   setEditValue('')
+  // }
 
-  async function handleSave(contractorId: string) {
-    setSaving(true)
-    const supabase = createClient()
-    const newValue = parseFloat(editValue) || 0
-
-    const { error } = await supabase
-      .from('users')
-      .update({ pay_increase: newValue, updated_at: new Date().toISOString() })
-      .eq('id', contractorId)
-
-    if (error) {
-      toast.error('Failed to update pay increase')
-    } else {
-      toast.success('Pay increase updated')
-      setLocalValues((prev) => ({ ...prev, [contractorId]: newValue }))
-    }
-
-    setSaving(false)
-    setEditingId(null)
-  }
+  // async function handleSave(contractorId: string) {
+  //   setSaving(true)
+  //   const supabase = createClient()
+  //   const newValue = parseFloat(editValue) || 0
+  //
+  //   const { error } = await supabase
+  //     .from('users')
+  //     .update({ pay_increase: newValue, updated_at: new Date().toISOString() })
+  //     .eq('id', contractorId)
+  //
+  //   if (error) {
+  //     toast.error('Failed to update pay increase')
+  //   } else {
+  //     toast.success('Pay increase updated')
+  //     setLocalValues((prev) => ({ ...prev, [contractorId]: newValue }))
+  //   }
+  //
+  //   setSaving(false)
+  //   setEditingId(null)
+  // }
 
   if (contractors.length === 0) {
     return (
@@ -85,14 +90,15 @@ export function TeamRatesView({ contractors, canEdit }: TeamRatesViewProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Contractor</TableHead>
-          <TableHead>Pay Increase</TableHead>
+          {/* NOTE: Pay Increase column disabled — managed via PayRateMatrix */}
+          {/* <TableHead>Pay Increase</TableHead> */}
           <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {contractors.map((contractor) => {
-          const currentValue = localValues[contractor.id] ?? contractor.pay_increase
-          const isEditing = editingId === contractor.id
+          // const currentValue = localValues[contractor.id] ?? contractor.pay_increase
+          // const isEditing = editingId === contractor.id
 
           return (
             <TableRow key={contractor.id}>
@@ -100,6 +106,7 @@ export function TeamRatesView({ contractors, canEdit }: TeamRatesViewProps) {
                 <div className="font-medium">{contractor.name || 'Unnamed'}</div>
                 <div className="text-sm text-gray-500">{contractor.email}</div>
               </TableCell>
+              {/* NOTE: Pay Increase cell disabled — managed via PayRateMatrix
               <TableCell>
                 {isEditing ? (
                   <div className="flex items-center gap-2">
@@ -156,6 +163,7 @@ export function TeamRatesView({ contractors, canEdit }: TeamRatesViewProps) {
                   </div>
                 )}
               </TableCell>
+              */}
               <TableCell>
                 <Link
                   href={`/team/${contractor.id}`}

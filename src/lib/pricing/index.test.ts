@@ -221,13 +221,13 @@ describe('calculateNoShowPricing', () => {
     expect(result.mcaCut).toBe(20) // $60 - $40
   })
 
-  it('respects pay increase bonus for no-show pay', () => {
-    // Normal pay $38.50 + $2 bonus = $40.50
-    const result = calculateNoShowPricing(mockServiceType, {
-      payIncrease: 2,
-    })
-
-    expect(result.contractorPay).toBe(40.5)
-    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
-  })
+  // NOTE: pay_increase feature disabled — test kept for reference
+  // it('respects pay increase bonus for no-show pay', () => {
+  //   // Normal pay $38.50 + $2 bonus = $40.50
+  //   const result = calculateNoShowPricing(mockServiceType, {
+  //     payIncrease: 2,
+  //   })
+  //   expect(result.contractorPay).toBe(40.5)
+  //   expect(result.mcaCut).toBe(19.5) // $60 - $40.50
+  // })
 })

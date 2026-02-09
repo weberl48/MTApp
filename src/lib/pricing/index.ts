@@ -123,12 +123,13 @@ export function calculateSessionPricing(
     }
   }
 
-  // Add per-session pay increase bonus (from users.pay_increase)
-  if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
-    contractorPay += effectiveOverrides.payIncrease
-    // Pay increase comes out of MCA's portion
-    mcaCut -= effectiveOverrides.payIncrease
-  }
+  // NOTE: pay_increase feature disabled — kept for reference in case we re-enable
+  // Per-session bonus from users.pay_increase was applied here on top of contractor pay
+  // if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
+  //   contractorPay += effectiveOverrides.payIncrease
+  //   // Pay increase comes out of MCA's portion
+  //   mcaCut -= effectiveOverrides.payIncrease
+  // }
 
   // Apply scholarship pricing AFTER contractor pay is calculated
   // Contractor gets their normal pay regardless of scholarship; MCA absorbs the discount
