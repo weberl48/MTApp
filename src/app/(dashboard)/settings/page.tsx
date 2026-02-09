@@ -1052,8 +1052,7 @@ export default function SettingsPage() {
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           ${st.base_rate}
                           {st.per_person_rate > 0 && ` + $${st.per_person_rate}/person`}
-                          {' | '}
-                          {st.mca_percentage}% cut
+                          {st.mca_percentage > 0 && ` | ${st.mca_percentage}% cut`}
                           {st.contractor_cap && ` | Max $${st.contractor_cap}`}
                           {st.rent_percentage > 0 && ` | ${st.rent_percentage}% rent`}
                         </p>
