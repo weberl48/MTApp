@@ -1,9 +1,7 @@
 import type { ServiceType } from '@/types/database'
 
-/**
- * Flat fee charged for no-show sessions regardless of service type or group size
- */
-export const NO_SHOW_FEE = 60
+/** @deprecated Use organization.settings.pricing.no_show_fee instead (default: 60) */
+const DEFAULT_NO_SHOW_FEE = 60
 
 export interface PricingCalculation {
   totalAmount: number
@@ -18,11 +16,13 @@ export interface PricingCalculation {
 
 /**
  * Per-contractor pricing overrides
- * Fetched from contractor_rates table (30-min rate per service type)
+ * Fetched from contractor_rates table (30-min rate + optional increment per service type)
  */
 export interface ContractorPricingOverrides {
   /** Custom contractor pay for this service type (30-min base rate) */
   customContractorPay?: number
+  /** Custom $/15min increment for durations beyond 30 min. null = use service type default */
+  durationIncrement?: number | null
 }
 
 /**
@@ -52,19 +52,16 @@ export interface PricingOptions {
 }
 
 /**
- * Calculate pricing for a session based on service type, number of attendees, and duration
+ * Calculate pricing for a session based on service type, number of attendees, and duration.
+ * All rates come from the database (service_types + contractor_rates tables).
  *
- * Pricing rules from project_notes.md:
- * - In-Home Individual: $50/30min, 23% MCA
- * - In-Home Group: $50 flat + $20/person, 30% MCA, contractor caps at $105
- * - Matt's Music Individual: $55, 30% MCA, 10% rent
- * - Matt's Music Group: $50 flat + $20/person
- * - Individual Art: $40, 20% MCA
- * - Group Art: $40 flat + $15/person, 30% MCA
+ * Contractor pay priority:
+ * 1. Custom rate + explicit durationIncrement → formula: base + (increment * steps)
+ * 2. Custom rate + schedule offset → customRate + (schedule[dur] - schedule[30])
+ * 3. Pay schedule amount for the duration
+ * 4. Formula: total - MCA% (with optional contractor cap)
  *
- * Duration multiplier: base rates are for 30 minutes, scale proportionally
- *
- * @param serviceType - Service type configuration
+ * @param serviceType - Service type configuration (from DB)
  * @param attendeeCount - Number of attendees
  * @param durationMinutes - Session duration in minutes (default 30)
  * @param contractorOverrides - Optional per-contractor pricing overrides (deprecated, use options)
@@ -100,7 +97,7 @@ export function calculateSessionPricing(
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
 
   // Calculate contractor pay
-  // Priority: 1) custom rate + schedule offset, 2) pay schedule, 3) formula
+  // Priority: 1) custom rate + increment, 2) custom rate + schedule offset, 3) pay schedule, 4) formula
   let contractorPay: number
 
   const schedule = serviceType.contractor_pay_schedule
@@ -112,11 +109,18 @@ export function calculateSessionPricing(
     if (durationMinutes === durationBase) {
       // At base duration: use custom rate directly
       contractorPay = effectiveOverrides.customContractorPay
+    } else if (effectiveOverrides.durationIncrement !== undefined) {
+      // Explicit increment provided (number or null)
+      const increment = effectiveOverrides.durationIncrement
+        ?? getDefaultIncrement(schedule, durationBase)
+        ?? 0
+      const steps = (durationMinutes - durationBase) / 15
+      contractorPay = effectiveOverrides.customContractorPay + (increment * steps)
     } else if (schedulePay !== undefined && scheduleBase !== undefined) {
-      // At other durations: custom rate + (schedule offset from base)
+      // Fallback: custom rate + schedule offset from base
       contractorPay = effectiveOverrides.customContractorPay + (schedulePay - scheduleBase)
     } else {
-      // No schedule: scale linearly from custom rate
+      // No schedule, no increment: scale linearly from custom rate
       contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
     }
     mcaCut = totalAmount - contractorPay
@@ -128,7 +132,7 @@ export function calculateSessionPricing(
     // Default: total - MCA cut
     contractorPay = totalAmount - mcaCut
 
-    // Apply contractor cap if specified (e.g., In-Home Group caps at $105)
+    // Apply contractor cap if specified
     if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
       const excess = contractorPay - serviceType.contractor_cap
       contractorPay = serviceType.contractor_cap
@@ -183,6 +187,21 @@ function round(value: number): number {
 }
 
 /**
+ * Derive the default per-15-min increment from a service type's pay schedule.
+ * Returns null if the schedule doesn't have enough data.
+ */
+export function getDefaultIncrement(
+  schedule: Record<string, number> | null,
+  durationBase: number = 30
+): number | null {
+  if (!schedule) return null
+  const basePay = schedule[String(durationBase)]
+  const nextPay = schedule[String(durationBase + 15)]
+  if (basePay === undefined || nextPay === undefined) return null
+  return round(nextPay - basePay)
+}
+
+/**
  * Format amount as currency string
  */
 export function formatCurrency(amount: number): string {
@@ -210,7 +229,7 @@ export function calculateContractorTotal(
 
 /**
  * Calculate pricing for a no-show session
- * No-show sessions are charged a flat $60 fee regardless of service type or group size
+ * No-show fee comes from organization settings (default: 60)
  * Contractor gets their normal session pay (as if the session happened for 30 min)
  * MCA cut = no-show fee - contractor pay
  */
@@ -219,7 +238,7 @@ export function calculateNoShowPricing(
   contractorOverrides?: ContractorPricingOverrides,
   noShowFee?: number
 ): PricingCalculation {
-  const totalAmount = noShowFee ?? NO_SHOW_FEE
+  const totalAmount = noShowFee ?? DEFAULT_NO_SHOW_FEE
 
   // Calculate contractor pay as if a normal 30-min session happened
   const normalPricing = calculateSessionPricing(serviceType, 1, 30, contractorOverrides)

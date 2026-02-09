@@ -66,7 +66,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     name: serviceType?.name || '',
     category: serviceType?.category || ('music_individual' as ServiceCategory),
     location: serviceType?.location || ('in_home' as LocationType),
-    base_rate: serviceType?.base_rate?.toString() || '50',
+    base_rate: serviceType?.base_rate?.toString() || '',
     per_person_rate: serviceType?.per_person_rate?.toString() || '0',
     mca_percentage: serviceType?.mca_percentage?.toString() || '0',
     contractor_cap: serviceType?.contractor_cap?.toString() || '',

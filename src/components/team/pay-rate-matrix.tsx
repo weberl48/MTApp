@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, calculateSessionPricing } from '@/lib/pricing'
+import { formatCurrency, calculateSessionPricing, getDefaultIncrement } from '@/lib/pricing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -37,9 +37,14 @@ interface RateEntry {
   contractor_id: string
   service_type_id: string
   contractor_pay: number
+  duration_increment: number | null
 }
 
 type EditingCell = { contractorId: string; serviceTypeId: string } | null
+
+function round(value: number): number {
+  return Math.round(value * 100) / 100
+}
 
 export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   const { organization } = useOrganization()
@@ -54,6 +59,8 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   const [setAllColumn, setSetAllColumn] = useState<string | null>(null)
   const [setAllValue, setSetAllValue] = useState('')
   const [selectedDuration, setSelectedDuration] = useState(30)
+
+  const isBaseDuration = selectedDuration === 30
 
   // Composite key for the rates map
   const rateKey = (contractorId: string, serviceTypeId: string) =>
@@ -85,7 +92,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
           .order('display_order', { ascending: true }),
         supabase
           .from('contractor_rates')
-          .select('id, contractor_id, service_type_id, contractor_pay'),
+          .select('id, contractor_id, service_type_id, contractor_pay, duration_increment'),
       ])
 
       if (cancelled) return
@@ -110,7 +117,15 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     return pricing.contractorPay
   }
 
-  /** Get the contractor pay for a given duration, using custom rate + schedule offset */
+  /** Get the effective increment for a contractor+service type */
+  function getEffectiveIncrement(serviceType: ServiceType, contractorId: string): number | null {
+    const key = rateKey(contractorId, serviceType.id)
+    const rateEntry = rates.get(key)
+    if (rateEntry?.duration_increment != null) return rateEntry.duration_increment
+    return getDefaultIncrement(serviceType.contractor_pay_schedule)
+  }
+
+  /** Get the contractor pay for a given duration */
   function getPayForDuration(
     serviceType: ServiceType,
     contractorId: string,
@@ -120,7 +135,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     const rateEntry = rates.get(key)
 
     const overrides = rateEntry
-      ? { customContractorPay: rateEntry.contractor_pay }
+      ? { customContractorPay: rateEntry.contractor_pay, durationIncrement: rateEntry.duration_increment }
       : undefined
 
     const pricing = calculateSessionPricing(serviceType, 1, duration, overrides)
@@ -128,13 +143,10 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   }
 
   function startEditing(contractorId: string, serviceTypeId: string) {
-    const key = rateKey(contractorId, serviceTypeId)
-    const existing = rates.get(key)
-    const defaultPay = getDefaultPay(
-      serviceTypes.find((s) => s.id === serviceTypeId)!
-    )
+    const st = serviceTypes.find((s) => s.id === serviceTypeId)!
+    const payAtDuration = getPayForDuration(st, contractorId, selectedDuration)
     setEditingCell({ contractorId, serviceTypeId })
-    setEditValue((existing?.contractor_pay ?? defaultPay).toString())
+    setEditValue(payAtDuration.toString())
   }
 
   function cancelEditing() {
@@ -154,41 +166,93 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     const key = rateKey(contractorId, serviceTypeId)
     const existing = rates.get(key)
 
-    if (existing) {
-      const { error } = await supabase
-        .from('contractor_rates')
-        .update({
-          contractor_pay: value,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id)
+    if (isBaseDuration) {
+      // Saving at 30 min: update contractor_pay, keep existing increment
+      const saveData = {
+        contractor_pay: value,
+        duration_increment: existing?.duration_increment ?? null,
+        updated_at: new Date().toISOString(),
+      }
 
-      if (error) {
-        toast.error('Failed to update rate')
+      if (existing) {
+        const { error } = await supabase
+          .from('contractor_rates')
+          .update(saveData)
+          .eq('id', existing.id)
+
+        if (error) {
+          toast.error('Failed to update rate')
+        } else {
+          const updated = new Map(rates)
+          updated.set(key, { ...existing, ...saveData })
+          setRates(updated)
+          toast.success('Rate updated')
+        }
       } else {
-        const updated = new Map(rates)
-        updated.set(key, { ...existing, contractor_pay: value })
-        setRates(updated)
-        toast.success('Rate updated')
+        const { data, error } = await supabase
+          .from('contractor_rates')
+          .insert({
+            contractor_id: contractorId,
+            service_type_id: serviceTypeId,
+            contractor_pay: value,
+          })
+          .select()
+          .single()
+
+        if (error) {
+          toast.error('Failed to create rate')
+        } else {
+          const updated = new Map(rates)
+          updated.set(key, data)
+          setRates(updated)
+          toast.success('Rate created')
+        }
       }
     } else {
-      const { data, error } = await supabase
-        .from('contractor_rates')
-        .insert({
-          contractor_id: contractorId,
-          service_type_id: serviceTypeId,
-          contractor_pay: value,
-        })
-        .select()
-        .single()
+      // Saving at non-30 duration: back-calculate increment
+      const baseRate = existing?.contractor_pay ?? getDefaultPay(serviceTypes.find((s) => s.id === serviceTypeId)!)
+      const steps = (selectedDuration - 30) / 15
+      const newIncrement = round((value - baseRate) / steps)
 
-      if (error) {
-        toast.error('Failed to create rate')
+      const saveData = {
+        contractor_pay: baseRate,
+        duration_increment: newIncrement,
+        updated_at: new Date().toISOString(),
+      }
+
+      if (existing) {
+        const { error } = await supabase
+          .from('contractor_rates')
+          .update(saveData)
+          .eq('id', existing.id)
+
+        if (error) {
+          toast.error('Failed to update rate')
+        } else {
+          const updated = new Map(rates)
+          updated.set(key, { ...existing, ...saveData })
+          setRates(updated)
+          toast.success('Rate updated')
+        }
       } else {
-        const updated = new Map(rates)
-        updated.set(key, data)
-        setRates(updated)
-        toast.success('Rate created')
+        const { data, error } = await supabase
+          .from('contractor_rates')
+          .insert({
+            contractor_id: contractorId,
+            service_type_id: serviceTypeId,
+            ...saveData,
+          })
+          .select()
+          .single()
+
+        if (error) {
+          toast.error('Failed to create rate')
+        } else {
+          const updated = new Map(rates)
+          updated.set(key, data)
+          setRates(updated)
+          toast.success('Rate updated')
+        }
       }
     }
 
@@ -232,16 +296,29 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     const supabase = createClient()
     const updated = new Map(rates)
     let errorCount = 0
+    const st = serviceTypes.find((s) => s.id === serviceTypeId)!
 
     for (const contractor of contractors) {
       const key = rateKey(contractor.id, serviceTypeId)
       const existing = rates.get(key)
 
+      // For non-30 durations, back-calculate increment
+      let saveContractorPay = value
+      let saveIncrement: number | null = existing?.duration_increment ?? null
+
+      if (!isBaseDuration) {
+        const baseRate = existing?.contractor_pay ?? getDefaultPay(st)
+        const steps = (selectedDuration - 30) / 15
+        saveIncrement = round((value - baseRate) / steps)
+        saveContractorPay = baseRate
+      }
+
       if (existing) {
         const { error } = await supabase
           .from('contractor_rates')
           .update({
-            contractor_pay: value,
+            contractor_pay: saveContractorPay,
+            duration_increment: saveIncrement,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id)
@@ -249,7 +326,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
         if (error) {
           errorCount++
         } else {
-          updated.set(key, { ...existing, contractor_pay: value })
+          updated.set(key, { ...existing, contractor_pay: saveContractorPay, duration_increment: saveIncrement })
         }
       } else {
         const { data, error } = await supabase
@@ -257,7 +334,8 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
           .insert({
             contractor_id: contractor.id,
             service_type_id: serviceTypeId,
-            contractor_pay: value,
+            contractor_pay: saveContractorPay,
+            duration_increment: saveIncrement,
           })
           .select()
           .single()
@@ -306,15 +384,13 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     )
   }
 
-  const isBaseDuration = selectedDuration === 30
-
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {isBaseDuration
-            ? 'Custom pay rates per contractor per service type. Click to edit.'
-            : `Pay preview at ${selectedDuration} min (read-only). Edit rates on the 30 min tab.`}
+            ? 'Base pay rates (30 min). Click to edit.'
+            : `Pay at ${selectedDuration} min. Editing updates the per-15-min increment.`}
         </p>
         <Tabs
           value={String(selectedDuration)}
@@ -348,13 +424,16 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                   <div className="text-[10px] text-gray-400 font-normal">
                     default: {formatCurrency(defaultPayAtDuration)}
                   </div>
-                  {canEdit && isBaseDuration && contractors.length > 1 && (
+                  {canEdit && contractors.length > 1 && (
                     <Popover
                       open={setAllColumn === st.id}
                       onOpenChange={(open) => {
                         if (open) {
                           setSetAllColumn(st.id)
-                          setSetAllValue(getDefaultPay(st).toString())
+                          const defaultVal = isBaseDuration
+                            ? getDefaultPay(st)
+                            : calculateSessionPricing(st, 1, selectedDuration).contractorPay
+                          setSetAllValue(defaultVal.toString())
                         } else {
                           setSetAllColumn(null)
                           setSetAllValue('')
@@ -374,7 +453,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                       <PopoverContent className="w-56 p-3" align="center">
                         <div className="space-y-2">
                           <p className="text-xs text-gray-500">
-                            Set rate for all {contractors.length} contractors
+                            Set {selectedDuration}-min rate for all {contractors.length} contractors
                           </p>
                           <div className="flex items-center gap-1">
                             <span className="text-sm">$</span>
@@ -434,10 +513,11 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                     editingCell?.serviceTypeId === st.id
 
                   const payAtDuration = getPayForDuration(st, contractor.id, selectedDuration)
+                  const increment = getEffectiveIncrement(st, contractor.id)
 
                   return (
                     <TableCell key={st.id} className="text-center p-1">
-                      {isBaseDuration && isEditing ? (
+                      {isEditing ? (
                         <div className="flex flex-col items-center gap-1">
                           <div className="flex items-center gap-1">
                             <span className="text-xs">$</span>
@@ -483,51 +563,53 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                             </Button>
                           </div>
                         </div>
-                      ) : isBaseDuration ? (
-                        <div className="flex items-center justify-center gap-0.5 group">
-                          {rateEntry ? (
-                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                              {formatCurrency(payAtDuration)}
-                            </span>
-                          ) : (
-                            <span className="text-sm text-amber-500 dark:text-amber-400">
-                              default
-                            </span>
-                          )}
-                          {canEdit && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                onClick={() =>
-                                  startEditing(contractor.id, st.id)
-                                }
-                              >
-                                <Pencil className="w-3 h-3" />
-                              </Button>
-                              {rateEntry && (
+                      ) : (
+                        <div className="flex flex-col items-center group">
+                          <div className="flex items-center gap-0.5">
+                            {rateEntry ? (
+                              <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                                {formatCurrency(payAtDuration)}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-amber-500 dark:text-amber-400">
+                                {formatCurrency(payAtDuration)}
+                              </span>
+                            )}
+                            {canEdit && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
                                 <Button
                                   size="icon"
                                   variant="ghost"
                                   className="h-6 w-6"
                                   onClick={() =>
-                                    removeRate(contractor.id, st.id)
+                                    startEditing(contractor.id, st.id)
                                   }
-                                  disabled={saving}
-                                  title="Reset to default"
                                 >
-                                  <RotateCcw className="w-3 h-3 text-gray-400" />
+                                  <Pencil className="w-3 h-3" />
                                 </Button>
-                              )}
-                            </div>
+                                {rateEntry && isBaseDuration && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-6 w-6"
+                                    onClick={() =>
+                                      removeRate(contractor.id, st.id)
+                                    }
+                                    disabled={saving}
+                                    title="Reset to default"
+                                  >
+                                    <RotateCcw className="w-3 h-3 text-gray-400" />
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          {rateEntry && increment != null && (
+                            <span className={`text-[10px] ${rateEntry.duration_increment != null ? 'text-green-500' : 'text-gray-400'}`}>
+                              +{formatCurrency(increment)}/15m
+                            </span>
                           )}
                         </div>
-                      ) : (
-                        /* Non-base duration: read-only preview */
-                        <span className="text-sm font-medium">
-                          {formatCurrency(payAtDuration)}
-                        </span>
                       )}
                     </TableCell>
                   )

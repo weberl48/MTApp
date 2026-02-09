@@ -90,12 +90,15 @@ export default function EarningsPage() {
       // Fetch contractor-specific rates
       const { data: customRates } = await supabase
         .from('contractor_rates')
-        .select('service_type_id, contractor_pay')
+        .select('service_type_id, contractor_pay, duration_increment')
         .eq('contractor_id', contractorId)
 
-      const customRatesMap = new Map<string, number>()
+      const customRatesMap = new Map<string, { contractorPay: number; durationIncrement: number | null }>()
       for (const rate of customRates || []) {
-        customRatesMap.set(rate.service_type_id, rate.contractor_pay)
+        customRatesMap.set(rate.service_type_id, {
+          contractorPay: rate.contractor_pay,
+          durationIncrement: rate.duration_increment,
+        })
       }
 
       // Calculate earnings from sessions
@@ -122,9 +125,9 @@ export default function EarningsPage() {
           || Math.max(1, (session.attendees as { id: string }[])?.length || 1)
 
         // Build contractor pricing overrides
-        const customPay = customRatesMap.get(serviceType.id)
+        const rateData = customRatesMap.get(serviceType.id)
         const overrides: ContractorPricingOverrides | undefined =
-          customPay ? { customContractorPay: customPay } : undefined
+          rateData ? { customContractorPay: rateData.contractorPay, durationIncrement: rateData.durationIncrement } : undefined
 
         // Use shared pricing calculation
         const pricing = calculateSessionPricing(

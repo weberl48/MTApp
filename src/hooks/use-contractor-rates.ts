@@ -2,9 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { ContractorPricingOverrides } from '@/lib/pricing'
 
+interface RateData {
+  contractorPay: number
+  durationIncrement: number | null
+}
+
 export function useContractorRates(contractorId: string) {
   const supabase = createClient()
-  const [customRates, setCustomRates] = useState<Map<string, number>>(new Map())
+  const [customRates, setCustomRates] = useState<Map<string, RateData>>(new Map())
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -13,15 +18,18 @@ export function useContractorRates(contractorId: string) {
     async function load() {
       const { data: rates } = await supabase
         .from('contractor_rates')
-        .select('service_type_id, contractor_pay')
+        .select('service_type_id, contractor_pay, duration_increment')
         .eq('contractor_id', contractorId)
 
       if (cancelled) return
 
       if (rates && rates.length > 0) {
-        const map = new Map<string, number>()
+        const map = new Map<string, RateData>()
         for (const rate of rates) {
-          map.set(rate.service_type_id, rate.contractor_pay)
+          map.set(rate.service_type_id, {
+            contractorPay: rate.contractor_pay,
+            durationIncrement: rate.duration_increment,
+          })
         }
         setCustomRates(map)
       }
@@ -34,9 +42,12 @@ export function useContractorRates(contractorId: string) {
   }, [contractorId, supabase])
 
   function getOverrides(serviceTypeId: string): ContractorPricingOverrides | undefined {
-    const customPay = customRates.get(serviceTypeId)
-    if (!customPay) return undefined
-    return { customContractorPay: customPay }
+    const rateData = customRates.get(serviceTypeId)
+    if (!rateData) return undefined
+    return {
+      customContractorPay: rateData.contractorPay,
+      durationIncrement: rateData.durationIncrement,
+    }
   }
 
   const hasMissingRate = useMemo(() => {

@@ -220,6 +220,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment: number | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -229,6 +230,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment?: number | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -237,6 +239,7 @@ export interface Database {
           contractor_id?: string
           service_type_id?: string
           contractor_pay?: number
+          duration_increment?: number | null
           notes?: string | null
           updated_at?: string
         }

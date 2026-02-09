@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency, calculateSessionPricing } from '@/lib/pricing'
+import { formatCurrency, calculateSessionPricing, getDefaultIncrement } from '@/lib/pricing'
 import { Loader2, Pencil, X, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ServiceType } from '@/types/database'
@@ -28,6 +28,7 @@ interface ContractorRate {
   id: string
   service_type_id: string
   contractor_pay: number
+  duration_increment: number | null
 }
 
 export function ContractorRatesForm({
@@ -184,6 +185,7 @@ export function ContractorRatesForm({
                 <TableHead>Service Type</TableHead>
                 <TableHead className="text-right">Default Pay (30 min)</TableHead>
                 <TableHead className="text-right">Custom Pay</TableHead>
+                <TableHead className="text-right">Increment</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -192,6 +194,8 @@ export function ContractorRatesForm({
                 const customRate = contractorRates.get(serviceType.id)
                 const defaultPay = getDefaultContractorPay(serviceType)
                 const isEditing = editingRateId === serviceType.id
+                const defaultIncrement = getDefaultIncrement(serviceType.contractor_pay_schedule)
+                const effectiveIncrement = customRate?.duration_increment ?? defaultIncrement
 
                 return (
                   <TableRow key={serviceType.id} className={!customRate ? 'bg-amber-50/50 dark:bg-amber-950/10' : ''}>
@@ -223,6 +227,15 @@ export function ContractorRatesForm({
                         </span>
                       ) : (
                         <span className="text-amber-600 dark:text-amber-400 font-medium">Not set</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {effectiveIncrement !== null ? (
+                        <span className={customRate?.duration_increment !== null && customRate?.duration_increment !== undefined ? 'text-green-600 font-medium' : 'text-gray-500'}>
+                          +{formatCurrency(effectiveIncrement)}/15m
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
