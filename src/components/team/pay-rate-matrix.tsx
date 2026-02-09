@@ -13,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Loader2, Check, X, Pencil, RotateCcw } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Loader2, Check, X, Pencil, RotateCcw, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import type { ServiceType } from '@/types/database'
@@ -46,6 +47,8 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   const [rates, setRates] = useState<Map<string, RateEntry>>(new Map())
   const [editingCell, setEditingCell] = useState<EditingCell>(null)
   const [editValue, setEditValue] = useState('')
+  const [setAllColumn, setSetAllColumn] = useState<string | null>(null)
+  const [setAllValue, setSetAllValue] = useState('')
 
   // Composite key for the rates map
   const rateKey = (contractorId: string, serviceTypeId: string) =>
@@ -197,7 +200,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   }
 
   async function setAllForServiceType(serviceTypeId: string) {
-    const value = parseFloat(editValue)
+    const value = parseFloat(setAllValue)
     if (isNaN(value) || value < 0) {
       toast.error('Please enter a valid amount')
       return
@@ -247,7 +250,8 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
 
     setRates(updated)
     setSaving(false)
-    cancelEditing()
+    setSetAllColumn(null)
+    setSetAllValue('')
 
     if (errorCount > 0) {
       toast.error(`Failed to update ${errorCount} rate(s)`)
@@ -299,6 +303,65 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                   <div className="text-[10px] text-gray-400 font-normal">
                     default: {formatCurrency(getDefaultPay(st))}
                   </div>
+                  {canEdit && contractors.length > 1 && (
+                    <Popover
+                      open={setAllColumn === st.id}
+                      onOpenChange={(open) => {
+                        if (open) {
+                          setSetAllColumn(st.id)
+                          setSetAllValue(getDefaultPay(st).toString())
+                        } else {
+                          setSetAllColumn(null)
+                          setSetAllValue('')
+                        }
+                      }}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-5 px-1.5 text-[10px] font-normal text-gray-400 hover:text-gray-600"
+                        >
+                          <Users className="w-3 h-3 mr-0.5" />
+                          Set all
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-3" align="center">
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-500">
+                            Set rate for all {contractors.length} contractors
+                          </p>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm">$</span>
+                            <Input
+                              type="number"
+                              step="0.50"
+                              min="0"
+                              value={setAllValue}
+                              onChange={(e) => setSetAllValue(e.target.value)}
+                              className="h-8 text-sm"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') setAllForServiceType(st.id)
+                                if (e.key === 'Escape') setSetAllColumn(null)
+                              }}
+                            />
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-full h-7 text-xs"
+                            onClick={() => setAllForServiceType(st.id)}
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            ) : null}
+                            Apply to all
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </TableHead>
               ))}
             </TableRow>
@@ -370,18 +433,6 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                             >
                               <X className="w-3 h-3 text-red-600" />
                             </Button>
-                            {canEdit && contractors.length > 1 && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 px-1.5 text-[10px]"
-                                onClick={() => setAllForServiceType(st.id)}
-                                disabled={saving}
-                                title="Set this rate for all contractors"
-                              >
-                                Set all
-                              </Button>
-                            )}
                           </div>
                         </div>
                       ) : (
