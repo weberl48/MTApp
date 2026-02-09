@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { bulkUpdateInvoiceStatus, updateInvoiceStatus, bulkSendInvoices } from '@/app/actions/invoices'
+import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -257,7 +257,6 @@ export default function InvoicesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
   const supabaseRef = useRef(createClient())
-  const router = useRouter()
 
   const handleRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1)

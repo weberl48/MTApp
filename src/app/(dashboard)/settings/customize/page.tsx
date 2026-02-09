@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -92,7 +91,7 @@ export default function CustomizeSettingsPage() {
           <div className="space-y-6 max-w-2xl">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Customize labels and toggle visibility for payment methods and billing methods.
-              Hidden options won't appear in forms. The internal key (shown in gray) stays the same.
+              Hidden options won&apos;t appear in forms. The internal key (shown in gray) stays the same.
             </p>
 
             {localSettings && (

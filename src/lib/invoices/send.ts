@@ -15,8 +15,8 @@ interface SendResult {
  * Send a single invoice via email: generates PDF, sends email, updates status.
  * Works with any Supabase client (server or service role).
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendInvoiceById(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any, any, any>,
   invoiceId: string
 ): Promise<SendResult> {
