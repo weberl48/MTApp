@@ -23,6 +23,7 @@ import {
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useOrganization } from '@/contexts/organization-context'
+import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
 
 interface SessionAttendee {
   id: string
@@ -46,22 +47,6 @@ interface SessionDetails {
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
   contractor: { id: string; name: string; email: string } | null
   attendees: SessionAttendee[]
-}
-
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
-
-const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  submitted: 'Submitted',
-  approved: 'Approved',
-  no_show: 'No Show',
-  cancelled: 'Cancelled',
 }
 
 export default function SessionDetailPage() {
@@ -276,8 +261,8 @@ export default function SessionDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Badge className={statusColors[session.status]}>
-            {statusLabels[session.status] || session.status}
+          <Badge className={sessionStatusColors[session.status]}>
+            {sessionStatusLabels[session.status] || session.status}
           </Badge>
           {canApprove && (
             <Button onClick={handleApprove} variant="default" className="w-full sm:w-auto">

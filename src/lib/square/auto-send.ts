@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createSquareInvoice } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { logger } from '@/lib/logger'
+import { formatInvoiceNumber } from '@/lib/constants/display'
 import type { OrganizationSettings } from '@/types/database'
 
 export interface AutoSendResult {
@@ -82,7 +83,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
     result.attempted++
 
     try {
-      const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+      const invoiceNumber = formatInvoiceNumber(invoice.id)
       const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
       const squareResult = await createSquareInvoice({

@@ -1,9 +1,9 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { autoSendInvoicesViaSquare, type AutoSendResult } from '@/lib/square/auto-send'
 import { logger } from '@/lib/logger'
+import { handleSupabaseError, revalidateSessionPaths } from '@/lib/actions/helpers'
 
 export async function approveSession(sessionId: string) {
   const supabase = await createClient()
@@ -13,22 +13,18 @@ export async function approveSession(sessionId: string) {
     .update({ status: 'approved', updated_at: new Date().toISOString() })
     .eq('id', sessionId)
 
-  if (error) {
-    return { success: false as const, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
   // Auto-send invoices via Square (non-blocking — approval always succeeds)
   let squareAutoSend: AutoSendResult | null = null
   try {
     squareAutoSend = await autoSendInvoicesViaSquare(sessionId)
-  } catch (err) {
-    logger.error('Auto-send Square invoices failed', err)
+  } catch (e) {
+    logger.error('Auto-send Square invoices failed', e)
   }
 
-  revalidatePath('/sessions')
-  revalidatePath(`/sessions/${sessionId}`)
-  revalidatePath('/dashboard')
-  revalidatePath('/invoices')
+  revalidateSessionPaths(sessionId)
 
   return { success: true as const, squareAutoSend }
 }
@@ -41,15 +37,12 @@ export async function markSessionNoShow(sessionId: string) {
     .update({ status: 'no_show', updated_at: new Date().toISOString() })
     .eq('id', sessionId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/sessions')
-  revalidatePath(`/sessions/${sessionId}`)
-  revalidatePath('/dashboard')
+  revalidateSessionPaths(sessionId)
 
-  return { success: true }
+  return { success: true as const }
 }
 
 /**
@@ -113,9 +106,8 @@ export async function rejectSession(sessionId: string, reason: string) {
     .delete()
     .eq('session_id', sessionId)
 
-  if (invoicesError) {
-    return { success: false as const, error: invoicesError.message }
-  }
+  const invoiceErr = handleSupabaseError(invoicesError)
+  if (invoiceErr) return invoiceErr
 
   // Remove from any pending batch invoices (scholarship)
   await removeSesssionFromBatchInvoices(supabase, sessionId)
@@ -130,14 +122,10 @@ export async function rejectSession(sessionId: string, reason: string) {
     })
     .eq('id', sessionId)
 
-  if (error) {
-    return { success: false as const, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/sessions')
-  revalidatePath(`/sessions/${sessionId}`)
-  revalidatePath('/dashboard')
-  revalidatePath('/invoices')
+  revalidateSessionPaths(sessionId)
 
   return { success: true as const }
 }
@@ -151,9 +139,8 @@ export async function cancelSession(sessionId: string) {
     .delete()
     .eq('session_id', sessionId)
 
-  if (invoicesError) {
-    return { success: false, error: invoicesError.message }
-  }
+  const invoiceErr = handleSupabaseError(invoicesError)
+  if (invoiceErr) return invoiceErr
 
   // Remove from any pending batch invoices (scholarship)
   await removeSesssionFromBatchInvoices(supabase, sessionId)
@@ -164,16 +151,12 @@ export async function cancelSession(sessionId: string) {
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', sessionId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/sessions')
-  revalidatePath(`/sessions/${sessionId}`)
-  revalidatePath('/dashboard')
-  revalidatePath('/invoices')
+  revalidateSessionPaths(sessionId)
 
-  return { success: true }
+  return { success: true as const }
 }
 
 export async function deleteSession(sessionId: string) {
@@ -188,9 +171,8 @@ export async function deleteSession(sessionId: string) {
     .delete()
     .eq('session_id', sessionId)
 
-  if (invoicesError) {
-    return { success: false, error: invoicesError.message }
-  }
+  const invoiceErr = handleSupabaseError(invoicesError)
+  if (invoiceErr) return invoiceErr
 
   // Delete attendees
   const { error: attendeesError } = await supabase
@@ -198,9 +180,8 @@ export async function deleteSession(sessionId: string) {
     .delete()
     .eq('session_id', sessionId)
 
-  if (attendeesError) {
-    return { success: false, error: attendeesError.message }
-  }
+  const attendeeErr = handleSupabaseError(attendeesError)
+  if (attendeeErr) return attendeeErr
 
   // Delete session
   const { error } = await supabase
@@ -208,13 +189,10 @@ export async function deleteSession(sessionId: string) {
     .delete()
     .eq('id', sessionId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/sessions')
-  revalidatePath('/dashboard')
-  revalidatePath('/invoices')
+  revalidateSessionPaths()
 
-  return { success: true }
+  return { success: true as const }
 }

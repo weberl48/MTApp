@@ -12,19 +12,7 @@ interface ClientDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-}
-
-const billingMethodLabels: Record<string, string> = {
-  square: 'Square',
-  check: 'Check',
-  email: 'Email',
-  other: 'Other',
-}
+import { paymentMethodLabels, billingMethodLabels } from '@/lib/constants/display'
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params

@@ -1,7 +1,9 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
+import { handleSupabaseError, revalidateTeamPaths } from '@/lib/actions/helpers'
 
 export async function removeTeamMember(memberId: string) {
   const supabase = await createClient()
@@ -22,12 +24,7 @@ export async function removeTeamMember(memberId: string) {
     .eq('id', user.id)
     .single()
 
-  const canRemove =
-    currentUser?.role === 'owner' ||
-    currentUser?.role === 'admin' ||
-    currentUser?.role === 'developer'
-
-  if (!canRemove) {
+  if (!can(currentUser?.role as UserRole ?? null, 'team:invite')) {
     return { success: false, error: 'Permission denied' }
   }
 
@@ -80,12 +77,10 @@ export async function removeTeamMember(memberId: string) {
     .delete()
     .eq('id', memberId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/team')
-  revalidatePath('/dashboard')
+  revalidateTeamPaths()
 
-  return { success: true }
+  return { success: true as const }
 }

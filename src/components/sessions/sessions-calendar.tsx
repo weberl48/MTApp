@@ -17,7 +17,7 @@ import {
 } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-// Badge import removed - not currently used but may be needed for session status display
+import { sessionStatusColors } from '@/lib/constants/display'
 
 interface Session {
   id: string
@@ -34,12 +34,6 @@ interface Session {
 interface SessionsCalendarProps {
   sessions: Session[]
   isAdmin: boolean
-}
-
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
 }
 
 export function SessionsCalendar({ sessions, isAdmin }: SessionsCalendarProps) {
@@ -131,7 +125,7 @@ export function SessionsCalendar({ sessions, isAdmin }: SessionsCalendarProps) {
                       href={`/sessions/${session.id}`}
                       className="block"
                     >
-                      <div className={`text-xs p-1.5 rounded border border-transparent hover:border-blue-300 transition-colors ${statusColors[session.status] || 'bg-gray-100'}`}>
+                      <div className={`text-xs p-1.5 rounded border border-transparent hover:border-blue-300 transition-colors ${sessionStatusColors[session.status] || 'bg-gray-100'}`}>
                         <div className="font-semibold truncate">
                           {session.service_type?.name}
                         </div>
