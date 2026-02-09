@@ -380,7 +380,7 @@ export default function InvoicesPage() {
       const { data } = await query
 
       // Fetch unbilled scholarship sessions (admin only)
-      let unbilled: UnbilledScholarshipSession[] = []
+      const unbilled: UnbilledScholarshipSession[] = []
       if (admin && !viewAsContractor) {
         // Get scholarship clients
         const { data: scholarshipClients } = await supabase
