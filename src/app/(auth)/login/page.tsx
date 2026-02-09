@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Clock, Lock } from 'lucide-react'
-import { MfaChallenge } from '@/components/forms/mfa-challenge'
 import { needsMfaVerification } from '@/lib/supabase/mfa'
 
 export default function LoginPage() {
@@ -18,8 +17,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [sessionExpired, setSessionExpired] = useState(false)
-  const [mfaRequired, setMfaRequired] = useState(false)
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
   const [lockoutMinutes, setLockoutMinutes] = useState(0)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -95,11 +92,10 @@ export default function LoginPage() {
       })
 
       // Check if MFA verification is needed
-      const { needsVerification, factorId } = await needsMfaVerification()
+      const { needsVerification } = await needsMfaVerification()
 
-      if (needsVerification && factorId) {
-        setMfaRequired(true)
-        setMfaFactorId(factorId)
+      if (needsVerification) {
+        router.push('/mfa-verify')
         return
       }
 
@@ -110,19 +106,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  function handleMfaCancel() {
-    // Sign out and reset state
-    supabase.auth.signOut()
-    setMfaRequired(false)
-    setMfaFactorId(null)
-    setPassword('')
-  }
-
-  // Show MFA challenge if required
-  if (mfaRequired && mfaFactorId) {
-    return <MfaChallenge factorId={mfaFactorId} onCancel={handleMfaCancel} />
   }
 
   const isLockedOut = lockoutMinutes > 0
