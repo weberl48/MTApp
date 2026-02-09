@@ -88,12 +88,19 @@ export default function EarningsPage() {
       }
 
       // Fetch contractor-specific rates
-      // NOTE: pay_increase fetch removed — was fetching users.pay_increase here
-      const { data: customRates } = await supabase
-        .from('contractor_rates')
-        .select('service_type_id, contractor_pay')
-        .eq('contractor_id', contractorId)
+      const [{ data: contractorData }, { data: customRates }] = await Promise.all([
+        supabase
+          .from('users')
+          .select('pay_increase')
+          .eq('id', contractorId)
+          .single(),
+        supabase
+          .from('contractor_rates')
+          .select('service_type_id, contractor_pay')
+          .eq('contractor_id', contractorId)
+      ])
 
+      const payIncrease = contractorData?.pay_increase || 0
       const customRatesMap = new Map<string, number>()
       for (const rate of customRates || []) {
         customRatesMap.set(rate.service_type_id, rate.contractor_pay)
@@ -125,7 +132,7 @@ export default function EarningsPage() {
         // Build contractor pricing overrides
         const customPay = customRatesMap.get(serviceType.id)
         const overrides: ContractorPricingOverrides | undefined =
-          customPay ? { customContractorPay: customPay } : undefined
+          customPay || payIncrease ? { customContractorPay: customPay, payIncrease } : undefined
 
         // Use shared pricing calculation
         const pricing = calculateSessionPricing(

@@ -15,6 +15,7 @@ describe('calculateSessionPricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -93,6 +94,7 @@ describe('scholarship pricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: 60,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -185,6 +187,7 @@ describe('calculateNoShowPricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -221,13 +224,88 @@ describe('calculateNoShowPricing', () => {
     expect(result.mcaCut).toBe(20) // $60 - $40
   })
 
-  // NOTE: pay_increase feature disabled — test kept for reference
-  // it('respects pay increase bonus for no-show pay', () => {
-  //   // Normal pay $38.50 + $2 bonus = $40.50
-  //   const result = calculateNoShowPricing(mockServiceType, {
-  //     payIncrease: 2,
-  //   })
-  //   expect(result.contractorPay).toBe(40.5)
-  //   expect(result.mcaCut).toBe(19.5) // $60 - $40.50
-  // })
+  it('respects pay increase bonus for no-show pay', () => {
+    // Normal pay $38.50 + $2 bonus = $40.50
+    const result = calculateNoShowPricing(mockServiceType, {
+      payIncrease: 2,
+    })
+    expect(result.contractorPay).toBe(40.5)
+    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
+  })
+})
+
+describe('contractor pay schedule', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Musical Expressions',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 53 },
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses pay schedule amount for 30 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30)
+    expect(result.contractorPay).toBe(38.5)
+    expect(result.totalAmount).toBe(60)
+    expect(result.mcaCut).toBe(21.5) // 60 - 38.5
+  })
+
+  it('uses pay schedule amount for 45 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 45)
+    expect(result.contractorPay).toBe(53)
+    expect(result.totalAmount).toBe(90) // 60 * 1.5
+    expect(result.mcaCut).toBe(37) // 90 - 53
+  })
+
+  it('falls back to formula for unlisted duration', () => {
+    // 60 min not in schedule, so uses formula: total - MCA%
+    const result = calculateSessionPricing(mockServiceType, 1, 60)
+    expect(result.totalAmount).toBe(120) // 60 * 2
+    expect(result.mcaCut).toBe(27.6) // 23% of 120
+    expect(result.contractorPay).toBe(92.4) // 120 - 27.6
+  })
+
+  it('custom rate overrides schedule at base duration only', () => {
+    // Contractor has custom 30-min rate of $39.50 (like Colleen)
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 39.5,
+    })
+    expect(result.contractorPay).toBe(39.5)
+
+    // At 45 min, schedule takes precedence over custom rate
+    const result45 = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 39.5,
+    })
+    expect(result45.contractorPay).toBe(53) // From schedule, not 39.5 * 1.5
+  })
+
+  it('pay increase adds on top of schedule amount', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      payIncrease: 2,
+    })
+    expect(result.contractorPay).toBe(55) // 53 + 2
+    expect(result.mcaCut).toBe(35) // 90 - 55
+  })
+
+  it('custom rate + pay increase at base duration', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 39.5,
+      payIncrease: 2,
+    })
+    expect(result.contractorPay).toBe(41.5) // 39.5 + 2
+    expect(result.mcaCut).toBe(18.5) // 60 - 41.5
+  })
 })
