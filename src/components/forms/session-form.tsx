@@ -684,46 +684,30 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
           </div>
 
-          {/* Group Session Fields - Only show for group service types */}
+          {/* Group Headcount - Only show for group service types */}
           {isGroupService && (
-            <Card className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/20">
-              <CardContent className="pt-4 space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-purple-900 dark:text-purple-100">
-                    Group Session Details
-                  </span>
-                </div>
-
-                {/* Headcount */}
-                <div className="space-y-2">
-                  <Label htmlFor="groupHeadcount">Number of Attendees *</Label>
-                  <Input
-                    id="groupHeadcount"
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={groupHeadcount}
-                    onChange={(e) => {
-                      setGroupHeadcount(e.target.value)
-                      if (e.target.value) clearFieldError('groupHeadcount')
-                    }}
-                    placeholder="Enter headcount"
-                    className={`w-32 ${errors.groupHeadcount ? 'border-red-500' : ''}`}
-                  />
-                  {errors.groupHeadcount ? (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.groupHeadcount}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      Total number of participants in this group session.
-                    </p>
-                  )}
-                </div>
-
-              </CardContent>
-            </Card>
+            <div className="space-y-2">
+              <Label htmlFor="groupHeadcount">Number of Attendees *</Label>
+              <Input
+                id="groupHeadcount"
+                type="number"
+                min="1"
+                max="50"
+                value={groupHeadcount}
+                onChange={(e) => {
+                  setGroupHeadcount(e.target.value)
+                  if (e.target.value) clearFieldError('groupHeadcount')
+                }}
+                placeholder="Enter headcount"
+                className={errors.groupHeadcount ? 'border-red-500' : ''}
+              />
+              {errors.groupHeadcount && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.groupHeadcount}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Pricing Preview */}
