@@ -72,9 +72,22 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Fetch invoice items for batch invoices
+    let items: Array<{ description: string; session_date: string; duration_minutes: number | null; amount: number; service_type_name: string | null; contractor_name: string | null }> = []
+    if (invoice.invoice_type === 'batch') {
+      const { data: itemsData } = await supabase
+        .from('invoice_items')
+        .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
+        .eq('invoice_id', id)
+        .order('session_date', { ascending: true })
+
+      items = itemsData || []
+    }
+
     // Generate PDF
+    const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
     const pdfBuffer = await renderToBuffer(
-      createElement(InvoicePDF, { invoice }) as ReactElement<DocumentProps>
+      createElement(InvoicePDF, { invoice: invoiceData }) as ReactElement<DocumentProps>
     )
 
     // Return PDF response

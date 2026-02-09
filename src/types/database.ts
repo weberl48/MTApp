@@ -478,7 +478,7 @@ export interface Database {
       invoices: {
         Row: {
           id: string
-          session_id: string
+          session_id: string | null
           client_id: string
           amount: number
           mca_cut: number
@@ -488,13 +488,15 @@ export interface Database {
           payment_method: PaymentMethod
           due_date: string | null
           paid_date: string | null
+          invoice_type: string
+          billing_period: string | null
           organization_id: string
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          session_id: string
+          session_id?: string | null
           client_id: string
           amount: number
           mca_cut: number
@@ -504,12 +506,14 @@ export interface Database {
           payment_method: PaymentMethod
           due_date?: string | null
           paid_date?: string | null
+          invoice_type?: string
+          billing_period?: string | null
           organization_id: string
           created_at?: string
           updated_at?: string
         }
         Update: {
-          session_id?: string
+          session_id?: string | null
           client_id?: string
           amount?: number
           mca_cut?: number
@@ -519,8 +523,55 @@ export interface Database {
           payment_method?: PaymentMethod
           due_date?: string | null
           paid_date?: string | null
+          invoice_type?: string
+          billing_period?: string | null
           organization_id?: string
           updated_at?: string
+        }
+      }
+      invoice_items: {
+        Row: {
+          id: string
+          invoice_id: string
+          session_id: string
+          description: string
+          session_date: string
+          duration_minutes: number | null
+          amount: number
+          mca_cut: number
+          contractor_pay: number
+          rent_amount: number
+          service_type_name: string | null
+          contractor_name: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          session_id: string
+          description: string
+          session_date: string
+          duration_minutes?: number | null
+          amount: number
+          mca_cut?: number
+          contractor_pay?: number
+          rent_amount?: number
+          service_type_name?: string | null
+          contractor_name?: string | null
+          created_at?: string
+        }
+        Update: {
+          invoice_id?: string
+          session_id?: string
+          description?: string
+          session_date?: string
+          duration_minutes?: number | null
+          amount?: number
+          mca_cut?: number
+          contractor_pay?: number
+          rent_amount?: number
+          service_type_name?: string | null
+          contractor_name?: string | null
         }
       }
       client_goals: {
@@ -751,6 +802,7 @@ export type ServiceType = Database['public']['Tables']['service_types']['Row']
 export type Session = Database['public']['Tables']['sessions']['Row']
 export type SessionAttendee = Database['public']['Tables']['session_attendees']['Row']
 export type Invoice = Database['public']['Tables']['invoices']['Row']
+export type InvoiceItem = Database['public']['Tables']['invoice_items']['Row']
 export type ClientGoal = Database['public']['Tables']['client_goals']['Row']
 export type ContractorRate = Database['public']['Tables']['contractor_rates']['Row']
 

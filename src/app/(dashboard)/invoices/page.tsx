@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus } from '@/app/actions/invoices'
+import { generateScholarshipBatchInvoice } from '@/app/actions/scholarship-invoices'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, Loader2 } from 'lucide-react'
+import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, Loader2, Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -26,7 +27,7 @@ import { InvoicesListSkeleton } from '@/components/ui/skeleton'
 
 interface Invoice {
   id: string
-  session_id: string
+  session_id: string | null
   client_id: string
   amount: number
   mca_cut: number
@@ -34,6 +35,8 @@ interface Invoice {
   rent_amount: number
   status: 'pending' | 'sent' | 'paid'
   payment_method: 'private_pay' | 'self_directed' | 'group_home' | 'scholarship'
+  invoice_type: string
+  billing_period: string | null
   organization_id: string
   created_at: string
   updated_at: string
@@ -48,6 +51,16 @@ interface Invoice {
     contractor: { id: string; name: string } | null
     service_type: { name: string } | null
   } | null
+}
+
+interface UnbilledScholarshipSession {
+  sessionId: string
+  clientId: string
+  clientName: string
+  date: string
+  durationMinutes: number
+  serviceTypeName: string
+  contractorName: string
 }
 
 const statusColors: Record<string, string> = {
@@ -162,15 +175,21 @@ function InvoiceTable({
                 </TableCell>
               )}
               <TableCell className="font-medium">{invoice.client?.name}</TableCell>
-              <TableCell>{invoice.session?.service_type?.name}</TableCell>
               <TableCell>
-                {invoice.session?.date
-                  ? new Date(invoice.session.date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })
-                  : '-'}
+                {invoice.invoice_type === 'batch'
+                  ? 'Monthly Statement'
+                  : invoice.session?.service_type?.name}
+              </TableCell>
+              <TableCell>
+                {invoice.invoice_type === 'batch' && invoice.billing_period
+                  ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                  : invoice.session?.date
+                    ? new Date(invoice.session.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    : '-'}
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
@@ -207,6 +226,8 @@ function InvoiceTable({
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
+  const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -304,7 +325,7 @@ export default function InvoicesPage() {
   }
 
   // Get context values for view-as filtering
-  const { can, effectiveUserId, viewAsContractor } = useOrganization()
+  const { organization, can, effectiveUserId, viewAsContractor } = useOrganization()
   const contextIsAdmin = can('invoice:bulk-action')
 
   useEffect(() => {
@@ -370,9 +391,76 @@ export default function InvoicesPage() {
 
       const { data } = await query
 
+      // Fetch unbilled scholarship sessions (admin only)
+      let unbilled: UnbilledScholarshipSession[] = []
+      if (admin && !viewAsContractor) {
+        // Get scholarship clients
+        const { data: scholarshipClients } = await supabase
+          .from('clients')
+          .select('id, name')
+          .eq('payment_method', 'scholarship')
+
+        if (scholarshipClients && scholarshipClients.length > 0) {
+          const clientIds = scholarshipClients.map((c) => c.id)
+          const clientMap = new Map(scholarshipClients.map((c) => [c.id, c.name]))
+
+          // Get all session_attendees for scholarship clients
+          const { data: attendeeRows } = await supabase
+            .from('session_attendees')
+            .select(`
+              client_id,
+              session:sessions!inner(
+                id, date, duration_minutes, status,
+                contractor:users!sessions_contractor_id_fkey(name),
+                service_type:service_types(name)
+              )
+            `)
+            .in('client_id', clientIds)
+
+          // Get all invoiced session IDs for these clients (per-session invoices)
+          const { data: invoicedRows } = await supabase
+            .from('invoices')
+            .select('session_id')
+            .in('client_id', clientIds)
+            .not('session_id', 'is', null)
+
+          const invoicedSessionIds = new Set((invoicedRows || []).map((r) => r.session_id))
+
+          // Get session IDs already in invoice_items
+          const { data: itemRows } = await supabase
+            .from('invoice_items')
+            .select('session_id')
+
+          const itemizedSessionIds = new Set((itemRows || []).map((r) => r.session_id))
+
+          for (const row of attendeeRows || []) {
+            const session = row.session as unknown as {
+              id: string; date: string; duration_minutes: number; status: string
+              contractor: { name: string } | null
+              service_type: { name: string } | null
+            }
+            if (!session) continue
+            if (session.status !== 'submitted' && session.status !== 'approved') continue
+            if (invoicedSessionIds.has(session.id)) continue
+            if (itemizedSessionIds.has(session.id)) continue
+
+            unbilled.push({
+              sessionId: session.id,
+              clientId: row.client_id,
+              clientName: clientMap.get(row.client_id) || 'Unknown',
+              date: session.date,
+              durationMinutes: session.duration_minutes,
+              serviceTypeName: session.service_type?.name || 'Unknown',
+              contractorName: session.contractor?.name || 'Unknown',
+            })
+          }
+        }
+      }
+
       if (!cancelled) {
         setIsAdmin(admin && !viewAsContractor)
         setInvoices((data as unknown as Invoice[]) || [])
+        setUnbilledScholarshipSessions(unbilled)
         setLoading(false)
       }
     }
@@ -401,20 +489,18 @@ export default function InvoicesPage() {
     (inv) => inv.payment_method === 'scholarship' && inv.status !== 'paid'
   ) || []
 
-  // Group scholarship invoices by client and month for batch billing
-  const scholarshipByClientMonth = useMemo(() => {
-    const groups = new Map<string, { clientName: string; month: string; invoices: Invoice[]; total: number }>()
-    for (const inv of scholarshipUnpaid) {
-      const date = inv.session?.date ? new Date(inv.session.date) : new Date(inv.created_at)
+  // Group unbilled scholarship sessions by client and month
+  const unbilledByClientMonth = useMemo(() => {
+    const groups = new Map<string, { clientId: string; clientName: string; month: string; sessions: UnbilledScholarshipSession[] }>()
+    for (const s of unbilledScholarshipSessions) {
+      const date = new Date(s.date)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      const clientName = inv.client?.name || 'Unknown'
-      const key = `${clientName}::${monthKey}`
+      const key = `${s.clientId}::${monthKey}`
       const existing = groups.get(key)
       if (existing) {
-        existing.invoices.push(inv)
-        existing.total += inv.amount
+        existing.sessions.push(s)
       } else {
-        groups.set(key, { clientName, month: monthKey, invoices: [inv], total: inv.amount })
+        groups.set(key, { clientId: s.clientId, clientName: s.clientName, month: monthKey, sessions: [s] })
       }
     }
     return Array.from(groups.values()).sort((a, b) => {
@@ -422,7 +508,14 @@ export default function InvoicesPage() {
       if (monthCmp !== 0) return monthCmp
       return a.clientName.localeCompare(b.clientName)
     })
-  }, [scholarshipUnpaid])
+  }, [unbilledScholarshipSessions])
+
+  // Existing batch scholarship invoices (already generated)
+  const scholarshipBatchInvoices = invoices?.filter(
+    (inv) => inv.payment_method === 'scholarship' && inv.invoice_type === 'batch' && inv.status !== 'paid'
+  ) || []
+
+  const hasScholarshipContent = unbilledByClientMonth.length > 0 || scholarshipBatchInvoices.length > 0 || scholarshipUnpaid.length > 0
 
   // Calculate totals
   const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
@@ -589,9 +682,9 @@ export default function InvoicesPage() {
                   Group Home ({groupHomeUnpaid.length})
                 </TabsTrigger>
               )}
-              {scholarshipUnpaid.length > 0 && (
+              {hasScholarshipContent && (
                 <TabsTrigger value="scholarship" className="text-purple-600 dark:text-purple-400">
-                  Scholarship ({scholarshipUnpaid.length})
+                  Scholarship{unbilledByClientMonth.length > 0 ? ` (${unbilledScholarshipSessions.length} unbilled)` : ''}
                 </TabsTrigger>
               )}
             </TabsList>
@@ -622,90 +715,112 @@ export default function InvoicesPage() {
                 <InvoiceTable invoices={groupHomeUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
               </TabsContent>
             )}
-            {scholarshipUnpaid.length > 0 && (
+            {hasScholarshipContent && (
               <TabsContent value="scholarship">
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Scholarship invoices grouped by client and month for end-of-month billing.
+                    Scholarship sessions are billed monthly. Generate a batch invoice for each client per month.
                   </p>
-                  {scholarshipByClientMonth.map((group) => {
-                    const monthLabel = new Date(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                    const allGroupIds = group.invoices.map(inv => inv.id)
-                    const allSelected = allGroupIds.every(id => selectedIds.has(id))
-                    return (
-                      <Card key={`${group.clientName}::${group.month}`} className="border-purple-100 dark:border-purple-900/30">
-                        <CardHeader className="py-3 px-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              {isAdmin && (
-                                <Checkbox
-                                  checked={allSelected}
-                                  onCheckedChange={(checked) => {
-                                    allGroupIds.forEach(id => handleSelectChange(id, !!checked))
-                                  }}
-                                  aria-label={`Select all for ${group.clientName}`}
-                                />
-                              )}
-                              <div>
-                                <p className="font-medium">{group.clientName}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{monthLabel}</p>
+
+                  {/* Unbilled sessions grouped by client + month */}
+                  {unbilledByClientMonth.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Unbilled Sessions</h3>
+                      {unbilledByClientMonth.map((group) => {
+                        const monthLabel = new Date(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                        const groupKey = `${group.clientId}::${group.month}`
+                        const isGenerating = generatingBatch === groupKey
+
+                        return (
+                          <Card key={groupKey} className="border-amber-200 dark:border-amber-900/30 bg-amber-50/30 dark:bg-amber-950/10">
+                            <CardHeader className="py-3 px-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium">{group.clientName}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{monthLabel}</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <p className="text-xs text-gray-500">
+                                    {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
+                                  </p>
+                                  {isAdmin && (
+                                    <Button
+                                      size="sm"
+                                      disabled={isGenerating}
+                                      onClick={async () => {
+                                        setGeneratingBatch(groupKey)
+                                        const result = await generateScholarshipBatchInvoice({
+                                          clientId: group.clientId,
+                                          billingPeriod: group.month,
+                                          organizationId: organization?.id || '',
+                                        })
+                                        setGeneratingBatch(null)
+                                        if (result.success) {
+                                          toast.success('Monthly invoice generated')
+                                          handleRefresh()
+                                        } else {
+                                          toast.error(result.error || 'Failed to generate invoice')
+                                        }
+                                      }}
+                                    >
+                                      {isGenerating ? (
+                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                      ) : (
+                                        <Plus className="w-4 h-4 mr-1" />
+                                      )}
+                                      Generate Invoice
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="font-bold">{formatCurrency(group.total)}</p>
-                                <p className="text-xs text-gray-500">{group.invoices.length} session{group.invoices.length !== 1 ? 's' : ''}</p>
-                              </div>
-                              {isAdmin && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    allGroupIds.forEach(id => handleSelectChange(id, true))
-                                  }}
-                                >
-                                  <Send className="w-3 h-3 mr-1" />
-                                  Select for Billing
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="px-4 pb-3 pt-0">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Service</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {group.invoices.map((inv) => (
-                                <TableRow
-                                  key={inv.id}
-                                  className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                  onClick={() => router.push(`/invoices/${inv.id}`)}
-                                >
-                                  <TableCell>{inv.session?.service_type?.name}</TableCell>
-                                  <TableCell>
-                                    {inv.session?.date
-                                      ? new Date(inv.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                                      : '-'}
-                                  </TableCell>
-                                  <TableCell className="text-right">{formatCurrency(inv.amount)}</TableCell>
-                                  <TableCell>
-                                    <Badge className={statusColors[inv.status]}>{inv.status}</Badge>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
+                            </CardHeader>
+                            <CardContent className="px-4 pb-3 pt-0">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Service</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Contractor</TableHead>
+                                    <TableHead className="text-right">Duration</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {group.sessions
+                                    .sort((a, b) => a.date.localeCompare(b.date))
+                                    .map((s) => (
+                                      <TableRow key={s.sessionId}>
+                                        <TableCell>{s.serviceTypeName}</TableCell>
+                                        <TableCell>
+                                          {new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                        </TableCell>
+                                        <TableCell>{s.contractorName}</TableCell>
+                                        <TableCell className="text-right">{s.durationMinutes} min</TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Existing batch invoices */}
+                  {scholarshipBatchInvoices.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Batch Invoices</h3>
+                      <InvoiceTable invoices={scholarshipBatchInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+                    </div>
+                  )}
+
+                  {/* Legacy per-session scholarship invoices (backward compat) */}
+                  {scholarshipUnpaid.filter(inv => inv.invoice_type !== 'batch').length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Per-Session Invoices (Legacy)</h3>
+                      <InvoiceTable invoices={scholarshipUnpaid.filter(inv => inv.invoice_type !== 'batch')} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             )}

@@ -429,26 +429,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
         // If submitted, create invoices for each client
         if (status === 'submitted' && pricing && selectedServiceType) {
-          const invoices = (clientData.data || []).map((client) => {
-            // Recalculate if scholarship (different rate for scholarship clients)
-            if (client.payment_method === 'scholarship' && selectedPaymentMethod !== 'scholarship') {
-              const scholarshipPricing = calculateSessionPricing(
-                selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides,
-                { paymentMethod: 'scholarship' }
-              )
-              return {
-                session_id: session.id,
-                client_id: client.id,
-                amount: scholarshipPricing.totalAmount,
-                mca_cut: scholarshipPricing.mcaCut,
-                contractor_pay: scholarshipPricing.contractorPay,
-                rent_amount: scholarshipPricing.rentAmount,
-                payment_method: client.payment_method,
-                status: 'pending' as const,
-                organization_id: organization!.id,
-              }
-            }
-            return {
+          const invoices = (clientData.data || [])
+            .filter((client) => client.payment_method !== 'scholarship') // Scholarship clients get monthly batch invoices
+            .map((client) => ({
               session_id: session.id,
               client_id: client.id,
               amount: pricing.totalAmount,
@@ -458,8 +441,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               payment_method: client.payment_method,
               status: 'pending' as const,
               organization_id: organization!.id,
-            }
-          })
+            }))
 
           const { error: invoicesError } = await supabase
             .from('invoices')

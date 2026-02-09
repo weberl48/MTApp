@@ -175,6 +175,15 @@ const styles = StyleSheet.create({
   },
 })
 
+interface InvoiceLineItem {
+  description: string
+  session_date: string
+  duration_minutes: number | null
+  amount: number
+  service_type_name: string | null
+  contractor_name: string | null
+}
+
 interface InvoiceData {
   id: string
   amount: number
@@ -182,6 +191,8 @@ interface InvoiceData {
   contractor_pay: number
   status: 'pending' | 'sent' | 'paid'
   payment_method: string
+  invoice_type?: string
+  billing_period?: string | null
   created_at: string
   due_date?: string
   paid_date?: string
@@ -189,7 +200,7 @@ interface InvoiceData {
     name: string
     contact_email?: string
   }
-  session: {
+  session?: {
     date: string
     duration_minutes?: number
     notes?: string
@@ -199,7 +210,8 @@ interface InvoiceData {
     contractor: {
       name: string
     }
-  }
+  } | null
+  items?: InvoiceLineItem[]
 }
 
 interface InvoicePDFProps {
@@ -228,8 +240,20 @@ function formatDate(dateString: string): string {
   })
 }
 
+function formatShortDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 export function InvoicePDF({ invoice }: InvoicePDFProps) {
   const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+  const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
+
+  const titleText = isBatch && invoice.billing_period
+    ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+    : 'INVOICE'
 
   return (
     <Document>
@@ -241,7 +265,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <Text style={styles.logoSubtext}>Music Therapy Services</Text>
           </View>
           <View>
-            <Text style={styles.invoiceTitle}>INVOICE</Text>
+            <Text style={styles.invoiceTitle}>{titleText}</Text>
             <Text style={styles.invoiceNumber}>{invoiceNumber}</Text>
           </View>
         </View>
@@ -296,35 +320,70 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <Text style={[styles.tableHeaderText, styles.col2]}>Date</Text>
             <Text style={[styles.tableHeaderText, styles.col3]}>Amount</Text>
           </View>
-          <View style={styles.tableRow}>
-            <View style={styles.col1}>
-              <Text style={{ fontWeight: 'bold' }}>{invoice.session.service_type.name}</Text>
-              <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
-                Therapist: {invoice.session.contractor.name}
-              </Text>
-              {invoice.session.duration_minutes && (
-                <Text style={{ fontSize: 9, color: '#6b7280' }}>
-                  Duration: {invoice.session.duration_minutes} minutes
+
+          {isBatch ? (
+            // Batch invoice: render multiple line items
+            <>
+              {invoice.items!.map((item, idx) => (
+                <View key={idx} style={styles.tableRow}>
+                  <View style={styles.col1}>
+                    <Text style={{ fontWeight: 'bold' }}>{item.service_type_name || 'Session'}</Text>
+                    {item.contractor_name && (
+                      <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                        Therapist: {item.contractor_name}
+                      </Text>
+                    )}
+                    {item.duration_minutes && (
+                      <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                        Duration: {item.duration_minutes} minutes
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={styles.col2}>{formatShortDate(item.session_date)}</Text>
+                  <Text style={[styles.col3, { fontWeight: 'bold' }]}>
+                    {formatCurrency(item.amount)}
+                  </Text>
+                </View>
+              ))}
+            </>
+          ) : invoice.session ? (
+            // Single session invoice
+            <View style={styles.tableRow}>
+              <View style={styles.col1}>
+                <Text style={{ fontWeight: 'bold' }}>{invoice.session.service_type.name}</Text>
+                <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                  Therapist: {invoice.session.contractor.name}
                 </Text>
-              )}
+                {invoice.session.duration_minutes && (
+                  <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                    Duration: {invoice.session.duration_minutes} minutes
+                  </Text>
+                )}
+              </View>
+              <Text style={styles.col2}>{formatDate(invoice.session.date)}</Text>
+              <Text style={[styles.col3, { fontWeight: 'bold' }]}>
+                {formatCurrency(invoice.amount)}
+              </Text>
             </View>
-            <Text style={styles.col2}>{formatDate(invoice.session.date)}</Text>
-            <Text style={[styles.col3, { fontWeight: 'bold' }]}>
-              {formatCurrency(invoice.amount)}
-            </Text>
-          </View>
+          ) : null}
         </View>
 
         {/* Totals */}
         <View style={styles.totalsSection}>
+          {isBatch && (
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>{invoice.items!.length} sessions</Text>
+              <Text style={styles.totalValue}></Text>
+            </View>
+          )}
           <View style={styles.grandTotal}>
             <Text style={styles.grandTotalLabel}>Total Due:</Text>
             <Text style={styles.grandTotalValue}>{formatCurrency(invoice.amount)}</Text>
           </View>
         </View>
 
-        {/* Session Notes */}
-        {invoice.session.notes && (
+        {/* Session Notes (single-session only) */}
+        {!isBatch && invoice.session?.notes && (
           <View style={styles.notes}>
             <Text style={styles.notesTitle}>Session Notes</Text>
             <Text style={styles.notesText}>{invoice.session.notes}</Text>
