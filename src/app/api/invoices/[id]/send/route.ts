@@ -73,21 +73,39 @@ export async function POST(
       )
     }
 
+    // Fetch invoice items for batch invoices
+    let items: Array<{ description: string; session_date: string; duration_minutes: number | null; amount: number; service_type_name: string | null; contractor_name: string | null }> = []
+    if (invoice.invoice_type === 'batch') {
+      const { data: itemsData } = await supabase
+        .from('invoice_items')
+        .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
+        .eq('invoice_id', id)
+        .order('session_date', { ascending: true })
+
+      items = itemsData || []
+    }
+
     // Generate PDF
+    const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
     const pdfBuffer = await renderToBuffer(
-      createElement(InvoicePDF, { invoice }) as ReactElement<DocumentProps>
+      createElement(InvoicePDF, { invoice: invoiceData }) as ReactElement<DocumentProps>
     )
 
     // Send email
     const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+    const isBatch = invoice.invoice_type === 'batch'
 
     await sendInvoiceEmail({
       to: invoice.client.contact_email,
       clientName: invoice.client.name,
       invoiceNumber,
       amount: invoice.amount,
-      sessionDate: invoice.session?.date || invoice.created_at,
-      serviceType: invoice.session?.service_type?.name || 'Session',
+      sessionDate: isBatch
+        ? (invoice.billing_period ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : invoice.created_at)
+        : (invoice.session?.date || invoice.created_at),
+      serviceType: isBatch
+        ? `Monthly Statement (${items.length} sessions)`
+        : (invoice.session?.service_type?.name || 'Session'),
       dueDate: invoice.due_date,
       pdfBuffer: Buffer.from(pdfBuffer),
     })

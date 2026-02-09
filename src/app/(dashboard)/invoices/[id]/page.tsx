@@ -21,16 +21,24 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
-import type { UserRole } from '@/types/database'
+import type { UserRole, InvoiceItem } from '@/types/database'
 import { format } from 'date-fns'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
 
 interface InvoiceDetails {
   id: string
-  session_id: string
+  session_id: string | null
   client_id: string
   amount: number
   mca_cut: number
@@ -38,6 +46,8 @@ interface InvoiceDetails {
   rent_amount: number
   status: InvoiceStatus
   payment_method: PaymentMethod
+  invoice_type: string
+  billing_period: string | null
   due_date: string | null
   paid_date: string | null
   square_invoice_id: string | null
@@ -120,6 +130,7 @@ export default function InvoiceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [invoice, setInvoice] = useState<InvoiceDetails | null>(null)
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
   const [activityLogs, setActivityLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -170,6 +181,17 @@ export default function InvoiceDetailPage() {
       }
 
       setInvoice(invoiceData as unknown as InvoiceDetails)
+
+      // Fetch invoice items for batch invoices
+      if ((invoiceData as Record<string, unknown>).invoice_type === 'batch') {
+        const { data: items } = await supabase
+          .from('invoice_items')
+          .select('*')
+          .eq('invoice_id', invoiceId)
+          .order('session_date', { ascending: true })
+
+        setInvoiceItems((items as InvoiceItem[]) || [])
+      }
 
       // Fetch activity logs for this invoice
       const { data: logs } = await supabase
@@ -229,12 +251,14 @@ export default function InvoiceDetailPage() {
               Invoice for {invoice.client?.name}
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              {invoice.session?.service_type?.name} - {invoice.session?.date && new Date(invoice.session.date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {invoice.invoice_type === 'batch' && invoice.billing_period
+                ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
+                : `${invoice.session?.service_type?.name} - ${invoice.session?.date && new Date(invoice.session.date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}`}
             </p>
           </div>
         </div>
@@ -349,8 +373,51 @@ export default function InvoiceDetailPage() {
         </Card>
       </div>
 
-      {/* Session Info */}
-      {invoice.session && (
+      {/* Session Info — batch invoices show itemized sessions */}
+      {invoice.invoice_type === 'batch' && invoiceItems.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Sessions Included</CardTitle>
+            <CardDescription>
+              {invoiceItems.length} session{invoiceItems.length !== 1 ? 's' : ''} in this monthly invoice
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Contractor</TableHead>
+                  <TableHead className="text-right">Duration</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invoiceItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {new Date(item.session_date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </TableCell>
+                    <TableCell>{item.service_type_name}</TableCell>
+                    <TableCell>{item.contractor_name}</TableCell>
+                    <TableCell className="text-right">{item.duration_minutes} min</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(item.amount)}</TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="font-bold">
+                  <TableCell colSpan={4} className="text-right">Total</TableCell>
+                  <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : invoice.session ? (
         <Card>
           <CardHeader>
             <CardTitle>Related Session</CardTitle>
@@ -382,7 +449,7 @@ export default function InvoiceDetailPage() {
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {/* Activity Feed */}
       <Card>

@@ -96,16 +96,49 @@ export async function POST(
     // Calculate due date (30 days from now if not set)
     const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
-    // Create description
-    const sessionDate = invoice.session?.date
-      ? new Date(invoice.session.date).toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-        })
-      : 'N/A'
+    // Build description based on invoice type
+    let description: string
+    let note: string | undefined
 
-    const description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate}`
+    const isBatch = invoice.invoice_type === 'batch'
+
+    if (isBatch) {
+      // Fetch invoice items for batch invoices
+      const { data: items } = await supabase
+        .from('invoice_items')
+        .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
+        .eq('invoice_id', id)
+        .order('session_date', { ascending: true })
+
+      const itemCount = items?.length || 0
+      const periodLabel = invoice.billing_period
+        ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : 'Monthly'
+
+      description = `Monthly Statement - ${periodLabel} (${itemCount} session${itemCount !== 1 ? 's' : ''})`
+
+      // Build a detailed note with session line items
+      if (items && items.length > 0) {
+        const lines = items.map((item) => {
+          const date = new Date(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          const svc = item.service_type_name || 'Session'
+          const dur = item.duration_minutes ? ` (${item.duration_minutes} min)` : ''
+          return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}`
+        })
+        note = lines.join('\n')
+      }
+    } else {
+      const sessionDate = invoice.session?.date
+        ? new Date(invoice.session.date).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'N/A'
+
+      description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate}`
+      note = invoice.session?.notes || undefined
+    }
 
     // Create Square invoice
     const squareResult = await createSquareInvoice({
@@ -115,7 +148,7 @@ export async function POST(
       description,
       dueDate,
       invoiceNumber,
-      note: invoice.session?.notes || undefined,
+      note,
     })
 
     // Update our invoice with Square invoice ID and URL
