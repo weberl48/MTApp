@@ -43,7 +43,7 @@ export async function sendInvoiceById(
   }
 
   if (!invoice.client?.contact_email) {
-    return { success: false, invoiceId, error: `${invoice.client?.name || 'Client'} has no email` }
+    return { success: false, invoiceId, error: 'Client has no email address on file' }
   }
 
   // Fetch invoice items for batch invoices
@@ -72,26 +72,34 @@ export async function sendInvoiceById(
   const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch'
 
-  await sendInvoiceEmail({
-    to: invoice.client.contact_email,
-    clientName: invoice.client.name,
-    invoiceNumber,
-    amount: invoice.amount,
-    sessionDate: isBatch
-      ? (invoice.billing_period ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : invoice.created_at)
-      : (invoice.session?.date || invoice.created_at),
-    serviceType: isBatch
-      ? `Monthly Statement (${items.length} sessions)`
-      : (invoice.session?.service_type?.name || 'Session'),
-    dueDate: invoice.due_date,
-    pdfBuffer: Buffer.from(pdfBuffer),
-  })
+  try {
+    await sendInvoiceEmail({
+      to: invoice.client.contact_email,
+      clientName: invoice.client.name,
+      invoiceNumber,
+      amount: invoice.amount,
+      sessionDate: isBatch
+        ? (invoice.billing_period ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : invoice.created_at)
+        : (invoice.session?.date || invoice.created_at),
+      serviceType: isBatch
+        ? `Monthly Statement (${items.length} sessions)`
+        : (invoice.session?.service_type?.name || 'Session'),
+      dueDate: invoice.due_date,
+      pdfBuffer: Buffer.from(pdfBuffer),
+    })
+  } catch {
+    return { success: false, invoiceId, error: 'Failed to send email' }
+  }
 
-  // Update invoice status to 'sent'
-  await supabase
+  // Update invoice status to 'sent' only after email succeeds
+  const { error: updateError } = await supabase
     .from('invoices')
     .update({ status: 'sent' })
     .eq('id', invoiceId)
+
+  if (updateError) {
+    return { success: false, invoiceId, error: 'Email sent but failed to update invoice status' }
+  }
 
   return { success: true, invoiceId }
 }

@@ -13,19 +13,7 @@ interface ClientDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-import { paymentMethodLabels, billingMethodLabels } from '@/lib/constants/display'
-
-const statusStyles: Record<string, string> = {
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  no_show: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
+import { paymentMethodLabels, billingMethodLabels, sessionStatusColors, invoiceStatusColors } from '@/lib/constants/display'
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params
@@ -229,7 +217,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                           <span className="font-medium text-sm">
                             {session.service_type?.name || 'Unknown Service'}
                           </span>
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${statusStyles[session.status] || statusStyles.draft}`}>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${sessionStatusColors[session.status] || sessionStatusColors.draft}`}>
                             {session.status}
                           </span>
                         </div>
@@ -276,7 +264,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                           <span className="font-medium text-sm">
                             {formatCurrency(invoice.amount)}
                           </span>
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${statusStyles[invoice.status] || statusStyles.pending}`}>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${invoiceStatusColors[invoice.status] || invoiceStatusColors.pending}`}>
                             {invoice.status}
                           </span>
                           <Badge variant="outline" className="text-xs">

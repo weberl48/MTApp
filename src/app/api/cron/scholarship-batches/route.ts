@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import type { OrganizationSettings } from '@/types/database'
+import type { OrganizationSettings, ServiceType } from '@/types/database'
+import { calculateSessionPricing } from '@/lib/pricing'
 
 let supabaseAdmin: SupabaseClient | null = null
 
@@ -18,11 +19,8 @@ function getSupabaseAdmin(): SupabaseClient {
 
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization')
-  if (!authHeader) return false
-  if (process.env.CRON_SECRET) {
-    return authHeader === `Bearer ${process.env.CRON_SECRET}`
-  }
-  return process.env.NODE_ENV !== 'production'
+  if (!authHeader || !process.env.CRON_SECRET) return false
+  return authHeader === `Bearer ${process.env.CRON_SECRET}`
 }
 
 /**
@@ -73,15 +71,7 @@ async function fetchOrgUnbilledScholarship(supabase: SupabaseClient, orgId: stri
     date: string
     duration_minutes: number
     status: string
-    service_type: {
-      name: string
-      scholarship_rate: number | null
-      base_rate: number
-      mca_percentage: number
-      contractor_cap: number | null
-      rent_percentage: number
-      per_person_rate: number
-    } | null
+    service_type: ServiceType | null
   }
 
   const unbilled: {
@@ -89,20 +79,23 @@ async function fetchOrgUnbilledScholarship(supabase: SupabaseClient, orgId: stri
     clientId: string
     clientName: string
     date: string
-    scholarshipRate: number
+    durationMinutes: number
+    serviceType: ServiceType
   }[] = []
 
   for (const row of attendeeRows || []) {
     const session = row.session as unknown as SessionData
     if (!session || (session.status !== 'submitted' && session.status !== 'approved')) continue
     if (invoicedIds.has(session.id) || itemizedIds.has(session.id)) continue
+    if (!session.service_type) continue
 
     unbilled.push({
       sessionId: session.id,
       clientId: row.client_id,
       clientName: clientMap.get(row.client_id) || 'Unknown',
       date: session.date,
-      scholarshipRate: session.service_type?.scholarship_rate ?? 60,
+      durationMinutes: session.duration_minutes,
+      serviceType: session.service_type,
     })
   }
 
@@ -168,16 +161,34 @@ export async function GET(request: NextRequest) {
 
         if (existing) continue
 
-        const totalAmount = sessions.reduce((sum, s) => sum + s.scholarshipRate, 0)
+        // Calculate pricing for each session using the proper pricing engine
+        let totalAmount = 0
+        let totalMcaCut = 0
+        let totalContractorPay = 0
+        let totalRent = 0
+
+        const itemData = sessions.map((s) => {
+          const pricing = calculateSessionPricing(
+            s.serviceType, 1, s.durationMinutes, undefined,
+            { paymentMethod: 'scholarship' }
+          )
+          totalAmount += pricing.totalAmount
+          totalMcaCut += pricing.mcaCut
+          totalContractorPay += pricing.contractorPay
+          totalRent += pricing.rentAmount
+          return { sessionId: s.sessionId, pricing }
+        })
+
+        const round = (v: number) => Math.round(v * 100) / 100
 
         const { data: invoice } = await supabase
           .from('invoices')
           .insert({
             client_id: clientId,
-            amount: totalAmount,
-            mca_cut: 0,
-            contractor_pay: 0,
-            rent_amount: 0,
+            amount: round(totalAmount),
+            mca_cut: round(totalMcaCut),
+            contractor_pay: round(totalContractorPay),
+            rent_amount: round(totalRent),
             payment_method: 'scholarship',
             status: 'pending',
             invoice_type: 'batch',
@@ -188,13 +199,13 @@ export async function GET(request: NextRequest) {
           .single()
 
         if (invoice) {
-          const items = sessions.map((s) => ({
+          const items = itemData.map((d) => ({
             invoice_id: invoice.id,
-            session_id: s.sessionId,
-            amount: s.scholarshipRate,
-            mca_cut: 0,
-            contractor_pay: 0,
-            rent_amount: 0,
+            session_id: d.sessionId,
+            amount: round(d.pricing.totalAmount),
+            mca_cut: round(d.pricing.mcaCut),
+            contractor_pay: round(d.pricing.contractorPay),
+            rent_amount: round(d.pricing.rentAmount),
           }))
           await supabase.from('invoice_items').insert(items)
           generated++

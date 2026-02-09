@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CheckCircle, Loader2, Clock } from 'lucide-react'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
+import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -24,15 +25,18 @@ interface SubmittedSession {
 export function PendingApprovals() {
   const [sessions, setSessions] = useState<SubmittedSession[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [approvingId, setApprovingId] = useState<string | null>(null)
   const [rejectDialogSession, setRejectDialogSession] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { can } = useOrganization()
+  const canApprove = can('session:approve')
 
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error: queryError } = await supabase
         .from('sessions')
         .select(`
           id, date, duration_minutes,
@@ -44,13 +48,17 @@ export function PendingApprovals() {
         .order('date', { ascending: false })
         .limit(20)
 
-      setSessions((data as unknown as SubmittedSession[]) || [])
+      if (queryError) {
+        setError('Failed to load pending sessions')
+      } else {
+        setSessions((data as unknown as SubmittedSession[]) || [])
+      }
       setLoading(false)
     }
     load()
   }, [])
 
-  if (loading || sessions.length === 0) return null
+  if (loading || error || sessions.length === 0) return null
 
   const allSelected = sessions.length > 0 && sessions.every((s) => selectedIds.has(s.id))
 
@@ -108,7 +116,7 @@ export function PendingApprovals() {
               <CardTitle>Pending Approvals</CardTitle>
             </div>
             <div className="flex items-center gap-2">
-              {selectedIds.size > 0 && (
+              {canApprove && selectedIds.size > 0 && (
                 <Button
                   size="sm"
                   onClick={handleBulkApprove}
@@ -189,28 +197,30 @@ export function PendingApprovals() {
                     )}
                   </div>
                 </Link>
-                <div className="flex gap-1 shrink-0">
-                  <Button
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    disabled={approvingId === session.id}
-                    onClick={(e) => handleApprove(e, session.id)}
-                  >
-                    {approvingId === session.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      'Approve'
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
-                    onClick={(e) => handleReject(e, session.id)}
-                  >
-                    Revise
-                  </Button>
-                </div>
+                {canApprove && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      disabled={approvingId === session.id}
+                      onClick={(e) => handleApprove(e, session.id)}
+                    >
+                      {approvingId === session.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        'Approve'
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                      onClick={(e) => handleReject(e, session.id)}
+                    >
+                      Revise
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

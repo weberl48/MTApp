@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { handleSupabaseError, revalidateInvoicePaths } from '@/lib/actions/helpers'
+import { handleSupabaseError, revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
 import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
 
@@ -73,6 +73,9 @@ export async function bulkUpdateInvoiceStatus(
 
 export async function bulkSendInvoices(invoiceIds: string[]) {
   if (invoiceIds.length === 0) return { success: true as const, sent: 0, failed: [] as string[] }
+
+  const permErr = await requirePermission('invoice:send')
+  if (permErr) return permErr
 
   const supabase = await createClient()
   const results = { sent: 0, failed: [] as string[] }

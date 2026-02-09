@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { AlertTriangle, Loader2, CheckCircle } from 'lucide-react'
 import { updateInvoiceStatus } from '@/app/actions/invoices'
 import { formatCurrency } from '@/lib/pricing'
+import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -20,7 +21,10 @@ interface OverdueInvoice {
 export function OverdueInvoices() {
   const [invoices, setInvoices] = useState<OverdueInvoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null)
+  const { can } = useOrganization()
+  const canBulkAction = can('invoice:bulk-action')
 
   useEffect(() => {
     async function load() {
@@ -29,7 +33,7 @@ export function OverdueInvoices() {
       today.setHours(0, 0, 0, 0)
       const todayStr = today.toISOString().split('T')[0]
 
-      const { data } = await supabase
+      const { data, error: queryError } = await supabase
         .from('invoices')
         .select('id, amount, due_date, client:clients(name)')
         .eq('status', 'sent')
@@ -37,13 +41,17 @@ export function OverdueInvoices() {
         .order('due_date', { ascending: true })
         .limit(10)
 
-      setInvoices((data as unknown as OverdueInvoice[]) || [])
+      if (queryError) {
+        setError('Failed to load overdue invoices')
+      } else {
+        setInvoices((data as unknown as OverdueInvoice[]) || [])
+      }
       setLoading(false)
     }
     load()
   }, [])
 
-  if (loading || invoices.length === 0) return null
+  if (loading || error || invoices.length === 0) return null
 
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0)
 
@@ -101,22 +109,24 @@ export function OverdueInvoices() {
                   <span className="font-bold text-red-700 dark:text-red-400 text-sm">
                     {formatCurrency(invoice.amount)}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs"
-                    disabled={markingPaidId === invoice.id}
-                    onClick={() => handleMarkPaid(invoice.id)}
-                  >
-                    {markingPaidId === invoice.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <>
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Mark Paid
-                      </>
-                    )}
-                  </Button>
+                  {canBulkAction && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      disabled={markingPaidId === invoice.id}
+                      onClick={() => handleMarkPaid(invoice.id)}
+                    >
+                      {markingPaidId === invoice.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <>
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Mark Paid
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
             )
