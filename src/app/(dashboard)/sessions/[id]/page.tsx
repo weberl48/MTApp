@@ -8,17 +8,20 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { decryptPHI } from '@/lib/crypto/actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { toast } from 'sonner'
 import {
   approveSession,
+  rejectSession,
   markSessionNoShow,
   cancelSession,
   deleteSession,
 } from '@/app/actions/sessions'
+import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useOrganization } from '@/contexts/organization-context'
 
 interface SessionAttendee {
@@ -37,6 +40,7 @@ interface SessionDetails {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  rejection_reason: string | null
   created_at: string
   updated_at: string
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
@@ -69,6 +73,7 @@ export default function SessionDetailPage() {
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
   const [decryptedClientNotes, setDecryptedClientNotes] = useState<string | null>(null)
   const [, startTransition] = useTransition()
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const currentUserId = effectiveUserId || user?.id || null
 
   useEffect(() => {
@@ -95,6 +100,7 @@ export default function SessionDetailPage() {
           client_notes,
           group_headcount,
           group_member_names,
+          rejection_reason,
           created_at,
           updated_at,
           service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage),
@@ -246,6 +252,15 @@ export default function SessionDetailPage() {
         { label: 'Sessions', href: '/sessions' },
         { label: session.service_type?.name || 'Session Details' },
       ]} />
+      {session.status === 'draft' && session.rejection_reason && (
+        <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800 dark:text-amber-200">Revision Requested</AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-300">
+            {session.rejection_reason}
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
@@ -267,6 +282,15 @@ export default function SessionDetailPage() {
           {canApprove && (
             <Button onClick={handleApprove} variant="default" className="w-full sm:w-auto">
               Approve Session
+            </Button>
+          )}
+          {canApprove && (
+            <Button
+              onClick={() => setRejectDialogOpen(true)}
+              variant="outline"
+              className="w-full sm:w-auto text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+            >
+              Request Revision
             </Button>
           )}
           {canMarkNoShow && (
@@ -495,6 +519,13 @@ export default function SessionDetailPage() {
         <p>Created: {new Date(session.created_at).toLocaleString()}</p>
         <p>Last updated: {new Date(session.updated_at).toLocaleString()}</p>
       </div>
+
+      <RejectSessionDialog
+        sessionId={session.id}
+        open={rejectDialogOpen}
+        onOpenChange={setRejectDialogOpen}
+        onRejected={() => setSession({ ...session, status: 'draft' })}
+      />
     </div>
   )
 }

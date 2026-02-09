@@ -52,6 +52,41 @@ export async function markSessionNoShow(sessionId: string) {
   return { success: true }
 }
 
+export async function rejectSession(sessionId: string, reason: string) {
+  const supabase = await createClient()
+
+  // Delete pending invoices (created on submit, must be removed when reverting to draft)
+  const { error: invoicesError } = await supabase
+    .from('invoices')
+    .delete()
+    .eq('session_id', sessionId)
+
+  if (invoicesError) {
+    return { success: false as const, error: invoicesError.message }
+  }
+
+  // Revert to draft with rejection reason
+  const { error } = await supabase
+    .from('sessions')
+    .update({
+      status: 'draft',
+      rejection_reason: reason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId)
+
+  if (error) {
+    return { success: false as const, error: error.message }
+  }
+
+  revalidatePath('/sessions')
+  revalidatePath(`/sessions/${sessionId}`)
+  revalidatePath('/dashboard')
+  revalidatePath('/invoices')
+
+  return { success: true as const }
+}
+
 export async function cancelSession(sessionId: string) {
   const supabase = await createClient()
 

@@ -16,8 +16,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Search, X, Filter } from 'lucide-react'
+import { Plus, Calendar, List, Search, X, Filter, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { approveSession } from '@/app/actions/sessions'
+import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
+import { toast } from 'sonner'
 import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
@@ -33,6 +36,7 @@ interface Session {
   notes: string | null
   created_at: string
   group_headcount: number | null
+  rejection_reason: string | null
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number } | null
   contractor: { id: string; name: string } | null
   attendees: {
@@ -73,6 +77,8 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'calendar'>('list')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [approvingId, setApprovingId] = useState<string | null>(null)
+  const [rejectDialogSession, setRejectDialogSession] = useState<string | null>(null)
 
   // Use effective permissions (respects "view as" role)
   const isAdmin = can('session:view-all')
@@ -127,6 +133,7 @@ export default function SessionsPage() {
           notes,
           created_at,
           group_headcount,
+          rejection_reason,
           service_type:service_types(id, name, base_rate, per_person_rate),
           contractor:users(id, name),
           attendees:session_attendees(
@@ -161,6 +168,32 @@ export default function SessionsPage() {
 
     loadSessions()
   }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter])
+
+  async function handleInlineApprove(e: React.MouseEvent, sessionId: string) {
+    e.preventDefault()
+    e.stopPropagation()
+    setApprovingId(sessionId)
+    const result = await approveSession(sessionId)
+    if (result.success) {
+      setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, status: 'approved' } : s))
+      toast.success('Session approved')
+      const sq = result.squareAutoSend
+      if (sq) {
+        if (sq.sent > 0) toast.success(`${sq.sent} invoice${sq.sent > 1 ? 's' : ''} sent via Square`)
+        if (sq.failed.length > 0) toast.warning(`Failed to send Square invoice for: ${sq.failed.join(', ')}`)
+        if (sq.skipped > 0) toast.info(`${sq.skipped} invoice${sq.skipped > 1 ? 's' : ''} skipped`)
+      }
+    } else {
+      toast.error('Failed to approve session')
+    }
+    setApprovingId(null)
+  }
+
+  function handleInlineReject(e: React.MouseEvent, sessionId: string) {
+    e.preventDefault()
+    e.stopPropagation()
+    setRejectDialogSession(sessionId)
+  }
 
   // Filter sessions based on current filters
   const filteredSessions = useMemo(() => {
@@ -433,8 +466,14 @@ export default function SessionsPage() {
                             <span className="font-medium truncate">
                               {session.service_type?.name || 'Unknown Service'}
                             </span>
-                            <Badge className={statusColors[session.status]}>
-                              {statusLabels[session.status] || session.status}
+                            <Badge className={
+                              session.status === 'draft' && session.rejection_reason
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : statusColors[session.status]
+                            }>
+                              {session.status === 'draft' && session.rejection_reason
+                                ? 'Needs Revision'
+                                : statusLabels[session.status] || session.status}
                             </Badge>
                           </div>
                           <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">
@@ -468,8 +507,33 @@ export default function SessionsPage() {
                             </p>
                           )}
                         </div>
-                        <div className="text-right ml-4">
+                        <div className="flex items-center gap-3 ml-4">
                           <span className="font-medium">{formatCurrency(totalCost)}</span>
+                          {isAdmin && session.status === 'submitted' && (
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="h-7 px-2 text-xs"
+                                disabled={approvingId === session.id}
+                                onClick={(e) => handleInlineApprove(e, session.id)}
+                              >
+                                {approvingId === session.id ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  'Approve'
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                                onClick={(e) => handleInlineReject(e, session.id)}
+                              >
+                                Revise
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Link>
@@ -509,6 +573,19 @@ export default function SessionsPage() {
         </Card>
       ) : (
         <SessionsCalendar sessions={sessions} isAdmin={isAdmin} />
+      )}
+      {rejectDialogSession && (
+        <RejectSessionDialog
+          sessionId={rejectDialogSession}
+          open={!!rejectDialogSession}
+          onOpenChange={(open) => { if (!open) setRejectDialogSession(null) }}
+          onRejected={() => {
+            setSessions(prev => prev.map(s =>
+              s.id === rejectDialogSession ? { ...s, status: 'draft', rejection_reason: 'revised' } : s
+            ))
+            setRejectDialogSession(null)
+          }}
+        />
       )}
     </div>
   )
