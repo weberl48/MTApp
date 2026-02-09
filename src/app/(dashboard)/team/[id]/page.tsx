@@ -38,7 +38,6 @@ interface TeamMember {
   role: string
   phone: string | null
   organization_id: string
-  pay_increase: number
 }
 
 interface Session {
@@ -481,10 +480,6 @@ export default function TeamMemberPage() {
                   contractorId={member.id}
                   contractorName={member.name || member.email}
                   organizationId={member.organization_id}
-                  currentPayIncrease={member.pay_increase || 0}
-                  onPayIncreaseUpdate={(newValue) => {
-                    setMember({ ...member, pay_increase: newValue })
-                  }}
                 />
               </TabsContent>
             )}

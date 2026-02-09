@@ -76,7 +76,7 @@ npm run health https://your-app.vercel.app  # Check production
 
 Core tables with RLS policies:
 - `organizations` - Multi-tenant container with settings JSON
-- `users` - Extends Supabase auth, has role enum + `pay_increase` field
+- `users` - Extends Supabase auth, has role enum
 - `clients` - Patients with payment method
 - `service_types` - Pricing configuration per organization
 - `contractor_rates` - Per-contractor-per-service custom pay rates
@@ -294,15 +294,15 @@ The business owner should be able to customize the app without code changes:
 
 The app supports per-contractor-per-service pricing:
 
-- `users.pay_increase` - Contractor's per-session bonus (e.g., +$2)
-- `contractor_rates` table - Custom pay rates per contractor per service type
-- When calculating contractor pay, check `contractor_rates` first, then fall back to service type default
+- `contractor_rates` table - Custom 30-min pay rates per contractor per service type (raises baked in)
+- `service_types.contractor_pay_schedule` - JSONB mapping duration → base contractor pay (e.g., `{"30": 38.50, "45": 54.00}`)
+- For non-30-min durations: `contractorPay = customRate + (schedule[duration] - schedule[30])`
 
 ```typescript
 // Pricing lookup priority:
-// 1. contractor_rates table (specific rate for this contractor + service)
-// 2. service_type defaults + user.pay_increase
-// 3. Calculated from service_type formula
+// 1. contractor_rates + schedule offset for duration
+// 2. contractor_pay_schedule for the duration
+// 3. Calculated from service_type formula (total - MCA%)
 ```
 
 ### Leverage Existing Packages

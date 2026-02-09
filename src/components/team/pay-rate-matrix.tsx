@@ -30,7 +30,6 @@ interface Contractor {
   id: string
   name: string | null
   email: string
-  pay_increase: number
 }
 
 interface RateEntry {
@@ -55,8 +54,6 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   const [setAllColumn, setSetAllColumn] = useState<string | null>(null)
   const [setAllValue, setSetAllValue] = useState('')
   const [selectedDuration, setSelectedDuration] = useState(30)
-  const [editingBonusId, setEditingBonusId] = useState<string | null>(null)
-  const [bonusValue, setBonusValue] = useState('')
 
   // Composite key for the rates map
   const rateKey = (contractorId: string, serviceTypeId: string) =>
@@ -76,7 +73,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
       ] = await Promise.all([
         supabase
           .from('users')
-          .select('id, name, email, pay_increase')
+          .select('id, name, email')
           .eq('organization_id', organizationId)
           .eq('role', 'contractor')
           .order('name'),
@@ -113,7 +110,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
     return pricing.contractorPay
   }
 
-  /** Get the contractor pay for a given duration, including custom rate + bonus */
+  /** Get the contractor pay for a given duration, using custom rate + schedule offset */
   function getPayForDuration(
     serviceType: ServiceType,
     contractorId: string,
@@ -121,46 +118,13 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   ): number {
     const key = rateKey(contractorId, serviceType.id)
     const rateEntry = rates.get(key)
-    const contractor = contractors.find((c) => c.id === contractorId)
-    const bonus = contractor?.pay_increase || 0
 
     const overrides = rateEntry
-      ? { customContractorPay: rateEntry.contractor_pay, payIncrease: bonus }
-      : bonus > 0
-        ? { payIncrease: bonus }
-        : undefined
+      ? { customContractorPay: rateEntry.contractor_pay }
+      : undefined
 
     const pricing = calculateSessionPricing(serviceType, 1, duration, overrides)
     return pricing.contractorPay
-  }
-
-  async function saveBonus(contractorId: string) {
-    const value = parseFloat(bonusValue)
-    if (isNaN(value) || value < 0) {
-      toast.error('Please enter a valid amount')
-      return
-    }
-
-    setSaving(true)
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('users')
-      .update({ pay_increase: value, updated_at: new Date().toISOString() })
-      .eq('id', contractorId)
-
-    if (error) {
-      toast.error('Failed to update bonus')
-    } else {
-      setContractors((prev) =>
-        prev.map((c) => (c.id === contractorId ? { ...c, pay_increase: value } : c))
-      )
-      toast.success('Bonus updated')
-    }
-
-    setSaving(false)
-    setEditingBonusId(null)
-    setBonusValue('')
   }
 
   function startEditing(contractorId: string, serviceTypeId: string) {
@@ -376,10 +340,6 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
               <TableHead className="sticky left-0 bg-white dark:bg-gray-950 z-10 min-w-[140px]">
                 Contractor
               </TableHead>
-              <TableHead className="text-center min-w-[80px]">
-                <div className="text-xs font-medium">Bonus</div>
-                <div className="text-[10px] text-gray-400 font-normal">per session</div>
-              </TableHead>
               {serviceTypes.map((st) => {
                 const defaultPayAtDuration = calculateSessionPricing(st, 1, selectedDuration).contractorPay
                 return (
@@ -464,81 +424,6 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                       {contractor.name || 'Unnamed'}
                     </div>
                   </Link>
-                </TableCell>
-
-                {/* Bonus cell */}
-                <TableCell className="text-center p-1">
-                  {editingBonusId === contractor.id ? (
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs">$</span>
-                        <Input
-                          type="number"
-                          step="0.50"
-                          min="0"
-                          value={bonusValue}
-                          onChange={(e) => setBonusValue(e.target.value)}
-                          className="w-16 h-8 text-sm"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') saveBonus(contractor.id)
-                            if (e.key === 'Escape') {
-                              setEditingBonusId(null)
-                              setBonusValue('')
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => saveBonus(contractor.id)}
-                          disabled={saving}
-                        >
-                          {saving ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Check className="w-3 h-3 text-green-600" />
-                          )}
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => {
-                            setEditingBonusId(null)
-                            setBonusValue('')
-                          }}
-                          disabled={saving}
-                        >
-                          <X className="w-3 h-3 text-red-600" />
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-0.5 group">
-                      <span className={`text-sm font-medium ${contractor.pay_increase > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}>
-                        {contractor.pay_increase > 0
-                          ? `+${formatCurrency(contractor.pay_increase)}`
-                          : '$0'}
-                      </span>
-                      {canEdit && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => {
-                            setEditingBonusId(contractor.id)
-                            setBonusValue(contractor.pay_increase.toString())
-                          }}
-                        >
-                          <Pencil className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
                 </TableCell>
 
                 {serviceTypes.map((st) => {

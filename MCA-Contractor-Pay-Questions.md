@@ -1,8 +1,8 @@
 # Contractor Pay - Questions for Amara
 
-Hey Amara, we're setting up contractor pay in the app and have a few things to confirm. Right now we only have data from the Musical Expressions columns in your spreadsheet, so we need the same info for the other service types too.
+Hey Amara, we're building the contractor pay into the app so it calculates everything automatically. We pulled what we could from the spreadsheet screenshots but we're missing some pieces. A few questions:
 
-For Musical Expressions, we have the base contractor pay at $38.50 for 30 min. The 45-min base looks like it might be $54.00 rather than $53.00 - when we add Megan's $0.50 increase to $54.00 we get $54.50, which matches the spreadsheet. Can you confirm the 45-min base is $54.00? And can you check that these calculated amounts match what you see for everyone?
+We only have data for Musical Expressions right now. For that one, we have the base contractor pay at $38.50 for 30 min and what looks like $54.00 for 45 min (Megan's $0.50 increase gives $54.50 which matches). Can you confirm those base amounts? Here's what we calculate for everyone on Musical Expressions - do these match your spreadsheet?
 
 | Contractor | Increase | 30 min | 45 min |
 |------------|----------|--------|--------|
@@ -13,8 +13,10 @@ For Musical Expressions, we have the base contractor pay at $38.50 for 30 min. T
 | Katie      | +$2.00   | $40.50 | $56.00 |
 | Miley      | +$1.50   | $40.00 | $55.50 |
 
-We also need the base contractor pay at each duration for the other service types (In-Home Individual, In-Home Group, Matt's Music Individual, Matt's Music Group, Individual Art, Group Art, Admin, and any others you use). A screenshot of those columns from your spreadsheet would be perfect.
+Can you explain in a few sentences how you determine the contractor base pay for a given service type and duration? For example, how did you arrive at $38.50 for Musical Expressions at 30 min and $54.00 at 45 min - is there a formula or rule you follow, or are those just manually decided amounts? Understanding the logic would help us set up the other service types correctly without needing every number individually.
 
-On the increase/bonus - does the amount stay the same flat dollar amount regardless of session length? For example, Colleen always gets +$2 whether it's 30 min or 90 min? That's how the app handles it right now, just want to make sure that's correct.
+We're also missing the contractor pay amounts for the other service types - In-Home Individual, In-Home Group, Matt's Music Individual, Matt's Music Group, Individual Art, Group Art, Admin, and anything else you use. If you can share a screenshot of those columns from your spreadsheet or just the base pay at 30 and 45 min for each, that would be great.
 
-Lastly, do Brianna and Madeline have increase amounts too, and are they still active? And is Colleen the only contractor with a custom base rate ($39.50 for Musical Expressions), or do any others have special rates for specific service types?
+On the increase/bonus amounts (+$2 for Colleen, +$0.50 for Megan, etc.) - does that stay the same flat amount regardless of session length? For example, Colleen always gets +$2 whether it's 30 min or 90 min? That's how we have it set up now.
+
+A few more things: Are Brianna Nilsen and Madeline Gilbert still active? If so, what are their increase amounts? Is Colleen the only one with a custom base rate ($39.50 for Musical Expressions vs the $38.50 default), or do any other contractors have special rates? And are there any service types we're missing that aren't in the list above?

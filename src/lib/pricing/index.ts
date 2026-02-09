@@ -18,13 +18,11 @@ export interface PricingCalculation {
 
 /**
  * Per-contractor pricing overrides
- * These can be fetched from contractor_rates table and users.pay_increase
+ * Fetched from contractor_rates table (30-min rate per service type)
  */
 export interface ContractorPricingOverrides {
-  /** Custom contractor pay for this service type (overrides calculated pay) */
+  /** Custom contractor pay for this service type (30-min base rate) */
   customContractorPay?: number
-  /** Per-session bonus added on top of contractor pay */
-  payIncrease?: number
 }
 
 /**
@@ -102,24 +100,29 @@ export function calculateSessionPricing(
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
 
   // Calculate contractor pay
-  // Priority: 1) custom rate (30-min only), 2) pay schedule, 3) formula
+  // Priority: 1) custom rate + schedule offset, 2) pay schedule, 3) formula
   let contractorPay: number
 
-  // Check for explicit pay schedule amount for this duration
+  const schedule = serviceType.contractor_pay_schedule
   const scheduleKey = String(durationMinutes)
-  const schedulePay = serviceType.contractor_pay_schedule?.[scheduleKey]
+  const schedulePay = schedule?.[scheduleKey]
+  const scheduleBase = schedule?.[String(durationBase)]
 
-  if (effectiveOverrides?.customContractorPay !== undefined && durationMinutes === durationBase) {
-    // Custom contractor rate applies at the base duration only (e.g., 30 min)
-    contractorPay = effectiveOverrides.customContractorPay
+  if (effectiveOverrides?.customContractorPay !== undefined) {
+    if (durationMinutes === durationBase) {
+      // At base duration: use custom rate directly
+      contractorPay = effectiveOverrides.customContractorPay
+    } else if (schedulePay !== undefined && scheduleBase !== undefined) {
+      // At other durations: custom rate + (schedule offset from base)
+      contractorPay = effectiveOverrides.customContractorPay + (schedulePay - scheduleBase)
+    } else {
+      // No schedule: scale linearly from custom rate
+      contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
+    }
     mcaCut = totalAmount - contractorPay
   } else if (schedulePay !== undefined) {
-    // Use explicit pay schedule amount for this duration
+    // No custom rate: use pay schedule amount for this duration
     contractorPay = schedulePay
-    mcaCut = totalAmount - contractorPay
-  } else if (effectiveOverrides?.customContractorPay !== undefined) {
-    // Custom rate exists but not at this duration — scale linearly from it
-    contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
     mcaCut = totalAmount - contractorPay
   } else {
     // Default: total - MCA cut
@@ -127,18 +130,10 @@ export function calculateSessionPricing(
 
     // Apply contractor cap if specified (e.g., In-Home Group caps at $105)
     if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
-      // Contractor maxes out, MCA takes the remainder
       const excess = contractorPay - serviceType.contractor_cap
       contractorPay = serviceType.contractor_cap
       mcaCut += excess
     }
-  }
-
-  // Add per-session pay increase bonus (from users.pay_increase)
-  if (effectiveOverrides?.payIncrease && effectiveOverrides.payIncrease > 0) {
-    contractorPay += effectiveOverrides.payIncrease
-    // Pay increase comes out of MCA's portion
-    mcaCut -= effectiveOverrides.payIncrease
   }
 
   // Apply scholarship pricing AFTER contractor pay is calculated

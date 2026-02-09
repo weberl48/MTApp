@@ -4,110 +4,164 @@ ALTER TABLE service_types ADD COLUMN IF NOT EXISTS contractor_pay_schedule JSONB
 -- Update service types and contractor rates based on owner's spreadsheet
 -- =============================================
 -- ASSUMPTIONS:
---   - All individual music types pay contractors $38.50 at 30 min, $54.00 at 45 min
---   - In-Home Individual ($50/23%) and Matt's Music ($55/30%) already give $38.50
---     via formula at 30 min, but need schedule overrides at 45 min ($54 vs formula $57.75)
---   - Musical Expressions charges $60 (not $50), needs schedule at both durations
+--   - All individual music types pay contractors $38.50 base at 30 min
+--   - Pay schedule increments: +$15.50 per 15-min block for music, +$13 per 15-min block for art
 --   - Groups: $60 flat, 0% MCA — contractor gets full amount, no schedule needed
---   - Art individual: $40/20% → contractor $32 at 30 min via formula, ~$45 at 45 min
+--   - Art individual: $40/20% → contractor $32 at 30 min via formula
 --   - Admin: $25/0% — contractor gets full amount, no schedule needed
+--   - Raises are baked directly into contractor_rates (no more users.pay_increase)
 
 -- =============================================
--- 1. SERVICE TYPE PAY SCHEDULES
+-- 1. SERVICE TYPE PAY SCHEDULES (base contractor pay per duration)
 -- =============================================
 
--- Musical Expressions: base_rate $50 → $60, contractor pay $38.50/30min, $54.00/45min
+-- Musical Expressions: base_rate $60, contractor base pay by duration
 UPDATE service_types
 SET base_rate = 60,
-    contractor_pay_schedule = '{"30": 38.50, "45": 54.00}'::jsonb,
+    contractor_pay_schedule = '{"30": 38.50, "45": 54.00, "60": 69.50, "75": 85.00, "90": 100.50}'::jsonb,
     updated_at = now()
 WHERE name = 'Musical Expressions'
   AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
 
--- In-Home Individual: formula gives $38.50 at 30 min already, but 45 min needs override
--- Formula 45 min = $57.75, actual should be $54.00 (same as other individual music)
+-- In-Home Individual: $50/23%, contractor base pay by duration
 UPDATE service_types
-SET contractor_pay_schedule = '{"30": 38.50, "45": 54.00}'::jsonb,
+SET contractor_pay_schedule = '{"30": 38.50, "45": 54.00, "60": 69.50, "75": 85.00, "90": 100.50}'::jsonb,
     updated_at = now()
 WHERE name IN ('In-Home Individual Session', 'In-Home Individual Music Therapy')
   AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
 
--- Matt's Music Individual: formula gives $38.50 at 30 min already, 45 min needs override
--- Formula 45 min = $57.75, actual should be $54.00
+-- Matt's Music Individual: $55/30%, contractor base pay by duration
 UPDATE service_types
-SET contractor_pay_schedule = '{"30": 38.50, "45": 54.00}'::jsonb,
+SET contractor_pay_schedule = '{"30": 38.50, "45": 54.00, "60": 69.50, "75": 85.00, "90": 100.50}'::jsonb,
     updated_at = now()
 WHERE name = 'Matt''s Music Individual'
   AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
 
--- Creative Remedies (Art): $40 base, 20% MCA → $32 at 30 min via formula
--- 45 min estimated at $45.00 (same non-linear ratio as music types)
+-- Creative Remedies (Art): $40/20%, art pay schedule
 UPDATE service_types
-SET contractor_pay_schedule = '{"30": 32.00, "45": 45.00}'::jsonb,
+SET contractor_pay_schedule = '{"30": 32.00, "45": 45.00, "60": 58.00, "75": 71.00, "90": 84.00}'::jsonb,
     updated_at = now()
 WHERE name = 'Creative Remedies (Art)'
   AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
 
 -- Individual Art Lesson (seed name): same as Creative Remedies
 UPDATE service_types
-SET contractor_pay_schedule = '{"30": 32.00, "45": 45.00}'::jsonb,
+SET contractor_pay_schedule = '{"30": 32.00, "45": 45.00, "60": 58.00, "75": 71.00, "90": 84.00}'::jsonb,
     updated_at = now()
 WHERE name = 'Individual Art Lesson'
   AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
 
--- Groups: 0% MCA, contractor gets full amount — formula handles this correctly
--- No pay schedule needed (In-Home Group, Matt's Music Group, Group Art Lesson)
-
+-- Groups: 0% MCA, contractor gets full amount — formula handles correctly, no schedule needed
 -- Admin: 0% MCA, $25 flat — formula handles correctly, no schedule needed
 
 -- =============================================
--- 2. CONTRACTOR PAY INCREASES (bonus per session)
+-- 2. CONTRACTOR RATES (30-min rate with raise baked in)
 -- =============================================
+-- Each contractor gets a rate for every individual service type.
+-- Groups are excluded (0% MCA, contractor gets full charge amount).
+--
+-- Contractor final 30-min rates (base $38.50 + raise):
+--   Colleen:  +$2.00 → $40.50
+--   Caroline: +$2.00 → $40.50
+--   Megan:    +$0.50 → $39.00
+--   Jacob:    +$1.50 → $40.00
+--   Katie:    +$2.00 → $40.50
+--   Miley:    +$1.50 → $40.00
+--
+-- Brianna and Madeline: haven't started yet — inactive, no rates needed.
 
-UPDATE users SET pay_increase = 2.00, updated_at = now()  -- Colleen
-WHERE email = 'cmilholland17@gmail.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
+-- Helper: insert rate for every individual service type for a given contractor
+-- Using a cross join with all active individual service types (non-group)
 
-UPDATE users SET pay_increase = 2.00, updated_at = now()  -- Caroline
-WHERE email = 'carolinewestmt@gmail.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
-
-UPDATE users SET pay_increase = 0.50, updated_at = now()  -- Megan
-WHERE email = 'megan.brunner250@gmail.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
-
-UPDATE users SET pay_increase = 1.50, updated_at = now()  -- Jacob
-WHERE email = 'jacob@soundtransformationsmt.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
-
-UPDATE users SET pay_increase = 2.00, updated_at = now()  -- Katie
-WHERE email = 'creativeremedies23@gmail.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
-
-UPDATE users SET pay_increase = 1.50, updated_at = now()  -- Miley
-WHERE email = 'miley.heislermt@gmail.com'
-  AND organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts');
-
--- TBD: Brianna and Madeline (waiting on Amara)
--- UPDATE users SET pay_increase = ?, updated_at = now()
--- WHERE email = 'briannanilsen@gmail.com';
--- UPDATE users SET pay_increase = ?, updated_at = now()
--- WHERE email = 'madelinegilbert027@gmail.com';
-
--- =============================================
--- 3. COLLEEN'S CUSTOM RATE
--- =============================================
--- $39.50 for Musical Expressions 30-min (vs $38.50 default)
-
+-- Colleen — $40.50
 INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
-SELECT u.id, st.id, 39.50
+SELECT u.id, st.id, 40.50
 FROM users u
 CROSS JOIN service_types st
 WHERE u.email = 'cmilholland17@gmail.com'
-  AND st.name = 'Musical Expressions'
-  AND st.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
 ON CONFLICT (contractor_id, service_type_id)
-DO UPDATE SET contractor_pay = 39.50, updated_at = now();
+DO UPDATE SET contractor_pay = 40.50, updated_at = now();
+
+-- Caroline — $40.50
+INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
+SELECT u.id, st.id, 40.50
+FROM users u
+CROSS JOIN service_types st
+WHERE u.email = 'carolinewestmt@gmail.com'
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
+ON CONFLICT (contractor_id, service_type_id)
+DO UPDATE SET contractor_pay = 40.50, updated_at = now();
+
+-- Megan — $39.00
+INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
+SELECT u.id, st.id, 39.00
+FROM users u
+CROSS JOIN service_types st
+WHERE u.email = 'megan.brunner250@gmail.com'
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
+ON CONFLICT (contractor_id, service_type_id)
+DO UPDATE SET contractor_pay = 39.00, updated_at = now();
+
+-- Jacob — $40.00
+INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
+SELECT u.id, st.id, 40.00
+FROM users u
+CROSS JOIN service_types st
+WHERE u.email = 'jacob@soundtransformationsmt.com'
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
+ON CONFLICT (contractor_id, service_type_id)
+DO UPDATE SET contractor_pay = 40.00, updated_at = now();
+
+-- Katie — $40.50
+INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
+SELECT u.id, st.id, 40.50
+FROM users u
+CROSS JOIN service_types st
+WHERE u.email = 'creativeremedies23@gmail.com'
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
+ON CONFLICT (contractor_id, service_type_id)
+DO UPDATE SET contractor_pay = 40.50, updated_at = now();
+
+-- Miley — $40.00
+INSERT INTO contractor_rates (contractor_id, service_type_id, contractor_pay)
+SELECT u.id, st.id, 40.00
+FROM users u
+CROSS JOIN service_types st
+WHERE u.email = 'miley.heislermt@gmail.com'
+  AND u.organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND st.organization_id = u.organization_id
+  AND st.is_active = true
+  AND st.per_person_rate = 0
+  AND st.mca_percentage > 0
+ON CONFLICT (contractor_id, service_type_id)
+DO UPDATE SET contractor_pay = 40.00, updated_at = now();
+
+-- Clear old pay_increase values (raises now baked into contractor_rates)
+UPDATE users SET pay_increase = 0, updated_at = now()
+WHERE organization_id = (SELECT id FROM organizations WHERE slug = 'may-creative-arts')
+  AND role = 'contractor'
+  AND pay_increase > 0;
 
 -- =============================================
 -- VERIFY
