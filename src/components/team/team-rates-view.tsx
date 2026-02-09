@@ -3,7 +3,7 @@
 // NOTE: pay_increase functionality disabled — rates are now managed via PayRateMatrix.
 // Keeping component for backward compatibility. pay_increase code commented out below.
 
-import { useState } from 'react'
+// import { useState } from 'react'
 // import { createClient } from '@/lib/supabase/client'
 // import { formatCurrency } from '@/lib/pricing'
 // import { Button } from '@/components/ui/button'
