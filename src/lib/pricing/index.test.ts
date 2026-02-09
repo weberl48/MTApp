@@ -224,14 +224,6 @@ describe('calculateNoShowPricing', () => {
     expect(result.mcaCut).toBe(20) // $60 - $40
   })
 
-  it('respects pay increase bonus for no-show pay', () => {
-    // Normal pay $38.50 + $2 bonus = $40.50
-    const result = calculateNoShowPricing(mockServiceType, {
-      payIncrease: 2,
-    })
-    expect(result.contractorPay).toBe(40.5)
-    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
-  })
 })
 
 describe('contractor pay schedule', () => {
@@ -248,7 +240,7 @@ describe('contractor pay schedule', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
-    contractor_pay_schedule: { '30': 38.5, '45': 53 },
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -265,9 +257,9 @@ describe('contractor pay schedule', () => {
 
   it('uses pay schedule amount for 45 min', () => {
     const result = calculateSessionPricing(mockServiceType, 1, 45)
-    expect(result.contractorPay).toBe(53)
+    expect(result.contractorPay).toBe(54)
     expect(result.totalAmount).toBe(90) // 60 * 1.5
-    expect(result.mcaCut).toBe(37) // 90 - 53
+    expect(result.mcaCut).toBe(36) // 90 - 54
   })
 
   it('falls back to formula for unlisted duration', () => {
@@ -278,34 +270,29 @@ describe('contractor pay schedule', () => {
     expect(result.contractorPay).toBe(92.4) // 120 - 27.6
   })
 
-  it('custom rate overrides schedule at base duration only', () => {
-    // Contractor has custom 30-min rate of $39.50 (like Colleen)
+  it('custom rate used at base duration', () => {
     const result = calculateSessionPricing(mockServiceType, 1, 30, {
-      customContractorPay: 39.5,
+      customContractorPay: 40.5,
     })
-    expect(result.contractorPay).toBe(39.5)
-
-    // At 45 min, schedule takes precedence over custom rate
-    const result45 = calculateSessionPricing(mockServiceType, 1, 45, {
-      customContractorPay: 39.5,
-    })
-    expect(result45.contractorPay).toBe(53) // From schedule, not 39.5 * 1.5
+    expect(result.contractorPay).toBe(40.5)
+    expect(result.mcaCut).toBe(19.5) // 60 - 40.5
   })
 
-  it('pay increase adds on top of schedule amount', () => {
+  it('custom rate + schedule offset at non-base duration', () => {
+    // Custom 30-min rate $40.50 + schedule offset (54 - 38.5 = 15.5) = $56
     const result = calculateSessionPricing(mockServiceType, 1, 45, {
-      payIncrease: 2,
+      customContractorPay: 40.5,
     })
-    expect(result.contractorPay).toBe(55) // 53 + 2
-    expect(result.mcaCut).toBe(35) // 90 - 55
+    expect(result.contractorPay).toBe(56) // 40.5 + (54 - 38.5)
+    expect(result.mcaCut).toBe(34) // 90 - 56
   })
 
-  it('custom rate + pay increase at base duration', () => {
-    const result = calculateSessionPricing(mockServiceType, 1, 30, {
-      customContractorPay: 39.5,
-      payIncrease: 2,
+  it('custom rate scales linearly when no schedule for duration', () => {
+    // 60 min not in schedule, so custom rate scales linearly: 40.5 * 2 = 81
+    const result = calculateSessionPricing(mockServiceType, 1, 60, {
+      customContractorPay: 40.5,
     })
-    expect(result.contractorPay).toBe(41.5) // 39.5 + 2
-    expect(result.mcaCut).toBe(18.5) // 60 - 41.5
+    expect(result.contractorPay).toBe(81) // 40.5 * (60/30)
+    expect(result.mcaCut).toBe(39) // 120 - 81
   })
 })
