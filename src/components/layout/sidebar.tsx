@@ -86,13 +86,13 @@ export function Sidebar() {
   }
 
   // Filter navigation based on user role and feature flags
-  const filteredNavigation = navigation.filter((item) => {
-    if (!shouldShowItem(item)) return false
+  const filteredNavigation = navigation.flatMap((item) => {
+    if (!shouldShowItem(item)) return []
     // For items with children, filter children too
     if (item.children) {
-      item = { ...item, children: item.children.filter(shouldShowItem) }
+      return [{ ...item, children: item.children.filter(shouldShowItem) }]
     }
-    return true
+    return [item]
   })
 
   // Auto-expand Billing when on a billing sub-route
