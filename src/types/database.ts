@@ -62,6 +62,17 @@ export interface OrganizationSettings {
     token_expiry_days: number
   }
   features: FeatureFlags
+  custom_lists: {
+    payment_methods: Record<string, { label: string; visible: boolean }>
+    billing_methods: Record<string, { label: string; visible: boolean }>
+  }
+  automation: {
+    auto_approve_sessions: boolean
+    auto_send_invoice_on_approve: boolean
+    auto_send_invoice_method: 'email' | 'square' | 'none'
+    auto_generate_scholarship_invoices: boolean
+    scholarship_invoice_day: number
+  }
 }
 
 // Social links structure
@@ -209,6 +220,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment: number | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -218,6 +230,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment?: number | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -226,6 +239,7 @@ export interface Database {
           contractor_id?: string
           service_type_id?: string
           contractor_pay?: number
+          duration_increment?: number | null
           notes?: string | null
           updated_at?: string
         }
@@ -354,6 +368,7 @@ export interface Database {
           minimum_attendees: number | null
           scholarship_discount_percentage: number | null
           scholarship_rate: number | null
+          contractor_pay_schedule: Record<string, number> | null
           is_active: boolean
           display_order: number
           organization_id: string
@@ -373,6 +388,7 @@ export interface Database {
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
           display_order?: number
           organization_id: string
@@ -391,6 +407,7 @@ export interface Database {
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
           display_order?: number
           organization_id?: string

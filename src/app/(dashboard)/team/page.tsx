@@ -17,7 +17,7 @@ import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
 import { TeamMemberActions } from '@/components/team/team-member-actions'
 import { TeamPageTabs } from '@/components/team/team-page-tabs'
-import { TeamRatesView } from '@/components/team/team-rates-view'
+import { PayRateMatrix } from '@/components/team/pay-rate-matrix'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -283,19 +283,16 @@ export default async function TeamPage() {
               )
             }
             ratesContent={
-              <TeamRatesView
-                contractors={
-                  users
-                    ?.filter((u) => u.role === 'contractor')
-                    .map((u) => ({
-                      id: u.id,
-                      name: u.name,
-                      email: u.email,
-                      pay_increase: Number(u.pay_increase) || 0,
-                    })) || []
-                }
-                canEdit={canManage}
-              />
+              users?.[0]?.organization_id ? (
+                <PayRateMatrix
+                  organizationId={users[0].organization_id}
+                  canEdit={canManage}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No team members found
+                </div>
+              )
             }
           />
         </CardContent>

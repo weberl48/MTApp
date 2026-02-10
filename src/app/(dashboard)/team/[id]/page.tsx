@@ -17,8 +17,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
+import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
-import { ArrowLeft, Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
+import { Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ContractorRatesForm } from '@/components/forms/contractor-rates-form'
 import {
   Select,
@@ -37,7 +39,6 @@ interface TeamMember {
   role: string
   phone: string | null
   organization_id: string
-  pay_increase: number
 }
 
 interface Session {
@@ -200,7 +201,7 @@ export default function TeamMemberPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -215,40 +216,19 @@ export default function TeamMemberPage() {
   const paidEarnings = invoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
   const pendingEarnings = invoices.filter(i => i.status !== 'paid').reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
 
-  const statusColors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-    submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  }
-
-  const statusLabels: Record<string, string> = {
-    draft: 'Draft',
-    submitted: 'Submitted',
-    approved: 'Approved',
-    no_show: 'No Show',
-    cancelled: 'Cancelled',
-  }
-
-  const invoiceStatusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  }
+  // Status colors and labels imported from @/lib/constants/display
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: 'Team', href: '/team' },
+        { label: member.name || 'Team Member' },
+      ]} />
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/team">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        </Link>
+      <div>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold break-words min-w-0">
               {member.name || 'Unnamed User'}
             </h1>
             {editingRole ? (
@@ -428,8 +408,8 @@ export default function TeamMemberPage() {
                         </TableCell>
                         <TableCell>{session.duration_minutes} min</TableCell>
                         <TableCell>
-                          <Badge className={statusColors[session.status]}>
-                            {statusLabels[session.status] || session.status}
+                          <Badge className={sessionStatusColors[session.status]}>
+                            {sessionStatusLabels[session.status] || session.status}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -500,10 +480,6 @@ export default function TeamMemberPage() {
                   contractorId={member.id}
                   contractorName={member.name || member.email}
                   organizationId={member.organization_id}
-                  currentPayIncrease={member.pay_increase || 0}
-                  onPayIncreaseUpdate={(newValue) => {
-                    setMember({ ...member, pay_increase: newValue })
-                  }}
                 />
               </TabsContent>
             )}

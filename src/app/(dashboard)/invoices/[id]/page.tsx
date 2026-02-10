@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import {
   ArrowLeft,
   Calendar,
@@ -32,6 +33,7 @@ import {
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole, InvoiceItem } from '@/types/database'
+import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
 import { format } from 'date-fns'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
@@ -76,18 +78,6 @@ interface AuditLog {
   created_at: string
 }
 
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-}
-
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-}
 
 const ACTION_ICONS = {
   INSERT: Plus,
@@ -211,7 +201,7 @@ export default function InvoiceDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -220,7 +210,7 @@ export default function InvoiceDetailPage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Invoice not found</h2>
-        <p className="text-gray-500 mb-4">This invoice may have been deleted or you don&apos;t have access.</p>
+        <p className="text-muted-foreground mb-4">This invoice may have been deleted or you don&apos;t have access.</p>
         <Link href="/invoices">
           <Button>
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -239,32 +229,29 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/invoices">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Invoice for {invoice.client?.name}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              {invoice.invoice_type === 'batch' && invoice.billing_period
-                ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
-                : `${invoice.session?.service_type?.name} - ${invoice.session?.date && new Date(invoice.session.date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}`}
-            </p>
-          </div>
+      <Breadcrumb items={[
+        { label: 'Invoices', href: '/invoices' },
+        { label: `Invoice for ${invoice.client?.name || 'Client'}` },
+      ]} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">
+            Invoice for {invoice.client?.name}
+          </h1>
+          <p className="text-muted-foreground">
+            {invoice.invoice_type === 'batch' && invoice.billing_period
+              ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
+              : `${invoice.session?.service_type?.name} - ${invoice.session?.date && new Date(invoice.session.date).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end gap-1">
-            <Badge className={isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : statusColors[invoice.status]}>
+            <Badge className={isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : invoiceStatusColors[invoice.status]}>
               {isOverdue ? 'Overdue' : invoice.status}
             </Badge>
             {isOverdue && (

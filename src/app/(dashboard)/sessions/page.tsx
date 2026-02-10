@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,9 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Search, X, Filter, Loader2 } from 'lucide-react'
+import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
-import { approveSession } from '@/app/actions/sessions'
+import { Checkbox } from '@/components/ui/checkbox'
+import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { toast } from 'sonner'
 import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
@@ -26,6 +27,7 @@ import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
 import { useOrganization } from '@/contexts/organization-context'
+import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
 
 interface Session {
   id: string
@@ -51,22 +53,6 @@ interface Contractor {
   name: string
 }
 
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
-
-const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  submitted: 'Submitted',
-  approved: 'Approved',
-  no_show: 'No Show',
-  cancelled: 'Cancelled',
-}
-
 const ITEMS_PER_PAGE = 50
 
 export default function SessionsPage() {
@@ -79,6 +65,8 @@ export default function SessionsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [approvingId, setApprovingId] = useState<string | null>(null)
   const [rejectDialogSession, setRejectDialogSession] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [isBulkPending, startBulkTransition] = useTransition()
 
   // Use effective permissions (respects "view as" role)
   const isAdmin = can('session:view-all')
@@ -195,6 +183,22 @@ export default function SessionsPage() {
     setRejectDialogSession(sessionId)
   }
 
+  function handleBulkApprove() {
+    if (selectedIds.size === 0) return
+    startBulkTransition(async () => {
+      const result = await bulkApproveSessions(Array.from(selectedIds))
+      if (result.success) {
+        toast.success(`Approved ${result.count} session${result.count !== 1 ? 's' : ''}`)
+        setSessions((prev) =>
+          prev.map((s) => (selectedIds.has(s.id) ? { ...s, status: 'approved' } : s))
+        )
+        setSelectedIds(new Set())
+      } else {
+        toast.error('error' in result ? result.error : 'Failed to approve sessions')
+      }
+    })
+  }
+
   // Filter sessions based on current filters
   const filteredSessions = useMemo(() => {
     return sessions.filter((session) => {
@@ -241,6 +245,13 @@ export default function SessionsPage() {
   }, [filteredSessions, visibleCount])
 
   const hasMoreSessions = filteredSessions.length > visibleCount
+
+  // Submitted sessions visible in current view (for select-all)
+  const submittedInView = useMemo(
+    () => paginatedSessions.filter((s) => s.status === 'submitted'),
+    [paginatedSessions]
+  )
+  const allSubmittedSelected = submittedInView.length > 0 && submittedInView.every((s) => selectedIds.has(s.id))
 
   function loadMoreSessions() {
     setVisibleCount(prev => prev + ITEMS_PER_PAGE)
@@ -434,16 +445,73 @@ export default function SessionsPage() {
         </Card>
       )}
 
+      {/* Bulk Action Bar */}
+      {isAdmin && selectedIds.size > 0 && (
+        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {selectedIds.size} session{selectedIds.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleBulkApprove}
+                  disabled={isBulkPending}
+                >
+                  {isBulkPending ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                  )}
+                  Approve ({selectedIds.size})
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedIds(new Set())}
+                  disabled={isBulkPending}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {view === 'list' ? (
         <Card>
           <CardHeader>
-            <CardTitle>All Sessions</CardTitle>
-            <CardDescription>
-              {filteredSessions.length === sessions.length
-                ? `${sessions.length} sessions total`
-                : `${filteredSessions.length} of ${sessions.length} sessions`}
-              {hasMoreSessions && ` (showing ${paginatedSessions.length})`}
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>All Sessions</CardTitle>
+                <CardDescription>
+                  {filteredSessions.length === sessions.length
+                    ? `${sessions.length} sessions total`
+                    : `${filteredSessions.length} of ${sessions.length} sessions`}
+                  {hasMoreSessions && ` (showing ${paginatedSessions.length})`}
+                </CardDescription>
+              </div>
+              {isAdmin && submittedInView.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={allSubmittedSelected}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedIds(new Set(submittedInView.map((s) => s.id)))
+                      } else {
+                        setSelectedIds(new Set())
+                      }
+                    }}
+                    aria-label="Select all submitted sessions"
+                  />
+                  <span className="text-xs text-gray-500">
+                    Select all submitted ({submittedInView.length})
+                  </span>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {paginatedSessions.length > 0 ? (
@@ -460,7 +528,23 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                      <div className={`flex items-center justify-between p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        {isAdmin && session.status === 'submitted' && (
+                          <div className="mr-3 shrink-0" onClick={(e) => e.preventDefault()}>
+                            <Checkbox
+                              checked={selectedIds.has(session.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedIds((prev) => {
+                                  const next = new Set(prev)
+                                  if (checked) next.add(session.id)
+                                  else next.delete(session.id)
+                                  return next
+                                })
+                              }}
+                              aria-label={`Select session`}
+                            />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
                             <span className="font-medium truncate">
@@ -469,11 +553,11 @@ export default function SessionsPage() {
                             <Badge className={
                               session.status === 'draft' && session.rejection_reason
                                 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                : statusColors[session.status]
+                                : sessionStatusColors[session.status]
                             }>
                               {session.status === 'draft' && session.rejection_reason
                                 ? 'Needs Revision'
-                                : statusLabels[session.status] || session.status}
+                                : sessionStatusLabels[session.status] || session.status}
                             </Badge>
                           </div>
                           <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">

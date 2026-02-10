@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { bulkUpdateInvoiceStatus } from '@/app/actions/invoices'
-import { generateScholarshipBatchInvoice } from '@/app/actions/scholarship-invoices'
+import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
+import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, Loader2, Plus } from 'lucide-react'
+import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, CheckCircle, Loader2, Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -24,6 +24,12 @@ import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
+import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
+import {
+  fetchUnbilledScholarshipSessions,
+  groupUnbilledByClientMonth,
+  type UnbilledScholarshipSession,
+} from '@/lib/queries/scholarship'
 
 interface Invoice {
   id: string
@@ -53,23 +59,6 @@ interface Invoice {
   } | null
 }
 
-interface UnbilledScholarshipSession {
-  sessionId: string
-  clientId: string
-  clientName: string
-  date: string
-  durationMinutes: number
-  serviceTypeName: string
-  contractorName: string
-}
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
-
 function getInvoiceStatus(invoice: Invoice): { status: string; isOverdue: boolean; daysOverdue: number } {
   if (invoice.status === 'paid') {
     return { status: 'paid', isOverdue: false, daysOverdue: 0 }
@@ -91,13 +80,6 @@ function getInvoiceStatus(invoice: Invoice): { status: string; isOverdue: boolea
   return { status: invoice.status, isOverdue: false, daysOverdue: 0 }
 }
 
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-  venmo: 'Venmo',
-}
 
 // Moved outside the component to avoid re-creating during render
 function InvoiceTable({
@@ -201,7 +183,7 @@ function InvoiceTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  <Badge className={statusColors[status]}>
+                  <Badge className={invoiceStatusColors[status]}>
                     {isOverdue ? 'overdue' : invoice.status}
                   </Badge>
                   {isOverdue && (
@@ -213,7 +195,47 @@ function InvoiceTable({
               </TableCell>
               {showActions && isAdmin && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
+                  <div className="flex items-center gap-1">
+                    {invoice.status === 'pending' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs"
+                        onClick={async () => {
+                          const result = await updateInvoiceStatus(invoice.id, 'sent')
+                          if (result.success) {
+                            toast.success('Marked as sent')
+                            onRefresh?.()
+                          } else {
+                            toast.error('error' in result ? result.error : 'Failed')
+                          }
+                        }}
+                      >
+                        <Send className="w-3 h-3 mr-1" />
+                        Send
+                      </Button>
+                    )}
+                    {invoice.status === 'sent' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs"
+                        onClick={async () => {
+                          const result = await updateInvoiceStatus(invoice.id, 'paid')
+                          if (result.success) {
+                            toast.success('Marked as paid')
+                            onRefresh?.()
+                          } else {
+                            toast.error('error' in result ? result.error : 'Failed')
+                          }
+                        }}
+                      >
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Paid
+                      </Button>
+                    )}
+                    <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
+                  </div>
                 </TableCell>
               )}
             </TableRow>
@@ -228,13 +250,13 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
   const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
+  const [generatingAll, setGeneratingAll] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
   const supabaseRef = useRef(createClient())
-  const router = useRouter()
 
   const handleRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1)
@@ -394,67 +416,7 @@ export default function InvoicesPage() {
       // Fetch unbilled scholarship sessions (admin only)
       let unbilled: UnbilledScholarshipSession[] = []
       if (admin && !viewAsContractor) {
-        // Get scholarship clients
-        const { data: scholarshipClients } = await supabase
-          .from('clients')
-          .select('id, name')
-          .eq('payment_method', 'scholarship')
-
-        if (scholarshipClients && scholarshipClients.length > 0) {
-          const clientIds = scholarshipClients.map((c) => c.id)
-          const clientMap = new Map(scholarshipClients.map((c) => [c.id, c.name]))
-
-          // Get all session_attendees for scholarship clients
-          const { data: attendeeRows } = await supabase
-            .from('session_attendees')
-            .select(`
-              client_id,
-              session:sessions!inner(
-                id, date, duration_minutes, status,
-                contractor:users!sessions_contractor_id_fkey(name),
-                service_type:service_types(name)
-              )
-            `)
-            .in('client_id', clientIds)
-
-          // Get all invoiced session IDs for these clients (per-session invoices)
-          const { data: invoicedRows } = await supabase
-            .from('invoices')
-            .select('session_id')
-            .in('client_id', clientIds)
-            .not('session_id', 'is', null)
-
-          const invoicedSessionIds = new Set((invoicedRows || []).map((r) => r.session_id))
-
-          // Get session IDs already in invoice_items
-          const { data: itemRows } = await supabase
-            .from('invoice_items')
-            .select('session_id')
-
-          const itemizedSessionIds = new Set((itemRows || []).map((r) => r.session_id))
-
-          for (const row of attendeeRows || []) {
-            const session = row.session as unknown as {
-              id: string; date: string; duration_minutes: number; status: string
-              contractor: { name: string } | null
-              service_type: { name: string } | null
-            }
-            if (!session) continue
-            if (session.status !== 'submitted' && session.status !== 'approved') continue
-            if (invoicedSessionIds.has(session.id)) continue
-            if (itemizedSessionIds.has(session.id)) continue
-
-            unbilled.push({
-              sessionId: session.id,
-              clientId: row.client_id,
-              clientName: clientMap.get(row.client_id) || 'Unknown',
-              date: session.date,
-              durationMinutes: session.duration_minutes,
-              serviceTypeName: session.service_type?.name || 'Unknown',
-              contractorName: session.contractor?.name || 'Unknown',
-            })
-          }
-        }
+        unbilled = await fetchUnbilledScholarshipSessions(supabase)
       }
 
       if (!cancelled) {
@@ -490,25 +452,10 @@ export default function InvoicesPage() {
   ) || []
 
   // Group unbilled scholarship sessions by client and month
-  const unbilledByClientMonth = useMemo(() => {
-    const groups = new Map<string, { clientId: string; clientName: string; month: string; sessions: UnbilledScholarshipSession[] }>()
-    for (const s of unbilledScholarshipSessions) {
-      const date = new Date(s.date)
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      const key = `${s.clientId}::${monthKey}`
-      const existing = groups.get(key)
-      if (existing) {
-        existing.sessions.push(s)
-      } else {
-        groups.set(key, { clientId: s.clientId, clientName: s.clientName, month: monthKey, sessions: [s] })
-      }
-    }
-    return Array.from(groups.values()).sort((a, b) => {
-      const monthCmp = b.month.localeCompare(a.month)
-      if (monthCmp !== 0) return monthCmp
-      return a.clientName.localeCompare(b.clientName)
-    })
-  }, [unbilledScholarshipSessions])
+  const unbilledByClientMonth = useMemo(
+    () => groupUnbilledByClientMonth(unbilledScholarshipSessions),
+    [unbilledScholarshipSessions]
+  )
 
   // Existing batch scholarship invoices (already generated)
   const scholarshipBatchInvoices = invoices?.filter(
@@ -587,7 +534,7 @@ export default function InvoicesPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -718,9 +665,38 @@ export default function InvoicesPage() {
             {hasScholarshipContent && (
               <TabsContent value="scholarship">
                 <div className="space-y-6">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Scholarship sessions are billed monthly. Generate a batch invoice for each client per month.
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Scholarship sessions are billed monthly. Generate a batch invoice for each client per month.
+                    </p>
+                    {isAdmin && unbilledByClientMonth.length > 0 && (
+                      <Button
+                        size="sm"
+                        disabled={generatingAll}
+                        onClick={async () => {
+                          setGeneratingAll(true)
+                          const result = await generateAllUnbilledScholarshipInvoices(organization?.id || '')
+                          setGeneratingAll(false)
+                          if (result.success) {
+                            if (result.generated > 0) {
+                              toast.success(`Generated ${result.generated} invoice${result.generated !== 1 ? 's' : ''}`)
+                            }
+                            if (result.failed.length > 0) {
+                              toast.warning(`${result.failed.length} failed`)
+                            }
+                            handleRefresh()
+                          }
+                        }}
+                      >
+                        {generatingAll ? (
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4 mr-1" />
+                        )}
+                        Generate All ({unbilledByClientMonth.length})
+                      </Button>
+                    )}
+                  </div>
 
                   {/* Unbilled sessions grouped by client + month */}
                   {unbilledByClientMonth.length > 0 && (

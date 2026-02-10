@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink } from 'lucide-react'
+import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import type { User } from '@/types/database'
@@ -356,6 +356,10 @@ export function Header({ user }: HeaderProps) {
           <DropdownMenuItem onClick={() => router.push('/settings/')}>
             <UserIcon className="mr-2 h-4 w-4" />
             Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/help/')}>
+            <HelpCircle className="mr-2 h-4 w-4" />
+            Help
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">

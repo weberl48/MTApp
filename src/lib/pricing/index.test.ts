@@ -1,4 +1,4 @@
-import { calculateSessionPricing, calculateNoShowPricing, NO_SHOW_FEE } from './index'
+import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement } from './index'
 import type { ServiceType } from '@/types/database'
 
 describe('calculateSessionPricing', () => {
@@ -15,6 +15,7 @@ describe('calculateSessionPricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -93,6 +94,7 @@ describe('scholarship pricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: 60,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -185,6 +187,7 @@ describe('calculateNoShowPricing', () => {
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
     display_order: 0,
     organization_id: 'org-1',
@@ -192,9 +195,7 @@ describe('calculateNoShowPricing', () => {
     updated_at: '',
   }
 
-  it('charges $60 no-show fee', () => {
-    expect(NO_SHOW_FEE).toBe(60)
-
+  it('charges default no-show fee', () => {
     const result = calculateNoShowPricing(mockServiceType)
     expect(result.totalAmount).toBe(60)
     expect(result.isNoShow).toBe(true)
@@ -221,13 +222,166 @@ describe('calculateNoShowPricing', () => {
     expect(result.mcaCut).toBe(20) // $60 - $40
   })
 
-  it('respects pay increase bonus for no-show pay', () => {
-    // Normal pay $38.50 + $2 bonus = $40.50
-    const result = calculateNoShowPricing(mockServiceType, {
-      payIncrease: 2,
-    })
+})
 
+describe('contractor pay schedule', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Musical Expressions',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses pay schedule amount for 30 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30)
+    expect(result.contractorPay).toBe(38.5)
+    expect(result.totalAmount).toBe(60)
+    expect(result.mcaCut).toBe(21.5) // 60 - 38.5
+  })
+
+  it('uses pay schedule amount for 45 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 45)
+    expect(result.contractorPay).toBe(54)
+    expect(result.totalAmount).toBe(90) // 60 * 1.5
+    expect(result.mcaCut).toBe(36) // 90 - 54
+  })
+
+  it('falls back to formula for unlisted duration', () => {
+    // 60 min not in schedule, so uses formula: total - MCA%
+    const result = calculateSessionPricing(mockServiceType, 1, 60)
+    expect(result.totalAmount).toBe(120) // 60 * 2
+    expect(result.mcaCut).toBe(27.6) // 23% of 120
+    expect(result.contractorPay).toBe(92.4) // 120 - 27.6
+  })
+
+  it('custom rate used at base duration', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 40.5,
+    })
     expect(result.contractorPay).toBe(40.5)
-    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
+    expect(result.mcaCut).toBe(19.5) // 60 - 40.5
+  })
+
+  it('custom rate + schedule offset at non-base duration', () => {
+    // Custom 30-min rate $40.50 + schedule offset (54 - 38.5 = 15.5) = $56
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 40.5,
+    })
+    expect(result.contractorPay).toBe(56) // 40.5 + (54 - 38.5)
+    expect(result.mcaCut).toBe(34) // 90 - 56
+  })
+
+  it('custom rate scales linearly when no schedule for duration', () => {
+    // 60 min not in schedule, so custom rate scales linearly: 40.5 * 2 = 81
+    const result = calculateSessionPricing(mockServiceType, 1, 60, {
+      customContractorPay: 40.5,
+    })
+    expect(result.contractorPay).toBe(81) // 40.5 * (60/30)
+    expect(result.mcaCut).toBe(39) // 120 - 81
+  })
+})
+
+describe('contractor duration increment', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Musical Expressions',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    is_active: true,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses explicit increment at 45 min', () => {
+    // Colleen: $41.50 base, +$13.50/15min
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(55) // 41.5 + 13.5*1
+  })
+
+  it('uses explicit increment at 60 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 60, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(68.5) // 41.5 + 13.5*2
+  })
+
+  it('uses explicit increment at 90 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 90, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(95.5) // 41.5 + 13.5*4
+  })
+
+  it('null increment falls back to service type default', () => {
+    // null durationIncrement → derive from schedule: 54 - 38.5 = 15.5
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+      durationIncrement: null,
+    })
+    expect(result.contractorPay).toBe(57) // 41.5 + 15.5*1
+  })
+
+  it('undefined increment uses schedule offset (backward compat)', () => {
+    // No durationIncrement field → existing behavior: schedule offset
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+    })
+    expect(result.contractorPay).toBe(57) // 41.5 + (54 - 38.5)
+  })
+
+  it('increment at base duration always uses custom rate directly', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(41.5) // Increment irrelevant at base
+  })
+})
+
+describe('getDefaultIncrement', () => {
+  it('derives increment from schedule', () => {
+    expect(getDefaultIncrement({ '30': 38.5, '45': 54 })).toBe(15.5)
+  })
+
+  it('returns null for null schedule', () => {
+    expect(getDefaultIncrement(null)).toBeNull()
+  })
+
+  it('returns null when schedule missing next duration', () => {
+    expect(getDefaultIncrement({ '30': 38.5 })).toBeNull()
+  })
+
+  it('works with art schedule', () => {
+    expect(getDefaultIncrement({ '30': 32, '45': 45 })).toBe(13)
   })
 })
