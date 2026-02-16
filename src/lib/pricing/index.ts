@@ -113,9 +113,13 @@ export function calculateSessionPricing(
       // Explicit increment provided (number or null)
       const increment = effectiveOverrides.durationIncrement
         ?? getDefaultIncrement(schedule, durationBase)
-        ?? 0
-      const steps = (durationMinutes - durationBase) / 15
-      contractorPay = effectiveOverrides.customContractorPay + (increment * steps)
+      if (increment != null) {
+        const steps = (durationMinutes - durationBase) / 15
+        contractorPay = effectiveOverrides.customContractorPay + (increment * steps)
+      } else {
+        // No increment and no schedule: scale proportionally
+        contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
+      }
     } else if (schedulePay !== undefined && scheduleBase !== undefined) {
       // Fallback: custom rate + schedule offset from base
       contractorPay = effectiveOverrides.customContractorPay + (schedulePay - scheduleBase)
