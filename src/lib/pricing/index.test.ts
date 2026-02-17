@@ -11,6 +11,7 @@ describe('calculateSessionPricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
@@ -62,6 +63,62 @@ describe('calculateSessionPricing', () => {
     expect(cappedResult.mcaCut).toBe(145)
   })
 
+  it('skips per_person_rate when only 1 attendee in group service', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+    }
+
+    // 1 person in group: just base rate $50 (no per-person charge)
+    const result = calculateSessionPricing(groupService, 1)
+    expect(result.totalAmount).toBe(50)
+    expect(result.mcaCut).toBe(15) // 30% of 50
+    expect(result.contractorPay).toBe(35) // 50 - 15
+  })
+
+  it('includes per_person_rate when 2+ attendees', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+    }
+
+    // 3 people: 50 + (20 * 3) = 110
+    const result = calculateSessionPricing(groupService, 3)
+    expect(result.totalAmount).toBe(110)
+    expect(result.mcaCut).toBe(33) // 30% of 110
+    expect(result.contractorPay).toBe(77) // 110 - 33
+  })
+
+  it('applies total_cap to limit billed amount', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+      total_cap: 150,
+    }
+
+    // 8 people: 50 + (20 * 8) = 210 → capped at 150
+    const result = calculateSessionPricing(groupService, 8)
+    expect(result.totalAmount).toBe(150)
+    expect(result.mcaCut).toBe(45) // 30% of 150
+    expect(result.contractorPay).toBe(105) // 150 - 45
+  })
+
+  it('does not apply total_cap when under limit', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+      total_cap: 150,
+    }
+
+    // 3 people: 50 + (20 * 3) = 110 (under cap)
+    const result = calculateSessionPricing(groupService, 3)
+    expect(result.totalAmount).toBe(110)
+  })
+
   it('scales pricing by duration', () => {
     // 30 min (default): $50
     const result30 = calculateSessionPricing(mockServiceType, 1, 30)
@@ -93,6 +150,7 @@ describe('scholarship pricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
@@ -189,6 +247,7 @@ describe('calculateNoShowPricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
@@ -243,6 +302,7 @@ describe('contractor pay schedule', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
@@ -317,6 +377,7 @@ describe('contractor duration increment', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,

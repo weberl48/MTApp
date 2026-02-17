@@ -86,9 +86,15 @@ export function calculateSessionPricing(
   const durationMultiplier = durationMinutes / durationBase
 
   // Calculate total amount
-  // For groups: base_rate + (per_person_rate * total attendees)
-  const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * count)
+  // For groups: base_rate + (per_person_rate * attendees), but skip per-person for solo attendees
+  const perPersonCount = (serviceType.per_person_rate > 0 && count <= 1) ? 0 : count
+  const baseAmount = serviceType.base_rate + (serviceType.per_person_rate * perPersonCount)
   let totalAmount = baseAmount * durationMultiplier
+
+  // Apply total amount cap if specified (before MCA/contractor calculations)
+  if (serviceType.total_cap != null && totalAmount > serviceType.total_cap) {
+    totalAmount = serviceType.total_cap
+  }
 
   // Rent is no longer used - keeping field for backwards compatibility
   const rentAmount = 0
@@ -282,6 +288,10 @@ export function getPricingDescription(serviceType: ServiceType, showFormula: boo
 
     if (serviceType.contractor_cap) {
       description += `, contractor max $${serviceType.contractor_cap}`
+    }
+
+    if (serviceType.total_cap) {
+      description += `, total max $${serviceType.total_cap}`
     }
   }
 
