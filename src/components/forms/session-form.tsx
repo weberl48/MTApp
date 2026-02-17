@@ -162,7 +162,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
-    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod })
+    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod, durationBaseMinutes: settings?.pricing?.duration_base_minutes })
     : null
 
   // Duplicate detection

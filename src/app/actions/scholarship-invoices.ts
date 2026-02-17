@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
-import { calculateSessionPricing } from '@/lib/pricing'
+import { calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
 import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
 import type { ServiceType } from '@/types/database'
 
@@ -99,7 +99,29 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: 'All sessions in this period are already invoiced' }
   }
 
-  // 4. Calculate totals and build line items
+  // 4. Fetch contractor rates for accurate contractor pay
+  const contractorIds = [...new Set(
+    uninvoicedSessions
+      .map((row) => (row.session as unknown as { contractor: { id: string } | null }).contractor?.id)
+      .filter((id): id is string => !!id)
+  )]
+
+  const rateMap = new Map<string, ContractorPricingOverrides>()
+  if (contractorIds.length > 0) {
+    const { data: rates } = await supabase
+      .from('contractor_rates')
+      .select('user_id, service_type_id, contractor_pay, duration_increment')
+      .in('user_id', contractorIds)
+
+    for (const rate of rates || []) {
+      rateMap.set(`${rate.user_id}:${rate.service_type_id}`, {
+        customContractorPay: rate.contractor_pay,
+        durationIncrement: rate.duration_increment,
+      })
+    }
+  }
+
+  // 5. Calculate totals and build line items
   let totalAmount = 0
   let totalMcaCut = 0
   let totalContractorPay = 0
@@ -129,8 +151,11 @@ export async function generateScholarshipBatchInvoice({
 
     const serviceType = session.service_type
     const attendeeCount = session.group_headcount || 1
+    const overrides = session.contractor
+      ? rateMap.get(`${session.contractor.id}:${serviceType.id}`)
+      : undefined
     const pricing = calculateSessionPricing(
-      serviceType, attendeeCount, session.duration_minutes, undefined,
+      serviceType, attendeeCount, session.duration_minutes, overrides,
       { paymentMethod: 'scholarship' }
     )
 
@@ -153,7 +178,7 @@ export async function generateScholarshipBatchInvoice({
     })
   }
 
-  // 5. Create the batch invoice
+  // 6. Create the batch invoice
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
@@ -176,7 +201,7 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: invoiceError.message }
   }
 
-  // 6. Insert line items
+  // 7. Insert line items
   const itemsToInsert = items.map((item) => ({
     ...item,
     invoice_id: invoice.id,
