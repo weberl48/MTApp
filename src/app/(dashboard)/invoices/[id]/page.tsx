@@ -35,6 +35,7 @@ import { can } from '@/lib/auth/permissions'
 import type { UserRole, InvoiceItem } from '@/types/database'
 import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
 
@@ -241,7 +242,7 @@ export default function InvoiceDetailPage() {
           <p className="text-muted-foreground">
             {invoice.invoice_type === 'batch' && invoice.billing_period
               ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
-              : `${invoice.session?.service_type?.name} - ${invoice.session?.date && new Date(invoice.session.date).toLocaleDateString('en-US', {
+              : `${invoice.session?.service_type?.name} - ${invoice.session?.date && parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
@@ -384,7 +385,7 @@ export default function InvoiceDetailPage() {
                 {invoiceItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      {new Date(item.session_date).toLocaleDateString('en-US', {
+                      {parseLocalDate(item.session_date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',
@@ -416,7 +417,7 @@ export default function InvoiceDetailPage() {
                 <p className="font-medium">{invoice.session.service_type?.name}</p>
                 <div className="flex flex-wrap gap-x-4 text-sm text-gray-500">
                   <span>
-                    {new Date(invoice.session.date).toLocaleDateString('en-US', {
+                    {parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',

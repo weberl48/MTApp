@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { escape as escapeHtml } from 'he'
 import { format, parse } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 
 // Lazy initialize Resend to avoid build-time errors
 let resend: Resend | null = null
@@ -310,7 +311,7 @@ export async function sendSessionRequestStatusEmail({
   portalUrl,
 }: SendSessionRequestStatusEmailParams) {
   // Use date-fns for consistent date/time formatting
-  const formattedDate = format(new Date(preferredDate + 'T00:00:00'), 'EEEE, MMMM d, yyyy')
+  const formattedDate = format(parseLocalDate(preferredDate), 'EEEE, MMMM d, yyyy')
   const formattedTime = preferredTime
     ? format(parse(preferredTime, 'HH:mm', new Date()), 'h:mm a')
     : null

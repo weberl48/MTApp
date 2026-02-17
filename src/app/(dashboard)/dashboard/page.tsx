@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Calendar, Users, FileText, DollarSign, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
@@ -290,7 +291,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(session.date).toLocaleDateString('en-US', {
+                      {parseLocalDate(session.date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',

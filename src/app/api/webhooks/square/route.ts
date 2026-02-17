@@ -3,6 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 
 // Types for Supabase join results
 interface ClientJoinResult {
@@ -109,7 +110,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
             <p style="margin: 4px 0;"><strong>Client:</strong> ${clientName || 'Unknown'}</p>
             <p style="margin: 4px 0;"><strong>Service:</strong> ${serviceTypeName || 'Unknown'}</p>
             <p style="margin: 4px 0;"><strong>Amount:</strong> ${formatCurrency(typedInvoice.amount)}</p>
-            ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${new Date(session.date).toLocaleDateString()}</p>` : ''}
+            ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${parseLocalDate(session.date).toLocaleDateString()}</p>` : ''}
           </div>
           <p style="color: #6b7280; font-size: 14px;">This is an automated notification from your MCA Manager.</p>
         </div>

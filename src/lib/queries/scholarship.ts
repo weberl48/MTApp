@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { parseLocalDate } from '@/lib/dates'
 
 export interface UnbilledScholarshipSession {
   sessionId: string
@@ -157,7 +158,7 @@ export function groupUnbilledByClientMonth(sessions: UnbilledScholarshipSession[
   const groups = new Map<string, UnbilledGroup>()
 
   for (const s of sessions) {
-    const date = new Date(s.date)
+    const date = parseLocalDate(s.date)
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
     const key = `${s.clientId}::${monthKey}`
     const existing = groups.get(key)

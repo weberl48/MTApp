@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from
 import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
+import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -166,7 +167,7 @@ function InvoiceTable({
                 {invoice.invoice_type === 'batch' && invoice.billing_period
                   ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                   : invoice.session?.date
-                    ? new Date(invoice.session.date).toLocaleDateString('en-US', {
+                    ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
@@ -767,7 +768,7 @@ export default function InvoicesPage() {
                                       <TableRow key={s.sessionId}>
                                         <TableCell>{s.serviceTypeName}</TableCell>
                                         <TableCell>
-                                          {new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                          {parseLocalDate(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                         </TableCell>
                                         <TableCell>{s.contractorName}</TableCell>
                                         <TableCell className="text-right">{s.durationMinutes} min</TableCell>

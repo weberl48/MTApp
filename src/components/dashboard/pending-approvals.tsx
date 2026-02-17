@@ -11,6 +11,7 @@ import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
+import { parseLocalDate } from '@/lib/dates'
 import Link from 'next/link'
 
 interface SubmittedSession {
@@ -179,7 +180,7 @@ export function PendingApprovals() {
                   </div>
                   <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     <span>
-                      {new Date(session.date).toLocaleDateString('en-US', {
+                      {parseLocalDate(session.date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                       })}

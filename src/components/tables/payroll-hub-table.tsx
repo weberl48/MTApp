@@ -27,6 +27,7 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 
 export interface UnpaidSession {
   id: string
@@ -284,7 +285,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                               {contractor.unpaidSessions.map((session) => (
                                 <tr key={session.id} className="border-t border-gray-100 dark:border-gray-800">
                                   <td className="py-2">
-                                    {format(new Date(session.date), 'MMM d, yyyy')}
+                                    {format(parseLocalDate(session.date), 'MMM d, yyyy')}
                                   </td>
                                   <td className="py-2">{session.service_type?.name || '-'}</td>
                                   <td className="py-2">{session.clients.join(', ') || '-'}</td>

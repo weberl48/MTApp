@@ -20,6 +20,7 @@ import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil, Info }
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
 import { useContractorRates } from '@/hooks/use-contractor-rates'
+import { parseLocalDate } from '@/lib/dates'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -490,7 +491,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 space-y-1">
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {date === new Date().toISOString().split('T')[0] ? 'Today' : new Date(date + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {date === new Date().toISOString().split('T')[0] ? 'Today' : parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     {', '}{new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                     {' \u00B7 '}{duration} min
                   </p>
@@ -827,7 +828,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <AlertTitle className="text-yellow-800 dark:text-yellow-200">Potential Duplicate Session</AlertTitle>
               <AlertDescription className="text-yellow-700 dark:text-yellow-300">
                 <strong>{duplicateWarning.clientName}</strong> already has a <strong>{duplicateWarning.serviceTypeName}</strong> session
-                on <strong>{new Date(duplicateWarning.date).toLocaleDateString()}</strong>.
+                on <strong>{parseLocalDate(duplicateWarning.date).toLocaleDateString()}</strong>.
                 <br />
                 <a
                   href={`/sessions/${duplicateWarning.sessionId}`}
