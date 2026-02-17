@@ -71,6 +71,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     per_person_rate: serviceType?.per_person_rate?.toString() || '0',
     mca_percentage: serviceType?.mca_percentage?.toString() || '0',
     contractor_cap: serviceType?.contractor_cap?.toString() || '',
+    total_cap: serviceType?.total_cap?.toString() || '',
     rent_percentage: serviceType?.rent_percentage?.toString() || '0',
     scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
     is_active: serviceType?.is_active ?? true,
@@ -120,6 +121,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       per_person_rate: parseFloat(formData.per_person_rate) || 0,
       mca_percentage: parseFloat(formData.mca_percentage),
       contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
+      total_cap: formData.total_cap ? parseFloat(formData.total_cap) : null,
       rent_percentage: parseFloat(formData.rent_percentage) || 0,
       scholarship_rate: formData.scholarship_rate ? parseFloat(formData.scholarship_rate) : null,
       is_active: formData.is_active,
@@ -269,6 +271,23 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             </p>
           </div>
 
+          {/* Total Cap */}
+          <div className="space-y-2">
+            <Label htmlFor="total_cap">Total Cap ($)</Label>
+            <Input
+              id="total_cap"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.total_cap}
+              onChange={(e) => setFormData({ ...formData, total_cap: e.target.value })}
+              placeholder="Leave empty for no cap"
+            />
+            <p className="text-xs text-gray-500">
+              Maximum total billed amount per session. Leave empty for no cap.
+            </p>
+          </div>
+
           {/* Rent */}
           <div className="space-y-2">
             <Label htmlFor="rent_percentage">Rent Percentage (%)</Label>
@@ -321,6 +340,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                     per_person_rate: 0,
                     mca_percentage: parseFloat(formData.mca_percentage) || 0,
                     contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
+                    total_cap: formData.total_cap ? parseFloat(formData.total_cap) : null,
                     contractor_pay_schedule: null,
                     rent_percentage: 0,
                     scholarship_rate: null,

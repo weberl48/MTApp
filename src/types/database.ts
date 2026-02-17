@@ -364,6 +364,7 @@ export interface Database {
           per_person_rate: number
           mca_percentage: number
           contractor_cap: number | null
+          total_cap: number | null
           rent_percentage: number
           minimum_attendees: number | null
           scholarship_discount_percentage: number | null
@@ -387,6 +388,7 @@ export interface Database {
           per_person_rate?: number
           mca_percentage: number
           contractor_cap?: number | null
+          total_cap?: number | null
           rent_percentage?: number
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
@@ -409,6 +411,7 @@ export interface Database {
           per_person_rate?: number
           mca_percentage?: number
           contractor_cap?: number | null
+          total_cap?: number | null
           rent_percentage?: number
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
