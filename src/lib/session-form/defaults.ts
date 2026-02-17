@@ -3,7 +3,6 @@ export type SessionFormDefaultsV1 = {
   time: string
   duration: string
   serviceTypeId: string
-  selectedClientIds: string[]
 }
 
 export function getSessionFormDefaultsStorageKey(params: {
@@ -11,10 +10,6 @@ export function getSessionFormDefaultsStorageKey(params: {
   contractorId: string
 }) {
   return `mca_session_form_defaults:v1:${params.organizationId}:${params.contractorId}`
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((v) => typeof v === 'string')
 }
 
 export function loadSessionFormDefaults(storageKey: string): SessionFormDefaultsV1 | null {
@@ -30,14 +25,12 @@ export function loadSessionFormDefaults(storageKey: string): SessionFormDefaults
     if (typeof parsed.time !== 'string') return null
     if (typeof parsed.duration !== 'string') return null
     if (typeof parsed.serviceTypeId !== 'string') return null
-    if (!isStringArray(parsed.selectedClientIds)) return null
 
     return {
       v: 1,
       time: parsed.time,
       duration: parsed.duration,
       serviceTypeId: parsed.serviceTypeId,
-      selectedClientIds: parsed.selectedClientIds,
     }
   } catch {
     return null
@@ -52,7 +45,6 @@ export function saveSessionFormDefaults(storageKey: string, defaults: Omit<Sessi
     time: defaults.time,
     duration: defaults.duration,
     serviceTypeId: defaults.serviceTypeId,
-    selectedClientIds: defaults.selectedClientIds,
   }
 
   try {

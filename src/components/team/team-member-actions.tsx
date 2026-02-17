@@ -45,13 +45,8 @@ export function TeamMemberActions({ member, currentUserId, currentUserRole }: Te
     // Can't remove yourself
     if (member.id === currentUserId) return false
 
-    // Developers can remove anyone
-    if (currentUserRole === 'developer') return true
-
-    // Owners can remove admins and contractors
-    if (currentUserRole === 'owner') {
-      return member.role !== 'owner' && member.role !== 'developer'
-    }
+    // Developers and owners can remove anyone
+    if (currentUserRole === 'developer' || currentUserRole === 'owner') return true
 
     // Admins can only remove contractors
     if (currentUserRole === 'admin') {

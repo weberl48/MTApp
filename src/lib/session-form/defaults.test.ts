@@ -29,7 +29,6 @@ describe('session form defaults storage', () => {
       time: '10:15',
       duration: '45',
       serviceTypeId: 'service-1',
-      selectedClientIds: ['c1', 'c2'],
     })
 
     const loaded = loadSessionFormDefaults(key)
@@ -38,7 +37,6 @@ describe('session form defaults storage', () => {
       time: '10:15',
       duration: '45',
       serviceTypeId: 'service-1',
-      selectedClientIds: ['c1', 'c2'],
     })
   })
 
@@ -60,7 +58,6 @@ describe('session form defaults storage', () => {
       time: '09:00',
       duration: '30',
       serviceTypeId: '',
-      selectedClientIds: [],
     })
     clearSessionFormDefaults(key)
     expect(loadSessionFormDefaults(key)).toBeNull()

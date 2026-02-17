@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import type { ServiceType, ServiceCategory, LocationType } from '@/types/database'
@@ -73,8 +74,24 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     rent_percentage: serviceType?.rent_percentage?.toString() || '0',
     scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
     is_active: serviceType?.is_active ?? true,
+    is_scholarship: serviceType?.is_scholarship ?? false,
+    requires_client: serviceType?.requires_client ?? true,
+    allowed_contractor_ids: serviceType?.allowed_contractor_ids || ([] as string[]),
     pay_schedule: initPaySchedule(),
   })
+
+  // Fetch contractors for restriction selector
+  const [contractors, setContractors] = useState<{ id: string; name: string }[]>([])
+  useEffect(() => {
+    if (!isOpen) return
+    const supabase = createClient()
+    supabase
+      .from('users')
+      .select('id, name')
+      .in('role', ['contractor', 'admin', 'owner'])
+      .order('name')
+      .then(({ data }) => setContractors(data || []))
+  }, [isOpen])
 
   const isEditing = !!serviceType
 
@@ -106,6 +123,9 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       rent_percentage: parseFloat(formData.rent_percentage) || 0,
       scholarship_rate: formData.scholarship_rate ? parseFloat(formData.scholarship_rate) : null,
       is_active: formData.is_active,
+      is_scholarship: formData.is_scholarship,
+      requires_client: formData.requires_client,
+      allowed_contractor_ids: formData.allowed_contractor_ids.length > 0 ? formData.allowed_contractor_ids : null,
       contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
     }
 
@@ -339,6 +359,71 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                 )
               })}
             </div>
+          </div>
+
+          {/* Scholarship Toggle */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label htmlFor="is_scholarship">Scholarship Service</Label>
+              <p className="text-xs text-gray-500">
+                Sessions are batch-invoiced monthly on the Scholarship tab instead of per-session
+              </p>
+            </div>
+            <Switch
+              id="is_scholarship"
+              checked={formData.is_scholarship}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_scholarship: checked })}
+            />
+          </div>
+
+          {/* Requires Client Toggle */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label htmlFor="requires_client">Requires Client</Label>
+              <p className="text-xs text-gray-500">
+                Turn off for admin work or tasks that don&apos;t need a client
+              </p>
+            </div>
+            <Switch
+              id="requires_client"
+              checked={formData.requires_client}
+              onCheckedChange={(checked) => setFormData({ ...formData, requires_client: checked })}
+            />
+          </div>
+
+          {/* Contractor Restrictions */}
+          <div className="space-y-2">
+            <Label>Restrict to Contractors</Label>
+            <p className="text-xs text-gray-500">
+              Only selected contractors can use this service type. Leave all unchecked for no restriction.
+            </p>
+            {contractors.length > 0 ? (
+              <div className="border rounded-lg divide-y max-h-48 overflow-y-auto">
+                {contractors.map((c) => (
+                  <label key={c.id} className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <Checkbox
+                      checked={formData.allowed_contractor_ids.includes(c.id)}
+                      onCheckedChange={(checked) => {
+                        setFormData({
+                          ...formData,
+                          allowed_contractor_ids: checked
+                            ? [...formData.allowed_contractor_ids, c.id]
+                            : formData.allowed_contractor_ids.filter((id) => id !== c.id),
+                        })
+                      }}
+                    />
+                    <span>{c.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400">Loading contractors...</p>
+            )}
+            {formData.allowed_contractor_ids.length > 0 && (
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Restricted to {formData.allowed_contractor_ids.length} contractor{formData.allowed_contractor_ids.length !== 1 ? 's' : ''}
+              </p>
+            )}
           </div>
 
           {/* Active Toggle */}

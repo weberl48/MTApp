@@ -44,9 +44,9 @@ export async function removeTeamMember(memberId: string) {
     return { success: false, error: 'Team member not found' }
   }
 
-  // Only developers can remove owners
-  if (memberToRemove.role === 'owner' && currentUser?.role !== 'developer') {
-    return { success: false, error: 'Only developers can remove owners' }
+  // Only developers and owners can remove owners
+  if (memberToRemove.role === 'owner' && currentUser?.role !== 'developer' && currentUser?.role !== 'owner') {
+    return { success: false, error: 'Only owners can remove other owners' }
   }
 
   // Only owners/developers can remove admins

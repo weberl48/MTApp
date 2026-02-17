@@ -16,6 +16,7 @@ interface CreateSessionParams {
   status: 'draft' | 'submitted' | 'approved'
   groupHeadcount: number | null
   pricing: PricingCalculation
+  isScholarshipService?: boolean
 }
 
 interface CreateSessionResult {
@@ -32,7 +33,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     supabase, date, time, durationMinutes, serviceTypeId,
     contractorId, organizationId, clientIds,
     encryptedNotes, encryptedClientNotes, status,
-    groupHeadcount, pricing,
+    groupHeadcount, pricing, isScholarshipService,
   } = params
 
   // Create the session
@@ -73,7 +74,8 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     if (attendeesError) throw attendeesError
 
     // If submitted, create invoices for each non-scholarship client
-    if (status === 'submitted' || status === 'approved') {
+    // Skip all per-session invoices for scholarship service types (they use batch invoicing)
+    if (!isScholarshipService && (status === 'submitted' || status === 'approved')) {
       const { data: clientData } = await supabase
         .from('clients')
         .select('id, payment_method')

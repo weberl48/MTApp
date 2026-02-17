@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil } from 'lucide-react'
+import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil, Info } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
 import { useContractorRates } from '@/hooks/use-contractor-rates'
@@ -64,6 +64,14 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const showFinancialDetails = can('financial:view-details')
   const isEditMode = !!existingSession
 
+  // Filter service types by contractor restrictions (admins see all)
+  const visibleServiceTypes = useMemo(() => {
+    if (showFinancialDetails) return serviceTypes // Admins/owners see all
+    return serviceTypes.filter((st) =>
+      !st.allowed_contractor_ids || st.allowed_contractor_ids.length === 0 || st.allowed_contractor_ids.includes(effectiveContractorId)
+    )
+  }, [serviceTypes, effectiveContractorId, showFinancialDetails])
+
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(existingSession?.date || new Date().toISOString().split('T')[0])
   const [time, setTime] = useState(existingSession?.time?.slice(0, 5) || '09:00')
@@ -87,6 +95,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Success state for "Log Another" flow
   const [showSuccess, setShowSuccess] = useState(false)
+  const wasScholarshipRef = useRef(false)
 
   function setFieldError(field: string, message: string) {
     setErrors(prev => ({ ...prev, [field]: message }))
@@ -118,13 +127,18 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Check if this is a group service type (has per_person_rate > 0)
   const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
 
+  // Check if this service type requires a client (admin work does not)
+  const requiresClient = selectedServiceType?.requires_client !== false
+
   // Whether notes are required on submit (configurable via org settings)
   const notesRequired = settings?.session?.require_notes !== false
 
-  // For groups, use headcount; for individuals, use selected clients count
+  // For groups, use headcount; for no-client services, default to 1; for individuals, use selected clients count
   const attendeeCount = isGroupService
     ? parseInt(groupHeadcount) || 0
-    : selectedClients.length
+    : !requiresClient
+      ? 1
+      : selectedClients.length
 
   // Build contractor pricing overrides for this service type
   const contractorOverrides = serviceTypeId ? getContractorOverrides(serviceTypeId) : undefined
@@ -133,15 +147,17 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const missingCustomRate = serviceTypeId ? hasMissingRate(serviceTypeId) : false
 
   // Determine payment method for pricing (scholarship affects pricing)
+  // Service types flagged as scholarship always use scholarship pricing
   // For single-client sessions, use that client's payment method
   // For groups/mixed, show normal pricing (scholarship handled per-client at invoice time)
   const selectedPaymentMethod = useMemo(() => {
+    if (selectedServiceType?.is_scholarship) return 'scholarship'
     if (selectedClients.length === 1) {
       const client = clients.find(c => c.id === selectedClients[0])
       return client?.payment_method
     }
     return undefined
-  }, [selectedClients, clients])
+  }, [selectedClients, clients, selectedServiceType?.is_scholarship])
 
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
@@ -220,7 +236,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }
 
   // Load remembered defaults (new sessions only). Never persist/restore notes.
-  const clientIdSet = useMemo(() => new Set(clients.map((c) => c.id)), [clients])
   const [didApplyDefaults, setDidApplyDefaults] = useState(false)
 
   useEffect(() => {
@@ -237,13 +252,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setTime(defaults.time)
     setDuration(defaults.duration)
     setServiceTypeId(defaults.serviceTypeId)
-    setSelectedClients(defaults.selectedClientIds.filter((id) => clientIdSet.has(id)))
     setDidApplyDefaults(true)
-  }, [clientIdSet, didApplyDefaults, isEditMode, storageKey])
+  }, [didApplyDefaults, isEditMode, storageKey])
 
   // Collapsible setup: contractors with remembered defaults start collapsed on mobile
   const hasPopulatedDefaults = didApplyDefaults && !isEditMode && !showFinancialDetails
-    && !!serviceTypeId && (isGroupService || selectedClients.length > 0)
+    && !!serviceTypeId
   const [setupExpanded, setSetupExpanded] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -268,7 +282,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
         hasErrors = true
       }
-    } else {
+    } else if (requiresClient) {
       if (selectedClients.length === 0) {
         setFieldError('clients', 'Please add at least one client')
         hasErrors = true
@@ -369,12 +383,13 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           serviceTypeId,
           contractorId: effectiveContractorId,
           organizationId: organization!.id,
-          clientIds: isGroupService ? [] : selectedClients,
+          clientIds: isGroupService || !requiresClient ? [] : selectedClients,
           encryptedNotes,
           encryptedClientNotes,
           status: effectiveStatus,
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
           pricing: pricing!,
+          isScholarshipService: selectedServiceType?.is_scholarship ?? false,
         })
 
         if (result.invoiceError) {
@@ -386,11 +401,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             time,
             duration,
             serviceTypeId,
-            selectedClientIds: selectedClients,
           })
         }
 
         toast.success('Session logged successfully!')
+        wasScholarshipRef.current = selectedPaymentMethod === 'scholarship'
         setShowSuccess(true)
       }
     } catch {
@@ -428,7 +443,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Session Logged!</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
-                Your session has been saved and submitted for approval.
+                {wasScholarshipRef.current
+                  ? 'This scholarship session will appear on the Invoices \u203A Scholarship tab for monthly batch invoicing.'
+                  : 'Your session has been saved and submitted for approval.'}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -563,7 +580,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent>
-                {serviceTypes.map((st) => (
+                {visibleServiceTypes.map((st) => (
                   <SelectItem key={st.id} value={st.id}>
                     {st.name}
                   </SelectItem>
@@ -589,8 +606,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
           </div>
 
-          {/* Clients - Only for individual (non-group) sessions */}
-          {!isGroupService && (
+          {/* Clients - Only for individual (non-group) sessions that require a client */}
+          {!isGroupService && requiresClient && (
           <div className="space-y-2">
             <Label>Clients *</Label>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -634,6 +651,16 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+          )}
+
+          {/* Scholarship info banner */}
+          {selectedPaymentMethod === 'scholarship' && (
+            <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-blue-700 dark:text-blue-300">
+                Scholarship sessions are invoiced monthly in batch — no per-session invoice will be created.
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Group Headcount - Only show for group service types */}
