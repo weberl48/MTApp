@@ -7,6 +7,7 @@ import {
 } from '@react-pdf/renderer'
 import { paymentMethodLabels, formatInvoiceNumber } from '@/lib/constants/display'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 
 const styles = StyleSheet.create({
   page: {
@@ -229,12 +230,7 @@ function formatDate(dateString: string): string {
   })
 }
 
-function formatShortDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-}
+
 
 export function InvoicePDF({ invoice }: InvoicePDFProps) {
   const invoiceNumber = formatInvoiceNumber(invoice.id)
@@ -328,7 +324,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
                       </Text>
                     )}
                   </View>
-                  <Text style={styles.col2}>{formatShortDate(item.session_date)}</Text>
+                  <Text style={styles.col2}>{parseLocalDate(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
                   <Text style={[styles.col3, { fontWeight: 'bold' }]}>
                     {formatCurrency(item.amount)}
                   </Text>
@@ -349,7 +345,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
                   </Text>
                 )}
               </View>
-              <Text style={styles.col2}>{formatDate(invoice.session.date)}</Text>
+              <Text style={styles.col2}>{parseLocalDate(invoice.session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
               <Text style={[styles.col3, { fontWeight: 'bold' }]}>
                 {formatCurrency(invoice.amount)}
               </Text>

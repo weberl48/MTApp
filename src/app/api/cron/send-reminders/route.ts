@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { parseLocalDate } from '@/lib/dates'
 
 // Lazy initialize clients to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -143,7 +144,7 @@ export async function GET(request: NextRequest) {
           .join(', ') || 'No clients'
 
         // Format date
-        const sessionDate = new Date(session.date)
+        const sessionDate = parseLocalDate(session.date)
         const formattedDate = sessionDate.toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',

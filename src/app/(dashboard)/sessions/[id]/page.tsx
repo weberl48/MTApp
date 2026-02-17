@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 import { decryptPHI } from '@/lib/crypto/actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { toast } from 'sonner'
@@ -275,7 +276,7 @@ export default function SessionDetailPage() {
             {(session.service_type?.name || 'Session Details').replaceAll('-', '‑')}
           </h1>
           <p className="text-muted-foreground">
-            {new Date(session.date).toLocaleDateString('en-US', {
+            {parseLocalDate(session.date).toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -350,7 +351,7 @@ export default function SessionDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Date & Time</p>
                 <p className="font-medium">
-                  {new Date(session.date).toLocaleDateString('en-US', {
+                  {parseLocalDate(session.date).toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',

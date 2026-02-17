@@ -8,6 +8,7 @@ import { Mail, Phone, CreditCard, FileText, Calendar } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { decryptField } from '@/lib/crypto'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 
 interface ClientDetailPageProps {
   params: Promise<{ id: string }>
@@ -86,7 +87,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   const clientSessions = (attendeeRows || [])
     .map((row) => row.session as unknown as SessionRow)
     .filter(Boolean)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime())
 
   // Fetch invoices for this client
   const { data: clientInvoices } = await supabase
@@ -219,7 +220,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {new Date(session.date).toLocaleDateString('en-US', {
+                          {parseLocalDate(session.date).toLocaleDateString('en-US', {
                             weekday: 'short',
                             month: 'short',
                             day: 'numeric',

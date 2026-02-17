@@ -13,6 +13,7 @@ import { formatCurrency } from '@/lib/pricing'
 import { paymentMethodLabels } from '@/lib/constants/display'
 import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
+import { parseLocalDate } from '@/lib/dates'
 import Link from 'next/link'
 
 interface PendingInvoice {
@@ -206,7 +207,7 @@ export function UnsentInvoices() {
                   {invoice.invoice_type === 'batch' && invoice.billing_period
                     ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                     : invoice.session?.date
-                      ? new Date(invoice.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                       : ''}
                   {invoice.session?.service_type?.name && ` \u00b7 ${invoice.session.service_type.name}`}
                 </p>

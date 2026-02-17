@@ -18,6 +18,7 @@ import {
 import Link from 'next/link'
 import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 import { Checkbox } from '@/components/ui/checkbox'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
@@ -598,7 +599,7 @@ export default function SessionsPage() {
                           </div>
                           <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">
                             <span>
-                              {new Date(session.date).toLocaleDateString('en-US', {
+                              {parseLocalDate(session.date).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 month: 'short',
                                 day: 'numeric',

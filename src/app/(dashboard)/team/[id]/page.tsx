@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -394,7 +395,7 @@ export default function TeamMemberPage() {
                     {sessions.map((session) => (
                       <TableRow key={session.id}>
                         <TableCell>
-                          {new Date(session.date).toLocaleDateString('en-US', {
+                          {parseLocalDate(session.date).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
@@ -440,11 +441,17 @@ export default function TeamMemberPage() {
                     {invoices.map((invoice) => (
                       <TableRow key={invoice.id}>
                         <TableCell>
-                          {new Date(invoice.session?.date || invoice.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
+                          {invoice.session?.date
+                            ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })
+                            : new Date(invoice.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
                         </TableCell>
                         <TableCell className="font-medium">
                           {invoice.client?.name}

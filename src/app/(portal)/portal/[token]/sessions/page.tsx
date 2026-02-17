@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Clock, User, FileText, Plus, Send } from 'lucide-react'
+import { parseLocalDate } from '@/lib/dates'
 
 interface SessionRequest {
   id: string
@@ -68,7 +69,7 @@ export default function PortalSessionsPage() {
   const pendingRequests = requests.filter((r) => r.status === 'pending')
 
   function formatDate(dateStr: string) {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

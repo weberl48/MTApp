@@ -14,6 +14,7 @@ import { AdminGuard } from '@/components/guards/admin-guard'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
 import { subMonths, format, startOfMonth, endOfMonth } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
 
 type DateRange = '3m' | '6m' | '12m' | 'ytd'
@@ -131,7 +132,7 @@ export default function AnalyticsPage() {
         return d >= start && d <= end
       }),
       filteredSessions: sessions.filter(s => {
-        const d = new Date(s.date)
+        const d = parseLocalDate(s.date)
         return d >= start && d <= end
       }),
     }
@@ -172,7 +173,7 @@ export default function AnalyticsPage() {
       })
 
       const monthSessions = filteredSessions.filter(s => {
-        const d = new Date(s.date)
+        const d = parseLocalDate(s.date)
         return d.getFullYear() === year && d.getMonth() === month
       })
 

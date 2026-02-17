@@ -3,6 +3,7 @@ import { createSquareInvoice } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { logger } from '@/lib/logger'
 import { formatInvoiceNumber } from '@/lib/constants/display'
+import { parseLocalDate } from '@/lib/dates'
 import type { OrganizationSettings } from '@/types/database'
 
 export interface AutoSendResult {
@@ -61,7 +62,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
   // Build description from session data (same pattern as /api/invoices/[id]/square)
   const serviceType = Array.isArray(session.service_type) ? session.service_type[0] : session.service_type
   const sessionDate = session.date
-    ? new Date(session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    ? parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : 'N/A'
   const description = `${serviceType?.name || 'Session'} on ${sessionDate}`
 
