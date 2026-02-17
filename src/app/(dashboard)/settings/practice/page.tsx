@@ -406,6 +406,14 @@ export default function PracticeSettingsPage() {
                 <Label htmlFor="youtube">YouTube</Label>
                 <Input id="youtube" value={socialLinks.youtube || ''} onChange={(e) => updateSocialLink('youtube', e.target.value)} placeholder="https://youtube.com/..." />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="twitter">Twitter / X</Label>
+                <Input id="twitter" value={socialLinks.twitter || ''} onChange={(e) => updateSocialLink('twitter', e.target.value)} placeholder="https://x.com/..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tiktok">TikTok</Label>
+                <Input id="tiktok" value={socialLinks.tiktok || ''} onChange={(e) => updateSocialLink('tiktok', e.target.value)} placeholder="https://tiktok.com/@..." />
+              </div>
             </div>
           </CardContent>
         </Card>

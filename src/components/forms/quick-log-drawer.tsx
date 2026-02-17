@@ -99,7 +99,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         1,
         parseInt(defaults.duration) || 30,
         contractorOverrides,
-        { paymentMethod: selectedPaymentMethod }
+        { paymentMethod: selectedPaymentMethod, durationBaseMinutes: settings?.pricing?.duration_base_minutes }
       )
     : null
 

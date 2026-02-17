@@ -136,7 +136,8 @@ export default function EarningsPage() {
           serviceType as ServiceType,
           attendeeCount,
           session.duration_minutes || 30,
-          overrides
+          overrides,
+          { durationBaseMinutes: organization?.settings?.pricing?.duration_base_minutes }
         )
 
         // Use actual paid amount if available, otherwise use calculated

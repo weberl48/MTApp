@@ -85,22 +85,6 @@ export interface SocialLinks {
   tiktok?: string
 }
 
-// Business hours structure
-export interface DayHours {
-  open: string
-  close: string
-  closed: boolean
-}
-
-export interface BusinessHours {
-  monday: DayHours
-  tuesday: DayHours
-  wednesday: DayHours
-  thursday: DayHours
-  friday: DayHours
-  saturday: DayHours
-  sunday: DayHours
-}
 
 export interface Database {
   public: {
@@ -121,7 +105,6 @@ export interface Database {
           description: string | null
           tax_id: string | null
           social_links: SocialLinks
-          business_hours: BusinessHours
           timezone: string
           currency: string
           plan: PlanType
@@ -145,7 +128,6 @@ export interface Database {
           description?: string | null
           tax_id?: string | null
           social_links?: SocialLinks
-          business_hours?: BusinessHours
           timezone?: string
           currency?: string
           plan?: PlanType
@@ -168,7 +150,6 @@ export interface Database {
           description?: string | null
           tax_id?: string | null
           social_links?: SocialLinks
-          business_hours?: BusinessHours
           timezone?: string
           currency?: string
           plan?: PlanType
