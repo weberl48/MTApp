@@ -27,7 +27,7 @@ import {
 import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
 import { calculateSessionPricing, formatCurrency } from '@/lib/pricing'
-import type { ServiceType, Client } from '@/types/database'
+import type { ServiceType } from '@/types/database'
 
 interface QuickLogDrawerProps {
   open: boolean
@@ -41,7 +41,6 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
   const { getOverrides } = useContractorRates(contractorId)
 
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([])
-  const [clients, setClients] = useState<Array<Pick<Client, 'id' | 'name' | 'payment_method'>>>([])
   const [dataLoading, setDataLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
@@ -67,13 +66,9 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
 
     let cancelled = false
     async function load() {
-      const [{ data: st }, { data: cl }] = await Promise.all([
-        supabase.from('service_types').select('*').order('name'),
-        supabase.from('clients').select('id, name, payment_method').order('name'),
-      ])
+      const { data: st } = await supabase.from('service_types').select('*').order('name')
       if (cancelled) return
       setServiceTypes((st as ServiceType[]) || [])
-      setClients(cl || [])
       setDataLoading(false)
     }
 
@@ -93,23 +88,15 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
 
   // Resolve defaults to names
   const serviceType = serviceTypes.find(st => st.id === defaults?.serviceTypeId)
-  const clientNames = (defaults?.selectedClientIds || [])
-    .map(id => clients.find(c => c.id === id)?.name)
-    .filter(Boolean)
-    .join(', ')
-  const hasValidDefaults = !!defaults && !!serviceType && clientNames.length > 0
+  const hasValidDefaults = !!defaults && !!serviceType
 
-  // Calculate pricing
-  const selectedPaymentMethod = useMemo(() => {
-    if (!defaults || defaults.selectedClientIds.length !== 1) return undefined
-    return clients.find(c => c.id === defaults.selectedClientIds[0])?.payment_method
-  }, [defaults, clients])
-
+  // Calculate pricing (no client pre-selected, so use 1 attendee and no payment method override)
   const contractorOverrides = defaults?.serviceTypeId ? getOverrides(defaults.serviceTypeId) : undefined
+  const selectedPaymentMethod = serviceType?.is_scholarship ? 'scholarship' as const : undefined
   const pricing = serviceType && defaults
     ? calculateSessionPricing(
         serviceType,
-        defaults.selectedClientIds.length || 1,
+        1,
         parseInt(defaults.duration) || 30,
         contractorOverrides,
         { paymentMethod: selectedPaymentMethod }
@@ -145,12 +132,13 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         serviceTypeId: defaults.serviceTypeId,
         contractorId,
         organizationId: organization.id,
-        clientIds: defaults.selectedClientIds,
+        clientIds: [],
         encryptedNotes: encrypted.notes,
         encryptedClientNotes: encrypted.clientNotes,
         status: effectiveStatus as 'submitted' | 'approved',
         groupHeadcount: null,
         pricing,
+        isScholarshipService: serviceType?.is_scholarship ?? false,
       })
 
       // Re-save defaults so they persist
@@ -159,7 +147,6 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
           time: defaults.time,
           duration: defaults.duration,
           serviceTypeId: defaults.serviceTypeId,
-          selectedClientIds: defaults.selectedClientIds,
         })
       }
 
@@ -205,8 +192,6 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
                   {serviceType?.name}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {clientNames}
-                  {' \u00B7 '}
                   {defaults?.duration || 30} min
                   {' \u00B7 '}
                   {new Date(`2000-01-01T${defaults?.time || '09:00'}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}

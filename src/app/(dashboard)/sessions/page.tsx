@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle } from 'lucide-react'
+import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { Checkbox } from '@/components/ui/checkbox'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
@@ -92,6 +92,7 @@ export default function SessionsPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'client_asc' | 'client_desc'>('date_desc')
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
@@ -239,12 +240,34 @@ export default function SessionsPage() {
 
   const hasActiveFilters = searchQuery || statusFilter !== 'all' || contractorFilter !== 'all' || dateFrom || dateTo
 
+  // Sort filtered sessions
+  const sortedSessions = useMemo(() => {
+    if (sortBy === 'date_desc') return filteredSessions // Already sorted by date desc from DB
+    const sorted = [...filteredSessions]
+    switch (sortBy) {
+      case 'date_asc':
+        sorted.sort((a, b) => a.date.localeCompare(b.date))
+        break
+      case 'client_asc':
+      case 'client_desc': {
+        const getClientName = (s: Session) =>
+          s.attendees?.[0]?.client?.name?.toLowerCase() || '\uffff' // push no-client sessions to end
+        sorted.sort((a, b) => {
+          const cmp = getClientName(a).localeCompare(getClientName(b))
+          return sortBy === 'client_asc' ? cmp : -cmp
+        })
+        break
+      }
+    }
+    return sorted
+  }, [filteredSessions, sortBy])
+
   // Paginated sessions (show only up to visibleCount)
   const paginatedSessions = useMemo(() => {
-    return filteredSessions.slice(0, visibleCount)
-  }, [filteredSessions, visibleCount])
+    return sortedSessions.slice(0, visibleCount)
+  }, [sortedSessions, visibleCount])
 
-  const hasMoreSessions = filteredSessions.length > visibleCount
+  const hasMoreSessions = sortedSessions.length > visibleCount
 
   // Submitted sessions visible in current view (for select-all)
   const submittedInView = useMemo(
@@ -263,6 +286,7 @@ export default function SessionsPage() {
     setContractorFilter('all')
     setDateFrom('')
     setDateTo('')
+    setSortBy('date_desc')
     setVisibleCount(ITEMS_PER_PAGE) // Reset pagination when clearing filters
   }
 
@@ -323,6 +347,18 @@ export default function SessionsPage() {
                     className="pl-9"
                   />
                 </div>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                  <SelectTrigger className="w-[160px]">
+                    <ArrowUpDown className="w-4 h-4 mr-2 shrink-0" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date_desc">Date (Newest)</SelectItem>
+                    <SelectItem value="date_asc">Date (Oldest)</SelectItem>
+                    <SelectItem value="client_asc">Client (A-Z)</SelectItem>
+                    <SelectItem value="client_desc">Client (Z-A)</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button
                   variant={showFilters ? 'secondary' : 'outline'}
                   onClick={() => setShowFilters(!showFilters)}

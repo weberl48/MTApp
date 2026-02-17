@@ -370,6 +370,9 @@ export interface Database {
           scholarship_rate: number | null
           contractor_pay_schedule: Record<string, number> | null
           is_active: boolean
+          is_scholarship: boolean
+          requires_client: boolean
+          allowed_contractor_ids: string[] | null
           display_order: number
           organization_id: string
           created_at: string
@@ -390,6 +393,9 @@ export interface Database {
           scholarship_rate?: number | null
           contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
+          is_scholarship?: boolean
+          requires_client?: boolean
+          allowed_contractor_ids?: string[] | null
           display_order?: number
           organization_id: string
           created_at?: string
@@ -409,6 +415,9 @@ export interface Database {
           scholarship_rate?: number | null
           contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
+          is_scholarship?: boolean
+          requires_client?: boolean
+          allowed_contractor_ids?: string[] | null
           display_order?: number
           organization_id?: string
           updated_at?: string
