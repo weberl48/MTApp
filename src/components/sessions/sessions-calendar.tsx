@@ -122,7 +122,7 @@ export function SessionsCalendar({ sessions, isAdmin }: SessionsCalendarProps) {
                   {daySessions.map((session) => (
                     <Link
                       key={session.id}
-                      href={`/sessions/${session.id}`}
+                      href={`/sessions/${session.id}/`}
                       className="block"
                     >
                       <div className={`text-xs p-1.5 rounded border border-transparent hover:border-blue-300 transition-colors ${sessionStatusColors[session.status] || 'bg-gray-100'}`}>

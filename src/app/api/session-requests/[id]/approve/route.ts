@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendSessionRequestStatusEmail } from '@/lib/email'
+import { logger } from '@/lib/logger'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 /**
  * POST /api/session-requests/[id]/approve
@@ -14,6 +16,11 @@ export async function POST(
 ) {
   try {
     const { id: requestId } = await params
+
+    if (!uuidSchema.safeParse(requestId).success) {
+      return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated
@@ -50,7 +57,7 @@ export async function POST(
       .single()
 
     if (fetchError || !sessionRequest) {
-      console.error('[MCA] Session request not found:', requestId)
+      logger.error('Session request not found')
       return NextResponse.json(
         { error: 'Request not found', details: fetchError?.message },
         { status: 404 }
@@ -162,7 +169,11 @@ export async function POST(
         .limit(1)
         .single()
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const envUrl = process.env.NEXT_PUBLIC_APP_URL
+      if (!envUrl && process.env.NODE_ENV === 'production') {
+        throw new Error('NEXT_PUBLIC_APP_URL is required in production')
+      }
+      const appUrl = envUrl || 'http://localhost:3000'
       const portalUrl = tokenData?.token
         ? `${appUrl}/portal/${tokenData.token}/sessions`
         : `${appUrl}/portal`
@@ -178,7 +189,7 @@ export async function POST(
           responseNotes: response_notes,
           portalUrl,
         })
-        console.log(`[Session Request] Approval email sent to ${client.contact_email}`)
+        logger.info('Session request approval email sent')
       } catch {
         // Don't fail the request if email fails
       }

@@ -4,6 +4,9 @@ import "./globals.css";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
 import { PWAInstallPrompt } from "@/components/pwa/install-prompt";
 import { ThemeProvider } from "next-themes";
+import { validateEnv } from "@/lib/env";
+
+validateEnv();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -85,7 +85,7 @@ export function AnalyticsSummary() {
               </div>
             </div>
           </div>
-          <Link href="/analytics">
+          <Link href="/analytics/">
             <Button variant="ghost" size="sm">
               <BarChart3 className="w-4 h-4 mr-1" />
               Full Analytics

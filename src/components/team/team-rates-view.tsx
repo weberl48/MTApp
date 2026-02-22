@@ -166,7 +166,7 @@ export function TeamRatesView({ contractors }: TeamRatesViewProps) {
               */}
               <TableCell>
                 <Link
-                  href={`/team/${contractor.id}`}
+                  href={`/team/${contractor.id}/`}
                   className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   All rates

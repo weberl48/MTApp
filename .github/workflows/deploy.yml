@@ -3,11 +3,9 @@ name: Build and Deploy to Vercel
 on:
   push:
     branches:
-      - master
       - main
   pull_request:
     branches:
-      - master
       - main
 
 env:
@@ -19,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -35,11 +33,9 @@ jobs:
 
       - name: Run linter
         run: npm run lint
-        continue-on-error: true
 
       - name: Run tests
         run: npm test
-        continue-on-error: true
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -57,22 +53,3 @@ jobs:
       - name: Deploy Preview (PR)
         if: github.event_name == 'pull_request'
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-
-      # Trigger Codemagic mobile builds after successful web deployment
-      - name: Trigger iOS Build (Codemagic)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        continue-on-error: true
-        run: |
-          curl -X POST https://api.codemagic.io/builds \
-            -H "x-auth-token: ${{ secrets.CODEMAGIC_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"appId": "${{ secrets.CODEMAGIC_APP_ID }}", "workflowId": "ios-build", "branch": "master"}'
-
-      - name: Trigger Android Build (Codemagic)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        continue-on-error: true
-        run: |
-          curl -X POST https://api.codemagic.io/builds \
-            -H "x-auth-token: ${{ secrets.CODEMAGIC_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"appId": "${{ secrets.CODEMAGIC_APP_ID }}", "workflowId": "android-build", "branch": "master"}'

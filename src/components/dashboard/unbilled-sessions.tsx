@@ -103,7 +103,7 @@ export function UnbilledSessions({ organizationId }: Props) {
                 Generate All ({groups.length})
               </Button>
             )}
-            <Link href="/invoices?tab=scholarship">
+            <Link href="/invoices/?tab=scholarship">
               <Button variant="outline" size="sm">View Details</Button>
             </Link>
           </div>

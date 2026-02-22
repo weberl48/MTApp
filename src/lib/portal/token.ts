@@ -72,8 +72,12 @@ export async function generateAccessToken(
     throw new Error(`Failed to create access token: ${error.message}`)
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const portalUrl = `${baseUrl}/portal/${token}`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl && process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_APP_URL is required in production')
+  }
+  const appUrl = baseUrl || 'http://localhost:3000'
+  const portalUrl = `${appUrl}/portal/${token}`
 
   return {
     token,
@@ -257,11 +261,15 @@ export async function getOrCreateClientToken(
     .single()
 
   if (existingToken) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl && process.env.NODE_ENV === 'production') {
+      throw new Error('NEXT_PUBLIC_APP_URL is required in production')
+    }
+    const appUrl = baseUrl || 'http://localhost:3000'
     return {
       token: existingToken.token,
       expiresAt: existingToken.expires_at,
-      portalUrl: `${baseUrl}/portal/${existingToken.token}`,
+      portalUrl: `${appUrl}/portal/${existingToken.token}`,
     }
   }
 

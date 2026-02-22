@@ -147,7 +147,15 @@ function InvoiceTable({
             <TableRow
               key={invoice.id}
               className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
-              onClick={() => router.push(`/invoices/${invoice.id}`)}
+              tabIndex={0}
+              role="link"
+              onClick={() => router.push(`/invoices/${invoice.id}/`)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  router.push(`/invoices/${invoice.id}/`)
+                }
+              }}
             >
               {showSelection && isAdmin && (
                 <TableCell onClick={(e) => e.stopPropagation()}>

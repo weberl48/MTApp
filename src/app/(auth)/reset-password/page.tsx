@@ -87,7 +87,7 @@ export default function ResetPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Link href="/forgot-password" className="w-full">
+          <Link href="/forgot-password/" className="w-full">
             <Button className="w-full">Request new reset link</Button>
           </Link>
         </CardFooter>
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button onClick={() => router.push('/login')} className="w-full">
+          <Button onClick={() => router.push('/login/')} className="w-full">
             Sign in
           </Button>
         </CardFooter>

@@ -95,7 +95,7 @@ export default function LoginPage() {
       const { needsVerification } = await needsMfaVerification()
 
       if (needsVerification) {
-        router.push('/mfa-verify')
+        router.push('/mfa-verify/')
         return
       }
 
@@ -154,7 +154,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
               <Link
-                href="/forgot-password"
+                href="/forgot-password/"
                 className="text-sm text-blue-600 hover:underline dark:text-blue-400"
               >
                 Forgot password?
@@ -176,7 +176,7 @@ export default function LoginPage() {
           </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/signup/" className="text-blue-600 hover:underline dark:text-blue-400">
               Sign up
             </Link>
           </p>

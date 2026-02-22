@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
+import { logger } from '@/lib/logger'
 
 // Types for Supabase join results
 interface ClientJoinResult {
@@ -99,7 +100,7 @@ async function sendPaymentNotification(squareInvoiceId: string) {
 
     // Send notification email
     await getResend().emails.send({
-      from: 'May Creative Arts <noreply@rattatata.xyz>',
+      from: `May Creative Arts <noreply@${process.env.EMAIL_FROM_DOMAIN || 'rattatata.xyz'}>`,
       to: [owner.email],
       subject: `Payment Received - ${formatCurrency(typedInvoice.amount)}`,
       html: `
@@ -117,10 +118,10 @@ async function sendPaymentNotification(squareInvoiceId: string) {
       `,
     })
 
-    console.log(`Payment notification sent to ${owner.email}`)
+    logger.info('Payment notification sent')
   } catch (error) {
     // Don't fail the webhook if notification fails
-    console.error('[MCA] Failed to send payment notification')
+    logger.error('Failed to send payment notification')
   }
 }
 
@@ -142,8 +143,13 @@ export async function POST(request: NextRequest) {
     const body = await request.text()
     const signature = request.headers.get('x-square-hmacsha256-signature')
 
-    // Verify webhook signature in production
-    if (process.env.NODE_ENV === 'production' && process.env.SQUARE_WEBHOOK_SIGNATURE_KEY) {
+    // Verify webhook signature in production (fail closed)
+    if (process.env.NODE_ENV === 'production') {
+      if (!process.env.SQUARE_WEBHOOK_SIGNATURE_KEY) {
+        logger.error('SQUARE_WEBHOOK_SIGNATURE_KEY is not configured')
+        return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 503 })
+      }
+
       if (!signature) {
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
       }
@@ -165,20 +171,14 @@ export async function POST(request: NextRequest) {
 
     // Sanitize log output to prevent log injection
     const eventType = String(event.type).replace(/[\r\n]/g, '')
-    console.log('Square webhook event:', eventType)
+    logger.info(`Square webhook event: ${eventType}`)
 
     // Handle invoice events
     if (event.type === 'invoice.payment_made' || event.type === 'invoice.updated') {
       const invoiceData = event.data?.object?.invoice
 
-      console.log('[Square Webhook] Invoice event received:', {
-        type: event.type,
-        invoiceId: invoiceData?.id,
-        status: invoiceData?.status,
-      })
-
       if (!invoiceData?.id) {
-        console.error('[Square Webhook] No invoice ID in event data')
+        logger.error('Square webhook: no invoice ID in event data')
         return NextResponse.json({ error: 'Invalid invoice data' }, { status: 400 })
       }
 
@@ -198,16 +198,12 @@ export async function POST(request: NextRequest) {
         ourStatus = 'pending'
       }
 
-      console.log('[Square Webhook] Mapped status:', { squareStatus, ourStatus, paidDate })
-
       // First check if we have this invoice
       const { data: existingInvoice, error: findError } = await getSupabaseAdmin()
         .from('invoices')
         .select('id, status, square_invoice_id')
         .eq('square_invoice_id', squareInvoiceId)
         .single()
-
-      console.log('[Square Webhook] Found invoice:', existingInvoice, 'Error:', findError)
 
       // Update our invoice
       const updateData: Record<string, unknown> = { status: ourStatus }
@@ -221,16 +217,12 @@ export async function POST(request: NextRequest) {
         .eq('square_invoice_id', squareInvoiceId)
         .select()
 
-      console.log('[Square Webhook] Update result:', { error, count, updateData })
-
       if (error) {
-        console.error('[MCA] Error updating invoice from webhook')
+        logger.error('Error updating invoice from webhook')
         return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
       }
 
-      // Sanitize IDs before logging
-      const safeInvoiceId = String(squareInvoiceId).replace(/[\r\n]/g, '')
-      console.log(`Updated invoice ${safeInvoiceId} to status ${ourStatus}`)
+      logger.info(`Updated invoice to status ${ourStatus}`)
 
       // Send notification to owner when invoice is paid
       if (ourStatus === 'paid') {
@@ -253,8 +245,7 @@ export async function POST(request: NextRequest) {
           .eq('square_invoice_id', invoiceId)
 
         if (!error) {
-          const safeId = String(invoiceId).replace(/[\r\n]/g, '')
-          console.log(`Marked invoice ${safeId} as paid from payment event`)
+          logger.info('Marked invoice as paid from payment event')
           await sendPaymentNotification(invoiceId)
         }
       }
@@ -262,7 +253,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[MCA] Square webhook error')
+    logger.error('Square webhook error')
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

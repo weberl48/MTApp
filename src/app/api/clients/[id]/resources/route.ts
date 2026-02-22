@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/clients/[id]/resources
@@ -13,6 +14,11 @@ export async function GET(
 ) {
   try {
     const { id: clientId } = await params
+
+    if (!uuidSchema.safeParse(clientId).success) {
+      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated
@@ -101,6 +107,11 @@ export async function POST(
 ) {
   try {
     const { id: clientId } = await params
+
+    if (!uuidSchema.safeParse(clientId).success) {
+      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated
@@ -227,6 +238,11 @@ export async function DELETE(
 ) {
   try {
     const { id: clientId } = await params
+
+    if (!uuidSchema.safeParse(clientId).success) {
+      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated

@@ -35,23 +35,23 @@ type NavItem = {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Sessions', href: '/sessions', icon: Calendar },
-  { name: 'Clients', href: '/clients', icon: Users, adminOnly: true },
+  { name: 'Dashboard', href: '/dashboard/', icon: LayoutDashboard },
+  { name: 'Sessions', href: '/sessions/', icon: Calendar },
+  { name: 'Clients', href: '/clients/', icon: Users, adminOnly: true },
   {
     name: 'Billing',
-    href: '/invoices',
+    href: '/invoices/',
     icon: FileText,
     adminOnly: true,
     children: [
-      { name: 'Invoices', href: '/invoices', icon: FileText },
-      { name: 'Payroll', href: '/payments', icon: Wallet, ownerOnly: true },
+      { name: 'Invoices', href: '/invoices/', icon: FileText },
+      { name: 'Payroll', href: '/payments/', icon: Wallet, ownerOnly: true },
     ],
   },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, ownerOnly: true },
-  { name: 'Earnings', href: '/earnings', icon: DollarSign, contractorOnly: true },
-  { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Analytics', href: '/analytics/', icon: BarChart3, ownerOnly: true },
+  { name: 'Earnings', href: '/earnings/', icon: DollarSign, contractorOnly: true },
+  { name: 'Team', href: '/team/', icon: UsersRound, adminOnly: true },
+  { name: 'Settings', href: '/settings/', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -119,6 +119,7 @@ export function Sidebar() {
         <div key={item.name}>
           <button
             onClick={() => toggleExpanded(item.name)}
+            aria-expanded={isExpanded}
             className={cn(
               'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
               isActive
@@ -214,7 +215,7 @@ export function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-800">
-            <Link href="/dashboard" className="flex items-center">
+            <Link href="/dashboard/" className="flex items-center">
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 MCA
               </span>
@@ -225,7 +226,7 @@ export function Sidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          <nav aria-label="Main navigation" className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
             {filteredNavigation.map(renderNavItem)}
           </nav>
 

@@ -496,7 +496,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
               <TableRow key={contractor.id}>
                 <TableCell className="sticky left-0 bg-white dark:bg-gray-950 z-10">
                   <Link
-                    href={`/team/${contractor.id}`}
+                    href={`/team/${contractor.id}/`}
                     className="hover:underline"
                   >
                     <div className="font-medium text-sm">

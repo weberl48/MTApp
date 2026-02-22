@@ -112,7 +112,7 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Link href="/login" className="w-full">
+          <Link href="/login/" className="w-full">
             <Button variant="outline" className="w-full">
               Back to login
             </Button>
@@ -252,7 +252,7 @@ export default function SignupPage() {
           </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/login/" className="text-blue-600 hover:underline dark:text-blue-400">
               Sign in
             </Link>
           </p>

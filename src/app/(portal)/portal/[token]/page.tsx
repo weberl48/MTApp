@@ -124,7 +124,7 @@ export default function PortalDashboard() {
                 <Calendar className="h-5 w-5" />
                 Upcoming Sessions
               </CardTitle>
-              <Link href={`/portal/${token}/sessions`}>
+              <Link href={`/portal/${token}/sessions/`}>
                 <Button variant="ghost" size="sm">
                   View all
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -142,7 +142,7 @@ export default function PortalDashboard() {
                 {upcomingSessions.map((session) => (
                   <div
                     key={session.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                   >
                     <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Calendar className="h-5 w-5 text-blue-600" />
@@ -174,7 +174,7 @@ export default function PortalDashboard() {
                 <Target className="h-5 w-5" />
                 Goals Progress
               </CardTitle>
-              <Link href={`/portal/${token}/goals`}>
+              <Link href={`/portal/${token}/goals/`}>
                 <Button variant="ghost" size="sm">
                   View all
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -227,7 +227,7 @@ export default function PortalDashboard() {
                 <FileText className="h-5 w-5" />
                 To Do
               </CardTitle>
-              <Link href={`/portal/${token}/resources`}>
+              <Link href={`/portal/${token}/resources/`}>
                 <Button variant="ghost" size="sm">
                   View all
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -249,7 +249,7 @@ export default function PortalDashboard() {
                 {recentResources.map((resource) => (
                   <div
                     key={resource.id}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg"
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
                   >
                     <div
                       className={`h-2 w-2 rounded-full ${

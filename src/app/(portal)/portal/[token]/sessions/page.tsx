@@ -183,7 +183,7 @@ export default function PortalSessionsPage() {
             View your upcoming and past therapy sessions
           </p>
         </div>
-        <Link href={`/portal/${token}/sessions/request`}>
+        <Link href={`/portal/${token}/sessions/request/`}>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Request Session

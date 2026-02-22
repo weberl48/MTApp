@@ -156,7 +156,7 @@ export function ClientsTable({ clients, canManageClients }: ClientsTableProps) {
               {filtered.map((client) => (
                 <TableRow key={client.id} className="relative cursor-pointer hover:bg-muted/50 transition-colors">
                   <TableCell className="font-medium">
-                    <Link href={`/clients/${client.id}`} className="after:absolute after:inset-0">
+                    <Link href={`/clients/${client.id}/`} className="after:absolute after:inset-0">
                       {client.name}
                     </Link>
                   </TableCell>

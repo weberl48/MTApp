@@ -75,7 +75,7 @@ export function OverdueInvoices() {
             <AlertTriangle className="w-5 h-5 text-red-600" />
             <CardTitle className="text-red-700 dark:text-red-400">Overdue Invoices</CardTitle>
           </div>
-          <Link href="/invoices">
+          <Link href="/invoices/">
             <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950">
               View All
             </Button>
@@ -99,7 +99,7 @@ export function OverdueInvoices() {
                 key={invoice.id}
                 className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg"
               >
-                <Link href={`/invoices/${invoice.id}`} className="flex-1 min-w-0">
+                <Link href={`/invoices/${invoice.id}/`} className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{clientName || 'Unknown Client'}</p>
                   <p className="text-xs text-red-600 dark:text-red-400">
                     {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} overdue

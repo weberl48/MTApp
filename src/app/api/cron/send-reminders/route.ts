@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { Resend } from 'resend'
 import { parseLocalDate } from '@/lib/dates'
 
-// Lazy initialize clients to avoid build-time errors
-let supabaseAdmin: SupabaseClient | null = null
+// Lazy initialize Resend client to avoid build-time errors
 let resend: Resend | null = null
-
-function getSupabaseAdmin(): SupabaseClient {
-  if (!supabaseAdmin) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!url || !key) {
-      throw new Error('Missing Supabase environment variables')
-    }
-    supabaseAdmin = createClient(url, key)
-  }
-  return supabaseAdmin
-}
 
 function getResend(): Resend | null {
   if (resend === null && process.env.RESEND_API_KEY) {
@@ -48,7 +35,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get pending reminders that are due
-    const { data: reminders, error: fetchError } = await getSupabaseAdmin()
+    const { data: reminders, error: fetchError } = await createServiceClient()
       .from('session_reminders')
       .select(`
         id,
@@ -90,7 +77,7 @@ export async function GET(request: NextRequest) {
         const resendClient = getResend()
         if (!resendClient) {
           console.log('Resend not configured, skipping reminder:', reminder.id)
-          await getSupabaseAdmin()
+          await createServiceClient()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -125,7 +112,7 @@ export async function GET(request: NextRequest) {
         const org = orgData?.[0] || null
 
         if (!session) {
-          await getSupabaseAdmin()
+          await createServiceClient()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -186,7 +173,7 @@ export async function GET(request: NextRequest) {
 
         if (emailError) {
           console.error('[MCA] Error sending reminder email')
-          await getSupabaseAdmin()
+          await createServiceClient()
             .from('session_reminders')
             .update({
               status: 'failed',
@@ -199,7 +186,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Mark as sent
-        await getSupabaseAdmin()
+        await createServiceClient()
           .from('session_reminders')
           .update({
             status: 'sent',
@@ -211,7 +198,7 @@ export async function GET(request: NextRequest) {
         successCount++
       } catch (error) {
         console.error('[MCA] Error processing reminder:', reminder.id)
-        await getSupabaseAdmin()
+        await createServiceClient()
           .from('session_reminders')
           .update({
             status: 'failed',
