@@ -188,7 +188,7 @@ export default function SessionDetailPage() {
     if (!session) return
     openConfirm({
       title: 'Delete Session',
-      description: 'Are you sure you want to delete this session? This cannot be undone.',
+      description: 'Are you sure you want to delete this session? This will also delete all linked invoices, attendee records, and payment data. This action cannot be undone.',
       confirmLabel: 'Delete',
       onConfirm: () => {
         startTransition(async () => {

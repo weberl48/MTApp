@@ -21,9 +21,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { ChevronDown, ChevronRight, Search, FileSpreadsheet, DollarSign, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Search, FileSpreadsheet, DollarSign, Loader2, Trash2 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { formatCurrency } from '@/lib/pricing'
 import { createClient } from '@/lib/supabase/client'
+import { deleteSession } from '@/app/actions/sessions'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
@@ -61,6 +72,12 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
   }>({ isOpen: false, contractor: null })
   const [payoutDate, setPayoutDate] = useState(new Date().toISOString().split('T')[0])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    session: UnpaidSession | null
+    contractorName: string
+  }>({ isOpen: false, session: null, contractorName: '' })
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Filter contractors by search
   const filteredContractors = contractors.filter(
@@ -124,6 +141,26 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
       toast.error('Failed to mark sessions as paid')
     } finally {
       setIsProcessing(false)
+    }
+  }
+
+  async function handleDeleteSession() {
+    if (!deleteDialog.session) return
+
+    setIsDeleting(true)
+    try {
+      const result = await deleteSession(deleteDialog.session.id)
+      if (result.success) {
+        toast.success('Session and linked data deleted')
+        setDeleteDialog({ isOpen: false, session: null, contractorName: '' })
+        onPayoutComplete()
+      } else {
+        toast.error(result.error || 'Failed to delete session')
+      }
+    } catch {
+      toast.error('Failed to delete session')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -279,6 +316,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                                 <th className="text-left pb-2 font-medium">Service</th>
                                 <th className="text-left pb-2 font-medium">Clients</th>
                                 <th className="text-right pb-2 font-medium">Amount</th>
+                                <th className="text-right pb-2 font-medium w-10"></th>
                               </tr>
                             </thead>
                             <tbody>
@@ -291,6 +329,23 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                                   <td className="py-2">{session.clients.join(', ') || '-'}</td>
                                   <td className="py-2 text-right font-medium">
                                     {formatCurrency(session.contractor_pay)}
+                                  </td>
+                                  <td className="py-2 text-right">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setDeleteDialog({
+                                          isOpen: true,
+                                          session,
+                                          contractorName: contractor.name,
+                                        })
+                                      }}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
                                   </td>
                                 </tr>
                               ))}
@@ -306,6 +361,30 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
           </TableBody>
         </Table>
       </div>
+
+      {/* Delete Session Dialog */}
+      <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, session: null, contractorName: '' })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Session</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this session for <strong>{deleteDialog.contractorName}</strong> on{' '}
+              <strong>{deleteDialog.session ? format(parseLocalDate(deleteDialog.session.date), 'MMM d, yyyy') : ''}</strong>?
+              This will also delete all linked invoices, attendee records, and payment data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSession}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Mark Paid Dialog */}
       <Dialog open={markPaidDialog.isOpen} onOpenChange={(open) => !open && setMarkPaidDialog({ isOpen: false, contractor: null })}>
