@@ -16,6 +16,7 @@ import {
   DollarSign,
   BarChart3,
   ChevronRight,
+  HelpCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -227,6 +228,23 @@ export function Sidebar() {
           <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
             {filteredNavigation.map(renderNavItem)}
           </nav>
+
+          {/* Help link */}
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
+            <Link
+              href="/help/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                pathname.startsWith('/help')
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              )}
+            >
+              <HelpCircle className="w-5 h-5 mr-3" />
+              Help
+            </Link>
+          </div>
         </div>
       </aside>
     </>
