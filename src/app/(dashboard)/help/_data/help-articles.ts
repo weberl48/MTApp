@@ -82,7 +82,7 @@ You can reach the Help Center at any time by clicking your avatar in the top-rig
     description: 'How to add a new client and configure their billing settings.',
     walkthrough: 'add-client',
     adminOnly: true,
-    relatedArticles: ['logging-a-session', 'client-portal'],
+    relatedArticles: ['logging-a-session', 'client-portal', 'scholarship-billing'],
     content: `
 ## Adding a New Client
 
@@ -352,7 +352,7 @@ When someone leaves, deactivate their account rather than deleting it. Deactivat
     description: 'How to set up service types, pricing fields, and contractor restrictions.',
     walkthrough: 'configure-services',
     adminOnly: true,
-    relatedArticles: ['group-sessions', 'managing-contractor-rates'],
+    relatedArticles: ['group-sessions', 'managing-contractor-rates', 'scholarship-billing'],
     content: `
 ## Configuring Service Types
 
@@ -474,41 +474,57 @@ Once approved, the session status changes to "Approved" and an invoice is create
     slug: 'scholarship-billing',
     title: 'Scholarship Billing',
     category: 'invoices',
-    description: 'How to batch-invoice scholarship sessions on a monthly basis.',
+    description: 'How scholarship sessions are tracked and batch-invoiced on a monthly basis.',
     walkthrough: 'scholarship-billing',
     adminOnly: true,
-    relatedArticles: ['generating-invoices', 'automation-settings'],
+    relatedArticles: ['generating-invoices', 'automation-settings', 'configuring-services', 'adding-a-client'],
     content: `
 ## Scholarship Billing
 
-Scholarship clients are billed differently from private-pay clients. Rather than generating an invoice for every session, scholarship sessions are grouped by month and invoiced as a batch.
+Scholarship clients are billed differently from private-pay clients. Rather than generating an invoice for every session, scholarship sessions are grouped by month and invoiced as a single batch per client.
 
 ### Where to Find It
 
-Navigate to **Invoices** and click the **Scholarship** tab.
+Navigate to **Invoices** and click the **Scholarship** tab. This tab is always visible for admins and owners, even when there are no scholarship sessions in the system yet. When there is nothing to show, you will see a message explaining what the tab is for.
+
+### What Makes a Session "Scholarship"
+
+A session is treated as scholarship through either of two paths:
+
+1. **Client-based** - The client's payment method is set to **Scholarship** (under Clients > Edit Client). Any session logged for this client will be routed to batch invoicing.
+2. **Service-type-based** - The service type is marked as a **Scholarship Service** (under Settings > Services). Any session using this service type will be routed to batch invoicing, regardless of the client's payment method.
+
+In both cases, per-session invoices are skipped and the session is held for monthly batch generation instead.
 
 ### How It Works
 
-The Scholarship tab displays all approved scholarship sessions that have not yet been invoiced. Sessions are grouped by client and by month. For each group, you can see the number of sessions, the total scholarship amount, and the clients covered.
+The Scholarship tab displays all approved scholarship sessions that have not yet been invoiced. Sessions are grouped by **client** and by **month**. For each group, you can see the service type, date, contractor, and duration of each session.
 
 ### Generating Invoices
 
 - **Generate Invoice** (per group) - Creates one invoice for that client covering the selected month's sessions.
 - **Generate All** - Creates invoices for every unbilled group shown on the page.
 
-All generated invoices start in "Pending" status. Review them before sending to make sure the details are correct.
+All generated invoices start in **Pending** status. Review them before sending to make sure the details are correct. Once generated, batch invoices appear under the "Batch Invoices" section on the same tab.
 
 ### Scholarship Rate
 
-The invoice amount is based on the flat scholarship rate configured on the service type, not the standard session rate. The rate is the same regardless of session duration.
+The invoice amount is based on the flat scholarship rate configured on the service type, not the standard session rate. The rate is the same regardless of session duration. You can set this rate in **Settings > Services** when editing a service type.
 
 ### Contractor Pay
 
-Contractors are paid based on normal pricing rules, not the scholarship rate. If the scholarship rate is lower than what the contractor would normally earn, the organization absorbs the difference.
+Contractors are paid based on normal pricing rules, not the scholarship rate. If the scholarship rate is lower than what the contractor would normally earn, the organization absorbs the difference. This means switching a client to scholarship does not affect contractor compensation.
 
 ### Auto-Generation
 
-If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month on which the invoices are automatically created, covering the previous month's unbilled sessions.
+If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month (1-28) on which invoices are automatically created, covering the previous month's unbilled sessions. Generated invoices start in Pending status so you can review them before sending.
+
+### Setting Up Scholarship Billing
+
+1. **Configure a scholarship service type** - Go to Settings > Services, create or edit a service type, and check "Scholarship Service". Set the flat scholarship rate.
+2. **Set client payment method** - Go to Clients, edit the client, and set their payment method to "Scholarship".
+3. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
+4. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
     `,
   },
   {
