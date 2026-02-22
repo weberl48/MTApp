@@ -36,6 +36,7 @@ export function revalidateSessionPaths(sessionId?: string) {
   if (sessionId) revalidatePath(`/sessions/${sessionId}`)
   revalidatePath('/dashboard')
   revalidatePath('/invoices')
+  revalidatePath('/payments')
 }
 
 /** Revalidate all paths affected by invoice changes. */
