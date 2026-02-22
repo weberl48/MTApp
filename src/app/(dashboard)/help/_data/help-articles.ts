@@ -249,7 +249,8 @@ Invoices in MCA Manager are created automatically. You do not need to build them
 - **Pending** - Created but not yet sent to the client.
 - **Sent** - Delivered to the client by email or Square.
 - **Paid** - Payment has been received and recorded.
-- **Overdue** - The due date has passed and the invoice is still unpaid.
+
+Sent invoices that are past their due date are displayed with an **Overdue** indicator and a count of days late. This is a visual flag, not a separate status.
 
 ### Scholarship Sessions
 
@@ -277,7 +278,7 @@ Once an invoice has been generated, you can deliver it to the client by email or
 1. Navigate to **Invoices** in the sidebar.
 2. Click on the invoice you want to send.
 3. On the invoice detail page, open the **InvoiceActions** dropdown.
-4. Choose **Send** to email the invoice with a PDF attachment, or **Send via Square** to create a Square invoice with an online payment link.
+4. Choose **Send via Email** to email the invoice with a PDF attachment, or **Send via Square** to create a Square invoice with an online payment link.
 
 ### Sending via Square
 
@@ -318,12 +319,12 @@ Add contractors and admins to your organization so they can log sessions or help
 ### Steps to Invite Someone
 
 1. Click **Team** in the sidebar.
-2. Click the **Invite Team Member** button.
-3. Enter their email address.
-4. Select their role (see below).
-5. Click **Send Invite**.
+2. Click the **Invite Team Member** button in the top-right corner.
+3. Select a role for the new member (Contractor or Admin).
+4. Enter their email address (optional — you can also generate and share a link directly).
+5. Click **Send Invite** to email the link, or **Generate invite link** to copy it manually.
 
-The person will receive an email with a link to create their account and join your organization.
+The invite link is single-use and expires after 30 days. If you include an email, the person receives a message with a link to create their account and join your organization.
 
 ### Roles Explained
 
@@ -399,7 +400,7 @@ MCA Manager supports custom pay rates per contractor per service type. This lets
 
 There are two places to manage contractor rates:
 
-1. **Team > Pay Rate Matrix** - A grid showing all contractors across all service types. You can see and edit every rate in one place.
+1. **Team > Rates tab** - A Pay Rate Matrix grid showing all contractors across all service types. You can see and edit every rate in one place.
 2. **Team > [Member Name] > Rates tab** - The rates for a single contractor, listed by service type.
 
 ### How It Works
@@ -445,7 +446,7 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 ### Available Actions
 
 - **Approve** - Confirms the session. An invoice is automatically created for the client (unless the client is on a scholarship payment method).
-- **Reject** - Sends the session back to the contractor with a reason. The contractor can see your note, make changes, and resubmit.
+- **Reject** - Returns the session to draft status with a reason. The contractor can see your note, make changes, and resubmit.
 - **Mark No-Show** - Used when a client did not attend. A flat no-show fee is charged to the client, and the contractor still receives their normal session pay.
 - **Cancel** - Removes the session from billing entirely. No invoice is created.
 - **Delete** - Permanently removes the session. Use only when the session was logged in error.
@@ -462,7 +463,7 @@ This is useful at the end of a pay period when all submissions are ready to proc
 
 ### After Rejection
 
-Rejected sessions appear in the contractor's Sessions list with an indicator and the rejection reason. The contractor edits the session and resubmits, at which point it returns to your review queue.
+Rejected sessions return to draft status and appear in the contractor's Sessions list with a rejection indicator and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue.
 
 ### After Approval
 
@@ -633,7 +634,7 @@ Clients can request a new session from the portal by submitting preferred dates 
 
 ### Token Expiry
 
-Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Portal** tab. After a link expires, you send a new invite to regenerate access.
+Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. After a link expires, you send a new invite to regenerate access.
     `,
   },
   {
@@ -694,11 +695,11 @@ View As mode lets owners simulate the experience of any other role or specific c
 
 ### Where to Find It
 
-Click your avatar or initials in the top-right corner of the header. In the dropdown menu, click the **View As** button.
+Look for the **View As** button in the header bar at the top of the page. It appears next to the organization name and is available to owners and developers.
 
 ### How It Works
 
-After clicking View As, you can choose to simulate:
+After clicking View As, a dropdown menu opens where you can choose to simulate:
 
 - A specific **role** (Contractor, Admin) - shows a generic view of that permission level.
 - A specific **team member** - shows exactly what that contractor sees, including their sessions, earnings, and navigation.
