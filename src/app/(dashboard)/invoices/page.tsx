@@ -631,7 +631,7 @@ export default function InvoicesPage() {
                   Group Home ({groupHomeUnpaid.length})
                 </TabsTrigger>
               )}
-              {hasScholarshipContent && (
+              {isAdmin && (
                 <TabsTrigger value="scholarship" className="text-purple-600 dark:text-purple-400">
                   Scholarship{unbilledByClientMonth.length > 0 ? ` (${unbilledScholarshipSessions.length} unbilled)` : ''}
                 </TabsTrigger>
@@ -664,8 +664,15 @@ export default function InvoicesPage() {
                 <InvoiceTable invoices={groupHomeUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
               </TabsContent>
             )}
-            {hasScholarshipContent && (
+            {isAdmin && (
               <TabsContent value="scholarship">
+                {!hasScholarshipContent ? (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No scholarship sessions logged yet</p>
+                    <p className="text-sm mt-1">Sessions for clients with a scholarship payment method or scholarship service types will appear here for batch invoicing.</p>
+                  </div>
+                ) : (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -800,6 +807,7 @@ export default function InvoicesPage() {
                     </div>
                   )}
                 </div>
+                )}
               </TabsContent>
             )}
           </Tabs>
