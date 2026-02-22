@@ -12,10 +12,32 @@ import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import {
   HELP_ARTICLES,
   HELP_CATEGORIES,
-  searchArticles,
+  searchArticlesRanked,
   getArticlesByCategory,
   type HelpCategory,
+  type SearchResult,
 } from './_data/help-articles'
+
+/** Highlight matched terms in text using <mark> tags. */
+function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
+  if (terms.length === 0) return <>{text}</>
+
+  const escaped = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const regex = new RegExp(`(${escaped.join('|')})`, 'gi')
+  const parts = text.split(regex)
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-yellow-200 dark:bg-yellow-800/60 text-inherit rounded px-0.5">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  )
+}
 
 const CATEGORY_ICONS: Record<HelpCategory, React.ComponentType<{ className?: string }>> = {
   'getting-started': BookOpen,
@@ -41,18 +63,25 @@ export default function HelpPage() {
   }, [isAdminOrAbove])
 
   // Get filtered articles based on search and category
+  const searchResults = useMemo((): SearchResult[] | null => {
+    if (!searchQuery.trim()) return null
+    return searchArticlesRanked(searchQuery)
+      .filter(r => accessibleArticles.includes(r.article))
+  }, [searchQuery, accessibleArticles])
+
   const filteredArticles = useMemo(() => {
-    let articles = accessibleArticles
+    if (searchResults) return searchResults.map(r => r.article)
+    if (selectedCategory) return getArticlesByCategory(selectedCategory).filter(a => accessibleArticles.includes(a))
+    return accessibleArticles
+  }, [searchResults, selectedCategory, accessibleArticles])
 
-    if (searchQuery.trim()) {
-      const searchResults = searchArticles(searchQuery)
-      articles = searchResults.filter(a => accessibleArticles.includes(a))
-    } else if (selectedCategory) {
-      articles = getArticlesByCategory(selectedCategory).filter(a => accessibleArticles.includes(a))
-    }
-
-    return articles
-  }, [searchQuery, selectedCategory, accessibleArticles])
+  // Map for quick lookup of search result data by slug
+  const searchResultMap = useMemo(() => {
+    if (!searchResults) return null
+    const map = new Map<string, SearchResult>()
+    for (const r of searchResults) map.set(r.article.slug, r)
+    return map
+  }, [searchResults])
 
   // Get categories with article counts
   const categoriesWithCounts = useMemo(() => {
@@ -75,7 +104,7 @@ export default function HelpPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
+      <div className="relative max-w-lg">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
@@ -177,54 +206,85 @@ export default function HelpPage() {
         <div className="space-y-3">
           {filteredArticles.length === 0 ? (
             <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">No articles found matching your search.</p>
+              <CardContent className="py-8 text-center space-y-4">
+                <div>
+                  <p className="text-muted-foreground">No articles found matching your search.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Try different keywords or browse by category.</p>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {categoriesWithCounts.map(cat => {
+                    const Icon = CATEGORY_ICONS[cat.id]
+                    return (
+                      <Button
+                        key={cat.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setSelectedCategory(cat.id)
+                        }}
+                        className="gap-1.5"
+                      >
+                        <Icon className="h-4 w-4" />
+                        {cat.name}
+                      </Button>
+                    )
+                  })}
+                </div>
               </CardContent>
             </Card>
           ) : (
-            filteredArticles.map(article => (
-              <Card key={article.slug} className="hover:bg-muted/50 transition-colors">
-                <CardContent className="py-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/help/${article.slug}`} className="group">
-                        <h3 className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                          {article.title}
-                          <ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </h3>
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {article.description}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {HELP_CATEGORIES.find(c => c.id === article.category)?.name}
-                        </Badge>
-                        {article.adminOnly && (
-                          <Badge variant="secondary" className="text-xs">
-                            Admin
-                          </Badge>
+            filteredArticles.map(article => {
+              const result = searchResultMap?.get(article.slug)
+              return (
+                <Card key={article.slug} className="hover:bg-muted/50 transition-colors">
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/help/${article.slug}`} className="group">
+                          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                            {article.title}
+                            <ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                          </h3>
+                        </Link>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {article.description}
+                        </p>
+                        {result && (
+                          <p className="text-sm text-muted-foreground mt-1.5 italic line-clamp-2">
+                            &ldquo;<HighlightedText text={result.excerpt} terms={result.matchTerms} />&rdquo;
+                          </p>
                         )}
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">
+                            {HELP_CATEGORIES.find(c => c.id === article.category)?.name}
+                          </Badge>
+                          {article.adminOnly && (
+                            <Badge variant="secondary" className="text-xs">
+                              Admin
+                            </Badge>
+                          )}
+                        </div>
                       </div>
+                      {article.walkthrough && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            startWalkthrough(article.walkthrough!)
+                          }}
+                          className="gap-1.5 shrink-0"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          <span className="hidden sm:inline">Walkthrough</span>
+                        </Button>
+                      )}
                     </div>
-                    {article.walkthrough && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          startWalkthrough(article.walkthrough!)
-                        }}
-                        className="gap-1.5 shrink-0"
-                      >
-                        <PlayCircle className="h-4 w-4" />
-                        <span className="hidden sm:inline">Walkthrough</span>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              )
+            })
           )}
         </div>
       )}
