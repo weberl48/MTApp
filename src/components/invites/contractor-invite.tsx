@@ -14,7 +14,7 @@ type InviteResult = {
   emailSent?: boolean
 }
 
-export function ContractorInvite(props: { organizationId: string }) {
+export function ContractorInvite(props: { organizationId: string; role?: 'contractor' | 'admin' }) {
   const [email, setEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -41,7 +41,7 @@ export function ContractorInvite(props: { organizationId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           organizationId: props.organizationId,
-          role: 'contractor',
+          role: props.role || 'contractor',
           email: email.trim() || undefined,
           expiresInDays: 30,
           sendEmail: sendEmail && !!email.trim(),
@@ -63,7 +63,7 @@ export function ContractorInvite(props: { organizationId: string }) {
       if (data.emailSent) {
         toast.success(`Invite sent to ${email}`)
       } else {
-        toast.success('Contractor invite link generated')
+        toast.success('Invite link generated')
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to generate invite')

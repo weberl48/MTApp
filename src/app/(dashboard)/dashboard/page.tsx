@@ -183,7 +183,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid - Clickable */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="dashboard-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/sessions">
           <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
