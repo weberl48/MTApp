@@ -20,7 +20,7 @@ import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil, Info }
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
 import { useContractorRates } from '@/hooks/use-contractor-rates'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -74,7 +74,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }, [serviceTypes, effectiveContractorId, showFinancialDetails])
 
   const [loading, setLoading] = useState(false)
-  const [date, setDate] = useState(existingSession?.date || new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(existingSession?.date || todayLocal())
   const [time, setTime] = useState(existingSession?.time?.slice(0, 5) || '09:00')
   const [duration, setDuration] = useState(existingSession?.duration_minutes?.toString() || '30')
   const [serviceTypeId, setServiceTypeId] = useState(existingSession?.service_type_id || '')
@@ -423,13 +423,14 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Reset form for logging another session
   function handleLogAnother() {
-    setDate(new Date().toISOString().split('T')[0])
+    setDate(todayLocal())
     setNotes('')
     setClientNotes('')
     setGroupHeadcount('')
+    setSelectedClients([])
     setShowSuccess(false)
     clearAllErrors()
-    // Keep: time, duration, serviceTypeId, selectedClients (remembered)
+    // Keep: time, duration, serviceTypeId (remembered)
   }
 
   // Show success state with options after submission
@@ -491,7 +492,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 space-y-1">
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {date === new Date().toISOString().split('T')[0] ? 'Today' : parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {date === todayLocal() ? 'Today' : parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     {', '}{new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                     {' \u00B7 '}{duration} min
                   </p>
@@ -520,7 +521,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <div className="space-y-2">
               <Label htmlFor="date" className="flex items-center gap-2">
                 Date *
-                {date === new Date().toISOString().split('T')[0] && (
+                {date === todayLocal() && (
                   <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
                 )}
               </Label>

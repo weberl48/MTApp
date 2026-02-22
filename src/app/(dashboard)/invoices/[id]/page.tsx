@@ -259,7 +259,7 @@ export default function InvoiceDetailPage() {
               <span className="text-xs text-red-600">{daysOverdue} days late</span>
             )}
           </div>
-          {isAdmin && <InvoiceActions invoice={invoice} />}
+          {isAdmin && <InvoiceActions invoice={invoice} canDelete={isAdmin} onStatusChange={() => router.push('/invoices/')} />}
         </div>
       </div>
 

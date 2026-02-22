@@ -134,7 +134,7 @@ function InvoiceTable({
           <TableHead>Service</TableHead>
           <TableHead>Date</TableHead>
           <TableHead>Payment Method</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
+          <TableHead className="text-right">{isAdmin ? 'Amount' : 'Pay'}</TableHead>
           <TableHead>Status</TableHead>
           {showActions && isAdmin && <TableHead>Actions</TableHead>}
         </TableRow>
@@ -180,7 +180,7 @@ function InvoiceTable({
                 </Badge>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(invoice.amount)}
+                {formatCurrency(isAdmin ? invoice.amount : (invoice.contractor_pay ?? invoice.amount))}
               </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
@@ -648,7 +648,7 @@ export default function InvoicesPage() {
               <InvoiceTable invoices={sentInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="paid">
-              <InvoiceTable invoices={paidInvoices} isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              <InvoiceTable invoices={paidInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="all">
               <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />

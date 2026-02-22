@@ -18,6 +18,8 @@ MCA App is a multi-tenant practice management system for May Creative Arts, hand
 - **Email**: Resend
 - **Payments**: Square API
 - **Rate Limiting**: Upstash Redis
+- **Theming**: next-themes (light/dark/system)
+- **Key Libraries**: date-fns (dates), sonner (toasts), react-pdf (PDFs), zod (validation)
 
 ## Development Commands
 
@@ -25,6 +27,7 @@ MCA App is a multi-tenant practice management system for May Creative Arts, hand
 npm run dev          # Start Next.js dev server (http://localhost:3000)
 npm run build        # Production build
 npm run lint         # Run ESLint
+npx tsc --noEmit     # Type check (used in CI)
 npm run test         # Run Vitest tests
 npm run test -- --watch  # Run tests in watch mode
 ```
@@ -43,7 +46,7 @@ Note: Native app builds (Capacitor) are shelved in `feature/capacitor-mobile` br
 ### Health Checks
 ```bash
 npm run health         # Check localhost:3000
-npm run health https://your-app.vercel.app  # Check production
+npm run health:prod    # Check production
 ```
 
 ## Architecture
@@ -53,6 +56,10 @@ npm run health https://your-app.vercel.app  # Check production
 - `(dashboard)` - Main app with sidebar (requires auth)
 - `(portal)` - Client portal (token-based access, no auth)
 - `api/` - API routes for PDF generation, webhooks, etc.
+
+**Note**: `trailingSlash: true` is set in `next.config.ts` — all route links must include trailing slashes.
+
+**Note**: The `mca-app/` directory at the repo root is a legacy/reference copy. Ignore it — all active code is in `src/`.
 
 ### Key Patterns
 
@@ -65,6 +72,9 @@ npm run health https://your-app.vercel.app  # Check production
 - `OrganizationContext` - Current user + organization data (dashboard)
 - `PortalContext` - Client data for portal (token-based)
 - `BrandingProvider` - Organization branding (colors, logo)
+
+**Dashboard Provider Stack** (outermost → innermost in `(dashboard)/layout.tsx`):
+`OrganizationProvider → BrandingProvider → ActivityTracker → WalkthroughProvider → MfaEnforcementGuard → OwnerOnboardingGate → {children}`
 
 **Pricing Logic** (`src/lib/pricing/index.ts`):
 - `calculateSessionPricing()` - Computes total, MCA cut, contractor pay, rent
@@ -92,12 +102,15 @@ Business rules are stored in `organization.settings` (JSONB) rather than hardcod
 
 | Section | Fields | Defaults |
 |---------|--------|----------|
-| `invoice` | `footer_text`, `payment_instructions`, `due_days`, `send_reminders`, `reminder_days` | 30 days, reminders at 7 and 1 day |
+| `invoice` | `footer_text`, `payment_instructions`, `due_days`, `send_reminders`, `reminder_days`, `auto_send_square_on_approve` | 30 days, reminders at 7 and 1 day, auto-send off |
 | `session` | `default_duration`, `duration_options`, `require_notes`, `auto_submit`, `reminder_hours`, `send_reminders` | 30 min, [30,45,60,90] |
 | `notification` | `email_on_session_submit`, `email_on_invoice_paid`, `admin_email` | Both enabled |
 | `security` | `session_timeout_minutes`, `require_mfa`, `max_login_attempts`, `lockout_duration_minutes` | 30 min, 5 attempts, 15 min lockout |
 | `pricing` | `no_show_fee`, `duration_base_minutes` | $60, 30 min |
 | `portal` | `token_expiry_days` | 90 days |
+| `features` | `client_portal` | Enabled (fail-open: missing flags default to `true`) |
+| `custom_lists` | `payment_methods`, `billing_methods` | All methods visible with default labels |
+| `automation` | `auto_approve_sessions`, `auto_send_invoice_on_approve`, `auto_send_invoice_method`, `auto_generate_scholarship_invoices`, `scholarship_invoice_day` | All off, method `'none'`, day 1 |
 
 Defaults are applied via deep merge in `OrganizationContext` — organizations without new fields automatically get default values.
 
@@ -144,21 +157,44 @@ Service types control pricing with these fields:
 - `self_directed` - Reimbursement (often slow)
 - `group_home` - Facility billing
 - `scholarship` - Scholarship fund
+- `venmo` - Venmo payment
+
+### Billing Methods
+
+- `square` - Square invoice
+- `check` - Check payment
+- `email` - Email invoice
+- `other` - Other billing method
+
+Both lists are customizable per-organization via `settings.custom_lists` (labels and visibility).
 
 ## API Routes
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/invoices/[id]/pdf` | GET | Generate PDF |
-| `/api/invoices/[id]/send` | POST | Email invoice |
-| `/api/invoices/[id]/square` | POST | Create Square invoice |
-| `/api/webhooks/square` | POST | Square payment webhooks |
-| `/api/cron/send-reminders` | GET | Invoice reminder cron |
 | `/api/auth/lockout` | POST | Account lockout check/record |
-| `/api/portal/*` | Various | Client portal endpoints |
+| `/api/clients/[id]/access-token` | POST | Generate client portal access token |
+| `/api/clients/[id]/resources` | GET/POST | List/upload client resources |
+| `/api/clients/[id]/resources/[resourceId]/download` | GET | Download a client resource |
+| `/api/clients/[id]/resources/upload` | POST | Upload client resource file |
+| `/api/clients/[id]/send-invite` | POST | Send portal invite to client |
+| `/api/cron/cleanup` | GET | Periodic data cleanup |
+| `/api/cron/scholarship-batches` | GET | Generate monthly scholarship invoices |
+| `/api/cron/send-reminders` | GET | Invoice reminder cron |
 | `/api/health` | GET | Full health check (all services) |
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
+| `/api/invites/user` | GET | Get pending invites for user |
+| `/api/invites/validate` | GET | Validate an invite token |
+| `/api/invoices/[id]/pdf` | GET | Generate PDF |
+| `/api/invoices/[id]/send` | POST | Email invoice |
+| `/api/invoices/[id]/square` | POST | Create Square invoice |
+| `/api/portal/*` | Various | Client portal endpoints (sessions, goals, resources, session-requests) |
+| `/api/session-requests/[id]/approve` | POST | Approve a session request |
+| `/api/session-requests/[id]/decline` | POST | Decline a session request |
+| `/api/sessions/export` | GET | Export sessions data |
+| `/api/square/status` | GET | Check Square connection status |
+| `/api/webhooks/square` | POST | Square payment webhooks |
 
 ## Security Infrastructure
 
@@ -180,6 +216,10 @@ Service types control pricing with these fields:
 - `src/app/(auth)/error.tsx` — Auth flow errors
 - `src/app/(portal)/error.tsx` — Client portal errors
 
+### Security Headers (`next.config.ts`)
+- CSP, HSTS (`max-age=31536000; includeSubDomains`), X-Frame-Options (`DENY`), X-Content-Type-Options (`nosniff`), Referrer-Policy, X-XSS-Protection, Permissions-Policy
+- Applied to all routes — modify in `next.config.ts` `headers()` function
+
 ### Safe Logging
 - `src/lib/logger.ts` — Use instead of raw `console.error` for anything that might contain PHI
 - Strips error objects to `{ name, message }` only — never logs stack traces or request bodies
@@ -187,6 +227,10 @@ Service types control pricing with these fields:
 ### Next.js 16 Proxy (Middleware)
 - **File must be `src/proxy.ts`** exporting `proxy` function (NOT `middleware.ts`)
 - Next.js 16 renamed middleware to "proxy" — using the old convention triggers a deprecation warning
+- **HTTPS enforcement**: Redirects HTTP → HTTPS (301) in production via `x-forwarded-proto` header
+- **ENCRYPTION_KEY check**: Returns 503 for all routes in production if `ENCRYPTION_KEY` is missing (HIPAA enforcement). In dev, logs a one-time warning instead.
+- **Rate limiting**: Auth paths use `authRateLimit`, API paths use `apiRateLimit` (gracefully skipped if Upstash not configured)
+- **Session refresh**: Calls `updateSession()` for Supabase auth session management
 
 ## Key Components
 
@@ -195,6 +239,16 @@ Service types control pricing with these fields:
 - `InvoicePDF` - React-PDF template
 - `PayrollHubTable` - Contractor payment tracking
 - `AdminGuard` - Role-based component wrapper
+
+## Key Library Modules
+
+- `src/lib/dates.ts` — `parseLocalDate()` timezone fix for date-only strings
+- `src/lib/constants/display.ts` — Display constants, labels, formatters
+- `src/lib/crypto/phi.ts` — Higher-level PHI encrypt/decrypt helpers (wraps `src/lib/crypto/`)
+- `src/lib/validation/schemas.ts` — Zod schemas for API input validation
+- `src/lib/features/index.ts` — Feature flag system (`isFeatureEnabled(settings, flag)`, fail-open design)
+- `src/lib/supabase/mfa.ts` — MFA enrollment/verification utilities
+- `src/lib/actions/helpers.ts` — Server action helpers (auth checks, error handling)
 
 ## Testing
 
@@ -211,6 +265,12 @@ Unit tests cover:
 - Session form defaults (`src/lib/session-form/defaults.test.ts`)
 - Client multi-select component (`src/components/forms/client-multi-select.test.tsx`)
 - Owner onboarding steps (`src/components/onboarding/owner-onboarding-steps.test.ts`)
+- Account lockout logic (`src/lib/auth/lockout.test.ts`)
+- Password validation (`src/lib/auth/password.test.ts`)
+- Permissions system (`src/lib/auth/permissions.test.ts`)
+- Encryption utilities (`src/lib/crypto/index.test.ts`)
+- PHI field helpers (`src/lib/crypto/phi.test.ts`)
+- Validation schemas (`src/lib/validation/schemas.test.ts`)
 
 ### E2E Tests (Playwright)
 ```bash
@@ -242,7 +302,26 @@ ENCRYPTION_KEY=64-hex-character-key-here
 # Rate Limiting (optional — gracefully disabled if not set)
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+
+# Cron job authentication
+CRON_SECRET=secret-for-vercel-cron-jobs
 ```
+
+## Dark Mode / Theming
+
+The root layout uses `next-themes` (`ThemeProvider` with `attribute="class"`) supporting light, dark, and system themes. Components use Tailwind's `dark:` variant for dark mode styles.
+
+## CI Workflows (`.github/workflows/`)
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `test.yml` | Push/PR to `main` | Lint → type check (`tsc --noEmit`) → unit tests → build |
+| `deploy.yml` | Push/PR to `main`/`master` | Type check → lint → tests → Vercel deploy (prod on push, preview on PR) |
+| `codeql.yml` | Push/PR + weekly | CodeQL static analysis (security-extended + security-and-quality) |
+| `semgrep.yml` | Push/PR + weekly | Semgrep SAST (JS/TS/React/Next.js/OWASP rules) |
+| `claude.yml` | `@claude` mention | Claude Code GitHub Action for issue/PR assistance |
+
+CI uses Node 20.
 
 ## Development Principles
 
@@ -305,43 +384,10 @@ The app supports per-contractor-per-service pricing:
 // 3. Calculated from service_type formula (total - MCA%)
 ```
 
-### Leverage Existing Packages
-
-Before implementing new functionality, always check for existing solutions:
-
-1. **Search npm** for well-maintained packages that solve the problem
-   - Prefer packages with: high weekly downloads, recent updates, TypeScript support, minimal dependencies
-   - Examples already in use: `date-fns` (dates), `sonner` (toasts), `react-pdf` (PDFs), `zod` (validation)
-
-2. **Check shadcn/ui** for components before building custom ones
-   - Run `npx shadcn@latest add <component>` to add new components
-   - Existing: Button, Card, Dialog, Select, Table, Tabs, Badge, etc.
-
-3. **Use Supabase features** before building custom backends
-   - Auth, RLS policies, real-time subscriptions, storage, edge functions
-
-4. **Evaluate before adopting**:
-   - Is the package actively maintained (commits in last 6 months)?
-   - Does it have known security vulnerabilities (`npm audit`)?
-   - Is the bundle size reasonable for the functionality?
-   - Does it have good TypeScript types?
-
-5. **Document dependencies** - When adding a new package, note why it was chosen over alternatives
+### Adding shadcn/ui Components
 
 ```bash
-# Check package health before installing
-npm view <package> time modified  # Last publish date
-npm view <package> homepage       # Check GitHub stars/issues
+npx shadcn@latest add <component>
 ```
 
-### Development Workflow
-
-**Before starting development each day:**
-- Run `npm outdated` to check for package updates
-- Review changelogs for major framework updates (Next.js, React, Tailwind)
-- Run `npm audit` to check for security vulnerabilities
-
-**When doing development work:**
-- Always reference the official Next.js documentation at https://nextjs.org/docs for current best practices
-- Check that code patterns match the latest stable Next.js version
-- When implementing new features, verify the approach against current docs before coding
+Existing: Button, Card, Dialog, Select, Table, Tabs, Badge, etc.
