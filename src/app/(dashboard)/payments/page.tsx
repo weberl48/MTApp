@@ -73,6 +73,7 @@ export default function PaymentsPage() {
   const [invoices, setInvoices] = useState<InvoiceData[]>([])
   const [contractors, setContractors] = useState<ContractorPayment[]>([])
   const [unpaidContractors, setUnpaidContractors] = useState<ContractorPayout[]>([])
+  const [canDeleteSession, setCanDeleteSession] = useState(false)
   const [activeTab, setActiveTab] = useState('payroll')
 
   // Date range filtering
@@ -103,6 +104,8 @@ export default function PaymentsPage() {
       router.push('/dashboard/')
       return
     }
+
+    setCanDeleteSession(can(role ?? null, 'session:delete'))
 
     // Fetch all invoices with contractor information (for the history tab)
     const { data: invoicesData } = await supabase
@@ -400,6 +403,7 @@ export default function PaymentsPage() {
               <PayrollHubTable
                 contractors={filteredUnpaidContractors}
                 onPayoutComplete={loadPayments}
+                canDelete={canDeleteSession}
               />
             </CardContent>
           </Card>

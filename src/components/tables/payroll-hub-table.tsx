@@ -61,9 +61,10 @@ export interface ContractorPayout {
 interface PayrollHubTableProps {
   contractors: ContractorPayout[]
   onPayoutComplete: () => void
+  canDelete?: boolean
 }
 
-export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTableProps) {
+export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = false }: PayrollHubTableProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedContractors, setExpandedContractors] = useState<Set<string>>(new Set())
   const [markPaidDialog, setMarkPaidDialog] = useState<{
@@ -316,7 +317,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                                 <th className="text-left pb-2 font-medium">Service</th>
                                 <th className="text-left pb-2 font-medium">Clients</th>
                                 <th className="text-right pb-2 font-medium">Amount</th>
-                                <th className="text-right pb-2 font-medium w-10"></th>
+                                {canDelete && <th className="text-right pb-2 font-medium w-10"></th>}
                               </tr>
                             </thead>
                             <tbody>
@@ -330,6 +331,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                                   <td className="py-2 text-right font-medium">
                                     {formatCurrency(session.contractor_pay)}
                                   </td>
+                                  {canDelete && (
                                   <td className="py-2 text-right">
                                     <Button
                                       variant="ghost"
@@ -347,6 +349,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete }: PayrollHubTab
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                   </td>
+                                  )}
                                 </tr>
                               ))}
                             </tbody>

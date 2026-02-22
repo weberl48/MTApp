@@ -237,7 +237,7 @@ export default function SessionDetailPage() {
   const isActiveSession = !['no_show', 'cancelled'].includes(session.status)
   const isOwnDraft = session.contractor?.id === currentUserId && session.status === 'draft'
   const canEdit = isActiveSession && (can('session:approve') || isOwnDraft)
-  const canDelete = isActiveSession && (can('session:delete') || isOwnDraft)
+  const canDelete = isActiveSession && can('session:delete')
   const canApprove = can('session:approve') && session.status === 'submitted'
   const canMarkNoShow = can('session:mark-no-show') && isActiveSession && session.status !== 'draft'
   const canCancel = isActiveSession && (can('session:cancel') || isOwnDraft)
