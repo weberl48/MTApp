@@ -1,24 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendInvoiceReminderEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { differenceInCalendarDays, parseISO } from 'date-fns'
 import type { OrganizationSettings } from '@/types/database'
-
-// Lazy initialize clients to avoid build-time errors
-let supabaseAdmin: SupabaseClient | null = null
-
-function getSupabaseAdmin(): SupabaseClient {
-  if (!supabaseAdmin) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!url || !key) {
-      throw new Error('Missing Supabase environment variables')
-    }
-    supabaseAdmin = createClient(url, key)
-  }
-  return supabaseAdmin
-}
 
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization')
@@ -37,7 +22,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const db = getSupabaseAdmin()
+    const db = createServiceClient()
     const today = new Date()
 
     // Fetch all organizations with their settings

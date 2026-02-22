@@ -41,7 +41,7 @@ export default function EarningsPage() {
   // Only contractors (or those viewing as a contractor) should see this page
   const effectiveRole = viewAsRole || actualRole
   if (user && effectiveRole !== 'contractor' && !viewAsContractor) {
-    redirect('/dashboard')
+    redirect('/dashboard/')
   }
 
   useEffect(() => {

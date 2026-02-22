@@ -222,7 +222,7 @@ export default function TeamMemberPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: 'Team', href: '/team' },
+        { label: 'Team', href: '/team/' },
         { label: member.name || 'Team Member' },
       ]} />
       {/* Header */}

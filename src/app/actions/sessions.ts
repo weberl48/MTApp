@@ -56,6 +56,9 @@ async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof cre
 }
 
 export async function approveSession(sessionId: string) {
+  const permErr = await requirePermission('session:approve')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -110,6 +113,9 @@ export async function bulkApproveSessions(sessionIds: string[]) {
 }
 
 export async function markSessionNoShow(sessionId: string) {
+  const permErr = await requirePermission('session:mark-no-show')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -178,6 +184,9 @@ async function removeSessionFromBatchInvoices(supabase: Awaited<ReturnType<typeo
 }
 
 export async function rejectSession(sessionId: string, reason: string) {
+  const permErr = await requirePermission('session:approve')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // Delete pending per-session invoices (created on submit, must be removed when reverting to draft)
@@ -211,6 +220,9 @@ export async function rejectSession(sessionId: string, reason: string) {
 }
 
 export async function cancelSession(sessionId: string) {
+  const permErr = await requirePermission('session:cancel')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // Delete any per-session invoices for this session
@@ -240,6 +252,9 @@ export async function cancelSession(sessionId: string) {
 }
 
 export async function deleteSession(sessionId: string) {
+  const permErr = await requirePermission('session:delete')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // Remove from any pending batch invoices (scholarship)

@@ -241,7 +241,7 @@ export default function HelpPage() {
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <Link href={`/help/${article.slug}`} className="group">
+                        <Link href={`/help/${article.slug}/`} className="group">
                           <h3 className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                             {article.title}
                             <ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
@@ -299,7 +299,7 @@ export default function HelpPage() {
                 <CardContent className="py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <Link href={`/help/${article.slug}`} className="group">
+                      <Link href={`/help/${article.slug}/`} className="group">
                         <h3 className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                           {article.title}
                           <ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />

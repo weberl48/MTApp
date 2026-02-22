@@ -6,6 +6,9 @@ import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
 
 export async function deleteInvoice(invoiceId: string) {
+  const permErr = await requirePermission('invoice:delete')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { error, count } = await supabase
@@ -29,6 +32,9 @@ export async function updateInvoiceStatus(
   invoiceId: string,
   status: 'pending' | 'sent' | 'paid'
 ) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const updates: { status: string; paid_date?: string } = { status }
@@ -54,6 +60,9 @@ export async function bulkUpdateInvoiceStatus(
   invoiceIds: string[],
   status: 'sent' | 'paid'
 ) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const updates: { status: string; paid_date?: string } = { status }

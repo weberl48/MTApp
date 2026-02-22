@@ -148,7 +148,7 @@ export function UnsentInvoices() {
                 </Button>
               </>
             )}
-            <Link href="/invoices">
+            <Link href="/invoices/">
               <Button variant="outline" size="sm">View All</Button>
             </Link>
           </div>
@@ -189,7 +189,7 @@ export function UnsentInvoices() {
                 onCheckedChange={(checked) => toggleSelect(invoice.id, !!checked)}
                 aria-label={`Select invoice for ${invoice.client?.name}`}
               />
-              <Link href={`/invoices/${invoice.id}`} className="flex-1 min-w-0">
+              <Link href={`/invoices/${invoice.id}/`} className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-medium truncate text-sm">
                     {invoice.client?.name || 'Unknown'}

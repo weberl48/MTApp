@@ -131,7 +131,7 @@ export function PendingApprovals() {
                   Approve ({selectedIds.size})
                 </Button>
               )}
-              <Link href="/sessions?status=submitted">
+              <Link href="/sessions/?status=submitted">
                 <Button variant="outline" size="sm">View All</Button>
               </Link>
             </div>

@@ -301,7 +301,7 @@ export function Header({ user }: HeaderProps) {
                   key={client.id}
                   onClick={() => {
                     if (client.active_token) {
-                      window.open(`/portal/${client.active_token}`, '_blank')
+                      window.open(`/portal/${client.active_token}/`, '_blank')
                     } else {
                       router.push(`/clients/${client.id}/`)
                     }
@@ -353,7 +353,7 @@ export function Header({ user }: HeaderProps) {
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/settings/')}>
+          <DropdownMenuItem onClick={() => router.push('/settings/profile/')}>
             <UserIcon className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>

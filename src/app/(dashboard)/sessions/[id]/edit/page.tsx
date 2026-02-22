@@ -99,7 +99,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-2">
-          <Link href={`/sessions/${id}`}>
+          <Link href={`/sessions/${id}/`}>
             <Button variant="ghost" size="icon">
               <ArrowLeft className="w-5 h-5" />
             </Button>

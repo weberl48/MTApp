@@ -184,7 +184,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid - Clickable */}
       <div data-tour="dashboard-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Link href="/sessions">
+        <Link href="/sessions/">
           <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -198,7 +198,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/clients">
+        <Link href="/clients/">
           <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -214,7 +214,7 @@ export default function DashboardPage() {
 
         {stats?.isAdmin && (
           <>
-            <Link href="/invoices">
+            <Link href="/invoices/">
               <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -228,7 +228,7 @@ export default function DashboardPage() {
               </Card>
             </Link>
 
-            <Link href="/invoices">
+            <Link href="/invoices/">
               <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">

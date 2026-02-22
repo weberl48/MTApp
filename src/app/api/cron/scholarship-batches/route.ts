@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import type { OrganizationSettings, ServiceType } from '@/types/database'
 import { calculateSessionPricing } from '@/lib/pricing'
-
-let supabaseAdmin: SupabaseClient | null = null
-
-function getSupabaseAdmin(): SupabaseClient {
-  if (!supabaseAdmin) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!url || !key) {
-      throw new Error('Missing Supabase environment variables')
-    }
-    supabaseAdmin = createClient(url, key)
-  }
-  return supabaseAdmin
-}
 
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization')
@@ -26,7 +12,7 @@ function verifyCronSecret(request: NextRequest): boolean {
 /**
  * Fetch unbilled scholarship sessions for a specific organization.
  */
-async function fetchOrgUnbilledScholarship(supabase: SupabaseClient, orgId: string) {
+async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createServiceClient>, orgId: string) {
   // Get scholarship clients for this org
   const { data: clients } = await supabase
     .from('clients')
@@ -108,7 +94,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = getSupabaseAdmin()
+    const supabase = createServiceClient()
     const today = new Date()
     const dayOfMonth = today.getDate()
 

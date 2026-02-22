@@ -95,7 +95,7 @@ export function MissingRates() {
             <AlertTriangle className="w-5 h-5 text-amber-600" />
             <CardTitle>Missing Contractor Rates</CardTitle>
           </div>
-          <Link href="/team">
+          <Link href="/team/">
             <Button variant="outline" size="sm">Team &gt; Rates</Button>
           </Link>
         </div>
@@ -108,7 +108,7 @@ export function MissingRates() {
           {Array.from(byContractor.values()).map((contractor) => (
             <Link
               key={contractor.id}
-              href={`/team/${contractor.id}`}
+              href={`/team/${contractor.id}/`}
               className="block p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
             >
               <div className="font-medium text-sm">{contractor.name}</div>

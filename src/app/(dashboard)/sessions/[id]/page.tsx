@@ -217,7 +217,7 @@ export default function SessionDetailPage() {
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Session not found</h2>
         <p className="text-muted-foreground mb-4">This session may have been deleted or you don&apos;t have access.</p>
-        <Link href="/sessions">
+        <Link href="/sessions/">
           <Button>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Sessions
@@ -245,7 +245,7 @@ export default function SessionDetailPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: 'Sessions', href: '/sessions' },
+        { label: 'Sessions', href: '/sessions/' },
         { label: session.service_type?.name || 'Session Details' },
       ]} />
       {session.status === 'draft' && session.rejection_reason && (
@@ -310,7 +310,7 @@ export default function SessionDetailPage() {
             </Button>
           )}
           {canEdit && (
-            <Link href={`/sessions/${session.id}/edit`}>
+            <Link href={`/sessions/${session.id}/edit/`}>
               <Button variant="outline">
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit

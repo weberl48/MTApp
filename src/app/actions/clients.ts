@@ -1,9 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { handleSupabaseError, revalidateClientPaths } from '@/lib/actions/helpers'
+import { handleSupabaseError, revalidateClientPaths, requirePermission } from '@/lib/actions/helpers'
 
 export async function deleteClient(clientId: string) {
+  const permErr = await requirePermission('settings:edit')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // Check if client has any sessions

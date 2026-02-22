@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generateAccessToken, getClientTokens } from '@/lib/portal/token'
 import { sendMagicLinkEmail } from '@/lib/email'
 import { isFeatureEnabled } from '@/lib/features'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 /**
  * POST /api/clients/[id]/send-invite
@@ -16,6 +17,11 @@ export async function POST(
 ) {
   try {
     const { id: clientId } = await params
+
+    if (!uuidSchema.safeParse(clientId).success) {
+      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated and has permission
@@ -94,7 +100,11 @@ export async function POST(
     if (existingTokens.length > 0) {
       // Use existing token
       const token = existingTokens[0].token
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const envUrl = process.env.NEXT_PUBLIC_APP_URL
+      if (!envUrl && process.env.NODE_ENV === 'production') {
+        throw new Error('NEXT_PUBLIC_APP_URL is required in production')
+      }
+      const baseUrl = envUrl || 'http://localhost:3000'
       portalUrl = `${baseUrl}/portal/${token}`
     } else {
       // Generate new token

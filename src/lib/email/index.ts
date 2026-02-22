@@ -17,6 +17,11 @@ function getResendClient(): Resend {
   return resend
 }
 
+function getFromAddress(name?: string): string {
+  const domain = process.env.EMAIL_FROM_DOMAIN || 'rattatata.xyz'
+  return `${name || 'May Creative Arts'} <noreply@${domain}>`
+}
+
 interface SendInvoiceEmailParams {
   to: string
   clientName: string
@@ -61,7 +66,7 @@ export async function sendInvoiceEmail({
     : []
 
   const { data, error } = await getResendClient().emails.send({
-    from: 'May Creative Arts <noreply@rattatata.xyz>',
+    from: getFromAddress(),
     to: [to],
     subject: `Invoice ${invoiceNumber} - May Creative Arts`,
     html: `
@@ -231,7 +236,7 @@ export async function sendInvoiceReminderEmail({
     : `This is a friendly reminder that your invoice is due on <strong>${formattedDueDate}</strong>.`
 
   const { data, error } = await getResendClient().emails.send({
-    from: 'May Creative Arts <noreply@rattatata.xyz>',
+    from: getFromAddress(),
     to: [to],
     subject,
     html: `
@@ -357,7 +362,7 @@ export async function sendMagicLinkEmail({
   portalUrl,
 }: SendMagicLinkEmailParams) {
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `Your Portal Access Link - ${organizationName}`,
     html: `
@@ -484,7 +489,7 @@ export async function sendSessionRequestStatusEmail({
   const statusEmoji = isApproved ? '✓' : '✗'
 
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `Session Request ${statusText} - ${organizationName}`,
     html: `
@@ -613,7 +618,7 @@ export async function sendTeamInviteEmail({
   const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1)
 
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `You're invited to join ${organizationName}`,
     html: `

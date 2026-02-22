@@ -556,10 +556,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="45">45 minutes</SelectItem>
-                <SelectItem value="60">60 minutes</SelectItem>
-                <SelectItem value="90">90 minutes</SelectItem>
+                {(settings?.session?.duration_options ?? [30, 45, 60, 90]).map((mins) => (
+                  <SelectItem key={mins} value={String(mins)}>
+                    {mins} minutes
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -833,7 +834,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 on <strong>{parseLocalDate(duplicateWarning.date).toLocaleDateString()}</strong>.
                 <br />
                 <a
-                  href={`/sessions/${duplicateWarning.sessionId}`}
+                  href={`/sessions/${duplicateWarning.sessionId}/`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:no-underline"

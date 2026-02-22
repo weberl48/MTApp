@@ -213,7 +213,7 @@ export default function InvoiceDetailPage() {
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Invoice not found</h2>
         <p className="text-muted-foreground mb-4">This invoice may have been deleted or you don&apos;t have access.</p>
-        <Link href="/invoices">
+        <Link href="/invoices/">
           <Button>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Invoices
@@ -232,7 +232,7 @@ export default function InvoiceDetailPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: 'Invoices', href: '/invoices' },
+        { label: 'Invoices', href: '/invoices/' },
         { label: `Invoice for ${invoice.client?.name || 'Client'}` },
       ]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -430,7 +430,7 @@ export default function InvoiceDetailPage() {
                   )}
                 </div>
               </div>
-              <Link href={`/sessions/${invoice.session.id}`}>
+              <Link href={`/sessions/${invoice.session.id}/`}>
                 <Button variant="outline" size="sm">
                   View Session
                 </Button>

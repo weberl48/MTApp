@@ -74,7 +74,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/settings?tab=security">
+            <Link href="/settings/?tab=security">
               <Button>
                 <Shield className="w-4 h-4 mr-2" />
                 Set Up Two-Factor Authentication
@@ -97,7 +97,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
               Your account does not have two-factor authentication enabled.
               For better security, we recommend setting up 2FA.
             </span>
-            <Link href="/settings?tab=security">
+            <Link href="/settings/?tab=security">
               <Button variant="outline" size="sm" className="flex-shrink-0">
                 Set Up 2FA
               </Button>

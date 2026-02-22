@@ -103,7 +103,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: 'Clients', href: '/clients' },
+        { label: 'Clients', href: '/clients/' },
         { label: client.name },
       ]} />
       {/* Header */}
@@ -254,7 +254,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                   {clientInvoices.map((invoice) => (
                     <Link
                       key={invoice.id}
-                      href={`/invoices/${invoice.id}`}
+                      href={`/invoices/${invoice.id}/`}
                       className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
