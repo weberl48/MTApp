@@ -139,6 +139,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         groupHeadcount: null,
         pricing,
         isScholarshipService: serviceType?.is_scholarship ?? false,
+        dueDays: settings?.invoice?.due_days,
       })
 
       // Re-save defaults so they persist

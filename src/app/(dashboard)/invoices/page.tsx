@@ -51,6 +51,7 @@ interface Invoice {
   paid_date: string | null
   square_invoice_id: string | null
   square_payment_url: string | null
+  reminder_sent_days: number[]
   client: { id: string; name: string; contact_email: string | null } | null
   session: {
     id: string
