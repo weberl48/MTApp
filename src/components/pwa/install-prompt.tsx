@@ -28,6 +28,13 @@ function getIsIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent)
 }
 
+// Check if mobile/tablet device (only show install prompt on these)
+function getIsMobileDevice() {
+  if (typeof window === 'undefined') return false
+  return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024)
+}
+
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
@@ -40,8 +47,12 @@ export function PWAInstallPrompt() {
   )
 
   const isIOS = getIsIOS()
+  const isMobile = getIsMobileDevice()
 
   useEffect(() => {
+    // Don't show on desktop/laptop browsers
+    if (!isMobile) return
+
     // Don't run if already standalone
     if (isStandalone) return
 
@@ -79,7 +90,7 @@ export function PWAInstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [isStandalone, isIOS])
+  }, [isStandalone, isIOS, isMobile])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
@@ -101,8 +112,8 @@ export function PWAInstallPrompt() {
     }
   }
 
-  // Don't show if already installed
-  if (isStandalone || !showPrompt) {
+  // Don't show on desktop or if already installed
+  if (!isMobile || isStandalone || !showPrompt) {
     return null
   }
 
