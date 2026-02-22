@@ -55,6 +55,7 @@ interface InvoiceDetails {
   paid_date: string | null
   square_invoice_id: string | null
   square_payment_url: string | null
+  reminder_sent_days: number[]
   organization_id: string
   created_at: string
   updated_at: string

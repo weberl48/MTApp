@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
 import { calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
 import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
-import type { ServiceType } from '@/types/database'
+import type { ServiceType, OrganizationSettings } from '@/types/database'
+import { addDays, format } from 'date-fns'
 
 interface GenerateBatchInvoiceParams {
   clientId: string
@@ -178,7 +179,20 @@ export async function generateScholarshipBatchInvoice({
     })
   }
 
-  // 6. Create the batch invoice
+  // 6. Fetch org settings for due_days
+  const { data: orgData } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', organizationId)
+    .single()
+
+  const orgSettings = orgData?.settings as OrganizationSettings | undefined
+  const dueDays = orgSettings?.invoice?.due_days
+  const dueDate = dueDays != null
+    ? format(addDays(new Date(), dueDays), 'yyyy-MM-dd')
+    : undefined
+
+  // 7. Create the batch invoice
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
@@ -193,6 +207,7 @@ export async function generateScholarshipBatchInvoice({
       invoice_type: 'batch',
       billing_period: billingPeriod,
       organization_id: organizationId,
+      ...(dueDate && { due_date: dueDate }),
     })
     .select()
     .single()
@@ -201,7 +216,7 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: invoiceError.message }
   }
 
-  // 7. Insert line items
+  // 8. Insert line items
   const itemsToInsert = items.map((item) => ({
     ...item,
     invoice_id: invoice.id,

@@ -4,7 +4,6 @@ import { isSquareConfigured } from '@/lib/square/client'
 import { logger } from '@/lib/logger'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { parseLocalDate } from '@/lib/dates'
-import type { OrganizationSettings } from '@/types/database'
 
 export interface AutoSendResult {
   attempted: number
@@ -27,7 +26,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
 
   const supabase = await createClient()
 
-  // Fetch session with org settings to check if auto-send is enabled
+  // Fetch session data for building invoice description
   const { data: session } = await supabase
     .from('sessions')
     .select('organization_id, date, duration_minutes, service_type:service_types(name)')
@@ -35,17 +34,6 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
     .single()
 
   if (!session) return empty
-
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('settings')
-    .eq('id', session.organization_id)
-    .single()
-
-  const settings = org?.settings as OrganizationSettings | null
-  if (!settings?.invoice?.auto_send_square_on_approve) {
-    return empty
-  }
 
   // Fetch pending invoices for this session that haven't been sent via Square
   const { data: invoices } = await supabase

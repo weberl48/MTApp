@@ -33,7 +33,6 @@ export interface OrganizationSettings {
     due_days: number
     send_reminders: boolean
     reminder_days: number[]
-    auto_send_square_on_approve: boolean
   }
   session: {
     default_duration: number
@@ -500,6 +499,7 @@ export interface Database {
           paid_date: string | null
           invoice_type: string
           billing_period: string | null
+          reminder_sent_days: number[]
           organization_id: string
           created_at: string
           updated_at: string
@@ -518,6 +518,7 @@ export interface Database {
           paid_date?: string | null
           invoice_type?: string
           billing_period?: string | null
+          reminder_sent_days?: number[]
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -535,6 +536,7 @@ export interface Database {
           paid_date?: string | null
           invoice_type?: string
           billing_period?: string | null
+          reminder_sent_days?: number[]
           organization_id?: string
           updated_at?: string
         }

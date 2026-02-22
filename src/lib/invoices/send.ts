@@ -4,6 +4,7 @@ import { sendInvoiceEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { createElement, type ReactElement } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { OrganizationSettings } from '@/types/database'
 
 interface SendResult {
   success: boolean
@@ -46,6 +47,17 @@ export async function sendInvoiceById(
     return { success: false, invoiceId, error: 'Client has no email address on file' }
   }
 
+  // Fetch org settings for footer_text and payment_instructions
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', invoice.organization_id)
+    .single()
+
+  const settings = org?.settings as OrganizationSettings | undefined
+  const footerText = settings?.invoice?.footer_text || undefined
+  const paymentInstructions = settings?.invoice?.payment_instructions || undefined
+
   // Fetch invoice items for batch invoices
   let items: Array<{
     description: string; session_date: string; duration_minutes: number | null
@@ -65,7 +77,7 @@ export async function sendInvoiceById(
   // Generate PDF
   const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
   const pdfBuffer = await renderToBuffer(
-    createElement(InvoicePDF, { invoice: invoiceData }) as ReactElement<DocumentProps>
+    createElement(InvoicePDF, { invoice: invoiceData, footerText, paymentInstructions }) as ReactElement<DocumentProps>
   )
 
   // Send email
@@ -86,6 +98,8 @@ export async function sendInvoiceById(
         : (invoice.session?.service_type?.name || 'Session'),
       dueDate: invoice.due_date,
       pdfBuffer: Buffer.from(pdfBuffer),
+      footerText,
+      paymentInstructions,
     })
   } catch {
     return { success: false, invoiceId, error: 'Failed to send email' }

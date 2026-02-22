@@ -1,5 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PricingCalculation } from '@/lib/pricing'
+import { addDays, format } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 
 interface CreateSessionParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +19,7 @@ interface CreateSessionParams {
   groupHeadcount: number | null
   pricing: PricingCalculation
   isScholarshipService?: boolean
+  dueDays?: number
 }
 
 interface CreateSessionResult {
@@ -33,7 +36,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     supabase, date, time, durationMinutes, serviceTypeId,
     contractorId, organizationId, clientIds,
     encryptedNotes, encryptedClientNotes, status,
-    groupHeadcount, pricing, isScholarshipService,
+    groupHeadcount, pricing, isScholarshipService, dueDays,
   } = params
 
   // Create the session
@@ -81,6 +84,10 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
         .select('id, payment_method')
         .in('id', clientIds)
 
+      const dueDate = dueDays != null
+        ? format(addDays(parseLocalDate(date), dueDays), 'yyyy-MM-dd')
+        : undefined
+
       const invoices = (clientData || [])
         .filter((client) => client.payment_method !== 'scholarship')
         .map((client) => ({
@@ -93,6 +100,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
           payment_method: client.payment_method,
           status: 'pending' as const,
           organization_id: organizationId,
+          ...(dueDate && { due_date: dueDate }),
         }))
 
       if (invoices.length > 0) {

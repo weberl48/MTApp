@@ -47,7 +47,6 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
     due_days: 30,
     send_reminders: true,
     reminder_days: [7, 1],
-    auto_send_square_on_approve: false,
   },
   session: {
     default_duration: 30,

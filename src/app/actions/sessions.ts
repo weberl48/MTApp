@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { autoSendInvoicesViaSquare, type AutoSendResult } from '@/lib/square/auto-send'
+import { autoSendInvoicesViaSquare } from '@/lib/square/auto-send'
 import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
@@ -31,15 +31,20 @@ async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof cre
   if (method === 'square') {
     await autoSendInvoicesViaSquare(sessionId)
   } else if (method === 'email') {
-    // Find pending invoices for this session and send via email
+    // Find pending invoices for this session — only send to email-billed clients
     const { data: invoices } = await supabase
       .from('invoices')
-      .select('id')
+      .select('id, client:clients(billing_method)')
       .eq('session_id', sessionId)
       .eq('status', 'pending')
 
     if (invoices) {
       for (const inv of invoices) {
+        const client = Array.isArray(inv.client) ? inv.client[0] : inv.client
+        const billingMethod = client?.billing_method
+        // Only auto-send email to clients with email billing or no billing method set
+        if (billingMethod && billingMethod !== 'email') continue
+
         try {
           await sendInvoiceById(supabase, inv.id)
         } catch (e) {
@@ -61,14 +66,6 @@ export async function approveSession(sessionId: string) {
   const err = handleSupabaseError(error)
   if (err) return err
 
-  // Auto-send invoices via Square (legacy setting — non-blocking)
-  let squareAutoSend: AutoSendResult | null = null
-  try {
-    squareAutoSend = await autoSendInvoicesViaSquare(sessionId)
-  } catch (e) {
-    logger.error('Auto-send Square invoices failed', e)
-  }
-
   // Auto-send via automation settings (email or square)
   try {
     await autoSendInvoicesOnApprove(supabase, sessionId)
@@ -78,7 +75,7 @@ export async function approveSession(sessionId: string) {
 
   revalidateSessionPaths(sessionId)
 
-  return { success: true as const, squareAutoSend }
+  return { success: true as const }
 }
 
 export async function bulkApproveSessions(sessionIds: string[]) {

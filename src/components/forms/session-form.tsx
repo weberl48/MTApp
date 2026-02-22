@@ -391,6 +391,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
           pricing: pricing!,
           isScholarshipService: selectedServiceType?.is_scholarship ?? false,
+          dueDays: settings?.invoice?.due_days,
         })
 
         if (result.invoiceError) {

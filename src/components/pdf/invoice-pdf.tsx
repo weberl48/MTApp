@@ -219,6 +219,8 @@ interface InvoiceData {
 
 interface InvoicePDFProps {
   invoice: InvoiceData
+  footerText?: string
+  paymentInstructions?: string
 }
 
 
@@ -232,7 +234,7 @@ function formatDate(dateString: string): string {
 
 
 
-export function InvoicePDF({ invoice }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, footerText, paymentInstructions }: InvoicePDFProps) {
   const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
 
@@ -375,10 +377,18 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           </View>
         )}
 
+        {/* Payment Instructions */}
+        {paymentInstructions ? (
+          <View style={{ marginTop: 30, padding: 15, backgroundColor: '#f0f9ff', borderRadius: 4 }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#374151', marginBottom: 8 }}>Payment Instructions</Text>
+            <Text style={{ fontSize: 10, color: '#6b7280', lineHeight: 1.5 }}>{paymentInstructions}</Text>
+          </View>
+        ) : null}
+
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Thank you for choosing May Creative Arts!
+            {footerText || 'Thank you for choosing May Creative Arts!'}
           </Text>
           <Text style={[styles.footerText, { marginTop: 4 }]}>
             Questions? Contact us at maycreativearts@gmail.com

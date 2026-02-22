@@ -5,7 +5,7 @@ import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { createElement, ReactElement } from 'react'
 import { can } from '@/lib/auth/permissions'
 import { uuidSchema } from '@/lib/validation/schemas'
-import type { UserRole } from '@/types/database'
+import type { UserRole, OrganizationSettings } from '@/types/database'
 
 export async function GET(
   request: NextRequest,
@@ -72,6 +72,17 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Fetch org settings for footer_text and payment_instructions
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', invoice.organization_id)
+      .single()
+
+    const orgSettings = org?.settings as OrganizationSettings | undefined
+    const footerText = orgSettings?.invoice?.footer_text || undefined
+    const paymentInstructions = orgSettings?.invoice?.payment_instructions || undefined
+
     // Fetch invoice items for batch invoices
     let items: Array<{ description: string; session_date: string; duration_minutes: number | null; amount: number; service_type_name: string | null; contractor_name: string | null }> = []
     if (invoice.invoice_type === 'batch') {
@@ -87,7 +98,7 @@ export async function GET(
     // Generate PDF
     const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
     const pdfBuffer = await renderToBuffer(
-      createElement(InvoicePDF, { invoice: invoiceData }) as ReactElement<DocumentProps>
+      createElement(InvoicePDF, { invoice: invoiceData, footerText, paymentInstructions }) as ReactElement<DocumentProps>
     )
 
     // Return PDF response

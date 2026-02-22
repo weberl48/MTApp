@@ -167,12 +167,6 @@ export default function SessionsPage() {
     if (result.success) {
       setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, status: 'approved' } : s))
       toast.success('Session approved')
-      const sq = result.squareAutoSend
-      if (sq) {
-        if (sq.sent > 0) toast.success(`${sq.sent} invoice${sq.sent > 1 ? 's' : ''} sent via Square`)
-        if (sq.failed.length > 0) toast.warning(`Failed to send Square invoice for: ${sq.failed.join(', ')}`)
-        if (sq.skipped > 0) toast.info(`${sq.skipped} invoice${sq.skipped > 1 ? 's' : ''} skipped`)
-      }
     } else {
       toast.error('Failed to approve session')
     }
