@@ -722,6 +722,272 @@ Click the **Back to Owner** button shown in the header or in the View As menu to
 - Demonstrating the app to a new contractor before their account is set up.
     `,
   },
+  {
+    slug: 'my-earnings',
+    title: 'My Earnings',
+    category: 'analytics',
+    description: 'How to track your earnings, view payment history, and understand your pay breakdown.',
+    relatedArticles: ['logging-a-session', 'payroll-and-payments'],
+    content: `
+## My Earnings
+
+The Earnings page is your personal financial dashboard as a contractor. It shows what you have earned, what has been paid, and what is still pending.
+
+### Where to Find It
+
+Click **Earnings** in the sidebar. This page is visible only to contractors (and to owners using View As mode).
+
+### Summary Cards
+
+At the top of the page, four cards give you a quick snapshot:
+
+- **YTD Earnings** - Your total earnings since January 1st of the current year, with a count of how many sessions that covers.
+- **Paid Out** - How much has actually been paid to you so far.
+- **Pending** - Earnings from approved sessions that have not been paid yet.
+- **This Month** - Your earnings for the current calendar month.
+
+### Monthly Chart
+
+A bar chart shows your earnings over the last six months, making it easy to see trends in your workload.
+
+### Monthly Breakdown
+
+Below the chart, each month is listed with the total number of sessions and your earnings for that period. This gives you a detailed, month-by-month record of your pay.
+
+### How Pay Is Calculated
+
+Your earnings are calculated from the service type pricing, your custom pay rate (if one has been set), and the session duration. If you have questions about how a specific amount was calculated, ask your admin to check the pricing breakdown on the session detail page.
+    `,
+  },
+  {
+    slug: 'profile-and-security',
+    title: 'Profile & Security Settings',
+    category: 'settings',
+    description: 'How to update your profile, set up two-factor authentication, and configure security policies.',
+    adminOnly: false,
+    relatedArticles: ['getting-started'],
+    content: `
+## Profile & Security Settings
+
+Manage your personal information and account security from the Profile & Security page.
+
+### Where to Find It
+
+Navigate to **Settings > Profile & Security**.
+
+### Profile
+
+Update your display name and phone number. These are visible to your team members and may appear on communications.
+
+### Account Details
+
+Your email, role, and organization are displayed for reference. These are read-only and can only be changed by an administrator.
+
+### Two-Factor Authentication (MFA)
+
+MFA adds an extra layer of security to your account by requiring a code from an authenticator app in addition to your password.
+
+To set up MFA:
+
+1. Open Profile & Security.
+2. In the MFA Setup section, follow the prompts to link an authenticator app (such as Google Authenticator or Authy).
+3. Scan the QR code with your app and enter the verification code to confirm.
+
+Once enabled, you will be asked for a code each time you log in. If your organization has enforced MFA, you will be required to set it up before you can use the app.
+
+### Security Policies (Owner Only)
+
+Owners can configure organization-wide security settings:
+
+- **Session Timeout** - How many minutes of inactivity before a user is automatically logged out (5 to 120 minutes, default 30).
+- **Require Two-Factor Authentication** - When enabled, all users in the organization must set up MFA.
+- **Max Login Attempts** - How many failed login attempts before an account is temporarily locked (3 to 10, default 5).
+- **Lockout Duration** - How long a locked account stays locked, in minutes (5 to 60, default 15).
+    `,
+  },
+  {
+    slug: 'practice-branding',
+    title: 'Practice & Branding',
+    category: 'settings',
+    description: 'How to customize your logo, brand colors, business details, and regional settings.',
+    adminOnly: true,
+    relatedArticles: ['getting-started', 'automation-settings'],
+    content: `
+## Practice & Branding
+
+Customize how your practice appears on invoices, emails, and the client portal.
+
+### Where to Find It
+
+Navigate to **Settings > Practice & Branding**. This page is available to owners only.
+
+### Organization Details
+
+Set your practice name, email, phone, mailing address, and website. These appear on invoices and other communications sent to clients.
+
+### Logo
+
+Upload your practice logo. It will appear on invoices, email headers, and the client portal. If no logo is uploaded, your practice initials are displayed instead.
+
+### Brand Colors
+
+Choose a **primary color** and **secondary color** using the color pickers. These colors are used on invoice headers, email templates, and portal buttons to give your communications a consistent brand identity.
+
+### Live Preview
+
+As you make changes, a live preview panel shows how your branding looks across three contexts:
+
+- **Invoice** - Header with your logo, name, and tagline.
+- **Email** - Email template with branded header and action button.
+- **Client Portal** - Portal header as clients will see it.
+
+### Business Details
+
+- **Tagline** - A short phrase that appears under your practice name on invoices and emails.
+- **Business Description** - A brief description of your practice.
+- **Tax ID / EIN** - Optional. If provided, it is printed on invoices.
+
+### Regional Settings
+
+- **Timezone** - Select your local timezone (US timezones are available).
+- **Currency** - Choose your currency (USD, CAD, EUR, or GBP).
+
+### Social Media
+
+Optionally link your Facebook, Instagram, LinkedIn, YouTube, Twitter/X, and TikTok profiles. These may be displayed on your public-facing pages.
+    `,
+  },
+  {
+    slug: 'client-details',
+    title: 'Viewing Client Details & History',
+    category: 'clients',
+    description: 'How to view a client\'s contact information, session history, and invoice history.',
+    adminOnly: true,
+    relatedArticles: ['adding-a-client', 'client-portal'],
+    content: `
+## Viewing Client Details & History
+
+Each client has a detail page where you can see their full record in one place.
+
+### How to Get There
+
+Click **Clients** in the sidebar, then click on any client's name to open their detail page.
+
+### Contact Information
+
+The left panel shows the client's email, phone number, payment method, billing method, and any internal notes (which are encrypted for HIPAA compliance). Email and phone are clickable to start a message or call.
+
+### Statistics
+
+A summary shows the client's total session count and the number of pending invoices. If there are outstanding invoices, the count is highlighted.
+
+### Sessions Tab
+
+Lists all sessions for this client, showing the service type, status, date, duration, and contractor name. Click any session to view its full details.
+
+### Invoices Tab
+
+Lists all invoices for this client, showing the amount, status, payment method, creation date, and due date. Click any invoice to view its detail page.
+    `,
+  },
+  {
+    slug: 'appearance-and-dark-mode',
+    title: 'Appearance & Dark Mode',
+    category: 'getting-started',
+    description: 'How to switch between light mode, dark mode, and system theme.',
+    relatedArticles: ['getting-started'],
+    content: `
+## Appearance & Dark Mode
+
+MCA Manager supports light and dark color themes so you can work comfortably in any lighting.
+
+### How to Switch Themes
+
+Click the **sun or moon icon** in the top-right corner of the header (next to your avatar). A dropdown menu appears with three options:
+
+- **Light** - Always use the light theme.
+- **Dark** - Always use the dark theme.
+- **System** - Automatically match your device's theme setting. If your phone or computer switches to dark mode at night, MCA Manager follows along.
+
+The active theme is labeled "Active" in the dropdown. Your preference is saved and persists across sessions.
+    `,
+  },
+  {
+    slug: 'exporting-data',
+    title: 'Exporting Data',
+    category: 'analytics',
+    description: 'How to export sessions and invoices as CSV files for your records.',
+    adminOnly: true,
+    relatedArticles: ['analytics-and-reports', 'payroll-and-payments'],
+    content: `
+## Exporting Data
+
+MCA Manager lets you export session and invoice data as CSV files for use in spreadsheets, accounting software, or your own records.
+
+### Exporting Invoices
+
+1. Go to **Invoices** in the sidebar.
+2. Use the checkboxes to select the invoices you want to export.
+3. A blue action bar appears at the top showing the count and total amount.
+4. Click **Export CSV**.
+
+The downloaded file includes columns for client name, service type, date, payment method, amount, and status.
+
+### Exporting Sessions
+
+Session data can be exported through the API at \`/api/sessions/export\`. Admins see all sessions; contractors see only their own. The export supports optional date range and client filters.
+
+The CSV includes date, time, duration, status, service type, contractor, clients, group headcount, and session notes (automatically decrypted).
+
+### Tips
+
+- Use invoice export at the end of each month to reconcile with your accounting records.
+- Filter by date range or client before exporting to narrow down the data you need.
+    `,
+  },
+  {
+    slug: 'audit-log',
+    title: 'Audit Log',
+    category: 'settings',
+    description: 'How to use the audit log to track all data changes for compliance.',
+    adminOnly: true,
+    relatedArticles: ['profile-and-security'],
+    content: `
+## Audit Log
+
+The audit log records every data change in the system, providing a complete compliance trail for HIPAA and business auditing purposes.
+
+### Where to Find It
+
+Navigate to **Settings > Audit Log**. This page is available to owners only.
+
+### What Is Tracked
+
+Every create, update, and delete action on the following tables is logged: sessions, invoices, clients, users, service types, session attendees, organizations, contractor rates, client goals, invites, portal tokens, session requests, and client resources.
+
+Each log entry records the timestamp, the action performed, which table was affected, the record ID, and who made the change.
+
+### Filtering the Log
+
+Use the controls at the top to narrow down the log:
+
+- **Search** - Find entries by user email or record ID.
+- **Table filter** - Show only changes to a specific table (e.g., Sessions, Invoices, Clients).
+- **Action filter** - Show only Created, Updated, or Deleted entries.
+
+### Viewing Details
+
+Click the **eye icon** on any log entry to open a detail view showing:
+
+- For **updates**: which fields changed, with a side-by-side "before" and "after" comparison.
+- For **creates**: the full record data as it was created.
+- For **deletes**: the full record data as it existed before deletion.
+
+### Pagination
+
+The log shows 20 entries per page. Use the Previous and Next buttons to navigate through the history.
+    `,
+  },
 ]
 
 export function getArticleBySlug(slug: string): HelpArticle | undefined {
