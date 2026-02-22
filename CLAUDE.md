@@ -92,7 +92,7 @@ Core tables with RLS policies:
 - `contractor_rates` - Per-contractor-per-service custom pay rates
 - `sessions` - Session logs with status workflow (draft → submitted → approved)
 - `session_attendees` - Many-to-many for group sessions
-- `invoices` - Generated from sessions, Square integration fields
+- `invoices` - Generated from sessions, Square integration fields, `reminder_sent_days` JSONB tracks which reminders have been sent
 
 Schema is in `supabase/schema.sql`. Run migrations via Supabase Dashboard or CLI.
 
@@ -102,7 +102,7 @@ Business rules are stored in `organization.settings` (JSONB) rather than hardcod
 
 | Section | Fields | Defaults |
 |---------|--------|----------|
-| `invoice` | `footer_text`, `payment_instructions`, `due_days`, `send_reminders`, `reminder_days`, `auto_send_square_on_approve` | 30 days, reminders at 7 and 1 day, auto-send off |
+| `invoice` | `footer_text`, `payment_instructions`, `due_days`, `send_reminders`, `reminder_days` | "Thank you for your business!", 30 days, reminders at [7, 1] days before due |
 | `session` | `default_duration`, `duration_options`, `require_notes`, `auto_submit`, `reminder_hours`, `send_reminders` | 30 min, [30,45,60,90] |
 | `notification` | `email_on_session_submit`, `email_on_invoice_paid`, `admin_email` | Both enabled |
 | `security` | `session_timeout_minutes`, `require_mfa`, `max_login_attempts`, `lockout_duration_minutes` | 30 min, 5 attempts, 15 min lockout |
@@ -180,7 +180,8 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/clients/[id]/send-invite` | POST | Send portal invite to client |
 | `/api/cron/cleanup` | GET | Periodic data cleanup |
 | `/api/cron/scholarship-batches` | GET | Generate monthly scholarship invoices |
-| `/api/cron/send-reminders` | GET | Invoice reminder cron |
+| `/api/cron/send-invoice-reminders` | GET | Invoice payment reminder cron (daily 2PM UTC) |
+| `/api/cron/send-reminders` | GET | Session reminder cron |
 | `/api/health` | GET | Full health check (all services) |
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
