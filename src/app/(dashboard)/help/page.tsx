@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle } from 'lucide-react'
+import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle, UserCog, BarChart2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,8 @@ const CATEGORY_ICONS: Record<HelpCategory, React.ComponentType<{ className?: str
   'clients': Users,
   'sessions': Calendar,
   'invoices': FileText,
+  'team': UserCog,
+  'analytics': BarChart2,
   'settings': Settings,
 }
 
