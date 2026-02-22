@@ -8,13 +8,17 @@ import { logger } from '@/lib/logger'
 export async function deleteInvoice(invoiceId: string) {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  const { error, count } = await supabase
     .from('invoices')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('id', invoiceId)
 
   const err = handleSupabaseError(error)
   if (err) return err
+
+  if (count === 0) {
+    return { success: false as const, error: 'Invoice not found or you do not have permission to delete it' }
+  }
 
   revalidateInvoicePaths()
 
