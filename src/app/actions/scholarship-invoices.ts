@@ -1,9 +1,11 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { calculateSessionPricing } from '@/lib/pricing'
-import type { ServiceType } from '@/types/database'
+import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
+import { calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
+import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
+import type { ServiceType, OrganizationSettings } from '@/types/database'
+import { addDays, format } from 'date-fns'
 
 interface GenerateBatchInvoiceParams {
   clientId: string
@@ -98,7 +100,29 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: 'All sessions in this period are already invoiced' }
   }
 
-  // 4. Calculate totals and build line items
+  // 4. Fetch contractor rates for accurate contractor pay
+  const contractorIds = [...new Set(
+    uninvoicedSessions
+      .map((row) => (row.session as unknown as { contractor: { id: string } | null }).contractor?.id)
+      .filter((id): id is string => !!id)
+  )]
+
+  const rateMap = new Map<string, ContractorPricingOverrides>()
+  if (contractorIds.length > 0) {
+    const { data: rates } = await supabase
+      .from('contractor_rates')
+      .select('user_id, service_type_id, contractor_pay, duration_increment')
+      .in('user_id', contractorIds)
+
+    for (const rate of rates || []) {
+      rateMap.set(`${rate.user_id}:${rate.service_type_id}`, {
+        customContractorPay: rate.contractor_pay,
+        durationIncrement: rate.duration_increment,
+      })
+    }
+  }
+
+  // 5. Calculate totals and build line items
   let totalAmount = 0
   let totalMcaCut = 0
   let totalContractorPay = 0
@@ -128,8 +152,11 @@ export async function generateScholarshipBatchInvoice({
 
     const serviceType = session.service_type
     const attendeeCount = session.group_headcount || 1
+    const overrides = session.contractor
+      ? rateMap.get(`${session.contractor.id}:${serviceType.id}`)
+      : undefined
     const pricing = calculateSessionPricing(
-      serviceType, attendeeCount, session.duration_minutes, undefined,
+      serviceType, attendeeCount, session.duration_minutes, overrides,
       { paymentMethod: 'scholarship' }
     )
 
@@ -152,7 +179,20 @@ export async function generateScholarshipBatchInvoice({
     })
   }
 
-  // 5. Create the batch invoice
+  // 6. Fetch org settings for due_days
+  const { data: orgData } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', organizationId)
+    .single()
+
+  const orgSettings = orgData?.settings as OrganizationSettings | undefined
+  const dueDays = orgSettings?.invoice?.due_days
+  const dueDate = dueDays != null
+    ? format(addDays(new Date(), dueDays), 'yyyy-MM-dd')
+    : undefined
+
+  // 7. Create the batch invoice
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
@@ -167,6 +207,7 @@ export async function generateScholarshipBatchInvoice({
       invoice_type: 'batch',
       billing_period: billingPeriod,
       organization_id: organizationId,
+      ...(dueDate && { due_date: dueDate }),
     })
     .select()
     .single()
@@ -175,7 +216,7 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: invoiceError.message }
   }
 
-  // 6. Insert line items
+  // 8. Insert line items
   const itemsToInsert = items.map((item) => ({
     ...item,
     invoice_id: invoice.id,
@@ -191,8 +232,39 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: itemsError.message }
   }
 
-  revalidatePath('/invoices')
-  revalidatePath('/dashboard')
+  revalidateInvoicePaths()
 
   return { success: true as const, invoiceId: invoice.id }
+}
+
+export async function generateAllUnbilledScholarshipInvoices(organizationId: string) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+
+  const supabase = await createClient()
+
+  const unbilled = await fetchUnbilledScholarshipSessions(supabase)
+  const groups = groupUnbilledByClientMonth(unbilled)
+
+  if (groups.length === 0) {
+    return { success: true as const, generated: 0, failed: [] as string[] }
+  }
+
+  const results: { generated: number; failed: string[] } = { generated: 0, failed: [] }
+
+  for (const group of groups) {
+    const result = await generateScholarshipBatchInvoice({
+      clientId: group.clientId,
+      billingPeriod: group.month,
+      organizationId,
+    })
+
+    if (result.success) {
+      results.generated++
+    } else {
+      results.failed.push(`${group.clientName} (${group.month}): ${result.error}`)
+    }
+  }
+
+  return { success: true as const, ...results }
 }

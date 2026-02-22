@@ -1,9 +1,12 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { handleSupabaseError, revalidateClientPaths, requirePermission } from '@/lib/actions/helpers'
 
 export async function deleteClient(clientId: string) {
+  const permErr = await requirePermission('settings:edit')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // Check if client has any sessions
@@ -38,14 +41,12 @@ export async function deleteClient(clientId: string) {
     .delete()
     .eq('id', clientId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/clients')
-  revalidatePath('/dashboard')
+  revalidateClientPaths()
 
-  return { success: true }
+  return { success: true as const }
 }
 
 export async function addClient(data: {
@@ -71,14 +72,12 @@ export async function addClient(data: {
     .select('id')
     .single()
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/clients')
-  revalidatePath('/dashboard')
+  revalidateClientPaths()
 
-  return { success: true, clientId: newClient.id }
+  return { success: true as const, clientId: newClient!.id }
 }
 
 export async function updateClient(
@@ -105,12 +104,10 @@ export async function updateClient(
     })
     .eq('id', clientId)
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  const err = handleSupabaseError(error)
+  if (err) return err
 
-  revalidatePath('/clients')
-  revalidatePath(`/clients/${clientId}`)
+  revalidateClientPaths(clientId)
 
-  return { success: true }
+  return { success: true as const }
 }

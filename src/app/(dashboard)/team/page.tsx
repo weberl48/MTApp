@@ -17,7 +17,8 @@ import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
 import { TeamMemberActions } from '@/components/team/team-member-actions'
 import { TeamPageTabs } from '@/components/team/team-page-tabs'
-import { TeamRatesView } from '@/components/team/team-rates-view'
+import { PayRateMatrix } from '@/components/team/pay-rate-matrix'
+import { InviteTeamMemberDialog } from '@/components/team/invite-team-member-dialog'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -49,6 +50,7 @@ export default async function TeamPage() {
   }
 
   const canManage = can(currentUserRole as UserRole, 'team:manage')
+  const canInvite = can(currentUserRole as UserRole, 'team:invite')
 
   // Fetch all users with their session and invoice stats
   const { data: users, error: usersError } = await supabase
@@ -111,11 +113,16 @@ export default async function TeamPage() {
   return (
     <AdminGuard>
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Manage contractors and view their performance
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Manage contractors and view their performance
+          </p>
+        </div>
+        {canInvite && users?.[0]?.organization_id && (
+          <InviteTeamMemberDialog organizationId={users[0].organization_id} />
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -283,19 +290,16 @@ export default async function TeamPage() {
               )
             }
             ratesContent={
-              <TeamRatesView
-                contractors={
-                  users
-                    ?.filter((u) => u.role === 'contractor')
-                    .map((u) => ({
-                      id: u.id,
-                      name: u.name,
-                      email: u.email,
-                      pay_increase: Number(u.pay_increase) || 0,
-                    })) || []
-                }
-                canEdit={canManage}
-              />
+              users?.[0]?.organization_id ? (
+                <PayRateMatrix
+                  organizationId={users[0].organization_id}
+                  canEdit={canManage}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No team members found
+                </div>
+              )
             }
           />
         </CardContent>

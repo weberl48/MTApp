@@ -5,30 +5,27 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Calendar, Users, FileText, DollarSign, Plus, AlertTriangle } from 'lucide-react'
+import { Calendar, Users, FileText, DollarSign, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
+import { PendingApprovals } from '@/components/dashboard/pending-approvals'
+import { UnbilledSessions } from '@/components/dashboard/unbilled-sessions'
+import { UnsentInvoices } from '@/components/dashboard/unsent-invoices'
+import { OverdueInvoices } from '@/components/dashboard/overdue-invoices'
+import { MissingRates } from '@/components/dashboard/missing-rates'
+import { AnalyticsSummary } from '@/components/dashboard/analytics-summary'
 
 interface DashboardStats {
   sessionsCount: number
   clientsCount: number
   pendingInvoicesCount: number
   pendingAmount: number
-  overdueInvoicesCount: number
-  overdueAmount: number
   isAdmin: boolean
   organizationId: string | null
-  actualIsAdmin: boolean  // True admin status (ignores impersonation)
-}
-
-interface OverdueInvoice {
-  id: string
-  amount: number
-  due_date: string
-  client: { name: string } | null
 }
 
 interface RecentSession {
@@ -43,7 +40,6 @@ interface RecentSession {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([])
-  const [overdueInvoices, setOverdueInvoices] = useState<OverdueInvoice[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const { viewAsContractor, viewAsRole } = useOrganization()
@@ -115,8 +111,6 @@ export default function DashboardPage() {
       // Pending invoices (admin only, not when impersonating)
       let pendingInvoicesCount = 0
       let pendingAmount = 0
-      let overdueInvoicesCount = 0
-      let overdueAmount = 0
 
       if (effectiveIsAdmin) {
         const { data: pendingInvoices } = await supabase
@@ -126,25 +120,6 @@ export default function DashboardPage() {
 
         pendingInvoicesCount = pendingInvoices?.length || 0
         pendingAmount = pendingInvoices?.reduce((sum, inv) => sum + inv.amount, 0) || 0
-
-        // Overdue invoices (sent > 30 days ago, still not paid)
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0]
-
-        const { data: overdueData } = await supabase
-          .from('invoices')
-          .select('id, amount, due_date, client:clients(name)')
-          .eq('status', 'sent')
-          .lt('due_date', thirtyDaysAgoStr)
-          .order('due_date', { ascending: true })
-          .limit(5)
-
-        if (overdueData) {
-          setOverdueInvoices(overdueData as unknown as OverdueInvoice[])
-          overdueInvoicesCount = overdueData.length
-          overdueAmount = overdueData.reduce((sum, inv) => sum + inv.amount, 0)
-        }
       }
 
       setStats({
@@ -152,11 +127,8 @@ export default function DashboardPage() {
         clientsCount: clientsCount || 0,
         pendingInvoicesCount,
         pendingAmount,
-        overdueInvoicesCount,
-        overdueAmount,
         isAdmin: effectiveIsAdmin,
         organizationId: userProfile?.organization_id || null,
-        actualIsAdmin: isAdmin,  // Store true admin status
       })
 
       // Recent sessions
@@ -193,8 +165,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
             {viewAsContractor
               ? `Viewing ${viewAsContractor.name}'s dashboard`
               : "Welcome back! Here's an overview of your practice."}
@@ -210,109 +182,81 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Sessions This Month
-            </CardTitle>
-            <Calendar className="w-4 h-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.sessionsCount || 0}</div>
-          </CardContent>
-        </Card>
+      {/* Stats Grid - Clickable */}
+      <div data-tour="dashboard-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Link href="/sessions/">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Sessions This Month
+              </CardTitle>
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.sessionsCount || 0}</div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Total Clients
-            </CardTitle>
-            <Users className="w-4 h-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.clientsCount || 0}</div>
-          </CardContent>
-        </Card>
+        <Link href="/clients/">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Clients
+              </CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.clientsCount || 0}</div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {stats?.isAdmin && (
           <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Pending Invoices
-                </CardTitle>
-                <FileText className="w-4 h-4 text-gray-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.pendingInvoicesCount}</div>
-              </CardContent>
-            </Card>
+            <Link href="/invoices/">
+              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Pending Invoices
+                  </CardTitle>
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.pendingInvoicesCount}</div>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Pending Amount
-                </CardTitle>
-                <DollarSign className="w-4 h-4 text-gray-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
-              </CardContent>
-            </Card>
+            <Link href="/invoices/">
+              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Pending Amount
+                  </CardTitle>
+                  <DollarSign className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
+                </CardContent>
+              </Card>
+            </Link>
           </>
         )}
       </div>
 
-      {/* Overdue Invoices Alert - Admin Only */}
-      {stats?.isAdmin && overdueInvoices.length > 0 && (
-        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-                <CardTitle className="text-red-700 dark:text-red-400">
-                  Overdue Invoices
-                </CardTitle>
-              </div>
-              <Link href="/invoices">
-                <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100">
-                  View All
-                </Button>
-              </Link>
-            </div>
-            <CardDescription className="text-red-600 dark:text-red-400">
-              {stats.overdueInvoicesCount} invoice{stats.overdueInvoicesCount !== 1 ? 's' : ''} past due
-              {' • '}
-              {formatCurrency(stats.overdueAmount)} outstanding
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {overdueInvoices.map((invoice) => {
-                const clientData = invoice.client as { name: string } | { name: string }[] | null
-                const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name
-                const daysOverdue = Math.floor(
-                  (new Date().getTime() - new Date(invoice.due_date).getTime()) / (1000 * 60 * 60 * 24)
-                )
-                return (
-                  <Link
-                    key={invoice.id}
-                    href={`/invoices/${invoice.id}`}
-                    className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <div>
-                      <p className="font-medium">{clientName || 'Unknown Client'}</p>
-                      <p className="text-sm text-red-600">{daysOverdue} days overdue</p>
-                    </div>
-                    <span className="font-bold text-red-700">{formatCurrency(invoice.amount)}</span>
-                  </Link>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Analytics Summary - Admin Only */}
+      {stats?.isAdmin && <AnalyticsSummary />}
+
+      {/* Action Center - Admin Only */}
+      {stats?.isAdmin && (
+        <div className="space-y-4">
+          <MissingRates />
+          <PendingApprovals />
+          <UnbilledSessions organizationId={stats.organizationId || ''} />
+          <UnsentInvoices />
+          <OverdueInvoices />
+        </div>
       )}
 
       {/* Recent Sessions */}
@@ -327,7 +271,7 @@ export default function DashboardPage() {
               {recentSessions.map((session) => (
                 <div
                   key={session.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-muted rounded-lg"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -340,14 +284,14 @@ export default function DashboardPage() {
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                             : session.status === 'submitted'
                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {session.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(session.date).toLocaleDateString('en-US', {
+                    <p className="text-sm text-muted-foreground">
+                      {parseLocalDate(session.date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',
@@ -375,7 +319,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-muted-foreground">
               <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>No sessions yet</p>
               <Link href="/sessions/new/">

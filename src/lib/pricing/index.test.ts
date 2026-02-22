@@ -1,4 +1,4 @@
-import { calculateSessionPricing, calculateNoShowPricing, NO_SHOW_FEE } from './index'
+import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement } from './index'
 import type { ServiceType } from '@/types/database'
 
 describe('calculateSessionPricing', () => {
@@ -11,11 +11,16 @@ describe('calculateSessionPricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -58,6 +63,62 @@ describe('calculateSessionPricing', () => {
     expect(cappedResult.mcaCut).toBe(145)
   })
 
+  it('skips per_person_rate when only 1 attendee in group service', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+    }
+
+    // 1 person in group: just base rate $50 (no per-person charge)
+    const result = calculateSessionPricing(groupService, 1)
+    expect(result.totalAmount).toBe(50)
+    expect(result.mcaCut).toBe(15) // 30% of 50
+    expect(result.contractorPay).toBe(35) // 50 - 15
+  })
+
+  it('includes per_person_rate when 2+ attendees', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+    }
+
+    // 3 people: 50 + (20 * 3) = 110
+    const result = calculateSessionPricing(groupService, 3)
+    expect(result.totalAmount).toBe(110)
+    expect(result.mcaCut).toBe(33) // 30% of 110
+    expect(result.contractorPay).toBe(77) // 110 - 33
+  })
+
+  it('applies total_cap to limit billed amount', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+      total_cap: 150,
+    }
+
+    // 8 people: 50 + (20 * 8) = 210 → capped at 150
+    const result = calculateSessionPricing(groupService, 8)
+    expect(result.totalAmount).toBe(150)
+    expect(result.mcaCut).toBe(45) // 30% of 150
+    expect(result.contractorPay).toBe(105) // 150 - 45
+  })
+
+  it('does not apply total_cap when under limit', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      per_person_rate: 20,
+      mca_percentage: 30,
+      total_cap: 150,
+    }
+
+    // 3 people: 50 + (20 * 3) = 110 (under cap)
+    const result = calculateSessionPricing(groupService, 3)
+    expect(result.totalAmount).toBe(110)
+  })
+
   it('scales pricing by duration', () => {
     // 30 min (default): $50
     const result30 = calculateSessionPricing(mockServiceType, 1, 30)
@@ -89,11 +150,16 @@ describe('scholarship pricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: 60,
+    contractor_pay_schedule: null,
     is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -181,20 +247,23 @@ describe('calculateNoShowPricing', () => {
     per_person_rate: 0,
     mca_percentage: 23,
     contractor_cap: null,
+    total_cap: null,
     rent_percentage: 0,
     minimum_attendees: 1,
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
+    contractor_pay_schedule: null,
     is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
     updated_at: '',
   }
 
-  it('charges $60 no-show fee', () => {
-    expect(NO_SHOW_FEE).toBe(60)
-
+  it('charges default no-show fee', () => {
     const result = calculateNoShowPricing(mockServiceType)
     expect(result.totalAmount).toBe(60)
     expect(result.isNoShow).toBe(true)
@@ -221,13 +290,174 @@ describe('calculateNoShowPricing', () => {
     expect(result.mcaCut).toBe(20) // $60 - $40
   })
 
-  it('respects pay increase bonus for no-show pay', () => {
-    // Normal pay $38.50 + $2 bonus = $40.50
-    const result = calculateNoShowPricing(mockServiceType, {
-      payIncrease: 2,
-    })
+})
 
+describe('contractor pay schedule', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Musical Expressions',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses pay schedule amount for 30 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30)
+    expect(result.contractorPay).toBe(38.5)
+    expect(result.totalAmount).toBe(60)
+    expect(result.mcaCut).toBe(21.5) // 60 - 38.5
+  })
+
+  it('uses pay schedule amount for 45 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 45)
+    expect(result.contractorPay).toBe(54)
+    expect(result.totalAmount).toBe(90) // 60 * 1.5
+    expect(result.mcaCut).toBe(36) // 90 - 54
+  })
+
+  it('falls back to formula for unlisted duration', () => {
+    // 60 min not in schedule, so uses formula: total - MCA%
+    const result = calculateSessionPricing(mockServiceType, 1, 60)
+    expect(result.totalAmount).toBe(120) // 60 * 2
+    expect(result.mcaCut).toBe(27.6) // 23% of 120
+    expect(result.contractorPay).toBe(92.4) // 120 - 27.6
+  })
+
+  it('custom rate used at base duration', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 40.5,
+    })
     expect(result.contractorPay).toBe(40.5)
-    expect(result.mcaCut).toBe(19.5) // $60 - $40.50
+    expect(result.mcaCut).toBe(19.5) // 60 - 40.5
+  })
+
+  it('custom rate + schedule offset at non-base duration', () => {
+    // Custom 30-min rate $40.50 + schedule offset (54 - 38.5 = 15.5) = $56
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 40.5,
+    })
+    expect(result.contractorPay).toBe(56) // 40.5 + (54 - 38.5)
+    expect(result.mcaCut).toBe(34) // 90 - 56
+  })
+
+  it('custom rate scales linearly when no schedule for duration', () => {
+    // 60 min not in schedule, so custom rate scales linearly: 40.5 * 2 = 81
+    const result = calculateSessionPricing(mockServiceType, 1, 60, {
+      customContractorPay: 40.5,
+    })
+    expect(result.contractorPay).toBe(81) // 40.5 * (60/30)
+    expect(result.mcaCut).toBe(39) // 120 - 81
+  })
+})
+
+describe('contractor duration increment', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Musical Expressions',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses explicit increment at 45 min', () => {
+    // Colleen: $41.50 base, +$13.50/15min
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(55) // 41.5 + 13.5*1
+  })
+
+  it('uses explicit increment at 60 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 60, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(68.5) // 41.5 + 13.5*2
+  })
+
+  it('uses explicit increment at 90 min', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 90, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(95.5) // 41.5 + 13.5*4
+  })
+
+  it('null increment falls back to service type default', () => {
+    // null durationIncrement → derive from schedule: 54 - 38.5 = 15.5
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+      durationIncrement: null,
+    })
+    expect(result.contractorPay).toBe(57) // 41.5 + 15.5*1
+  })
+
+  it('undefined increment uses schedule offset (backward compat)', () => {
+    // No durationIncrement field → existing behavior: schedule offset
+    const result = calculateSessionPricing(mockServiceType, 1, 45, {
+      customContractorPay: 41.5,
+    })
+    expect(result.contractorPay).toBe(57) // 41.5 + (54 - 38.5)
+  })
+
+  it('increment at base duration always uses custom rate directly', () => {
+    const result = calculateSessionPricing(mockServiceType, 1, 30, {
+      customContractorPay: 41.5,
+      durationIncrement: 13.5,
+    })
+    expect(result.contractorPay).toBe(41.5) // Increment irrelevant at base
+  })
+})
+
+describe('getDefaultIncrement', () => {
+  it('derives increment from schedule', () => {
+    expect(getDefaultIncrement({ '30': 38.5, '45': 54 })).toBe(15.5)
+  })
+
+  it('returns null for null schedule', () => {
+    expect(getDefaultIncrement(null)).toBeNull()
+  })
+
+  it('returns null when schedule missing next duration', () => {
+    expect(getDefaultIncrement({ '30': 38.5 })).toBeNull()
+  })
+
+  it('works with art schedule', () => {
+    expect(getDefaultIncrement({ '30': 32, '45': 45 })).toBe(13)
   })
 })

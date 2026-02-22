@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { escape as escapeHtml } from 'he'
 import { format, parse } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 
 // Lazy initialize Resend to avoid build-time errors
 let resend: Resend | null = null
@@ -16,6 +17,11 @@ function getResendClient(): Resend {
   return resend
 }
 
+function getFromAddress(name?: string): string {
+  const domain = process.env.EMAIL_FROM_DOMAIN || 'rattatata.xyz'
+  return `${name || 'May Creative Arts'} <noreply@${domain}>`
+}
+
 interface SendInvoiceEmailParams {
   to: string
   clientName: string
@@ -25,6 +31,8 @@ interface SendInvoiceEmailParams {
   serviceType: string
   dueDate?: string
   pdfBuffer?: Buffer
+  footerText?: string
+  paymentInstructions?: string
 }
 
 export async function sendInvoiceEmail({
@@ -36,6 +44,8 @@ export async function sendInvoiceEmail({
   serviceType,
   dueDate,
   pdfBuffer,
+  footerText,
+  paymentInstructions,
 }: SendInvoiceEmailParams) {
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -56,7 +66,7 @@ export async function sendInvoiceEmail({
     : []
 
   const { data, error } = await getResendClient().emails.send({
-    from: 'May Creative Arts <noreply@rattatata.xyz>',
+    from: getFromAddress(),
     to: [to],
     subject: `Invoice ${invoiceNumber} - May Creative Arts`,
     html: `
@@ -143,8 +153,15 @@ export async function sendInvoiceEmail({
                 ${pdfBuffer ? 'A PDF copy of your invoice is attached to this email. ' : ''}If you have any questions about this invoice, please don't hesitate to reach out.
               </p>
 
+              ${paymentInstructions ? `
+              <div style="background-color: #f0f9ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px; color: #0369a1; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Payment Instructions</p>
+                <p style="margin: 0; color: #374151; font-size: 14px; line-height: 22px; white-space: pre-line;">${escapeHtml(paymentInstructions)}</p>
+              </div>
+              ` : ''}
+
               <p style="margin: 0; color: #4b5563; font-size: 14px;">
-                Thank you for choosing May Creative Arts!
+                ${footerText ? escapeHtml(footerText) : 'Thank you for choosing May Creative Arts!'}
               </p>
             </td>
           </tr>
@@ -179,6 +196,156 @@ export async function sendInvoiceEmail({
   return data
 }
 
+// Invoice Reminder Email
+
+interface SendInvoiceReminderEmailParams {
+  to: string
+  clientName: string
+  invoiceNumber: string
+  amount: number
+  dueDate: string
+  isOverdue: boolean
+  paymentInstructions?: string
+  footerText?: string
+}
+
+export async function sendInvoiceReminderEmail({
+  to,
+  clientName,
+  invoiceNumber,
+  amount,
+  dueDate,
+  isOverdue,
+  paymentInstructions,
+  footerText,
+}: SendInvoiceReminderEmailParams) {
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount)
+
+  const formattedDueDate = format(new Date(dueDate), 'MMMM d, yyyy')
+  const subject = isOverdue
+    ? `Overdue: Invoice ${invoiceNumber} - May Creative Arts`
+    : `Payment Reminder: Invoice ${invoiceNumber} — Due ${formattedDueDate}`
+
+  const urgencyColor = isOverdue ? '#dc2626' : '#d97706'
+  const urgencyBg = isOverdue ? '#fee2e2' : '#fef3c7'
+  const urgencyText = isOverdue
+    ? 'This invoice is past due. Please submit payment at your earliest convenience.'
+    : `This is a friendly reminder that your invoice is due on <strong>${formattedDueDate}</strong>.`
+
+  const { data, error } = await getResendClient().emails.send({
+    from: getFromAddress(),
+    to: [to],
+    subject,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Reminder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #1e40af; padding: 30px 40px;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">May Creative Arts</h1>
+              <p style="margin: 8px 0 0; color: #93c5fd; font-size: 14px;">Payment Reminder</p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 20px; color: #111827; font-size: 20px;">Hello ${escapeHtml(clientName)},</h2>
+
+              <!-- Urgency Banner -->
+              <div style="background-color: ${urgencyBg}; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0; color: ${urgencyColor}; font-size: 15px; line-height: 22px;">
+                  ${urgencyText}
+                </p>
+              </div>
+
+              <!-- Invoice Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td>
+                          <p style="margin: 0 0 4px; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Invoice Number</p>
+                          <p style="margin: 0; color: #111827; font-size: 16px; font-weight: 600;">${invoiceNumber}</p>
+                        </td>
+                        <td align="right">
+                          <p style="margin: 0 0 4px; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Amount Due</p>
+                          <p style="margin: 0; color: #1e40af; font-size: 24px; font-weight: bold;">${formattedAmount}</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding: 8px 0;">
+                          <span style="color: #6b7280; font-size: 14px;">Due Date:</span>
+                          <span style="color: #111827; font-size: 14px; margin-left: 12px;">${formattedDueDate}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              ${paymentInstructions ? `
+              <div style="background-color: #f0f9ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px; color: #0369a1; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Payment Instructions</p>
+                <p style="margin: 0; color: #374151; font-size: 14px; line-height: 22px; white-space: pre-line;">${escapeHtml(paymentInstructions)}</p>
+              </div>
+              ` : ''}
+
+              <p style="margin: 0; color: #4b5563; font-size: 14px;">
+                ${footerText ? escapeHtml(footerText) : 'Thank you for choosing May Creative Arts!'}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center;">
+                May Creative Arts | Music Therapy Services
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
+                Questions? Contact us at maycreativearts@gmail.com
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `,
+  })
+
+  if (error) {
+    console.error('[MCA] Invoice reminder email error')
+    throw error
+  }
+
+  return data
+}
+
 // Portal Email Templates
 
 interface SendMagicLinkEmailParams {
@@ -195,7 +362,7 @@ export async function sendMagicLinkEmail({
   portalUrl,
 }: SendMagicLinkEmailParams) {
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `Your Portal Access Link - ${organizationName}`,
     html: `
@@ -310,7 +477,7 @@ export async function sendSessionRequestStatusEmail({
   portalUrl,
 }: SendSessionRequestStatusEmailParams) {
   // Use date-fns for consistent date/time formatting
-  const formattedDate = format(new Date(preferredDate + 'T00:00:00'), 'EEEE, MMMM d, yyyy')
+  const formattedDate = format(parseLocalDate(preferredDate), 'EEEE, MMMM d, yyyy')
   const formattedTime = preferredTime
     ? format(parse(preferredTime, 'HH:mm', new Date()), 'h:mm a')
     : null
@@ -322,7 +489,7 @@ export async function sendSessionRequestStatusEmail({
   const statusEmoji = isApproved ? '✓' : '✗'
 
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `Session Request ${statusText} - ${organizationName}`,
     html: `
@@ -451,7 +618,7 @@ export async function sendTeamInviteEmail({
   const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1)
 
   const { data, error } = await getResendClient().emails.send({
-    from: `${organizationName} <noreply@rattatata.xyz>`,
+    from: getFromAddress(organizationName),
     to: [to],
     subject: `You're invited to join ${organizationName}`,
     html: `

@@ -3,6 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createSquareInvoice } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { formatInvoiceNumber } from '@/lib/constants/display'
+import { parseLocalDate } from '@/lib/dates'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 export async function POST(
   request: NextRequest,
@@ -42,8 +46,8 @@ export async function POST(
       .eq('id', user.id)
       .single<{ role: string; organization_id: string }>()
 
-    const role = userProfile?.role
-    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+    const role = userProfile?.role as UserRole | undefined
+    if (!can(role ?? null, 'invoice:send')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -91,7 +95,7 @@ export async function POST(
     }
 
     // Create the invoice number
-    const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+    const invoiceNumber = formatInvoiceNumber(invoice.id)
 
     // Calculate due date (30 days from now if not set)
     const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -120,7 +124,7 @@ export async function POST(
       // Build a detailed note with session line items
       if (items && items.length > 0) {
         const lines = items.map((item) => {
-          const date = new Date(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          const date = parseLocalDate(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
           const svc = item.service_type_name || 'Session'
           const dur = item.duration_minutes ? ` (${item.duration_minutes} min)` : ''
           return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}`
@@ -129,7 +133,7 @@ export async function POST(
       }
     } else {
       const sessionDate = invoice.session?.date
-        ? new Date(invoice.session.date).toLocaleDateString('en-US', {
+        ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
             year: 'numeric',

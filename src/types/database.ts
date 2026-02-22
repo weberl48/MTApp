@@ -33,7 +33,6 @@ export interface OrganizationSettings {
     due_days: number
     send_reminders: boolean
     reminder_days: number[]
-    auto_send_square_on_approve: boolean
   }
   session: {
     default_duration: number
@@ -62,6 +61,17 @@ export interface OrganizationSettings {
     token_expiry_days: number
   }
   features: FeatureFlags
+  custom_lists: {
+    payment_methods: Record<string, { label: string; visible: boolean }>
+    billing_methods: Record<string, { label: string; visible: boolean }>
+  }
+  automation: {
+    auto_approve_sessions: boolean
+    auto_send_invoice_on_approve: boolean
+    auto_send_invoice_method: 'email' | 'square' | 'none'
+    auto_generate_scholarship_invoices: boolean
+    scholarship_invoice_day: number
+  }
 }
 
 // Social links structure
@@ -74,22 +84,6 @@ export interface SocialLinks {
   tiktok?: string
 }
 
-// Business hours structure
-export interface DayHours {
-  open: string
-  close: string
-  closed: boolean
-}
-
-export interface BusinessHours {
-  monday: DayHours
-  tuesday: DayHours
-  wednesday: DayHours
-  thursday: DayHours
-  friday: DayHours
-  saturday: DayHours
-  sunday: DayHours
-}
 
 export interface Database {
   public: {
@@ -110,7 +104,6 @@ export interface Database {
           description: string | null
           tax_id: string | null
           social_links: SocialLinks
-          business_hours: BusinessHours
           timezone: string
           currency: string
           plan: PlanType
@@ -134,7 +127,6 @@ export interface Database {
           description?: string | null
           tax_id?: string | null
           social_links?: SocialLinks
-          business_hours?: BusinessHours
           timezone?: string
           currency?: string
           plan?: PlanType
@@ -157,7 +149,6 @@ export interface Database {
           description?: string | null
           tax_id?: string | null
           social_links?: SocialLinks
-          business_hours?: BusinessHours
           timezone?: string
           currency?: string
           plan?: PlanType
@@ -209,6 +200,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment: number | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -218,6 +210,7 @@ export interface Database {
           contractor_id: string
           service_type_id: string
           contractor_pay: number
+          duration_increment?: number | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -226,6 +219,7 @@ export interface Database {
           contractor_id?: string
           service_type_id?: string
           contractor_pay?: number
+          duration_increment?: number | null
           notes?: string | null
           updated_at?: string
         }
@@ -350,11 +344,16 @@ export interface Database {
           per_person_rate: number
           mca_percentage: number
           contractor_cap: number | null
+          total_cap: number | null
           rent_percentage: number
           minimum_attendees: number | null
           scholarship_discount_percentage: number | null
           scholarship_rate: number | null
+          contractor_pay_schedule: Record<string, number> | null
           is_active: boolean
+          is_scholarship: boolean
+          requires_client: boolean
+          allowed_contractor_ids: string[] | null
           display_order: number
           organization_id: string
           created_at: string
@@ -369,11 +368,16 @@ export interface Database {
           per_person_rate?: number
           mca_percentage: number
           contractor_cap?: number | null
+          total_cap?: number | null
           rent_percentage?: number
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
+          is_scholarship?: boolean
+          requires_client?: boolean
+          allowed_contractor_ids?: string[] | null
           display_order?: number
           organization_id: string
           created_at?: string
@@ -387,11 +391,16 @@ export interface Database {
           per_person_rate?: number
           mca_percentage?: number
           contractor_cap?: number | null
+          total_cap?: number | null
           rent_percentage?: number
           minimum_attendees?: number | null
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
+          contractor_pay_schedule?: Record<string, number> | null
           is_active?: boolean
+          is_scholarship?: boolean
+          requires_client?: boolean
+          allowed_contractor_ids?: string[] | null
           display_order?: number
           organization_id?: string
           updated_at?: string
@@ -490,6 +499,7 @@ export interface Database {
           paid_date: string | null
           invoice_type: string
           billing_period: string | null
+          reminder_sent_days: number[]
           organization_id: string
           created_at: string
           updated_at: string
@@ -508,6 +518,7 @@ export interface Database {
           paid_date?: string | null
           invoice_type?: string
           billing_period?: string | null
+          reminder_sent_days?: number[]
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -525,6 +536,7 @@ export interface Database {
           paid_date?: string | null
           invoice_type?: string
           billing_period?: string | null
+          reminder_sent_days?: number[]
           organization_id?: string
           updated_at?: string
         }

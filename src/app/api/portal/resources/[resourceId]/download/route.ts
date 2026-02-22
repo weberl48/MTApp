@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/portal/resources/[resourceId]/download
@@ -14,6 +15,10 @@ export async function GET(
 ) {
   try {
     const { resourceId } = await params
+
+    if (!uuidSchema.safeParse(resourceId).success) {
+      return NextResponse.json({ error: 'Invalid resource ID' }, { status: 400 })
+    }
 
     // Validate portal token
     const authHeader = request.headers.get('Authorization')

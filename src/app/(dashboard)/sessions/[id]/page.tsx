@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 import { decryptPHI } from '@/lib/crypto/actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { toast } from 'sonner'
@@ -22,7 +23,9 @@ import {
 } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useOrganization } from '@/contexts/organization-context'
+import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
 
 interface SessionAttendee {
   id: string
@@ -48,22 +51,6 @@ interface SessionDetails {
   attendees: SessionAttendee[]
 }
 
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
-
-const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  submitted: 'Submitted',
-  approved: 'Approved',
-  no_show: 'No Show',
-  cancelled: 'Cancelled',
-}
-
 export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -74,6 +61,7 @@ export default function SessionDetailPage() {
   const [decryptedClientNotes, setDecryptedClientNotes] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
   const currentUserId = effectiveUserId || user?.id || null
 
   useEffect(() => {
@@ -150,19 +138,6 @@ export default function SessionDetailPage() {
       if (result.success) {
         setSession({ ...session, status: 'approved' })
         toast.success('Session approved')
-        // Show Square auto-send feedback
-        const sq = result.squareAutoSend
-        if (sq) {
-          if (sq.sent > 0) {
-            toast.success(`${sq.sent} invoice${sq.sent > 1 ? 's' : ''} sent via Square`)
-          }
-          if (sq.failed.length > 0) {
-            toast.warning(`Failed to send Square invoice for: ${sq.failed.join(', ')}`)
-          }
-          if (sq.skipped > 0) {
-            toast.info(`${sq.skipped} invoice${sq.skipped > 1 ? 's' : ''} skipped (no client email)`)
-          }
-        }
       } else {
         toast.error(result.error || 'Failed to approve session')
       }
@@ -170,48 +145,69 @@ export default function SessionDetailPage() {
   }
 
   const handleMarkNoShow = () => {
-    if (!session || !confirm('Mark this session as a no-show? This cannot be undone.')) return
-    startTransition(async () => {
-      const result = await markSessionNoShow(session.id)
-      if (result.success) {
-        setSession({ ...session, status: 'no_show' })
-        toast.success('Session marked as no-show')
-      } else {
-        toast.error(result.error || 'Failed to update session')
-      }
+    if (!session) return
+    openConfirm({
+      title: 'Mark as No-Show',
+      description: 'Mark this session as a no-show? This cannot be undone.',
+      confirmLabel: 'Mark No-Show',
+      onConfirm: () => {
+        startTransition(async () => {
+          const result = await markSessionNoShow(session.id)
+          if (result.success) {
+            setSession({ ...session, status: 'no_show' })
+            toast.success('Session marked as no-show')
+          } else {
+            toast.error(result.error || 'Failed to update session')
+          }
+        })
+      },
     })
   }
 
   const handleCancel = () => {
-    if (!session || !confirm('Cancel this session? This cannot be undone.')) return
-    startTransition(async () => {
-      const result = await cancelSession(session.id)
-      if (result.success) {
-        setSession({ ...session, status: 'cancelled' })
-        toast.success('Session cancelled')
-      } else {
-        toast.error(result.error || 'Failed to cancel session')
-      }
+    if (!session) return
+    openConfirm({
+      title: 'Cancel Session',
+      description: 'Cancel this session? This cannot be undone.',
+      confirmLabel: 'Cancel Session',
+      onConfirm: () => {
+        startTransition(async () => {
+          const result = await cancelSession(session.id)
+          if (result.success) {
+            setSession({ ...session, status: 'cancelled' })
+            toast.success('Session cancelled')
+          } else {
+            toast.error(result.error || 'Failed to cancel session')
+          }
+        })
+      },
     })
   }
 
   const handleDelete = () => {
-    if (!session || !confirm('Are you sure you want to delete this session?')) return
-    startTransition(async () => {
-      const result = await deleteSession(session.id)
-      if (result.success) {
-        toast.success('Session deleted')
-        router.push('/sessions/')
-      } else {
-        toast.error(result.error || 'Failed to delete session')
-      }
+    if (!session) return
+    openConfirm({
+      title: 'Delete Session',
+      description: 'Are you sure you want to delete this session? This cannot be undone.',
+      confirmLabel: 'Delete',
+      onConfirm: () => {
+        startTransition(async () => {
+          const result = await deleteSession(session.id)
+          if (result.success) {
+            toast.success('Session deleted')
+            router.push('/sessions/')
+          } else {
+            toast.error(result.error || 'Failed to delete session')
+          }
+        })
+      },
     })
   }
 
   if (loading || contextLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -220,8 +216,8 @@ export default function SessionDetailPage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Session not found</h2>
-        <p className="text-gray-500 mb-4">This session may have been deleted or you don&apos;t have access.</p>
-        <Link href="/sessions">
+        <p className="text-muted-foreground mb-4">This session may have been deleted or you don&apos;t have access.</p>
+        <Link href="/sessions/">
           <Button>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Sessions
@@ -249,7 +245,7 @@ export default function SessionDetailPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: 'Sessions', href: '/sessions' },
+        { label: 'Sessions', href: '/sessions/' },
         { label: session.service_type?.name || 'Session Details' },
       ]} />
       {session.status === 'draft' && session.rejection_reason && (
@@ -263,11 +259,11 @@ export default function SessionDetailPage() {
       )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
+          <h1 className="text-xl sm:text-2xl font-bold break-words">
             {(session.service_type?.name || 'Session Details').replaceAll('-', '‑')}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            {new Date(session.date).toLocaleDateString('en-US', {
+          <p className="text-muted-foreground">
+            {parseLocalDate(session.date).toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -276,8 +272,8 @@ export default function SessionDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Badge className={statusColors[session.status]}>
-            {statusLabels[session.status] || session.status}
+          <Badge className={sessionStatusColors[session.status]}>
+            {sessionStatusLabels[session.status] || session.status}
           </Badge>
           {canApprove && (
             <Button onClick={handleApprove} variant="default" className="w-full sm:w-auto">
@@ -314,7 +310,7 @@ export default function SessionDetailPage() {
             </Button>
           )}
           {canEdit && (
-            <Link href={`/sessions/${session.id}/edit`}>
+            <Link href={`/sessions/${session.id}/edit/`}>
               <Button variant="outline">
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit
@@ -338,11 +334,11 @@ export default function SessionDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-gray-400" />
+              <Calendar className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Date & Time</p>
+                <p className="text-sm text-muted-foreground">Date & Time</p>
                 <p className="font-medium">
-                  {new Date(session.date).toLocaleDateString('en-US', {
+                  {parseLocalDate(session.date).toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -362,31 +358,31 @@ export default function SessionDetailPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-gray-400" />
+              <Clock className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Duration</p>
+                <p className="text-sm text-muted-foreground">Duration</p>
                 <p className="font-medium">{session.duration_minutes} minutes</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-400" />
+              <User className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Contractor</p>
+                <p className="text-sm text-muted-foreground">Contractor</p>
                 <p className="font-medium">{session.contractor?.name || 'Unknown'}</p>
                 {session.contractor?.email && (
-                  <p className="text-sm text-gray-500">{session.contractor.email}</p>
+                  <p className="text-sm text-muted-foreground">{session.contractor.email}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-gray-400" />
+              <FileText className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Service Type</p>
+                <p className="text-sm text-muted-foreground">Service Type</p>
                 <p className="font-medium">{session.service_type?.name || 'Unknown'}</p>
                 {session.service_type && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Base: {formatCurrency(session.service_type.base_rate)}
                     {session.service_type.per_person_rate > 0 && (
                       <> + {formatCurrency(session.service_type.per_person_rate)}/person</>
@@ -405,9 +401,9 @@ export default function SessionDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-gray-400" />
+              <Users className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Attendees</p>
+                <p className="text-sm text-muted-foreground">Attendees</p>
                 <p className="font-medium">
                   {session.attendees?.length || 0} client{session.attendees?.length !== 1 ? 's' : ''}
                 </p>
@@ -415,15 +411,15 @@ export default function SessionDetailPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <DollarSign className="w-5 h-5 text-gray-400" />
+              <DollarSign className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Total Amount</p>
+                <p className="text-sm text-muted-foreground">Total Amount</p>
                 <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
               </div>
             </div>
 
             {session.group_headcount && session.group_headcount > 1 && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {formatCurrency(totalCost / session.group_headcount)} per person
               </div>
             )}
@@ -451,7 +447,7 @@ export default function SessionDetailPage() {
             <div className="flex items-center gap-3">
               <Users className="w-5 h-5 text-purple-500" />
               <div>
-                <p className="text-sm text-gray-500">Total Participants</p>
+                <p className="text-sm text-muted-foreground">Total Participants</p>
                 <p className="font-medium">{session.group_headcount} people</p>
               </div>
             </div>
@@ -476,7 +472,7 @@ export default function SessionDetailPage() {
                   <div>
                     <p className="font-medium">{attendee.client?.name || 'Unknown Client'}</p>
                     {attendee.client?.contact_email && (
-                      <p className="text-sm text-gray-500">{attendee.client.contact_email}</p>
+                      <p className="text-sm text-muted-foreground">{attendee.client.contact_email}</p>
                     )}
                   </div>
                   <div className="text-right">
@@ -499,13 +495,13 @@ export default function SessionDetailPage() {
           <CardContent className="space-y-4">
             {decryptedNotes && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Internal Notes</p>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Internal Notes</p>
                 <p className="whitespace-pre-wrap">{decryptedNotes}</p>
               </div>
             )}
             {decryptedClientNotes && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Client Notes</p>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Client Notes</p>
                 <p className="whitespace-pre-wrap">{decryptedClientNotes}</p>
               </div>
             )}
@@ -515,7 +511,7 @@ export default function SessionDetailPage() {
 
       <Separator />
 
-      <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-sm text-muted-foreground">
         <p>Created: {new Date(session.created_at).toLocaleString()}</p>
         <p>Last updated: {new Date(session.updated_at).toLocaleString()}</p>
       </div>
@@ -526,6 +522,7 @@ export default function SessionDetailPage() {
         onOpenChange={setRejectDialogOpen}
         onRejected={() => setSession({ ...session, status: 'draft' })}
       />
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   )
 }
