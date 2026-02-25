@@ -87,6 +87,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     (existingSession?.status as 'draft' | 'submitted') || 'submitted'
   )
 
+  // Admin work: who did the admin work (admin-role users only)
+  const [adminUsers, setAdminUsers] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedAdminUserId, setSelectedAdminUserId] = useState('')
+
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
   // groupMemberNames removed — groups now use headcount only
@@ -164,6 +168,25 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const pricing = selectedServiceType && attendeeCount > 0
     ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod, durationBaseMinutes: settings?.pricing?.duration_base_minutes })
     : null
+
+  // Fetch admin-role users when admin work service type is selected
+  useEffect(() => {
+    if (requiresClient) {
+      setAdminUsers([])
+      return
+    }
+
+    async function loadAdminUsers() {
+      const { data } = await supabase
+        .from('users')
+        .select('id, name')
+        .eq('role', 'admin')
+        .eq('organization_id', organization!.id)
+      setAdminUsers(data || [])
+    }
+
+    void loadAdminUsers()
+  }, [requiresClient, supabase, organization])
 
   // Duplicate detection
   const [duplicateWarning, setDuplicateWarning] = useState<{
@@ -297,10 +320,17 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           hasErrors = true
         }
       }
+    } else {
+      // Admin work: require selecting who did the work
+      if (!selectedAdminUserId) {
+        setFieldError('adminUser', 'Please select who did this work')
+        hasErrors = true
+      }
     }
 
     // Require notes when submitting (not for drafts), if enabled in settings
-    if (status === 'submitted' && notesRequired) {
+    // Skip notes validation for admin work (no client = no notes needed)
+    if (status === 'submitted' && notesRequired && requiresClient) {
       if (!notes.trim()) {
         setFieldError('notes', 'Internal notes are required when submitting')
         hasErrors = true
@@ -376,13 +406,18 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             ? 'approved'
             : status
 
+        // For admin work, the selected admin is the contractor
+        const sessionContractorId = !requiresClient && selectedAdminUserId
+          ? selectedAdminUserId
+          : effectiveContractorId
+
         const result = await createNewSession({
           supabase,
           date,
           time,
           durationMinutes: parseInt(duration),
           serviceTypeId,
-          contractorId: effectiveContractorId,
+          contractorId: sessionContractorId,
           organizationId: organization!.id,
           clientIds: isGroupService || !requiresClient ? [] : selectedClients,
           encryptedNotes,
@@ -429,6 +464,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setClientNotes('')
     setGroupHeadcount('')
     setSelectedClients([])
+    setSelectedAdminUserId('')
     setShowSuccess(false)
     clearAllErrors()
     // Keep: time, duration, serviceTypeId (remembered)
@@ -657,6 +693,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           </div>
           )}
 
+          {/* Admin work: who did the admin work */}
+          {!isGroupService && !requiresClient && (
+            <div className="space-y-2">
+              <Label htmlFor="adminUser">Who did this work? *</Label>
+              <Select value={selectedAdminUserId} onValueChange={setSelectedAdminUserId}>
+                <SelectTrigger id="adminUser" className={errors.adminUser ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select admin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {adminUsers.map((admin) => (
+                    <SelectItem key={admin.id} value={admin.id}>
+                      {admin.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.adminUser && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.adminUser}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Scholarship info banner */}
           {selectedPaymentMethod === 'scholarship' && (
             <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
@@ -736,7 +797,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           )}
           </div>{/* end collapsible setup fields wrapper */}
 
-          {/* Internal Notes */}
+          {/* Internal Notes - hidden for admin work */}
+          {requiresClient && (
           <div className="space-y-2">
             <Label htmlFor="notes">Internal Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
@@ -757,8 +819,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+          )}
 
-          {/* Client-Facing Notes */}
+          {/* Client-Facing Notes - hidden for admin work */}
+          {requiresClient && (
           <div className="space-y-2">
             <Label htmlFor="clientNotes">Client Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
@@ -779,6 +843,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+          )}
 
           {/* Status */}
           {showFinancialDetails ? (
