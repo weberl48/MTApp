@@ -59,3 +59,10 @@ export function revalidateTeamPaths() {
   revalidatePath('/team')
   revalidatePath('/dashboard')
 }
+
+/** Revalidate all paths affected by admin work changes. */
+export function revalidateAdminWorkPaths() {
+  revalidatePath('/admin-work')
+  revalidatePath('/payments')
+  revalidatePath('/dashboard')
+}

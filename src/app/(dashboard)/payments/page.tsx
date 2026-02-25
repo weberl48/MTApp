@@ -223,6 +223,65 @@ export default function PaymentsPage() {
       unpaidByContractor[contractor.id].sessionCount += 1
     })
 
+    // Fetch unpaid admin work entries
+    const { data: unpaidAdminWork } = await supabase
+      .from('admin_work')
+      .select(`
+        id,
+        date,
+        duration_minutes,
+        description,
+        pay_amount,
+        admin_user_id,
+        paid_date,
+        admin_user:users!admin_user_id(id, name, email)
+      `)
+      .is('paid_date', null)
+      .in('status', ['submitted', 'approved'])
+      .order('date', { ascending: false })
+
+    // Merge admin work into the same contractor groupings
+    const typedAdminWork = (unpaidAdminWork as unknown as Array<{
+      id: string
+      date: string
+      duration_minutes: number
+      description: string
+      pay_amount: number
+      admin_user_id: string
+      paid_date: string | null
+      admin_user: { id: string; name: string; email: string } | null
+    }>) || []
+
+    typedAdminWork.forEach((entry) => {
+      const adminUser = entry.admin_user
+      if (!adminUser?.id) return
+
+      if (!unpaidByContractor[adminUser.id]) {
+        unpaidByContractor[adminUser.id] = {
+          id: adminUser.id,
+          name: adminUser.name || 'Unknown',
+          email: adminUser.email || '',
+          unpaidSessions: [],
+          totalPending: 0,
+          sessionCount: 0,
+        }
+      }
+
+      const unpaidItem: UnpaidSession = {
+        id: entry.id,
+        date: entry.date,
+        service_type: { name: `Admin: ${entry.description}` },
+        duration_minutes: entry.duration_minutes,
+        contractor_pay: Number(entry.pay_amount),
+        clients: [],
+        entryType: 'admin_work',
+      }
+
+      unpaidByContractor[adminUser.id].unpaidSessions.push(unpaidItem)
+      unpaidByContractor[adminUser.id].totalPending += Number(entry.pay_amount)
+      unpaidByContractor[adminUser.id].sessionCount += 1
+    })
+
     setUnpaidContractors(Object.values(unpaidByContractor))
     setLoading(false)
   }
@@ -309,7 +368,7 @@ export default function PaymentsPage() {
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)} sessions awaiting payment
+              {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)} items awaiting payment
             </p>
           </CardContent>
         </Card>

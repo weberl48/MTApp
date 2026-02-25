@@ -18,6 +18,20 @@ export const sessionStatusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
+// --- Admin work status ---
+
+export const adminWorkStatusColors: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+}
+
+export const adminWorkStatusLabels: Record<string, string> = {
+  draft: 'Draft',
+  submitted: 'Submitted',
+  approved: 'Approved',
+}
+
 // --- Invoice status ---
 
 export const invoiceStatusColors: Record<string, string> = {

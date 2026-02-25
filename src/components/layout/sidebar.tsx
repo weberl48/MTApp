@@ -17,6 +17,7 @@ import {
   BarChart3,
   ChevronRight,
   HelpCircle,
+  ClipboardList,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -45,6 +46,7 @@ const navigation: NavItem[] = [
     adminOnly: true,
     children: [
       { name: 'Invoices', href: '/invoices/', icon: FileText },
+      { name: 'Admin Work', href: '/admin-work/', icon: ClipboardList, adminOnly: true },
       { name: 'Payroll', href: '/payments/', icon: Wallet, ownerOnly: true },
     ],
   },
@@ -97,7 +99,7 @@ export function Sidebar() {
   })
 
   // Auto-expand Billing when on a billing sub-route
-  const isBillingActive = pathname.startsWith('/invoices') || pathname.startsWith('/payments')
+  const isBillingActive = pathname.startsWith('/invoices') || pathname.startsWith('/admin-work') || pathname.startsWith('/payments')
 
   function toggleExpanded(name: string) {
     setExpandedItems((prev) => {

@@ -17,6 +17,10 @@ export type Permission =
   | 'analytics:view'
   | 'payments:view'
   | 'financial:view-details'
+  | 'admin-work:view'
+  | 'admin-work:create'
+  | 'admin-work:approve'
+  | 'admin-work:delete'
 
 const ROLE_PERMISSIONS: Record<Permission, UserRole[]> = {
   'session:approve':        ['developer', 'owner', 'admin'],
@@ -34,6 +38,10 @@ const ROLE_PERMISSIONS: Record<Permission, UserRole[]> = {
   'analytics:view':         ['developer', 'owner'],
   'payments:view':          ['developer', 'owner'],
   'financial:view-details': ['developer', 'owner'],
+  'admin-work:view':        ['developer', 'owner', 'admin'],
+  'admin-work:create':      ['developer', 'owner', 'admin'],
+  'admin-work:approve':     ['developer', 'owner', 'admin'],
+  'admin-work:delete':      ['developer', 'owner', 'admin'],
 }
 
 export function can(role: UserRole | null, permission: Permission): boolean {

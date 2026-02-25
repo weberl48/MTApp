@@ -38,6 +38,15 @@ export const sessionRequestSchema = z.object({
   notes: z.string().optional().nullable(),
 })
 
+/** Admin work entry */
+export const adminWorkSchema = z.object({
+  admin_user_id: z.string().uuid('Invalid admin user'),
+  date: z.string().min(1, 'Date is required'),
+  duration_minutes: z.number().int().positive('Duration must be positive'),
+  description: z.string().min(1, 'Description is required').max(500),
+  pay_amount: z.number().positive('Pay amount must be positive'),
+})
+
 /**
  * Extract bearer token from Authorization header.
  * Returns null if header is missing or malformed.

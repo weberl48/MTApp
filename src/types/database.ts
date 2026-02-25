@@ -12,6 +12,7 @@ export type SessionStatus = 'draft' | 'submitted' | 'approved' | 'no_show' | 'ca
 export type InvoiceStatus = 'pending' | 'sent' | 'paid'
 export type PaymentMethod = 'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
 export type BillingMethod = 'square' | 'check' | 'email' | 'other'
+export type AdminWorkStatus = 'draft' | 'submitted' | 'approved'
 export type GoalStatus = 'active' | 'met' | 'not_met'
 export type LocationType = 'in_home' | 'matts_music' | 'other'
 export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individual' | 'art_group'
@@ -783,6 +784,51 @@ export interface Database {
           updated_at?: string
         }
       }
+      admin_work: {
+        Row: {
+          id: string
+          organization_id: string
+          admin_user_id: string
+          date: string
+          duration_minutes: number
+          description: string
+          pay_amount: number
+          status: AdminWorkStatus
+          paid_date: string | null
+          paid_amount: number | null
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          admin_user_id: string
+          date: string
+          duration_minutes?: number
+          description: string
+          pay_amount: number
+          status?: AdminWorkStatus
+          paid_date?: string | null
+          paid_amount?: number | null
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          organization_id?: string
+          admin_user_id?: string
+          date?: string
+          duration_minutes?: number
+          description?: string
+          pay_amount?: number
+          status?: AdminWorkStatus
+          paid_date?: string | null
+          paid_amount?: number | null
+          created_by?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -801,6 +847,7 @@ export interface Database {
       service_category: ServiceCategory
       session_request_status: SessionRequestStatus
       resource_type: ResourceType
+      admin_work_status: AdminWorkStatus
     }
   }
 }
@@ -822,6 +869,7 @@ export type ContractorRate = Database['public']['Tables']['contractor_rates']['R
 export type ClientAccessToken = Database['public']['Tables']['client_access_tokens']['Row']
 export type SessionRequest = Database['public']['Tables']['session_requests']['Row']
 export type ClientResource = Database['public']['Tables']['client_resources']['Row']
+export type AdminWork = Database['public']['Tables']['admin_work']['Row']
 
 // App Settings types
 export interface BusinessInfo {

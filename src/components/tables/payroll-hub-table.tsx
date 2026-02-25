@@ -35,6 +35,7 @@ import {
 import { formatCurrency } from '@/lib/pricing'
 import { createClient } from '@/lib/supabase/client'
 import { deleteSession } from '@/app/actions/sessions'
+import { deleteAdminWork } from '@/app/actions/admin-work'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
@@ -47,6 +48,7 @@ export interface UnpaidSession {
   duration_minutes: number
   contractor_pay: number
   clients: string[]
+  entryType?: 'session' | 'admin_work'
 }
 
 export interface ContractorPayout {
@@ -119,21 +121,32 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
         contractor_paid_amount: session.contractor_pay,
       }))
 
-      // Batch update sessions
+      // Batch update sessions and admin work entries
       for (const update of updates) {
-        const { error } = await supabase
-          .from('sessions')
-          .update({
-            contractor_paid_date: update.contractor_paid_date,
-            contractor_paid_amount: update.contractor_paid_amount,
-          })
-          .eq('id', update.id)
-
-        if (error) throw error
+        const session = markPaidDialog.contractor!.unpaidSessions.find((s) => s.id === update.id)
+        if (session?.entryType === 'admin_work') {
+          const { error } = await supabase
+            .from('admin_work')
+            .update({
+              paid_date: update.contractor_paid_date,
+              paid_amount: update.contractor_paid_amount,
+            })
+            .eq('id', update.id)
+          if (error) throw error
+        } else {
+          const { error } = await supabase
+            .from('sessions')
+            .update({
+              contractor_paid_date: update.contractor_paid_date,
+              contractor_paid_amount: update.contractor_paid_amount,
+            })
+            .eq('id', update.id)
+          if (error) throw error
+        }
       }
 
       toast.success(
-        `Marked ${sessionIds.length} sessions as paid for ${markPaidDialog.contractor.name}`
+        `Marked ${sessionIds.length} item${sessionIds.length !== 1 ? 's' : ''} as paid for ${markPaidDialog.contractor.name}`
       )
       setMarkPaidDialog({ isOpen: false, contractor: null })
       onPayoutComplete()
@@ -150,16 +163,19 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
 
     setIsDeleting(true)
     try {
-      const result = await deleteSession(deleteDialog.session.id)
+      const isAdminWork = deleteDialog.session.entryType === 'admin_work'
+      const result = isAdminWork
+        ? await deleteAdminWork(deleteDialog.session.id)
+        : await deleteSession(deleteDialog.session.id)
       if (result.success) {
-        toast.success('Session and linked data deleted')
+        toast.success(isAdminWork ? 'Admin work entry deleted' : 'Session and linked data deleted')
         setDeleteDialog({ isOpen: false, session: null, contractorName: '' })
         onPayoutComplete()
       } else {
-        toast.error(result.error || 'Failed to delete session')
+        toast.error(result.error || 'Failed to delete')
       }
     } catch {
-      toast.error('Failed to delete session')
+      toast.error('Failed to delete')
     } finally {
       setIsDeleting(false)
     }
@@ -232,7 +248,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
             />
           </div>
           <div className="text-sm text-gray-500 break-words">
-            {totalSessions} unpaid session{totalSessions !== 1 ? 's' : ''} •{' '}
+            {totalSessions} unpaid item{totalSessions !== 1 ? 's' : ''} •{' '}
             <span className="font-medium text-amber-600">{formatCurrency(totalUnpaid)}</span> total
           </div>
         </div>
