@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +39,7 @@ import { FEATURE_DEFINITIONS } from '@/lib/features'
 
 export default function BusinessSettingsPage() {
   const { organization, can, settings, feature, updateSettings } = useOrganization()
+  const searchParams = useSearchParams()
   const isOwner = can('settings:edit')
   const isAdmin = can('session:view-all')
   const [saving, setSaving] = useState(false)
@@ -46,6 +48,14 @@ export default function BusinessSettingsPage() {
   const [isServiceTypeFormOpen, setIsServiceTypeFormOpen] = useState(false)
   const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(settings)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
+
+  // Auto-open the service type form when navigated from a walkthrough
+  useEffect(() => {
+    if (searchParams.get('tour') === 'edit-service' && serviceTypes.length > 0 && !isServiceTypeFormOpen) {
+      setEditingServiceType(serviceTypes[0])
+      setIsServiceTypeFormOpen(true)
+    }
+  }, [searchParams, serviceTypes, isServiceTypeFormOpen])
 
   useEffect(() => {
     if (settings) setLocalSettings(settings)
