@@ -63,6 +63,20 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     return schedule
   }
 
+  // Initialize group contractor pay matrix from existing data
+  const GROUP_HEADCOUNTS = [1, 2, 3, 4, 5, 6]
+  const initGroupPay = (): Record<string, string> => {
+    const matrix: Record<string, string> = {}
+    for (const h of GROUP_HEADCOUNTS) {
+      for (const dur of durationOptions) {
+        const key = `${h}_${dur}`
+        const existing = serviceType?.group_contractor_pay?.[key]
+        matrix[key] = existing !== undefined ? String(existing) : ''
+      }
+    }
+    return matrix
+  }
+
   const [formData, setFormData] = useState({
     name: serviceType?.name || '',
     category: serviceType?.category || ('music_individual' as ServiceCategory),
@@ -79,6 +93,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     requires_client: serviceType?.requires_client ?? true,
     allowed_contractor_ids: serviceType?.allowed_contractor_ids || ([] as string[]),
     pay_schedule: initPaySchedule(),
+    group_pay: initGroupPay(),
   })
 
   // Fetch contractors for restriction selector
@@ -113,6 +128,17 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       }
     }
 
+    // Build group_contractor_pay from form values (only include filled-in cells)
+    const groupPay: Record<string, number> = {}
+    let hasAnyGroupPay = false
+    for (const [key, val] of Object.entries(formData.group_pay)) {
+      const parsed = parseFloat(val)
+      if (!isNaN(parsed) && parsed > 0) {
+        groupPay[key] = parsed
+        hasAnyGroupPay = true
+      }
+    }
+
     const data = {
       name: formData.name,
       category: formData.category,
@@ -129,6 +155,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       requires_client: formData.requires_client,
       allowed_contractor_ids: formData.allowed_contractor_ids.length > 0 ? formData.allowed_contractor_ids : null,
       contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
+      group_contractor_pay: hasAnyGroupPay ? groupPay : null,
     }
 
     try {
@@ -380,6 +407,60 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               })}
             </div>
           </div>
+
+          {/* Group Contractor Pay Matrix */}
+          {parseFloat(formData.per_person_rate) > 0 && (
+            <div className="space-y-2">
+              <Label>Group Contractor Pay by Headcount</Label>
+              <p className="text-xs text-gray-500">
+                Set contractor pay based on group size and duration. The last row (6+) applies to groups of 6 or more. Leave empty to use the default pay schedule or formula.
+              </p>
+              <div className="border rounded-lg overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-50 dark:bg-gray-800">
+                      <th className="px-2 py-1.5 text-left font-medium text-gray-600 dark:text-gray-400 w-16">Clients</th>
+                      {durationOptions.map((dur) => (
+                        <th key={dur} className="px-2 py-1.5 text-center font-medium text-gray-600 dark:text-gray-400">
+                          {dur}m
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {GROUP_HEADCOUNTS.map((h) => (
+                      <tr key={h}>
+                        <td className="px-2 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {h === 6 ? '6+' : h}
+                        </td>
+                        {durationOptions.map((dur) => {
+                          const key = `${h}_${dur}`
+                          return (
+                            <td key={dur} className="px-1 py-1">
+                              <Input
+                                type="number"
+                                step="0.50"
+                                min="0"
+                                value={formData.group_pay[key] || ''}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    group_pay: { ...formData.group_pay, [key]: e.target.value },
+                                  })
+                                }
+                                placeholder="—"
+                                className="w-full h-7 text-sm text-center px-1"
+                              />
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Scholarship Toggle */}
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">

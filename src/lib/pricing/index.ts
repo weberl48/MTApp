@@ -103,7 +103,8 @@ export function calculateSessionPricing(
   let mcaCut = (totalAmount * serviceType.mca_percentage) / 100
 
   // Calculate contractor pay
-  // Priority: 1) custom rate + increment, 2) custom rate + schedule offset, 3) pay schedule, 4) formula
+  // Priority: 0) group contractor pay matrix, 1) custom rate + increment,
+  // 2) custom rate + schedule offset, 3) pay schedule, 4) formula
   let contractorPay: number
 
   const schedule = serviceType.contractor_pay_schedule
@@ -111,7 +112,17 @@ export function calculateSessionPricing(
   const schedulePay = schedule?.[scheduleKey]
   const scheduleBase = schedule?.[String(durationBase)]
 
-  if (effectiveOverrides?.customContractorPay !== undefined) {
+  // Priority 0: Group contractor pay matrix (headcount × duration)
+  // Only applies to group services (per_person_rate > 0) with a defined matrix and headcount > 0
+  const groupPayMatrix = serviceType.group_contractor_pay
+  const groupMatrixPay = groupPayMatrix && serviceType.per_person_rate > 0 && count > 0
+    ? lookupGroupContractorPay(groupPayMatrix, count, durationMinutes)
+    : undefined
+
+  if (groupMatrixPay !== undefined) {
+    contractorPay = groupMatrixPay
+    mcaCut = totalAmount - contractorPay
+  } else if (effectiveOverrides?.customContractorPay !== undefined) {
     if (durationMinutes === durationBase) {
       // At base duration: use custom rate directly
       contractorPay = effectiveOverrides.customContractorPay
@@ -194,6 +205,48 @@ export function calculateSessionPricing(
  */
 function round(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+/**
+ * Look up contractor pay from a group contractor pay matrix.
+ * Keys are "{headcount}_{duration}" (e.g., "3_30", "6_45").
+ * If exact headcount is not found, clamps to the maximum defined headcount
+ * (e.g., if max key is "6" and headcount=8, uses "6_{duration}").
+ * Returns undefined if no matching entry exists.
+ */
+export function lookupGroupContractorPay(
+  matrix: Record<string, number>,
+  headcount: number,
+  durationMinutes: number
+): number | undefined {
+  // Try exact match first
+  const exactKey = `${headcount}_${durationMinutes}`
+  if (matrix[exactKey] !== undefined) {
+    return matrix[exactKey]
+  }
+
+  // Find the maximum headcount defined in the matrix
+  const headcounts = new Set<number>()
+  for (const key of Object.keys(matrix)) {
+    const parts = key.split('_')
+    const h = parseInt(parts[0])
+    if (!isNaN(h)) headcounts.add(h)
+  }
+
+  if (headcounts.size === 0) return undefined
+
+  const maxHeadcount = Math.max(...headcounts)
+
+  // If headcount exceeds max, clamp to max
+  if (headcount > maxHeadcount) {
+    const clampedKey = `${maxHeadcount}_${durationMinutes}`
+    if (matrix[clampedKey] !== undefined) {
+      return matrix[clampedKey]
+    }
+  }
+
+  // No match found for this headcount/duration combo
+  return undefined
 }
 
 /**

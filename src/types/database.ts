@@ -356,6 +356,7 @@ export interface Database {
           scholarship_discount_percentage: number | null
           scholarship_rate: number | null
           contractor_pay_schedule: Record<string, number> | null
+          group_contractor_pay: Record<string, number> | null
           is_active: boolean
           is_scholarship: boolean
           requires_client: boolean
@@ -380,6 +381,7 @@ export interface Database {
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
           contractor_pay_schedule?: Record<string, number> | null
+          group_contractor_pay?: Record<string, number> | null
           is_active?: boolean
           is_scholarship?: boolean
           requires_client?: boolean
@@ -403,6 +405,7 @@ export interface Database {
           scholarship_discount_percentage?: number | null
           scholarship_rate?: number | null
           contractor_pay_schedule?: Record<string, number> | null
+          group_contractor_pay?: Record<string, number> | null
           is_active?: boolean
           is_scholarship?: boolean
           requires_client?: boolean
