@@ -113,7 +113,7 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
       element: '[data-tour="sessions-new-button"]',
       popoverSide: 'bottom',
       ctaLabel: 'Go to New Session',
-      href: '/sessions/new/',
+      href: '/sessions/',
     },
     {
       title: 'Date and Time',
