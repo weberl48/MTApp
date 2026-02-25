@@ -350,8 +350,8 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             </p>
           </div>
 
-          {/* Contractor Pay by Duration */}
-          <div className="space-y-2" data-tour="pay-schedule">
+          {/* Contractor Pay by Duration (hidden for group services — use group matrix instead) */}
+          {!(parseFloat(formData.per_person_rate) > 0) && <div className="space-y-2" data-tour="pay-schedule">
             <Label>Contractor Pay by Duration</Label>
             <p className="text-xs text-gray-500">
               Set the default contractor pay for each session duration. Leave empty to calculate automatically from MCA %.
@@ -406,7 +406,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                 )
               })}
             </div>
-          </div>
+          </div>}
 
           {/* Group Contractor Pay Matrix */}
           {parseFloat(formData.per_person_rate) > 0 && (
