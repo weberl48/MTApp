@@ -24,6 +24,40 @@ export function useWalkthrough() {
   return ctx
 }
 
+/** Extract only the pathname from an href (strip query string and hash). */
+function hrefPathname(href: string): string {
+  try { return new URL(href, window.location.origin).pathname }
+  catch { return href.split('?')[0].split('#')[0] }
+}
+
+/**
+ * Scroll an element into view within its nearest scrollable ancestor.
+ * Standard scrollIntoView scrolls the whole page; this scrolls the
+ * dialog/overflow container so the field is visible.
+ */
+function scrollElementIntoView(el: Element) {
+  // Find the closest scrollable parent (e.g., the dialog content)
+  let scrollParent: Element | null = el.parentElement
+  while (scrollParent) {
+    const style = window.getComputedStyle(scrollParent)
+    if (
+      (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+      scrollParent.scrollHeight > scrollParent.clientHeight
+    ) {
+      break
+    }
+    scrollParent = scrollParent.parentElement
+  }
+
+  if (scrollParent) {
+    const parentRect = scrollParent.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    // Scroll so the element is near the top of the scrollable area with some padding
+    const scrollOffset = elRect.top - parentRect.top - 20
+    scrollParent.scrollBy({ top: scrollOffset, behavior: 'smooth' })
+  }
+}
+
 export function WalkthroughProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -37,12 +71,6 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
 
     setActiveWalkthrough(walkthrough)
     setStepIndex(0)
-
-    /** Extract only the pathname from an href (strip query string and hash). */
-    function hrefPathname(href: string): string {
-      try { return new URL(href, window.location.origin).pathname }
-      catch { return href.split('?')[0].split('#')[0] }
-    }
 
     // Navigate to the first step's page if needed
     const firstStep = walkthrough.steps[0]
@@ -86,6 +114,14 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
               if (needsNavigation) {
                 router.push(step.href)
               }
+            }
+
+            // Scroll the target element into view within its scrollable container
+            if (step.element) {
+              requestAnimationFrame(() => {
+                const el = document.querySelector(step.element!)
+                if (el) scrollElementIntoView(el)
+              })
             }
           },
         })),
