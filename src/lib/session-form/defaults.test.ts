@@ -24,19 +24,17 @@ describe('session form defaults storage', () => {
     })
   })
 
-  it('saves and loads v1 defaults', () => {
+  it('saves and loads v2 defaults (time + duration only)', () => {
     saveSessionFormDefaults(key, {
       time: '10:15',
       duration: '45',
-      serviceTypeId: 'service-1',
     })
 
     const loaded = loadSessionFormDefaults(key)
     expect(loaded).toEqual({
-      v: 1,
+      v: 2,
       time: '10:15',
       duration: '45',
-      serviceTypeId: 'service-1',
     })
   })
 
@@ -45,10 +43,18 @@ describe('session form defaults storage', () => {
     expect(loadSessionFormDefaults(key)).toBeNull()
   })
 
+  it('returns null for old v1 data', () => {
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({ v: 1, time: '09:00', duration: '30', serviceTypeId: 'x' })
+    )
+    expect(loadSessionFormDefaults(key)).toBeNull()
+  })
+
   it('returns null for wrong shapes', () => {
     window.localStorage.setItem(
       key,
-      JSON.stringify({ v: 1, time: 123, duration: '30', serviceTypeId: 'x', selectedClientIds: [] })
+      JSON.stringify({ v: 2, time: 123, duration: '30' })
     )
     expect(loadSessionFormDefaults(key)).toBeNull()
   })
@@ -57,10 +63,8 @@ describe('session form defaults storage', () => {
     saveSessionFormDefaults(key, {
       time: '09:00',
       duration: '30',
-      serviceTypeId: '',
     })
     clearSessionFormDefaults(key)
     expect(loadSessionFormDefaults(key)).toBeNull()
   })
 })
-

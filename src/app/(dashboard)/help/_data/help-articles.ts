@@ -156,11 +156,11 @@ Service types are configured by your organization. Some types are restricted to 
 
 ### Remembered Defaults
 
-The session form remembers your last-used time, duration, and service type. These are pre-filled the next time you open the form to speed up repeat entries.
+The session form remembers your last-used time and duration. These are pre-filled the next time you open the form to speed up repeat entries. The service type is **not** remembered — you always choose it fresh to avoid accidentally logging under the wrong type.
 
 ### Quick Session on Mobile
 
-On mobile devices, contractors see a floating action button that opens a simplified quick-log drawer at the bottom of the screen. This lets you capture the essential details and submit in seconds without leaving your current view.
+On mobile devices, contractors see a floating action button that opens a simplified quick-log drawer at the bottom of the screen. The quick-log drawer remembers your full previous settings (including service type) so you can re-log the same session in seconds.
 
 ### Pricing Preview
 
@@ -170,7 +170,7 @@ After selecting a service type and client, a pricing summary appears below the f
 
 Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If it is rejected, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
 
-If you want to log another session right away, click the **Log Another** button that appears on the success screen.
+If you want to log another session right away, click the **Log Another** button that appears on the success screen. The form resets the date, service type, clients, and notes, but keeps your time and duration from the previous entry.
     `,
   },
   {
@@ -210,6 +210,10 @@ Some service types have a maximum total defined. If the calculated total would e
 ### Contractor Pay
 
 Contractor earnings scale with the headcount the same way the total does. As more clients attend, both the total billed and the contractor's pay increase (up to any configured cap).
+
+### Classroom Selection
+
+For scholarship group sessions, a **Classroom** dropdown appears on the session form. This lets contractors indicate which classroom the session took place in. The list of classrooms is configurable by the owner in **Settings > Business Rules > Sessions**. The classroom is recorded on the session and included in data exports.
 
 ### Separate Invoices
 
@@ -283,6 +287,10 @@ Once an invoice has been generated, you can deliver it to the client by email or
 ### Sending via Square
 
 When you use the Square option, a Square invoice is created in your connected Square account and sent to the client automatically. When the client pays using the Square link, MCA Manager receives a webhook notification and marks the invoice as paid without any manual action.
+
+### Square Processing Fee
+
+You can add an automatic processing fee to every Square invoice to cover online payment costs. Go to **Settings > Business Rules > Invoices** and enable the **Square Processing Fee** option. You can choose a fixed dollar amount (e.g., $3.00) or a percentage (e.g., 2.9% + $0.30 to match Square's standard rate). The fee appears as a separate "Online Processing Fee" line item on the Square invoice.
 
 ### Bulk Actions
 
@@ -754,12 +762,17 @@ Contractors are paid based on normal pricing rules, not the scholarship rate. If
 
 If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month (1-28) on which invoices are automatically created, covering the previous month's unbilled sessions. Generated invoices start in Pending status so you can review them before sending.
 
+### Classroom Tracking
+
+For scholarship group sessions, contractors select a **Classroom** from a dropdown when logging the session. This helps track which room or location the group met in. The classroom list is configured by the owner under **Settings > Business Rules > Sessions > Classrooms**.
+
 ### Setting Up Scholarship Billing
 
 1. **Configure a scholarship service type** - Go to Settings > Services, create or edit a service type, and check "Scholarship Service". Set the flat scholarship rate.
 2. **Set client payment method** - Go to Clients, edit the client, and set their payment method to "Scholarship".
-3. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
-4. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
+3. **(Optional) Configure classrooms** - Go to Settings > Business Rules > Sessions and add classroom names so contractors can select a room when logging scholarship group sessions.
+4. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
+5. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
     `,
   },
   {

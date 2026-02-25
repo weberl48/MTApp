@@ -17,6 +17,7 @@ interface CreateSessionParams {
   encryptedClientNotes: string | null
   status: 'draft' | 'submitted' | 'approved'
   groupHeadcount: number | null
+  classroom: string | null
   pricing: PricingCalculation
   isScholarshipService?: boolean
   dueDays?: number
@@ -36,7 +37,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     supabase, date, time, durationMinutes, serviceTypeId,
     contractorId, organizationId, clientIds,
     encryptedNotes, encryptedClientNotes, status,
-    groupHeadcount, pricing, isScholarshipService, dueDays,
+    groupHeadcount, classroom, pricing, isScholarshipService, dueDays,
   } = params
 
   // Create the session
@@ -53,6 +54,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
       client_notes: encryptedClientNotes,
       group_headcount: groupHeadcount,
       group_member_names: null,
+      classroom: classroom ?? null,
       organization_id: organizationId,
     })
     .select()

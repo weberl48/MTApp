@@ -20,9 +20,9 @@ import Link from 'next/link'
 import { useOrganization } from '@/contexts/organization-context'
 import { useContractorRates } from '@/hooks/use-contractor-rates'
 import {
-  getSessionFormDefaultsStorageKey,
-  loadSessionFormDefaults,
-  saveSessionFormDefaults,
+  getQuickLogDefaultsStorageKey,
+  loadQuickLogDefaults,
+  saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
@@ -49,15 +49,15 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
   const [notes, setNotes] = useState('')
   const [clientNotes, setClientNotes] = useState('')
 
-  // Load defaults from localStorage
+  // Load defaults from localStorage (quick-log has its own storage with serviceTypeId)
   const storageKey = useMemo(() => {
     if (!organization?.id || !contractorId) return null
-    return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId })
+    return getQuickLogDefaultsStorageKey({ organizationId: organization.id, contractorId })
   }, [organization?.id, contractorId])
 
   const defaults = useMemo(() => {
     if (!storageKey) return null
-    return loadSessionFormDefaults(storageKey)
+    return loadQuickLogDefaults(storageKey)
   }, [storageKey])
 
   // Fetch service types and clients when drawer opens
@@ -137,6 +137,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         encryptedClientNotes: encrypted.clientNotes,
         status: effectiveStatus as 'submitted' | 'approved',
         groupHeadcount: null,
+        classroom: null,
         pricing,
         isScholarshipService: serviceType?.is_scholarship ?? false,
         dueDays: settings?.invoice?.due_days,
@@ -144,7 +145,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
 
       // Re-save defaults so they persist
       if (storageKey) {
-        saveSessionFormDefaults(storageKey, {
+        saveQuickLogDefaults(storageKey, {
           time: defaults.time,
           duration: defaults.duration,
           serviceTypeId: defaults.serviceTypeId,

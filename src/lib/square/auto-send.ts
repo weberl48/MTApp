@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createSquareInvoice } from '@/lib/square/invoices'
+import { createSquareInvoice, buildSquareProcessingFee } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { logger } from '@/lib/logger'
 import { formatInvoiceNumber } from '@/lib/constants/display'
@@ -34,6 +34,17 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
     .single()
 
   if (!session) return empty
+
+  // Fetch organization settings for processing fee
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', session.organization_id)
+    .single()
+
+  const pricingSettings = (org?.settings as Record<string, unknown>)?.pricing as
+    | { square_processing_fee_enabled?: boolean; square_processing_fee_type?: string; square_processing_fee_amount?: number; square_processing_fee_percentage?: number; square_processing_fee_fixed_cents?: number }
+    | undefined
 
   // Fetch pending invoices for this session that haven't been sent via Square
   const { data: invoices } = await supabase
@@ -75,6 +86,8 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
       const invoiceNumber = formatInvoiceNumber(invoice.id)
       const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
+      const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
+
       const squareResult = await createSquareInvoice({
         clientName: client.name,
         clientEmail: client.contact_email,
@@ -82,6 +95,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
         description,
         dueDate,
         invoiceNumber,
+        serviceCharge,
       })
 
       await supabase

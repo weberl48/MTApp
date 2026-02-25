@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle, MapPin } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { decryptPHI } from '@/lib/crypto/actions'
@@ -43,6 +43,7 @@ interface SessionDetails {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  classroom: string | null
   rejection_reason: string | null
   created_at: string
   updated_at: string
@@ -89,6 +90,7 @@ export default function SessionDetailPage() {
           client_notes,
           group_headcount,
           group_member_names,
+          classroom,
           rejection_reason,
           created_at,
           updated_at,
@@ -454,6 +456,16 @@ export default function SessionDetailPage() {
                 <p className="font-medium">{session.group_headcount} people</p>
               </div>
             </div>
+
+            {session.classroom && (
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-purple-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Classroom</p>
+                  <p className="font-medium">{session.classroom}</p>
+                </div>
+              </div>
+            )}
 
           </CardContent>
         </Card>

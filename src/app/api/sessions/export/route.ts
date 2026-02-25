@@ -29,6 +29,7 @@ interface SessionWithJoins {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  classroom: string | null
   contractor: NameJoinResult | NameJoinResult[] | null
   service_type: NameJoinResult | NameJoinResult[] | null
   attendees: AttendeeJoinResult[] | null
@@ -81,6 +82,7 @@ export async function GET(request: NextRequest) {
         client_notes,
         group_headcount,
         group_member_names,
+        classroom,
         contractor:users(name),
         service_type:service_types(name),
         attendees:session_attendees(
@@ -167,6 +169,7 @@ export async function GET(request: NextRequest) {
           clients: clientNames || '',
           groupHeadcount: session.group_headcount,
           groupMembers: session.group_member_names || '',
+          classroom: session.classroom || '',
           notes: decryptedNotes || '',
           clientNotes: decryptedClientNotes || '',
         }
@@ -188,6 +191,7 @@ export async function GET(request: NextRequest) {
       'Clients',
       'Group Headcount',
       'Group Members',
+      'Classroom',
       'Internal Notes',
       'Client Notes',
     ]
@@ -204,6 +208,7 @@ export async function GET(request: NextRequest) {
         `"${(row.clients || '').replace(/"/g, '""')}"`,
         row.groupHeadcount || '',
         `"${(row.groupMembers || '').replace(/"/g, '""')}"`,
+        `"${(row.classroom || '').replace(/"/g, '""')}"`,
         `"${(row.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
         `"${(row.clientNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
       ].join(','))
