@@ -71,6 +71,7 @@ export default function SessionsPage() {
 
   // Use effective permissions (respects "view as" role)
   const isAdmin = can('session:view-all')
+  const showFinancialDetails = can('financial:view-details')
   // When viewing as a specific contractor, filter to their sessions even if effective role is still admin
   const shouldFilterByContractor = viewAsContractor || !isAdmin
   const contractorIdToFilter = viewAsContractor?.id || effectiveUserId
@@ -623,7 +624,7 @@ export default function SessionsPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-3 ml-4">
-                          <span className="font-medium">{formatCurrency(totalCost)}</span>
+                          {showFinancialDetails && <span className="font-medium">{formatCurrency(totalCost)}</span>}
                           {isAdmin && session.status === 'submitted' && (
                             <div className="flex gap-1">
                               <Button

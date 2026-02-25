@@ -475,9 +475,9 @@ export default function InvoicesPage() {
   const hasScholarshipContent = unbilledByClientMonth.length > 0 || scholarshipBatchInvoices.length > 0 || scholarshipUnpaid.length > 0
 
   // Calculate totals
-  const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const sentTotal = sentInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + (isAdmin ? inv.amount : (inv.contractor_pay ?? inv.amount)), 0)
+  const sentTotal = sentInvoices.reduce((sum, inv) => sum + (isAdmin ? inv.amount : (inv.contractor_pay ?? inv.amount)), 0)
+  const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + (isAdmin ? inv.amount : (inv.contractor_pay ?? inv.amount)), 0)
 
   if (loading) {
     return <InvoicesListSkeleton />
