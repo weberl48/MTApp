@@ -250,7 +250,7 @@ export default function DashboardPage() {
 
       {/* Action Center - Admin Only */}
       {stats?.isAdmin && (
-        <div className="space-y-4">
+        <div data-tour="dashboard-action-center" className="space-y-4">
           <MissingRates />
           <PendingApprovals />
           <UnbilledSessions organizationId={stats.organizationId || ''} />
@@ -260,7 +260,7 @@ export default function DashboardPage() {
       )}
 
       {/* Recent Sessions */}
-      <Card>
+      <Card data-tour="dashboard-recent-sessions">
         <CardHeader>
           <CardTitle>Recent Sessions</CardTitle>
           <CardDescription>Your latest session entries</CardDescription>

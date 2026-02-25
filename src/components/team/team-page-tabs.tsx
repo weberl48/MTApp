@@ -13,11 +13,11 @@ export function TeamPageTabs({ overviewContent, ratesContent }: TeamPageTabsProp
   return (
     <Tabs defaultValue="overview">
       <TabsList className="mb-4">
-        <TabsTrigger value="overview" className="flex items-center gap-1">
+        <TabsTrigger value="overview" data-tour="team-tab-overview" className="flex items-center gap-1">
           <Users className="w-4 h-4" />
           Overview
         </TabsTrigger>
-        <TabsTrigger value="rates" className="flex items-center gap-1">
+        <TabsTrigger value="rates" data-tour="team-tab-rates" className="flex items-center gap-1">
           <DollarSign className="w-4 h-4" />
           Rates
         </TabsTrigger>

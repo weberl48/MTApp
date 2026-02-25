@@ -318,7 +318,7 @@ export default function SessionsPage() {
               contractorId={shouldFilterByContractor ? contractorIdToFilter || undefined : undefined}
             />
           )}
-          <Link href="/sessions/new/">
+          <Link href="/sessions/new/" data-tour="sessions-new-button">
             <Button className="w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4 mr-2" />
               New Session
@@ -329,7 +329,7 @@ export default function SessionsPage() {
 
       {/* Filters */}
       {view === 'list' && (
-        <Card>
+        <Card data-tour="sessions-filters">
           <CardContent className="pt-4">
             <div className="flex flex-col gap-4">
               {/* Search and filter toggle */}
@@ -479,7 +479,7 @@ export default function SessionsPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card data-tour="sessions-bulk-actions" className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
@@ -513,7 +513,7 @@ export default function SessionsPage() {
       )}
 
       {view === 'list' ? (
-        <Card>
+        <Card data-tour="sessions-list">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>

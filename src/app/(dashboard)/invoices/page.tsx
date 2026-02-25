@@ -493,7 +493,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className={`grid gap-4 ${overdueInvoices.length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+      <div data-tour="invoices-stats" className={`grid gap-4 ${overdueInvoices.length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -601,7 +601,7 @@ export default function InvoicesPage() {
       )}
 
       {/* Invoice Tabs */}
-      <Card>
+      <Card data-tour="invoices-card">
         <CardHeader>
           <CardTitle>All Invoices</CardTitle>
           <CardDescription>
@@ -640,7 +640,7 @@ export default function InvoicesPage() {
                 </TabsTrigger>
               )}
               {isAdmin && (
-                <TabsTrigger value="scholarship" className="text-purple-600 dark:text-purple-400">
+                <TabsTrigger value="scholarship" data-tour="invoices-tab-scholarship" className="text-purple-600 dark:text-purple-400">
                   Scholarship{unbilledByClientMonth.length > 0 ? ` (${unbilledScholarshipSessions.length} unbilled)` : ''}
                 </TabsTrigger>
               )}
@@ -673,7 +673,7 @@ export default function InvoicesPage() {
               </TabsContent>
             )}
             {isAdmin && (
-              <TabsContent value="scholarship">
+              <TabsContent value="scholarship" data-tour="invoices-scholarship-content">
                 {!hasScholarshipContent ? (
                   <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />

@@ -44,6 +44,7 @@ export default async function ClientsPage() {
           </p>
         </div>
         {canManageClients && (
+          <div data-tour="clients-add-button">
           <AddClientDialog
             trigger={
               <Button size="lg" className="gap-2">
@@ -52,12 +53,13 @@ export default async function ClientsPage() {
               </Button>
             }
           />
+          </div>
         )}
       </div>
 
       {/* Quick Stats */}
       {canManageClients && allClients.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div data-tour="clients-stats" className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -87,7 +89,7 @@ export default async function ClientsPage() {
         </div>
       )}
 
-      <Card>
+      <Card data-tour="clients-table">
         <CardContent className="pt-6">
           <ClientsTable clients={allClients} canManageClients={canManageClients} />
         </CardContent>
