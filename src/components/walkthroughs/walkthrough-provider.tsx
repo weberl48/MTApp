@@ -58,14 +58,16 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         overlayColor: 'black',
         stagePadding: 8,
         stageRadius: 8,
+        allowClose: false,
         popoverClass: 'mca-walkthrough-popover',
         steps: walkthrough.steps.map((step, i) => ({
           element: step.element || undefined,
           popover: {
             title: step.title,
             description: step.description,
-            side: 'bottom' as const,
+            side: step.popoverSide || ('bottom' as const),
             align: 'center' as const,
+            showButtons: ['next', 'previous', 'close'] as const,
           },
           onHighlightStarted: () => {
             setStepIndex(i)
