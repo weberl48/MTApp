@@ -1,4 +1,4 @@
-import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement } from './index'
+import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement, lookupGroupContractorPay } from './index'
 import type { ServiceType } from '@/types/database'
 
 describe('calculateSessionPricing', () => {
@@ -17,6 +17,7 @@ describe('calculateSessionPricing', () => {
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
     contractor_pay_schedule: null,
+    group_contractor_pay: null,
     is_active: true,
     is_scholarship: false,
     requires_client: true,
@@ -156,6 +157,7 @@ describe('scholarship pricing', () => {
     scholarship_discount_percentage: 0,
     scholarship_rate: 60,
     contractor_pay_schedule: null,
+    group_contractor_pay: null,
     is_active: true,
     is_scholarship: false,
     requires_client: true,
@@ -253,6 +255,7 @@ describe('calculateNoShowPricing', () => {
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
     contractor_pay_schedule: null,
+    group_contractor_pay: null,
     is_active: true,
     is_scholarship: false,
     requires_client: true,
@@ -308,6 +311,7 @@ describe('contractor pay schedule', () => {
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
     contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    group_contractor_pay: null,
     is_active: true,
     is_scholarship: false,
     requires_client: true,
@@ -383,6 +387,7 @@ describe('contractor duration increment', () => {
     scholarship_discount_percentage: 0,
     scholarship_rate: null,
     contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    group_contractor_pay: null,
     is_active: true,
     is_scholarship: false,
     requires_client: true,
@@ -459,5 +464,132 @@ describe('getDefaultIncrement', () => {
 
   it('works with art schedule', () => {
     expect(getDefaultIncrement({ '30': 32, '45': 45 })).toBe(13)
+  })
+})
+
+describe('lookupGroupContractorPay', () => {
+  const matrix: Record<string, number> = {
+    '1_30': 40, '2_30': 49, '3_30': 63, '4_30': 77, '5_30': 91, '6_30': 105,
+    '2_45': 55, '3_45': 74, '4_45': 94, '5_45': 113, '6_45': 133,
+    '2_60': 60, '3_60': 85, '4_60': 111, '5_60': 136, '6_60': 161,
+  }
+
+  it('returns exact match', () => {
+    expect(lookupGroupContractorPay(matrix, 3, 30)).toBe(63)
+    expect(lookupGroupContractorPay(matrix, 5, 45)).toBe(113)
+  })
+
+  it('clamps headcount above max to max entry', () => {
+    // 8 clients → clamp to 6
+    expect(lookupGroupContractorPay(matrix, 8, 30)).toBe(105)
+    expect(lookupGroupContractorPay(matrix, 10, 45)).toBe(133)
+  })
+
+  it('returns undefined for missing duration', () => {
+    // 90-min not in matrix
+    expect(lookupGroupContractorPay(matrix, 3, 90)).toBeUndefined()
+  })
+
+  it('returns undefined for empty matrix', () => {
+    expect(lookupGroupContractorPay({}, 3, 30)).toBeUndefined()
+  })
+
+  it('returns solo entry when 1 client', () => {
+    expect(lookupGroupContractorPay(matrix, 1, 30)).toBe(40)
+  })
+})
+
+describe('group contractor pay matrix in pricing', () => {
+  const groupServiceWithMatrix: ServiceType = {
+    id: '1',
+    name: 'Group Music',
+    category: 'music_group',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 20,
+    mca_percentage: 0,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: {
+      '1_30': 40, '2_30': 49, '3_30': 63, '4_30': 77, '5_30': 91, '6_30': 105,
+      '2_45': 55, '3_45': 74, '4_45': 94, '5_45': 113, '6_45': 133,
+    },
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses matrix pay for 3 clients at 30 min', () => {
+    const result = calculateSessionPricing(groupServiceWithMatrix, 3, 30)
+    expect(result.contractorPay).toBe(63)
+    // Total: 60 + 20*3 = 120, MCA: 120 - 63 = 57
+    expect(result.totalAmount).toBe(120)
+    expect(result.mcaCut).toBe(57)
+  })
+
+  it('uses matrix pay for different duration', () => {
+    const result = calculateSessionPricing(groupServiceWithMatrix, 3, 45)
+    expect(result.contractorPay).toBe(74)
+    // Total: (60+20*3)*1.5 = 180
+    expect(result.totalAmount).toBe(180)
+    expect(result.mcaCut).toBe(106) // 180 - 74
+  })
+
+  it('clamps headcount above max', () => {
+    // 8 clients → uses 6_30 = 105
+    const result = calculateSessionPricing(groupServiceWithMatrix, 8, 30)
+    expect(result.contractorPay).toBe(105)
+    // Total: 60 + 20*8 = 220
+    expect(result.totalAmount).toBe(220)
+    expect(result.mcaCut).toBe(115) // 220 - 105
+  })
+
+  it('falls through to existing logic when matrix has no entry for duration', () => {
+    // 60-min not in matrix → fall through to formula (mca_percentage=0 → contractor gets all)
+    const result = calculateSessionPricing(groupServiceWithMatrix, 3, 60)
+    // Total: (60+20*3)*2 = 240, MCA 0% → contractor = 240
+    expect(result.totalAmount).toBe(240)
+    expect(result.contractorPay).toBe(240)
+  })
+
+  it('does not use matrix for individual services', () => {
+    const individualService: ServiceType = {
+      ...groupServiceWithMatrix,
+      per_person_rate: 0, // Not a group service
+    }
+    // per_person_rate=0 → matrix ignored
+    const result = calculateSessionPricing(individualService, 1, 30)
+    // Total: 60, MCA 0% → contractor = 60
+    expect(result.totalAmount).toBe(60)
+    expect(result.contractorPay).toBe(60)
+  })
+
+  it('uses matrix solo entry for 1 client in group service', () => {
+    const result = calculateSessionPricing(groupServiceWithMatrix, 1, 30)
+    expect(result.contractorPay).toBe(40) // "1_30" entry
+    // 1 person in group → base_rate only = 60
+    expect(result.totalAmount).toBe(60)
+    expect(result.mcaCut).toBe(20) // 60 - 40
+  })
+
+  it('ignores matrix when group_contractor_pay is null', () => {
+    const serviceNoMatrix: ServiceType = {
+      ...groupServiceWithMatrix,
+      group_contractor_pay: null,
+    }
+    const result = calculateSessionPricing(serviceNoMatrix, 3, 30)
+    // No matrix → formula: total=120, mca=0% → contractor=120
+    expect(result.totalAmount).toBe(120)
+    expect(result.contractorPay).toBe(120)
   })
 })

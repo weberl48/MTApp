@@ -209,7 +209,11 @@ Some service types have a maximum total defined. If the calculated total would e
 
 ### Contractor Pay
 
-Contractor earnings scale with the headcount the same way the total does. As more clients attend, both the total billed and the contractor's pay increase (up to any configured cap).
+For most group services, contractor pay scales based on the MCA percentage formula or the pay schedule (the same way it works for individual sessions).
+
+However, the owner can also set up a **headcount-based pay matrix** for any group service type. When configured, the contractor's pay is looked up based on both the **number of clients** and the **session duration**. For example, a 30-minute group session might pay $40 for 1 client, $49 for 2, $63 for 3, and so on up to a "6+" cap.
+
+If a headcount/duration combination is not defined in the matrix, the system falls back to the normal pay schedule or formula. This feature is configured in **Settings > Business Rules > Services** when editing a group service type.
 
 ### Classroom Selection
 
@@ -520,6 +524,22 @@ For example:
 When a pay schedule is set, the system uses these values as the baseline contractor pay. If a contractor also has a custom rate (set in Team > Rates), their custom rate is combined with the schedule to calculate the final pay for non-30-minute sessions.
 
 The form shows an "auto" value next to each duration so you can see what the formula would calculate. Fill in only the durations you want to override. Leave a duration empty to use the automatic calculation.
+
+### Group Contractor Pay by Headcount
+
+This section only appears when the per-person rate is greater than zero (i.e., the service is a group service). It lets you set exact contractor pay amounts based on both the **number of clients** and the **session duration**.
+
+The table has rows for 1 through 6+ clients and columns for each configured duration (e.g., 30, 45, 60, 90 minutes). Fill in the dollar amount for each combination.
+
+For example, a contractor agreement might specify:
+- 1 client, 30 min = $40
+- 2 clients, 30 min = $49
+- 3 clients, 30 min = $63
+- 6+ clients, 30 min = $105
+
+The **6+ row** acts as a cap. If 8 clients attend, the system uses the 6+ amount. Leave cells empty to fall back to the normal pay schedule or MCA percentage formula for that combination.
+
+This is the most precise way to match contractor agreements that specify different pay rates for different group sizes.
 
 ### Rent Percentage
 
