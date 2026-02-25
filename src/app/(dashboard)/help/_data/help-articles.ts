@@ -393,6 +393,7 @@ For a detailed walkthrough of how to use each field to customize your practice, 
     title: 'Editing Service Types: A Complete Guide',
     category: 'settings',
     description: 'A deep dive into every service type field and how to use them to customize pricing, pay, and workflows for your practice.',
+    walkthrough: 'edit-service-type',
     adminOnly: true,
     relatedArticles: ['configuring-services', 'managing-contractor-rates', 'group-sessions', 'scholarship-billing'],
     content: `

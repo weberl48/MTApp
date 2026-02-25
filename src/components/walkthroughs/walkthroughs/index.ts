@@ -195,12 +195,64 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
   ],
 }
 
+export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
+  id: 'edit-service-type',
+  name: 'Edit a Service Type',
+  description: 'Learn how to customize service type pricing, pay, and special behaviors',
+  steps: [
+    {
+      title: 'Go to Settings',
+      description: 'Service types are configured under Settings > Business Rules. Click Settings in the sidebar to get started.',
+      element: 'nav a[href="/settings/"]',
+      ctaLabel: 'Go to Settings',
+      href: '/settings/',
+    },
+    {
+      title: 'Open Business Rules',
+      description: 'Click "Business Rules" to access service types, invoicing, session settings, and features.',
+      ctaLabel: 'Go to Business Rules',
+      href: '/settings/business/',
+    },
+    {
+      title: 'View Your Service Types',
+      description: 'The Services tab shows all your service types with a summary of their pricing. Each row shows the base rate, per-person rate, MCA percentage, contractor cap, and rent. Click the pencil icon on any service type to edit it.',
+      ctaLabel: 'Stay on Services',
+      href: '/settings/business/',
+    },
+    {
+      title: 'Set the Base Rate and Pricing',
+      description: 'The Base Rate is the price for a 30-minute session. Longer sessions scale proportionally (60 min = 2x, 90 min = 3x). Set the Per-Person Rate for group services, or leave it at $0 for individual sessions. Use Total Cap to set a maximum bill amount for large groups.',
+      ctaLabel: 'Next',
+      href: '/settings/business/',
+    },
+    {
+      title: 'Configure Organization and Contractor Pay',
+      description: 'MCA Percentage is your organization\'s cut of each session. Contractor Cap limits how much the contractor can earn per session. Rent Percentage withholds a portion for facility rent. Use the Contractor Pay by Duration section to set exact dollar amounts per duration instead of relying on the formula.',
+      ctaLabel: 'Next',
+      href: '/settings/business/',
+    },
+    {
+      title: 'Special Behaviors',
+      description: 'Toggle "Requires Client" off for admin work (the form will ask "Who did this work?" instead of selecting a client). Turn on "Scholarship Service" for flat-rate monthly batch billing. Use "Restrict to Contractors" to limit who can select this service type. Toggle "Active" off to retire a service type without deleting it.',
+      ctaLabel: 'Next',
+      href: '/settings/business/',
+    },
+    {
+      title: 'Save and Test',
+      description: 'Click "Save Changes" to apply your edits. Changes only affect new sessions — existing records are not modified. Use View As mode to confirm contractors see the right service types and pricing in their session form.',
+      ctaLabel: 'Finish',
+      href: '/settings/business/',
+    },
+  ],
+}
+
 export const ALL_WALKTHROUGHS: Walkthrough[] = [
   APP_OVERVIEW_WALKTHROUGH,
   ADD_CLIENT_WALKTHROUGH,
   LOG_SESSION_WALKTHROUGH,
   INVITE_CONTRACTOR_WALKTHROUGH,
   CONFIGURE_SERVICES_WALKTHROUGH,
+  EDIT_SERVICE_TYPE_WALKTHROUGH,
   APPROVE_SESSIONS_WALKTHROUGH,
   SCHOLARSHIP_BILLING_WALKTHROUGH,
 ]
