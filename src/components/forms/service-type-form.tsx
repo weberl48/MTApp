@@ -183,7 +183,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4" data-tour="category-location">
             {/* Category */}
             <div className="space-y-2">
               <Label>Category *</Label>
@@ -226,7 +226,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           </div>
 
           {/* Pricing */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4" data-tour="pricing-rates">
             <div className="space-y-2">
               <Label htmlFor="base_rate">Base Rate ($) *</Label>
               <Input
@@ -324,7 +324,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           </div>
 
           {/* Contractor Pay by Duration */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-tour="pay-schedule">
             <Label>Contractor Pay by Duration</Label>
             <p className="text-xs text-gray-500">
               Set the default contractor pay for each session duration. Leave empty to calculate automatically from MCA %.
@@ -412,7 +412,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           </div>
 
           {/* Contractor Restrictions */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-tour="contractor-restrictions">
             <Label>Restrict to Contractors</Label>
             <p className="text-xs text-gray-500">
               Only selected contractors can use this service type. Leave all unchecked for no restriction.
