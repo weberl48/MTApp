@@ -52,7 +52,9 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
 
     // Small delay to let navigation settle before highlighting
     setTimeout(() => {
-      const driverInstance = driver({
+      let driverInstance: Driver
+
+      driverInstance = driver({
         showProgress: true,
         animate: true,
         overlayColor: 'black',
@@ -60,6 +62,10 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         stageRadius: 8,
         allowClose: false,
         popoverClass: 'mca-walkthrough-popover',
+        // The X button still works via onCloseClick even with allowClose: false
+        onCloseClick: () => {
+          driverInstance.destroy()
+        },
         steps: walkthrough.steps.map((step, i) => ({
           element: step.element || undefined,
           popover: {
