@@ -38,9 +38,15 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
     setActiveWalkthrough(walkthrough)
     setStepIndex(0)
 
+    /** Extract only the pathname from an href (strip query string and hash). */
+    function hrefPathname(href: string): string {
+      try { return new URL(href, window.location.origin).pathname }
+      catch { return href.split('?')[0].split('#')[0] }
+    }
+
     // Navigate to the first step's page if needed
     const firstStep = walkthrough.steps[0]
-    if (firstStep.href && !pathname.startsWith(firstStep.href)) {
+    if (firstStep.href && !pathname.startsWith(hrefPathname(firstStep.href))) {
       router.push(firstStep.href)
     }
 
@@ -63,9 +69,15 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
           },
           onHighlightStarted: () => {
             setStepIndex(i)
-            // Navigate if this step is on a different page
-            if (step.href && !window.location.pathname.startsWith(step.href)) {
-              router.push(step.href)
+            // Navigate if this step requires a different URL
+            if (step.href) {
+              const currentUrl = window.location.pathname + window.location.search
+              const stepPath = hrefPathname(step.href)
+              const needsNavigation = !window.location.pathname.startsWith(stepPath)
+                || (step.href.includes('?') && !currentUrl.includes(step.href.split('?')[1]))
+              if (needsNavigation) {
+                router.push(step.href)
+              }
             }
           },
         })),
