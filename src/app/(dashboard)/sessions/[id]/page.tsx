@@ -55,6 +55,7 @@ export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { can, user, effectiveUserId, loading: contextLoading } = useOrganization()
+  const showFinancialDetails = can('financial:view-details')
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
@@ -381,7 +382,7 @@ export default function SessionDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Service Type</p>
                 <p className="font-medium">{session.service_type?.name || 'Unknown'}</p>
-                {session.service_type && (
+                {showFinancialDetails && session.service_type && (
                   <p className="text-sm text-muted-foreground">
                     Base: {formatCurrency(session.service_type.base_rate)}
                     {session.service_type.per_person_rate > 0 && (
@@ -394,46 +395,48 @@ export default function SessionDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing Summary</CardTitle>
-            <CardDescription>Financial breakdown for this session</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Attendees</p>
-                <p className="font-medium">
-                  {session.attendees?.length || 0} client{session.attendees?.length !== 1 ? 's' : ''}
-                </p>
+        {showFinancialDetails && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing Summary</CardTitle>
+              <CardDescription>Financial breakdown for this session</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Attendees</p>
+                  <p className="font-medium">
+                    {session.attendees?.length || 0} client{session.attendees?.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <DollarSign className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Amount</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
+              <div className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Amount</p>
+                  <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
+                </div>
               </div>
-            </div>
 
-            {session.group_headcount && session.group_headcount > 1 && (
-              <div className="text-sm text-muted-foreground">
-                {formatCurrency(totalCost / session.group_headcount)} per person
-              </div>
-            )}
+              {session.group_headcount && session.group_headcount > 1 && (
+                <div className="text-sm text-muted-foreground">
+                  {formatCurrency(totalCost / session.group_headcount)} per person
+                </div>
+              )}
 
-            {/* Group session indicator */}
-            {session.group_headcount && (
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                  Group Session - {session.group_headcount} participants
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {/* Group session indicator */}
+              {session.group_headcount && (
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                    Group Session - {session.group_headcount} participants
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Group Session Details */}
@@ -475,9 +478,11 @@ export default function SessionDetailPage() {
                       <p className="text-sm text-muted-foreground">{attendee.client.contact_email}</p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">{formatCurrency(attendee.individual_cost)}</p>
-                  </div>
+                  {showFinancialDetails && (
+                    <div className="text-right">
+                      <p className="font-medium">{formatCurrency(attendee.individual_cost)}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -286,8 +286,8 @@ export default function InvoiceDetailPage() {
             <div className="flex items-center gap-3">
               <DollarSign className="w-5 h-5 text-gray-400" />
               <div>
-                <p className="text-sm text-gray-500">Amount</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(invoice.amount)}</p>
+                <p className="text-sm text-gray-500">{isAdmin ? 'Amount' : 'Your Pay'}</p>
+                <p className="text-xl font-bold text-green-600">{formatCurrency(isAdmin ? invoice.amount : invoice.contractor_pay)}</p>
               </div>
             </div>
 
@@ -332,34 +332,36 @@ export default function InvoiceDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Financial Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Breakdown</CardTitle>
-            <CardDescription>Revenue distribution for this invoice</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between py-2">
-              <span className="text-gray-500">Total Amount</span>
-              <span className="font-medium">{formatCurrency(invoice.amount)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between py-2">
-              <span className="text-gray-500">MCA Cut</span>
-              <span className="font-medium">{formatCurrency(invoice.mca_cut)}</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span className="text-gray-500">Contractor Pay</span>
-              <span className="font-medium text-green-600">{formatCurrency(invoice.contractor_pay)}</span>
-            </div>
-            {invoice.rent_amount > 0 && (
+        {/* Financial Breakdown — admin/owner only */}
+        {isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Breakdown</CardTitle>
+              <CardDescription>Revenue distribution for this invoice</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex justify-between py-2">
-                <span className="text-gray-500">Rent</span>
-                <span className="font-medium">{formatCurrency(invoice.rent_amount)}</span>
+                <span className="text-gray-500">Total Amount</span>
+                <span className="font-medium">{formatCurrency(invoice.amount)}</span>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <Separator />
+              <div className="flex justify-between py-2">
+                <span className="text-gray-500">MCA Cut</span>
+                <span className="font-medium">{formatCurrency(invoice.mca_cut)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-500">Contractor Pay</span>
+                <span className="font-medium text-green-600">{formatCurrency(invoice.contractor_pay)}</span>
+              </div>
+              {invoice.rent_amount > 0 && (
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-500">Rent</span>
+                  <span className="font-medium">{formatCurrency(invoice.rent_amount)}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Session Info — batch invoices show itemized sessions */}
@@ -379,7 +381,7 @@ export default function InvoiceDetailPage() {
                   <TableHead>Service</TableHead>
                   <TableHead>Contractor</TableHead>
                   <TableHead className="text-right">Duration</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  {isAdmin && <TableHead className="text-right">Amount</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -395,13 +397,15 @@ export default function InvoiceDetailPage() {
                     <TableCell>{item.service_type_name}</TableCell>
                     <TableCell>{item.contractor_name}</TableCell>
                     <TableCell className="text-right">{item.duration_minutes} min</TableCell>
-                    <TableCell className="text-right font-medium">{formatCurrency(item.amount)}</TableCell>
+                    {isAdmin && <TableCell className="text-right font-medium">{formatCurrency(item.amount)}</TableCell>}
                   </TableRow>
                 ))}
-                <TableRow className="font-bold">
-                  <TableCell colSpan={4} className="text-right">Total</TableCell>
-                  <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
-                </TableRow>
+                {isAdmin && (
+                  <TableRow className="font-bold">
+                    <TableCell colSpan={4} className="text-right">Total</TableCell>
+                    <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
