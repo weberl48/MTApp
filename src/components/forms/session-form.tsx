@@ -28,8 +28,10 @@ import { ClientMultiSelect } from '@/components/forms/client-multi-select'
 import {
   clearSessionFormDefaults,
   getSessionFormDefaultsStorageKey,
+  getQuickLogDefaultsStorageKey,
   loadSessionFormDefaults,
   saveSessionFormDefaults,
+  saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
@@ -45,6 +47,7 @@ interface ExistingSession {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  classroom: string | null
   attendees: { client_id: string }[]
 }
 
@@ -93,6 +96,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
+  const [classroom, setClassroom] = useState(existingSession?.classroom || '')
   // groupMemberNames removed — groups now use headcount only
 
   // Field validation errors
@@ -126,11 +130,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId: effectiveContractorId })
   }, [organization?.id, effectiveContractorId])
 
+  const quickLogStorageKey = useMemo(() => {
+    if (!organization?.id) return null
+    return getQuickLogDefaultsStorageKey({ organizationId: organization.id, contractorId: effectiveContractorId })
+  }, [organization?.id, effectiveContractorId])
+
   // Get selected service type for pricing calculation
   const selectedServiceType = serviceTypes.find((st) => st.id === serviceTypeId)
 
   // Check if this is a group service type (has per_person_rate > 0)
   const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
+
+  // Scholarship group sessions show a classroom dropdown
+  const isScholarshipGroup = !!(selectedServiceType?.is_scholarship && isGroupService)
+  const classroomOptions = settings?.custom_lists?.classrooms ?? []
 
   // Check if this service type requires a client (admin work does not)
   const requiresClient = selectedServiceType?.requires_client !== false
@@ -275,13 +288,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
     setTime(defaults.time)
     setDuration(defaults.duration)
-    setServiceTypeId(defaults.serviceTypeId)
     setDidApplyDefaults(true)
   }, [didApplyDefaults, isEditMode, storageKey])
 
   // Collapsible setup: contractors with remembered defaults start collapsed on mobile
   const hasPopulatedDefaults = didApplyDefaults && !isEditMode && !showFinancialDetails
-    && !!serviceTypeId
+    && !!time && time !== '09:00'
   const [setupExpanded, setSetupExpanded] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -304,6 +316,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       const headcount = parseInt(groupHeadcount)
       if (!headcount || headcount < 1) {
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
+        hasErrors = true
+      }
+      if (isScholarshipGroup && classroomOptions.length > 0 && !classroom) {
+        setFieldError('classroom', 'Please select a classroom')
         hasErrors = true
       }
     } else if (requiresClient) {
@@ -368,6 +384,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
             group_member_names: null,
+            classroom: isScholarshipGroup ? classroom || null : null,
             rejection_reason: status === 'submitted' ? null : undefined,
             updated_at: new Date().toISOString(),
           })
@@ -424,6 +441,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           encryptedClientNotes,
           status: effectiveStatus,
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+          classroom: isScholarshipGroup ? classroom || null : null,
           pricing: pricing!,
           isScholarshipService: selectedServiceType?.is_scholarship ?? false,
           dueDays: settings?.invoice?.due_days,
@@ -435,6 +453,13 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
         if (storageKey) {
           saveSessionFormDefaults(storageKey, {
+            time,
+            duration,
+          })
+        }
+        // Also save quick-log defaults (includes serviceTypeId for the FAB quick-log drawer)
+        if (quickLogStorageKey) {
+          saveQuickLogDefaults(quickLogStorageKey, {
             time,
             duration,
             serviceTypeId,
@@ -460,14 +485,16 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Reset form for logging another session
   function handleLogAnother() {
     setDate(todayLocal())
+    setServiceTypeId('')
     setNotes('')
     setClientNotes('')
     setGroupHeadcount('')
+    setClassroom('')
     setSelectedClients([])
     setSelectedAdminUserId('')
     setShowSuccess(false)
     clearAllErrors()
-    // Keep: time, duration, serviceTypeId (remembered)
+    // Keep: time, duration (remembered)
   }
 
   // Show success state with options after submission
@@ -749,6 +776,29 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
                   {errors.groupHeadcount}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Classroom - Only show for scholarship group sessions */}
+          {isScholarshipGroup && classroomOptions.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="classroom">Classroom *</Label>
+              <Select value={classroom} onValueChange={(val) => { setClassroom(val); clearFieldError('classroom') }}>
+                <SelectTrigger id="classroom" className={errors.classroom ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select classroom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classroomOptions.map((room) => (
+                    <SelectItem key={room} value={room}>{room}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.classroom && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.classroom}
                 </p>
               )}
             </div>

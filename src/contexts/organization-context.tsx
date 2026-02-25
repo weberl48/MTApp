@@ -70,6 +70,11 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
   pricing: {
     no_show_fee: 60,
     duration_base_minutes: 30,
+    square_processing_fee_enabled: false,
+    square_processing_fee_type: 'fixed' as const,
+    square_processing_fee_amount: 0,
+    square_processing_fee_percentage: 0,
+    square_processing_fee_fixed_cents: 0,
   },
   portal: {
     token_expiry_days: 90,
@@ -91,6 +96,7 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
       email: { label: 'Email', visible: true },
       other: { label: 'Other', visible: true },
     },
+    classrooms: [],
   },
   automation: {
     auto_approve_sessions: false,
@@ -168,6 +174,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
             ...DEFAULT_SETTINGS.custom_lists.billing_methods,
             ...((organization.settings as OrganizationSettings)?.custom_lists?.billing_methods || {}),
           },
+          classrooms: (organization.settings as OrganizationSettings)?.custom_lists?.classrooms
+            ?? DEFAULT_SETTINGS.custom_lists.classrooms,
         },
         automation: {
           ...DEFAULT_SETTINGS.automation,

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createSquareInvoice } from '@/lib/square/invoices'
+import { createSquareInvoice, buildSquareProcessingFee } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { uuidSchema } from '@/lib/validation/schemas'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { parseLocalDate } from '@/lib/dates'
 import { can } from '@/lib/auth/permissions'
-import type { UserRole } from '@/types/database'
+import type { UserRole, OrganizationSettings } from '@/types/database'
 
 export async function POST(
   request: NextRequest,
@@ -144,6 +144,16 @@ export async function POST(
       note = invoice.session?.notes || undefined
     }
 
+    // Fetch organization settings for processing fee
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', invoice.organization_id)
+      .single()
+
+    const pricingSettings = (org?.settings as OrganizationSettings)?.pricing
+    const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
+
     // Create Square invoice
     const squareResult = await createSquareInvoice({
       clientName: invoice.client.name,
@@ -153,6 +163,7 @@ export async function POST(
       dueDate,
       invoiceNumber,
       note,
+      serviceCharge,
     })
 
     // Update our invoice with Square invoice ID and URL

@@ -56,6 +56,11 @@ export interface OrganizationSettings {
   pricing: {
     no_show_fee: number
     duration_base_minutes: number
+    square_processing_fee_enabled: boolean
+    square_processing_fee_type: 'fixed' | 'percentage'
+    square_processing_fee_amount: number
+    square_processing_fee_percentage: number
+    square_processing_fee_fixed_cents: number
   }
   portal: {
     token_expiry_days: number
@@ -64,6 +69,7 @@ export interface OrganizationSettings {
   custom_lists: {
     payment_methods: Record<string, { label: string; visible: boolean }>
     billing_methods: Record<string, { label: string; visible: boolean }>
+    classrooms: string[]
   }
   automation: {
     auto_approve_sessions: boolean
@@ -421,6 +427,7 @@ export interface Database {
           contractor_paid_amount: number | null
           group_headcount: number | null
           group_member_names: string | null
+          classroom: string | null
           rejection_reason: string | null
           organization_id: string
           created_at: string
@@ -440,6 +447,7 @@ export interface Database {
           contractor_paid_amount?: number | null
           group_headcount?: number | null
           group_member_names?: string | null
+          classroom?: string | null
           rejection_reason?: string | null
           organization_id: string
           created_at?: string
@@ -458,6 +466,7 @@ export interface Database {
           contractor_paid_amount?: number | null
           group_headcount?: number | null
           group_member_names?: string | null
+          classroom?: string | null
           rejection_reason?: string | null
           organization_id?: string
           updated_at?: string

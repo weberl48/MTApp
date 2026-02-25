@@ -12,6 +12,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ServiceTypeForm } from '@/components/forms/service-type-form'
 import { useOrganization } from '@/contexts/organization-context'
 import {
@@ -322,6 +329,118 @@ export default function BusinessSettingsPage() {
                     <p className="text-xs text-gray-500">Comma-separated list of days before due date to send reminders</p>
                   </div>
                 )}
+                <Separator />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Square Processing Fee</h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Add Processing Fee to Square Invoices</Label>
+                    <p className="text-xs text-gray-500">Automatically add a service charge to cover Square processing fees</p>
+                  </div>
+                  <Switch
+                    checked={localSettings.pricing?.square_processing_fee_enabled ?? false}
+                    onCheckedChange={(checked) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        pricing: { ...localSettings.pricing, square_processing_fee_enabled: checked },
+                      })
+                    }
+                  />
+                </div>
+
+                {localSettings.pricing?.square_processing_fee_enabled && (
+                  <div className="ml-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label>Fee Type</Label>
+                      <Select
+                        value={localSettings.pricing?.square_processing_fee_type ?? 'fixed'}
+                        onValueChange={(val) =>
+                          setLocalSettings({
+                            ...localSettings,
+                            pricing: {
+                              ...localSettings.pricing,
+                              square_processing_fee_type: val as 'fixed' | 'percentage',
+                            },
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fixed">Fixed Dollar Amount</SelectItem>
+                          <SelectItem value="percentage">Percentage</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {(localSettings.pricing?.square_processing_fee_type ?? 'fixed') === 'percentage' ? (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="sq_fee_pct">Percentage (%)</Label>
+                          <Input
+                            id="sq_fee_pct"
+                            type="number"
+                            min="0"
+                            max="20"
+                            step="0.1"
+                            value={localSettings.pricing?.square_processing_fee_percentage ?? 0}
+                            onChange={(e) =>
+                              setLocalSettings({
+                                ...localSettings,
+                                pricing: {
+                                  ...localSettings.pricing,
+                                  square_processing_fee_percentage: parseFloat(e.target.value) || 0,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="sq_fee_fixed_cents">+ Fixed Amount (cents)</Label>
+                          <Input
+                            id="sq_fee_fixed_cents"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={localSettings.pricing?.square_processing_fee_fixed_cents ?? 0}
+                            onChange={(e) =>
+                              setLocalSettings({
+                                ...localSettings,
+                                pricing: {
+                                  ...localSettings.pricing,
+                                  square_processing_fee_fixed_cents: parseInt(e.target.value) || 0,
+                                },
+                              })
+                            }
+                          />
+                          <p className="text-xs text-gray-500">e.g., 30 for $0.30 (Square standard is 2.9% + 30 cents)</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="sq_fee_amount">Fee Amount ($)</Label>
+                        <Input
+                          id="sq_fee_amount"
+                          type="number"
+                          min="0"
+                          step="0.25"
+                          value={localSettings.pricing?.square_processing_fee_amount ?? 0}
+                          onChange={(e) =>
+                            setLocalSettings({
+                              ...localSettings,
+                              pricing: {
+                                ...localSettings.pricing,
+                                square_processing_fee_amount: parseFloat(e.target.value) || 0,
+                              },
+                            })
+                          }
+                        />
+                        <p className="text-xs text-gray-500">Fixed dollar amount added as a service charge on each Square invoice</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <Button onClick={saveSettings} disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
@@ -462,6 +581,30 @@ export default function BusinessSettingsPage() {
                   />
                   <p className="text-xs text-gray-500">Service type base rates are for this many minutes</p>
                 </div>
+                <Separator />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Classrooms</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="classrooms">Classroom Options</Label>
+                  <Input
+                    id="classrooms"
+                    value={(localSettings.custom_lists?.classrooms ?? []).join(', ')}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        custom_lists: {
+                          ...localSettings.custom_lists,
+                          classrooms: e.target.value
+                            .split(',')
+                            .map((v: string) => v.trim())
+                            .filter(Boolean),
+                        },
+                      })
+                    }
+                    placeholder="Room A, Room B, Music Hall"
+                  />
+                  <p className="text-xs text-gray-500">Comma-separated list of classroom options for scholarship group sessions</p>
+                </div>
+
                 {feature('client_portal') && (
                   <>
                     <Separator />

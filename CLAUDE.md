@@ -392,3 +392,13 @@ npx shadcn@latest add <component>
 ```
 
 Existing: Button, Card, Dialog, Select, Table, Tabs, Badge, etc.
+
+### Help Articles
+
+When making user-facing changes (new features, changed behavior, new settings, UI changes), **always update the relevant help articles** in `src/app/(dashboard)/help/_data/help-articles.ts`. This includes:
+
+- Adding documentation for new features to existing articles or creating new articles
+- Updating articles when existing behavior changes (e.g., form fields added/removed, defaults changed)
+- Updating settings documentation when new configuration options are added
+
+Help articles are defined as TypeScript objects in the `HELP_ARTICLES` array with `slug`, `title`, `category`, `description`, `content` (markdown), and optional `relatedArticles`, `walkthrough`, and `adminOnly` fields. Categories: `getting-started`, `clients`, `sessions`, `invoices`, `team`, `analytics`, `settings`.
