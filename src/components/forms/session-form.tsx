@@ -554,7 +554,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           {/* Setup fields: always visible on desktop, collapsible on mobile for contractors */}
           <div className={hasPopulatedDefaults && !setupExpanded ? 'hidden lg:contents' : 'contents'}>
           {/* Date and Time - always side-by-side */}
-          <div className="grid grid-cols-2 gap-4">
+          <div data-tour="session-form-datetime" className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date" className="flex items-center gap-2">
                 Date *
@@ -585,7 +585,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           </div>
 
           {/* Duration */}
-          <div className="space-y-2">
+          <div data-tour="session-form-duration" className="space-y-2">
             <Label htmlFor="duration">Duration (minutes) *</Label>
             <Select value={duration} onValueChange={setDuration}>
               <SelectTrigger>
@@ -602,7 +602,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           </div>
 
           {/* Service Type */}
-          <div className="space-y-2">
+          <div data-tour="session-form-service-type" className="space-y-2">
             <Label htmlFor="serviceType">Service Type *</Label>
             <Select
               value={serviceTypeId}
@@ -648,7 +648,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Clients - Only for individual (non-group) sessions that require a client */}
           {!isGroupService && requiresClient && (
-          <div className="space-y-2">
+          <div data-tour="session-form-clients" className="space-y-2">
             <Label>Clients *</Label>
             <div className="flex flex-wrap gap-2 mb-2">
               {selectedClients.map((clientId) => (
@@ -847,7 +847,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Status */}
           {showFinancialDetails ? (
-            <div className="space-y-2">
+            <div data-tour="session-form-status" className="space-y-2">
               <Label>Save as</Label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -940,7 +940,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </Button>
             )}
           </div>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" data-tour="session-form-submit" disabled={loading}>
             {loading
               ? isEditMode
                 ? 'Updating session...'

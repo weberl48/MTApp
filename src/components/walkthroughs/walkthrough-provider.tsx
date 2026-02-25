@@ -80,9 +80,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
 
     // Small delay to let navigation settle before highlighting
     setTimeout(() => {
-      let driverInstance: Driver
-
-      driverInstance = driver({
+      const driverInstance = driver({
         showProgress: true,
         animate: true,
         overlayColor: 'black',
