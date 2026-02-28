@@ -432,6 +432,9 @@ export interface Database {
           group_member_names: string | null
           classroom: string | null
           rejection_reason: string | null
+          total_amount: number | null
+          contractor_pay: number | null
+          mca_cut: number | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -452,6 +455,9 @@ export interface Database {
           group_member_names?: string | null
           classroom?: string | null
           rejection_reason?: string | null
+          total_amount?: number | null
+          contractor_pay?: number | null
+          mca_cut?: number | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -471,6 +477,9 @@ export interface Database {
           group_member_names?: string | null
           classroom?: string | null
           rejection_reason?: string | null
+          total_amount?: number | null
+          contractor_pay?: number | null
+          mca_cut?: number | null
           organization_id?: string
           updated_at?: string
         }

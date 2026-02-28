@@ -39,6 +39,7 @@ interface Session {
   notes: string | null
   created_at: string
   group_headcount: number | null
+  total_amount: number | null
   rejection_reason: string | null
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number } | null
   contractor: { id: string; name: string } | null
@@ -124,6 +125,7 @@ export default function SessionsPage() {
           notes,
           created_at,
           group_headcount,
+          total_amount,
           rejection_reason,
           service_type:service_types(id, name, base_rate, per_person_rate),
           contractor:users(id, name),
@@ -549,10 +551,12 @@ export default function SessionsPage() {
             {paginatedSessions.length > 0 ? (
               <div className="space-y-4">
                 {paginatedSessions.map((session) => {
-                  const totalCost = session.attendees?.reduce(
-                    (sum, a) => sum + (a.individual_cost || 0),
-                    0
-                  ) || 0
+                  const totalCost = session.total_amount
+                    ?? session.attendees?.reduce(
+                      (sum, a) => sum + (a.individual_cost || 0),
+                      0
+                    )
+                    ?? 0
 
                   return (
                     <Link

@@ -45,6 +45,9 @@ interface SessionDetails {
   group_member_names: string | null
   classroom: string | null
   rejection_reason: string | null
+  total_amount: number | null
+  contractor_pay: number | null
+  mca_cut: number | null
   created_at: string
   updated_at: string
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
@@ -92,6 +95,9 @@ export default function SessionDetailPage() {
           group_member_names,
           classroom,
           rejection_reason,
+          total_amount,
+          contractor_pay,
+          mca_cut,
           created_at,
           updated_at,
           service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage),
@@ -236,7 +242,9 @@ export default function SessionDetailPage() {
     return null
   }
 
-  const totalCost = session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0) || 0
+  const totalCost = session.total_amount
+    ?? session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0)
+    ?? 0
   const isActiveSession = !['no_show', 'cancelled'].includes(session.status)
   const isOwnDraft = session.contractor?.id === currentUserId && session.status === 'draft'
   const canEdit = isActiveSession && (can('session:approve') || isOwnDraft)
@@ -409,7 +417,7 @@ export default function SessionDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Attendees</p>
                   <p className="font-medium">
-                    {session.attendees?.length || 0} client{session.attendees?.length !== 1 ? 's' : ''}
+                    {session.group_headcount || session.attendees?.length || 0} client{(session.group_headcount || session.attendees?.length || 0) !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
@@ -422,9 +430,29 @@ export default function SessionDetailPage() {
                 </div>
               </div>
 
-              {session.group_headcount && session.group_headcount > 1 && (
+              {session.group_headcount && session.group_headcount > 1 && totalCost > 0 && (
                 <div className="text-sm text-muted-foreground">
                   {formatCurrency(totalCost / session.group_headcount)} per person
+                </div>
+              )}
+
+              {session.contractor_pay != null && (
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Contractor Pay</p>
+                    <p className="font-medium">{formatCurrency(session.contractor_pay)}</p>
+                  </div>
+                </div>
+              )}
+
+              {session.mca_cut != null && (
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">MCA Cut</p>
+                    <p className="font-medium">{formatCurrency(session.mca_cut)}</p>
+                  </div>
                 </div>
               )}
 
