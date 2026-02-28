@@ -1,4 +1,4 @@
-import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement, lookupGroupContractorPay } from './index'
+import { calculateSessionPricing, calculateNoShowPricing, getDefaultIncrement, lookupGroupContractorPay, validateMinimumAttendees, formatCurrency, calculateContractorTotal, getPricingDescription } from './index'
 import type { ServiceType } from '@/types/database'
 
 describe('calculateSessionPricing', () => {
@@ -591,5 +591,599 @@ describe('group contractor pay matrix in pricing', () => {
     // No matrix → formula: total=120, mca=0% → contractor=120
     expect(result.totalAmount).toBe(120)
     expect(result.contractorPay).toBe(120)
+  })
+})
+
+describe('validateMinimumAttendees', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Group Music',
+    category: 'music_group',
+    location: 'in_home',
+    base_rate: 60,
+    per_person_rate: 20,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 3,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('returns null when attendee count meets minimum', () => {
+    expect(validateMinimumAttendees(mockServiceType, 3)).toBeNull()
+    expect(validateMinimumAttendees(mockServiceType, 5)).toBeNull()
+  })
+
+  it('returns error message when below minimum', () => {
+    const result = validateMinimumAttendees(mockServiceType, 2)
+    expect(result).toContain('at least 3')
+    expect(result).toContain('currently 2')
+  })
+
+  it('returns null when minimum_attendees is not set', () => {
+    const noMinService: ServiceType = { ...mockServiceType, minimum_attendees: 0 }
+    expect(validateMinimumAttendees(noMinService, 1)).toBeNull()
+  })
+})
+
+describe('formatCurrency', () => {
+  it('formats whole dollar amounts', () => {
+    expect(formatCurrency(100)).toBe('$100.00')
+  })
+
+  it('formats cents', () => {
+    expect(formatCurrency(38.5)).toBe('$38.50')
+  })
+
+  it('formats zero', () => {
+    expect(formatCurrency(0)).toBe('$0.00')
+  })
+
+  it('formats negative amounts', () => {
+    expect(formatCurrency(-17)).toBe('-$17.00')
+  })
+
+  it('formats large amounts with comma', () => {
+    expect(formatCurrency(1250)).toBe('$1,250.00')
+  })
+})
+
+describe('calculateContractorTotal', () => {
+  const individualService: ServiceType = {
+    id: '1',
+    name: 'Individual Music',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  const groupService: ServiceType = {
+    ...individualService,
+    name: 'Group Music',
+    base_rate: 60,
+    per_person_rate: 20,
+    mca_percentage: 0,
+  }
+
+  it('sums contractor pay across multiple sessions', () => {
+    // Session 1: $50, 23% MCA → contractor $38.50
+    // Session 2: $50, 23% MCA → contractor $38.50
+    const total = calculateContractorTotal([
+      { serviceType: individualService, attendeeCount: 1 },
+      { serviceType: individualService, attendeeCount: 1 },
+    ])
+    expect(total).toBe(77) // 38.50 + 38.50
+  })
+
+  it('returns 0 for empty array', () => {
+    expect(calculateContractorTotal([])).toBe(0)
+  })
+
+  it('handles mix of individual and group sessions', () => {
+    // Individual: $50, 23% MCA → contractor $38.50
+    // Group 3 people: $60+$20*3=$120, 0% MCA → contractor $120
+    const total = calculateContractorTotal([
+      { serviceType: individualService, attendeeCount: 1 },
+      { serviceType: groupService, attendeeCount: 3 },
+    ])
+    expect(total).toBe(158.5) // 38.50 + 120
+  })
+})
+
+describe('getPricingDescription', () => {
+  const baseService: ServiceType = {
+    id: '1',
+    name: 'Individual Music',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('returns base rate for individual service', () => {
+    const service: ServiceType = { ...baseService, mca_percentage: 0 }
+    expect(getPricingDescription(service)).toBe('$50')
+  })
+
+  it('includes per-person rate for groups', () => {
+    const service: ServiceType = { ...baseService, base_rate: 60, per_person_rate: 20, mca_percentage: 0 }
+    expect(getPricingDescription(service)).toBe('$60 + $20/person')
+  })
+
+  it('includes MCA percentage when showFormula is true', () => {
+    expect(getPricingDescription(baseService)).toBe('$50 (23% MCA)')
+  })
+
+  it('includes contractor cap and total cap', () => {
+    const service: ServiceType = { ...baseService, contractor_cap: 105, total_cap: 150 }
+    expect(getPricingDescription(service)).toContain('contractor max $105')
+    expect(getPricingDescription(service)).toContain('total max $150')
+  })
+
+  it('omits formula details when showFormula is false', () => {
+    const service: ServiceType = { ...baseService, contractor_cap: 105 }
+    const result = getPricingDescription(service, false)
+    expect(result).toBe('$50')
+    expect(result).not.toContain('MCA')
+    expect(result).not.toContain('contractor max')
+  })
+})
+
+describe('perPersonCost', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Individual Music',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('equals totalAmount for individual sessions', () => {
+    const result = calculateSessionPricing(mockServiceType, 1)
+    expect(result.perPersonCost).toBe(result.totalAmount)
+    expect(result.perPersonCost).toBe(50)
+  })
+
+  it('divides totalAmount by attendee count for groups', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      base_rate: 60,
+      per_person_rate: 20,
+      mca_percentage: 0,
+    }
+    // 3 people: 60 + 20*3 = 120 total, 120/3 = 40 per person
+    const result = calculateSessionPricing(groupService, 3)
+    expect(result.totalAmount).toBe(120)
+    expect(result.perPersonCost).toBe(40)
+  })
+
+  it('divides correctly with scholarship pricing', () => {
+    const service: ServiceType = {
+      ...mockServiceType,
+      scholarship_rate: 60,
+    }
+    // Scholarship total = $60, 1 attendee → per person = $60
+    const result = calculateSessionPricing(service, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+    expect(result.totalAmount).toBe(60)
+    expect(result.perPersonCost).toBe(60)
+  })
+
+  it('divides correctly when total_cap is applied', () => {
+    const groupService: ServiceType = {
+      ...mockServiceType,
+      base_rate: 60,
+      per_person_rate: 20,
+      mca_percentage: 0,
+      total_cap: 150,
+    }
+    // 8 people: 60 + 20*8 = 220 → capped at 150
+    // Per person: 150/8 = 18.75
+    const result = calculateSessionPricing(groupService, 8)
+    expect(result.totalAmount).toBe(150)
+    expect(result.perPersonCost).toBe(18.75)
+  })
+})
+
+describe('custom duration base', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Test Service',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 75,
+    per_person_rate: 0,
+    mca_percentage: 20,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses custom base for scaling', () => {
+    // Base rate $75 is for 45 min; a 90-min session = 2x
+    const result = calculateSessionPricing(mockServiceType, 1, 90, undefined, {
+      durationBaseMinutes: 45,
+    })
+    expect(result.totalAmount).toBe(150) // 75 * (90/45)
+  })
+
+  it('defaults to 30-min base when not specified', () => {
+    // Base rate $75 is for 30 min; a 60-min session = 2x
+    const result = calculateSessionPricing(mockServiceType, 1, 60)
+    expect(result.totalAmount).toBe(150) // 75 * (60/30)
+  })
+})
+
+describe('calculateNoShowPricing extended', () => {
+  const mockServiceType: ServiceType = {
+    id: '1',
+    name: 'Individual Music',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+  }
+
+  it('uses custom no-show fee when provided', () => {
+    const result = calculateNoShowPricing(mockServiceType, undefined, 75)
+    expect(result.totalAmount).toBe(75)
+    expect(result.isNoShow).toBe(true)
+  })
+
+  it('uses pay schedule for contractor pay in no-show', () => {
+    // No-show calculates contractor as normal 30-min session
+    // Pay schedule says 30-min = $38.50
+    const result = calculateNoShowPricing(mockServiceType)
+    expect(result.contractorPay).toBe(38.5)
+    expect(result.mcaCut).toBe(21.5) // 60 - 38.5
+  })
+})
+
+// =============================================================================
+// BILLING RULES DOCUMENT VERIFICATION
+// Tests that match the exact examples from MCA-Billing-and-Pay-Rules.md
+// =============================================================================
+
+describe('billing rules: where every dollar goes', () => {
+  // Section 9 of the billing rules doc — exact dollar examples Amara signed off on
+
+  it('typical session: $100 total → $77 contractor → $23 MCA', () => {
+    const service: ServiceType = {
+      id: '1', name: 'In-Home Individual', category: 'music_individual', location: 'in_home',
+      base_rate: 100, per_person_rate: 0, mca_percentage: 23,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+
+    const result = calculateSessionPricing(service, 1, 30)
+    expect(result.totalAmount).toBe(100)
+    expect(result.contractorPay).toBe(77)
+    expect(result.mcaCut).toBe(23)
+  })
+
+  it('scholarship session: $60 billed, contractor still $77, MCA absorbs -$17', () => {
+    const service: ServiceType = {
+      id: '1', name: 'In-Home Individual', category: 'music_individual', location: 'in_home',
+      base_rate: 100, per_person_rate: 0, mca_percentage: 23,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: 60,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+
+    const result = calculateSessionPricing(service, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+    expect(result.totalAmount).toBe(60)
+    expect(result.contractorPay).toBe(77) // Same as non-scholarship
+    expect(result.mcaCut).toBe(-17) // MCA absorbs the loss
+    expect(result.scholarshipDiscount).toBe(40) // $100 - $60
+  })
+
+  it('no-show: $60 fee → $38.50 contractor → $21.50 MCA', () => {
+    const service: ServiceType = {
+      id: '1', name: 'In-Home Individual', category: 'music_individual', location: 'in_home',
+      base_rate: 50, per_person_rate: 0, mca_percentage: 23,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+
+    const result = calculateNoShowPricing(service)
+    expect(result.totalAmount).toBe(60)
+    expect(result.contractorPay).toBe(38.5)
+    expect(result.mcaCut).toBe(21.5)
+    expect(result.isNoShow).toBe(true)
+  })
+})
+
+describe('billing rules: group session billing with duration', () => {
+  // Section 2: Total = (Base Rate + Per-Person Rate × Attendees) × duration multiplier
+  // Solo exception: 1 attendee → per-person charge waived
+
+  const groupService: ServiceType = {
+    id: '1', name: 'Group Music', category: 'music_group', location: 'in_home',
+    base_rate: 60, per_person_rate: 20, mca_percentage: 0,
+    contractor_cap: null, total_cap: null, rent_percentage: 0,
+    minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+    contractor_pay_schedule: null, group_contractor_pay: null,
+    is_active: true, is_scholarship: false, requires_client: true,
+    allowed_contractor_ids: null, display_order: 0,
+    organization_id: 'org-1', created_at: '', updated_at: '',
+  }
+
+  it('3 attendees at 30 min: $60 + $20×3 = $120', () => {
+    const result = calculateSessionPricing(groupService, 3, 30)
+    expect(result.totalAmount).toBe(120)
+  })
+
+  it('3 attendees at 45 min: ($60 + $20×3) × 1.5 = $180', () => {
+    const result = calculateSessionPricing(groupService, 3, 45)
+    expect(result.totalAmount).toBe(180)
+  })
+
+  it('6 attendees at 60 min: ($60 + $20×6) × 2 = $360', () => {
+    const result = calculateSessionPricing(groupService, 6, 60)
+    expect(result.totalAmount).toBe(360)
+  })
+
+  it('solo exception at 45 min: 1 attendee → $60 × 1.5 = $90 (no per-person)', () => {
+    const result = calculateSessionPricing(groupService, 1, 45)
+    expect(result.totalAmount).toBe(90) // base only, scaled by 1.5
+  })
+})
+
+describe('billing rules: contractor pay priority chain', () => {
+  // Section 3: Priority 1 = group matrix, 2 = custom rate, 3 = pay schedule, 4 = formula
+
+  const serviceWithEverything: ServiceType = {
+    id: '1', name: 'Group Music', category: 'music_group', location: 'in_home',
+    base_rate: 60, per_person_rate: 20, mca_percentage: 23,
+    contractor_cap: null, total_cap: null, rent_percentage: 0,
+    minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+    contractor_pay_schedule: { '30': 38.5, '45': 54 },
+    group_contractor_pay: { '3_30': 63 },
+    is_active: true, is_scholarship: false, requires_client: true,
+    allowed_contractor_ids: null, display_order: 0,
+    organization_id: 'org-1', created_at: '', updated_at: '',
+  }
+
+  it('priority 1: group matrix beats custom rate when matrix entry exists', () => {
+    // Matrix says 3 clients 30 min = $63
+    // Custom rate would give $45
+    // Matrix should win
+    const result = calculateSessionPricing(serviceWithEverything, 3, 30, {
+      customContractorPay: 45,
+    })
+    expect(result.contractorPay).toBe(63) // Matrix wins
+  })
+
+  it('priority 2: custom rate beats pay schedule', () => {
+    // No matrix entry for 1 client (individual), so matrix skipped
+    // Custom rate = $42, schedule says $38.50
+    // Custom should win
+    const individualService: ServiceType = {
+      ...serviceWithEverything,
+      per_person_rate: 0, // Not a group → matrix ignored
+    }
+    const result = calculateSessionPricing(individualService, 1, 30, {
+      customContractorPay: 42,
+    })
+    expect(result.contractorPay).toBe(42) // Custom rate wins over schedule's $38.50
+  })
+
+  it('priority 3: pay schedule beats formula', () => {
+    // No custom rate, no matrix (individual service)
+    // Schedule says 30 min = $38.50
+    // Formula would give: $60 - 23% = $46.20
+    // Schedule should win
+    const individualService: ServiceType = {
+      ...serviceWithEverything,
+      per_person_rate: 0,
+    }
+    const result = calculateSessionPricing(individualService, 1, 30)
+    expect(result.contractorPay).toBe(38.5) // Schedule wins over formula's $46.20
+  })
+
+  it('priority 4: formula used when nothing else applies', () => {
+    // No matrix, no custom rate, no schedule
+    const bareService: ServiceType = {
+      ...serviceWithEverything,
+      per_person_rate: 0,
+      contractor_pay_schedule: null,
+      group_contractor_pay: null,
+    }
+    const result = calculateSessionPricing(bareService, 1, 30)
+    // Formula: $60 - 23% = $46.20
+    expect(result.contractorPay).toBe(46.2)
+    expect(result.mcaCut).toBe(13.8) // 23% of 60
+  })
+})
+
+describe('billing rules: MCA cut invariant', () => {
+  // Fundamental rule: MCA cut always = total amount - contractor pay
+
+  it('individual session', () => {
+    const service: ServiceType = {
+      id: '1', name: 'Test', category: 'music_individual', location: 'in_home',
+      base_rate: 80, per_person_rate: 0, mca_percentage: 25,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+    const result = calculateSessionPricing(service, 1, 30)
+    expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
+  })
+
+  it('group session with per-person rate', () => {
+    const service: ServiceType = {
+      id: '1', name: 'Test', category: 'music_group', location: 'in_home',
+      base_rate: 60, per_person_rate: 20, mca_percentage: 30,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+    const result = calculateSessionPricing(service, 5, 45)
+    expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
+  })
+
+  it('scholarship session (negative MCA is valid)', () => {
+    const service: ServiceType = {
+      id: '1', name: 'Test', category: 'music_individual', location: 'in_home',
+      base_rate: 100, per_person_rate: 0, mca_percentage: 23,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: 60,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+    const result = calculateSessionPricing(service, 1, 30, undefined, {
+      paymentMethod: 'scholarship',
+    })
+    expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
+    expect(result.mcaCut).toBeLessThan(0) // MCA absorbs the loss
+  })
+
+  it('session with contractor cap', () => {
+    const service: ServiceType = {
+      id: '1', name: 'Test', category: 'music_individual', location: 'in_home',
+      base_rate: 200, per_person_rate: 0, mca_percentage: 20,
+      contractor_cap: 100, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+    const result = calculateSessionPricing(service, 1, 30)
+    expect(result.contractorPay).toBe(100) // Capped
+    expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
+  })
+
+  it('no-show session', () => {
+    const service: ServiceType = {
+      id: '1', name: 'Test', category: 'music_individual', location: 'in_home',
+      base_rate: 50, per_person_rate: 0, mca_percentage: 23,
+      contractor_cap: null, total_cap: null, rent_percentage: 0,
+      minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
+      contractor_pay_schedule: null, group_contractor_pay: null,
+      is_active: true, is_scholarship: false, requires_client: true,
+      allowed_contractor_ids: null, display_order: 0,
+      organization_id: 'org-1', created_at: '', updated_at: '',
+    }
+    const result = calculateNoShowPricing(service)
+    expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
   })
 })
