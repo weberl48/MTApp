@@ -51,6 +51,7 @@ interface SessionWithInvoices {
   duration_minutes: number
   contractor_id: string
   contractor_paid_date: string | null
+  contractor_pay: number | null
   service_type: { name: string } | null
   contractor: { id: string; name: string; email: string } | null
   invoices: { contractor_pay: number }[]
@@ -173,6 +174,7 @@ export default function PaymentsPage() {
         duration_minutes,
         contractor_id,
         contractor_paid_date,
+        contractor_pay,
         service_type:service_types(name),
         contractor:users(id, name, email),
         invoices(contractor_pay),
@@ -191,8 +193,9 @@ export default function PaymentsPage() {
       const contractor = session.contractor
       if (!contractor?.id) return
 
-      // Calculate contractor pay from invoices
-      const contractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+      // Calculate contractor pay from invoices, falling back to session-level value (group sessions)
+      const invoiceContractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+      const contractorPay = invoiceContractorPay > 0 ? invoiceContractorPay : Number(session.contractor_pay || 0)
 
       if (!unpaidByContractor[contractor.id]) {
         unpaidByContractor[contractor.id] = {

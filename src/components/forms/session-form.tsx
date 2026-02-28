@@ -385,6 +385,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
             group_member_names: null,
             classroom: isScholarshipGroup ? classroom || null : null,
+            total_amount: pricing?.totalAmount ?? null,
+            contractor_pay: pricing?.contractorPay ?? null,
+            mca_cut: pricing?.mcaCut ?? null,
             rejection_reason: status === 'submitted' ? null : undefined,
             updated_at: new Date().toISOString(),
           })
@@ -402,7 +405,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           const attendees = selectedClients.map((clientId) => ({
             session_id: existingSession.id,
             client_id: clientId,
-            individual_cost: pricing?.totalAmount || 0,
+            individual_cost: pricing?.perPersonCost || 0,
           }))
 
           const { error: attendeesError } = await supabase
