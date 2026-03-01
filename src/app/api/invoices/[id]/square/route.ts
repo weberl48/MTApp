@@ -62,8 +62,7 @@ export async function POST(
           date,
           duration_minutes,
           contractor:users(id, name),
-          service_type:service_types(name),
-          session_attendees(client:clients(name))
+          service_type:service_types(name)
         )
       `)
       .eq('id', id)
@@ -71,6 +70,19 @@ export async function POST(
 
     if (error || !invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+    }
+
+    // Fetch session attendees separately to get client names for the invoice
+    let attendeeNames: string[] = []
+    if (invoice.session?.id) {
+      const { data: attendees } = await supabase
+        .from('session_attendees')
+        .select('client:clients(name)')
+        .eq('session_id', invoice.session.id)
+
+      attendeeNames = (attendees || [])
+        .map((a) => (a.client as unknown as { name: string } | null)?.name)
+        .filter((n): n is string => !!n)
     }
 
     // Verify organization ownership (developers can access all)
@@ -133,7 +145,7 @@ export async function POST(
       // Group attendee names by session_id
       const attendeesBySession = new Map<string, string[]>()
       for (const a of batchAttendees || []) {
-        const name = (a.client as { name: string } | null)?.name
+        const name = (a.client as unknown as { name: string } | null)?.name
         if (name && a.session_id) {
           const list = attendeesBySession.get(a.session_id) || []
           list.push(name)
@@ -163,9 +175,6 @@ export async function POST(
         : 'N/A'
 
       // Include attendee names in the description for agencies
-      const attendeeNames = (invoice.session?.session_attendees as { client: { name: string } | null }[] | undefined)
-        ?.map((a) => a.client?.name)
-        .filter(Boolean) || []
       const names = attendeeNames.length > 0 ? attendeeNames : [invoice.client.name]
       const nameList = names.join(', ')
 
