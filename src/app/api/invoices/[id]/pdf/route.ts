@@ -5,6 +5,7 @@ import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { createElement, ReactElement } from 'react'
 import { can } from '@/lib/auth/permissions'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { isEncrypted, decryptField } from '@/lib/crypto'
 import type { UserRole, OrganizationSettings } from '@/types/database'
 
 export async function GET(
@@ -93,6 +94,11 @@ export async function GET(
         .order('session_date', { ascending: true })
 
       items = itemsData || []
+    }
+
+    // Decrypt session notes if encrypted
+    if (invoice.session?.notes && isEncrypted(invoice.session.notes)) {
+      invoice.session.notes = await decryptField(invoice.session.notes)
     }
 
     // Generate PDF
