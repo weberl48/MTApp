@@ -61,6 +61,7 @@ export async function POST(
           id,
           date,
           duration_minutes,
+          group_member_names,
           contractor:users(id, name),
           service_type:service_types(name)
         )
@@ -72,9 +73,13 @@ export async function POST(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
-    // Fetch session attendees separately to get client names for the invoice
+    // Get attendee names: prefer free-form group_member_names, then session_attendees, then billed client
     let attendeeNames: string[] = []
-    if (invoice.session?.id) {
+    if (invoice.session?.group_member_names) {
+      // Free-form names entered for group sessions
+      attendeeNames = [invoice.session.group_member_names]
+    } else if (invoice.session?.id) {
+      // Look up tracked attendees from the database
       const { data: attendees } = await supabase
         .from('session_attendees')
         .select('client:clients(name)')

@@ -485,6 +485,16 @@ export default function SessionDetailPage() {
               </div>
             </div>
 
+            {session.group_member_names && (
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-purple-500 mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Attendee Names</p>
+                  <p className="font-medium">{session.group_member_names}</p>
+                </div>
+              </div>
+            )}
+
             {session.classroom && (
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-purple-500" />

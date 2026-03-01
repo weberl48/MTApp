@@ -137,6 +137,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         encryptedClientNotes: encrypted.clientNotes,
         status: effectiveStatus as 'submitted' | 'approved',
         groupHeadcount: null,
+        groupMemberNames: null,
         classroom: null,
         pricing,
         isScholarshipService: serviceType?.is_scholarship ?? false,

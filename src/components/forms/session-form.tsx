@@ -96,8 +96,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
+  const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
   const [classroom, setClassroom] = useState(existingSession?.classroom || '')
-  // groupMemberNames removed — groups now use headcount only
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -383,7 +383,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: null,
+            group_member_names: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
             classroom: isScholarshipGroup ? classroom || null : null,
             total_amount: pricing?.totalAmount ?? null,
             contractor_pay: pricing?.contractorPay ?? null,
@@ -444,6 +444,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           encryptedClientNotes,
           status: effectiveStatus,
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+          groupMemberNames: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
           classroom: isScholarshipGroup ? classroom || null : null,
           pricing: pricing!,
           isScholarshipService: selectedServiceType?.is_scholarship ?? false,
@@ -492,6 +493,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setNotes('')
     setClientNotes('')
     setGroupHeadcount('')
+    setGroupMemberNames('')
     setClassroom('')
     setSelectedClients([])
     setSelectedAdminUserId('')
@@ -781,6 +783,23 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   {errors.groupHeadcount}
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Group Member Names - Optional free-form names for group sessions */}
+          {isGroupService && (
+            <div className="space-y-2">
+              <Label htmlFor="groupMemberNames">Attendee Names</Label>
+              <Textarea
+                id="groupMemberNames"
+                placeholder="e.g., Sarah, John, Mike (optional)"
+                value={groupMemberNames}
+                onChange={(e) => setGroupMemberNames(e.target.value)}
+                rows={2}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                These names will appear on Square invoices
+              </p>
             </div>
           )}
 
