@@ -13,6 +13,9 @@ const RECOMMENDED_VARS = [
 
 export function validateEnv() {
   if (process.env.NODE_ENV !== 'production') return
+  // Skip during next build — server-side vars aren't available at build time.
+  // The proxy enforces ENCRYPTION_KEY at runtime instead.
+  if (process.env.NEXT_PHASE === 'phase-production-build') return
 
   const missing = REQUIRED_VARS.filter(v => !process.env[v])
   if (missing.length > 0) {
