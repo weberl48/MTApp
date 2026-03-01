@@ -2,7 +2,7 @@ import { squareClient, getDefaultLocationId, dollarsToCents, isSquareSandbox } f
 import { randomUUID } from 'crypto'
 
 // Development email for sandbox testing - prevents sending to real clients
-const DEV_EMAIL = process.env.SQUARE_DEV_EMAIL || 'dev-testing@example.com'
+const DEV_EMAIL = process.env.SQUARE_DEV_EMAIL || 'maycreativearts@gmail.com'
 
 // Re-export for convenience
 export { isSquareSandbox }
