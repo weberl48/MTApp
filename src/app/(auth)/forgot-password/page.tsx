@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="flex flex-col space-y-4">
-          <Link href="/login" className="w-full">
+          <Link href="/login/" className="w-full">
             <Button variant="outline" className="w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
             {loading ? 'Sending...' : 'Send reset link'}
           </Button>
           <Link
-            href="/login"
+            href="/login/"
             className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center justify-center"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />

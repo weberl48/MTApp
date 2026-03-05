@@ -47,7 +47,6 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
     due_days: 30,
     send_reminders: true,
     reminder_days: [7, 1],
-    auto_send_square_on_approve: false,
   },
   session: {
     default_duration: 30,
@@ -71,12 +70,40 @@ const DEFAULT_SETTINGS: OrganizationSettings = {
   pricing: {
     no_show_fee: 60,
     duration_base_minutes: 30,
+    square_processing_fee_enabled: false,
+    square_processing_fee_type: 'fixed' as const,
+    square_processing_fee_amount: 0,
+    square_processing_fee_percentage: 0,
+    square_processing_fee_fixed_cents: 0,
   },
   portal: {
     token_expiry_days: 90,
   },
   features: {
     client_portal: true,
+  },
+  custom_lists: {
+    payment_methods: {
+      private_pay: { label: 'Private Pay', visible: true },
+      self_directed: { label: 'Self-Directed', visible: true },
+      group_home: { label: 'Group Home', visible: true },
+      scholarship: { label: 'Scholarship', visible: true },
+      venmo: { label: 'Venmo', visible: true },
+    },
+    billing_methods: {
+      square: { label: 'Square', visible: true },
+      check: { label: 'Check', visible: true },
+      email: { label: 'Email', visible: true },
+      other: { label: 'Other', visible: true },
+    },
+    classrooms: [],
+  },
+  automation: {
+    auto_approve_sessions: false,
+    auto_send_invoice_on_approve: false,
+    auto_send_invoice_method: 'none',
+    auto_generate_scholarship_invoices: false,
+    scholarship_invoice_day: 1,
   },
 }
 
@@ -137,6 +164,22 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         features: {
           ...DEFAULT_SETTINGS.features,
           ...((organization.settings as OrganizationSettings)?.features || {}),
+        },
+        custom_lists: {
+          payment_methods: {
+            ...DEFAULT_SETTINGS.custom_lists.payment_methods,
+            ...((organization.settings as OrganizationSettings)?.custom_lists?.payment_methods || {}),
+          },
+          billing_methods: {
+            ...DEFAULT_SETTINGS.custom_lists.billing_methods,
+            ...((organization.settings as OrganizationSettings)?.custom_lists?.billing_methods || {}),
+          },
+          classrooms: (organization.settings as OrganizationSettings)?.custom_lists?.classrooms
+            ?? DEFAULT_SETTINGS.custom_lists.classrooms,
+        },
+        automation: {
+          ...DEFAULT_SETTINGS.automation,
+          ...((organization.settings as OrganizationSettings)?.automation || {}),
         },
       }
     : null

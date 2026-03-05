@@ -1,15 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { RevenueChart } from '@/components/charts/revenue-chart'
 import { SessionsChart } from '@/components/charts/sessions-chart'
 import { PaymentStatusChart } from '@/components/charts/payment-status-chart'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/pricing'
-import { DollarSign, TrendingUp, Users, Calendar, Loader2 } from 'lucide-react'
+import { DollarSign, TrendingUp, Users, Calendar } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
+import { subMonths, format, startOfMonth, endOfMonth } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
+import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
+
+type DateRange = '3m' | '6m' | '12m' | 'ytd'
 
 interface Invoice {
   amount: number
@@ -46,12 +54,23 @@ interface PaymentStatusDataPoint {
   [key: string]: string | number
 }
 
+function getDateRangeBounds(range: DateRange): { start: Date; end: Date } {
+  const now = new Date()
+  const end = endOfMonth(now)
+  if (range === 'ytd') {
+    return { start: new Date(now.getFullYear(), 0, 1), end }
+  }
+  const monthsBack = range === '3m' ? 3 : range === '6m' ? 6 : 12
+  return { start: startOfMonth(subMonths(now, monthsBack - 1)), end }
+}
+
 export default function AnalyticsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
   const [clientsCount, setClientsCount] = useState(0)
+  const [dateRange, setDateRange] = useState<DateRange>('6m')
 
   useEffect(() => {
     async function loadAnalytics() {
@@ -66,20 +85,18 @@ export default function AnalyticsPage() {
         return
       }
 
-      // Check if user is admin
       const { data: userProfile } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
         .single<{ role: string }>()
 
-      const role = userProfile?.role
-      if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+      const role = userProfile?.role as UserRole | undefined
+      if (!can(role ?? null, 'analytics:view')) {
         router.push('/dashboard/')
         return
       }
 
-      // Fetch analytics data
       const { data: invoicesData } = await supabase
         .from('invoices')
         .select('amount, mca_cut, contractor_pay, status, created_at')
@@ -106,68 +123,71 @@ export default function AnalyticsPage() {
     loadAnalytics()
   }, [router])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    )
-  }
+  // Compute filtered data based on date range
+  const { filteredInvoices, filteredSessions } = useMemo(() => {
+    const { start, end } = getDateRangeBounds(dateRange)
+    return {
+      filteredInvoices: invoices.filter(inv => {
+        const d = new Date(inv.created_at)
+        return d >= start && d <= end
+      }),
+      filteredSessions: sessions.filter(s => {
+        const d = parseLocalDate(s.date)
+        return d >= start && d <= end
+      }),
+    }
+  }, [invoices, sessions, dateRange])
 
-  // Calculate totals
-  const totalRevenue = invoices.reduce((sum, inv) => sum + Number(inv.amount), 0)
-  const totalMcaCut = invoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
-  const paidRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + Number(inv.amount), 0)
-  const pendingRevenue = invoices.filter(i => i.status === 'pending').reduce((sum, inv) => sum + Number(inv.amount), 0)
-  const sentRevenue = invoices.filter(i => i.status === 'sent').reduce((sum, inv) => sum + Number(inv.amount), 0)
+  // Calculate totals from filtered data
+  const totalRevenue = filteredInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0)
+  const totalMcaCut = filteredInvoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
+  const paidRevenue = filteredInvoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + Number(inv.amount), 0)
+  const pendingRevenue = filteredInvoices.filter(i => i.status === 'pending').reduce((sum, inv) => sum + Number(inv.amount), 0)
+  const sentRevenue = filteredInvoices.filter(i => i.status === 'sent').reduce((sum, inv) => sum + Number(inv.amount), 0)
 
-  // Generate monthly data for charts (last 6 months)
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const currentMonth = new Date().getMonth()
+  // Generate year-aware monthly data for charts
+  const { revenueData, sessionsData: sessionsChartData } = useMemo(() => {
+    const { start } = getDateRangeBounds(dateRange)
+    const now = new Date()
+    const endMonth = startOfMonth(now)
 
-  const revenueData: RevenueDataPoint[] = []
-  const sessionsData: SessionsDataPoint[] = []
+    const revenue: RevenueDataPoint[] = []
+    const sessionsByMonth: SessionsDataPoint[] = []
 
-  for (let i = 5; i >= 0; i--) {
-    const monthIndex = (currentMonth - i + 12) % 12
-    const monthName = months[monthIndex]
+    let cursor = startOfMonth(start)
+    while (cursor <= endMonth) {
+      const year = cursor.getFullYear()
+      const month = cursor.getMonth()
+      const label = format(cursor, 'MMM yyyy')
 
-    // Filter invoices for this month
-    const monthInvoices = invoices.filter(inv => {
-      const invDate = new Date(inv.created_at)
-      return invDate.getMonth() === monthIndex
-    })
+      const monthInvoices = filteredInvoices.filter(inv => {
+        const d = new Date(inv.created_at)
+        return d.getFullYear() === year && d.getMonth() === month
+      })
 
-    const monthRevenue = monthInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0)
-    const monthMcaCut = monthInvoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0)
-    const monthContractorPay = monthInvoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+      revenue.push({
+        month: label,
+        revenue: monthInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0),
+        mcaCut: monthInvoices.reduce((sum, inv) => sum + Number(inv.mca_cut), 0),
+        contractorPay: monthInvoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0),
+      })
 
-    revenueData.push({
-      month: monthName,
-      revenue: monthRevenue,
-      mcaCut: monthMcaCut,
-      contractorPay: monthContractorPay,
-    })
+      const monthSessions = filteredSessions.filter(s => {
+        const d = parseLocalDate(s.date)
+        return d.getFullYear() === year && d.getMonth() === month
+      })
 
-    // Filter sessions for this month
-    const monthSessions = sessions.filter(s => {
-      const sessDate = new Date(s.date)
-      return sessDate.getMonth() === monthIndex
-    })
+      sessionsByMonth.push({
+        month: label,
+        individual: monthSessions.filter(s => s.service_type?.category?.includes('individual')).length,
+        group: monthSessions.filter(s => s.service_type?.category?.includes('group')).length,
+      })
 
-    const individualSessions = monthSessions.filter(s =>
-      s.service_type?.category?.includes('individual')
-    ).length
-    const groupSessions = monthSessions.filter(s =>
-      s.service_type?.category?.includes('group')
-    ).length
+      cursor = new Date(year, month + 1, 1)
+    }
 
-    sessionsData.push({
-      month: monthName,
-      individual: individualSessions,
-      group: groupSessions,
-    })
-  }
+    return { revenueData: revenue, sessionsData: sessionsByMonth }
+  }, [filteredInvoices, filteredSessions, dateRange])
 
   // Payment status data for pie chart
   const paymentStatusData: PaymentStatusDataPoint[] = [
@@ -176,75 +196,91 @@ export default function AnalyticsPage() {
     { name: 'Pending', value: pendingRevenue, color: '#f59e0b' },
   ].filter(d => d.value > 0)
 
+  const rangeLabel = dateRange === 'ytd' ? 'Year to date' : `Last ${dateRange === '3m' ? '3' : dateRange === '6m' ? '6' : '12'} months`
+
+  if (loading) {
+    return (
+      <AdminGuard>
+        <AnalyticsSkeleton />
+      </AdminGuard>
+    )
+  }
+
   return (
     <AdminGuard>
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Business insights and performance metrics
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Analytics</h1>
+          <p className="text-muted-foreground">
+            Business insights and performance metrics
+          </p>
+        </div>
+        <div className="flex gap-1 rounded-lg border p-1">
+          {([['3m', '3M'], ['6m', '6M'], ['12m', '12M'], ['ytd', 'YTD']] as const).map(([value, label]) => (
+            <Button
+              key={value}
+              variant={dateRange === value ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setDateRange(value)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Revenue
             </CardTitle>
-            <DollarSign className="w-4 h-4 text-gray-400" />
+            <DollarSign className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              All time
-            </p>
+            <p className="text-xs text-muted-foreground">{rangeLabel}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               MCA Earnings
             </CardTitle>
-            <TrendingUp className="w-4 h-4 text-gray-400" />
+            <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{formatCurrency(totalMcaCut)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Total commission
-            </p>
+            <p className="text-xs text-muted-foreground">Total commission</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Sessions
             </CardTitle>
-            <Calendar className="w-4 h-4 text-gray-400" />
+            <Calendar className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{sessions.length}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              All time
-            </p>
+            <div className="text-2xl font-bold">{filteredSessions.length}</div>
+            <p className="text-xs text-muted-foreground">{rangeLabel}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Active Clients
             </CardTitle>
-            <Users className="w-4 h-4 text-gray-400" />
+            <Users className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{clientsCount}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Total clients
-            </p>
+            <p className="text-xs text-muted-foreground">Total clients</p>
           </CardContent>
         </Card>
       </div>
@@ -252,7 +288,7 @@ export default function AnalyticsPage() {
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
         <RevenueChart data={revenueData} />
-        <SessionsChart data={sessionsData} />
+        <SessionsChart data={sessionsChartData} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -265,15 +301,15 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Collected</span>
+              <span className="text-muted-foreground">Collected</span>
               <span className="font-medium text-green-600">{formatCurrency(paidRevenue)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Awaiting Payment</span>
+              <span className="text-muted-foreground">Awaiting Payment</span>
               <span className="font-medium text-blue-600">{formatCurrency(sentRevenue)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Pending Review</span>
+              <span className="text-muted-foreground">Pending Review</span>
               <span className="font-medium text-amber-600">{formatCurrency(pendingRevenue)}</span>
             </div>
             <div className="border-t pt-4 flex items-center justify-between">
@@ -285,5 +321,29 @@ export default function AnalyticsPage() {
       </div>
     </div>
     </AdminGuard>
+  )
+}
+
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-10 w-48" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border bg-card p-6"><Skeleton className="h-[300px] w-full" /></div>
+        <div className="rounded-lg border bg-card p-6"><Skeleton className="h-[300px] w-full" /></div>
+      </div>
+    </div>
   )
 }

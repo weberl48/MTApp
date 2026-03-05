@@ -106,7 +106,7 @@ export default function RequestSessionPage() {
                 >
                   Request Another
                 </Button>
-                <Link href={`/portal/${token}/sessions`}>
+                <Link href={`/portal/${token}/sessions/`}>
                   <Button>View Sessions</Button>
                 </Link>
               </div>
@@ -120,7 +120,7 @@ export default function RequestSessionPage() {
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/portal/${token}/sessions`}>
+        <Link href={`/portal/${token}/sessions/`}>
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -229,7 +229,7 @@ export default function RequestSessionPage() {
 
             {/* Submit */}
             <div className="flex gap-3 pt-4">
-              <Link href={`/portal/${token}/sessions`} className="flex-1">
+              <Link href={`/portal/${token}/sessions/`} className="flex-1">
                 <Button type="button" variant="outline" className="w-full">
                   Cancel
                 </Button>
