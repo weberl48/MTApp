@@ -564,96 +564,95 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className={`flex items-center justify-between p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                        {isAdmin && session.status === 'submitted' && (
-                          <div className="mr-3 shrink-0" onClick={(e) => e.preventDefault()}>
-                            <Checkbox
-                              checked={selectedIds.has(session.id)}
-                              onCheckedChange={(checked) => {
-                                setSelectedIds((prev) => {
-                                  const next = new Set(prev)
-                                  if (checked) next.add(session.id)
-                                  else next.delete(session.id)
-                                  return next
-                                })
-                              }}
-                              aria-label={`Select session`}
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
-                            <span className="font-medium truncate">
-                              {session.service_type?.name || 'Unknown Service'}
-                            </span>
-                            <Badge className={
-                              session.status === 'draft' && session.rejection_reason
-                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                : sessionStatusColors[session.status]
-                            }>
-                              {session.status === 'draft' && session.rejection_reason
-                                ? 'Needs Revision'
-                                : sessionStatusLabels[session.status] || session.status}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span>
+                      <div className={`p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        <div className="flex items-start gap-3">
+                          {isAdmin && session.status === 'submitted' && (
+                            <div className="shrink-0 pt-0.5" onClick={(e) => e.preventDefault()}>
+                              <Checkbox
+                                checked={selectedIds.has(session.id)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedIds((prev) => {
+                                    const next = new Set(prev)
+                                    if (checked) next.add(session.id)
+                                    else next.delete(session.id)
+                                    return next
+                                  })
+                                }}
+                                aria-label={`Select session`}
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            {/* Row 1: Service type + status badge + amount */}
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-medium truncate">
+                                  {session.service_type?.name || 'Unknown Service'}
+                                </span>
+                                <Badge className={`shrink-0 ${
+                                  session.status === 'draft' && session.rejection_reason
+                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                    : sessionStatusColors[session.status]
+                                }`}>
+                                  {session.status === 'draft' && session.rejection_reason
+                                    ? 'Needs Revision'
+                                    : sessionStatusLabels[session.status] || session.status}
+                                </Badge>
+                              </div>
+                              {showFinancialDetails && (
+                                <span className="font-medium shrink-0">{formatCurrency(totalCost)}</span>
+                              )}
+                            </div>
+                            {/* Row 2: Date · duration · attendees · contractor */}
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {parseLocalDate(session.date).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 month: 'short',
                                 day: 'numeric',
-                                year: 'numeric',
                               })}
-                            </span>
-                            <span>{session.duration_minutes} min</span>
-                            {(() => {
-                              const count = session.group_headcount || session.attendees?.length || 0
-                              return count > 0 ? (
-                                <span>
-                                  {count} attendee{count !== 1 ? 's' : ''}
-                                </span>
-                              ) : null
-                            })()}
-                            {isAdmin && session.contractor && (
-                              <span>by {session.contractor.name}</span>
+                              {' · '}{session.duration_minutes} min
+                              {(() => {
+                                const count = session.group_headcount || session.attendees?.length || 0
+                                return count > 0 ? ` · ${count} attendee${count !== 1 ? 's' : ''}` : ''
+                              })()}
+                              {isAdmin && session.contractor ? ` · ${session.contractor.name}` : ''}
+                            </p>
+                            {/* Row 3: Client names */}
+                            {session.attendees?.length > 0 && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                {session.attendees
+                                  .map((a) => a.client?.name)
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </p>
+                            )}
+                            {/* Row 4: Action buttons (mobile-friendly) */}
+                            {isAdmin && session.status === 'submitted' && (
+                              <div className="flex gap-2 mt-2" onClick={(e) => e.preventDefault()}>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="h-7 px-3 text-xs"
+                                  disabled={approvingId === session.id}
+                                  onClick={(e) => handleInlineApprove(e, session.id)}
+                                >
+                                  {approvingId === session.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    'Approve'
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-3 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                                  onClick={(e) => handleInlineReject(e, session.id)}
+                                >
+                                  Revise
+                                </Button>
+                              </div>
                             )}
                           </div>
-                          {session.attendees?.length > 0 && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
-                              {session.attendees
-                                .map((a) => a.client?.name)
-                                .filter(Boolean)
-                                .join(', ')}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 ml-4">
-                          {showFinancialDetails && <span className="font-medium">{formatCurrency(totalCost)}</span>}
-                          {isAdmin && session.status === 'submitted' && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="h-7 px-2 text-xs"
-                                disabled={approvingId === session.id}
-                                onClick={(e) => handleInlineApprove(e, session.id)}
-                              >
-                                {approvingId === session.id ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  'Approve'
-                                )}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
-                                onClick={(e) => handleInlineReject(e, session.id)}
-                              >
-                                Revise
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </Link>
