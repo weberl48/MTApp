@@ -155,75 +155,76 @@ export function PendingApprovals() {
               <span className="text-xs text-gray-500">Select all</span>
             </div>
 
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  selectedIds.has(session.id)
-                    ? 'bg-blue-50 dark:bg-blue-950/30'
-                    : 'bg-gray-50 dark:bg-gray-800'
-                }`}
-              >
-                <Checkbox
-                  checked={selectedIds.has(session.id)}
-                  onCheckedChange={(checked) => toggleSelect(session.id, !!checked)}
-                  aria-label={`Select session`}
-                />
-                <Link href={`/sessions/${session.id}/`} className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium truncate text-sm">
-                      {session.service_type?.name || 'Unknown'}
-                    </span>
-                    <Badge variant="outline" className="text-xs">
-                      {session.duration_minutes} min
-                    </Badge>
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    <span>
-                      {parseLocalDate(session.date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                    {session.contractor && <span>by {session.contractor.name}</span>}
-                    {session.attendees?.length > 0 && (
-                      <span>
-                        {session.attendees
-                          .slice(0, 2)
-                          .map((a) => a.client?.name)
-                          .filter(Boolean)
-                          .join(', ')}
-                        {session.attendees.length > 2 && ` +${session.attendees.length - 2}`}
+            {sessions.map((session) => {
+              const clientNames = session.attendees
+                ?.slice(0, 2)
+                .map((a) => a.client?.name)
+                .filter(Boolean)
+                .join(', ')
+              const extraClients = session.attendees?.length > 2 ? ` +${session.attendees.length - 2}` : ''
+
+              return (
+                <div
+                  key={session.id}
+                  className={`p-3 rounded-lg transition-colors ${
+                    selectedIds.has(session.id)
+                      ? 'bg-blue-50 dark:bg-blue-950/30'
+                      : 'bg-gray-50 dark:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      className="mt-0.5 shrink-0"
+                      checked={selectedIds.has(session.id)}
+                      onCheckedChange={(checked) => toggleSelect(session.id, !!checked)}
+                      aria-label={`Select session`}
+                    />
+                    <Link href={`/sessions/${session.id}/`} className="flex-1 min-w-0">
+                      <span className="font-medium text-sm">
+                        {session.service_type?.name || 'Unknown'}
                       </span>
-                    )}
-                  </div>
-                </Link>
-                {canApprove && (
-                  <div className="flex gap-1 shrink-0">
-                    <Button
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      disabled={approvingId === session.id}
-                      onClick={(e) => handleApprove(e, session.id)}
-                    >
-                      {approvingId === session.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        'Approve'
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {parseLocalDate(session.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                        {' · '}{session.duration_minutes} min
+                        {session.contractor ? ` · ${session.contractor.name}` : ''}
+                      </p>
+                      {clientNames && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {clientNames}{extraClients}
+                        </p>
                       )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
-                      onClick={(e) => handleReject(e, session.id)}
-                    >
-                      Revise
-                    </Button>
+                    </Link>
                   </div>
-                )}
-              </div>
-            ))}
+                  {canApprove && (
+                    <div className="flex gap-2 mt-2 ml-8">
+                      <Button
+                        size="sm"
+                        className="h-7 px-3 text-xs"
+                        disabled={approvingId === session.id}
+                        onClick={(e) => handleApprove(e, session.id)}
+                      >
+                        {approvingId === session.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          'Approve'
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-3 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                        onClick={(e) => handleReject(e, session.id)}
+                      >
+                        Revise
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
