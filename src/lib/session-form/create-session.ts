@@ -68,12 +68,14 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
 
   let invoiceError = false
 
-  // Add attendees and create invoices (individual sessions only)
+  // Add attendees and create invoices
   if (clientIds.length > 0) {
+    const isGroup = groupHeadcount != null && groupHeadcount > 0
+
     const attendees = clientIds.map((clientId) => ({
       session_id: session.id,
       client_id: clientId,
-      individual_cost: pricing.perPersonCost,
+      individual_cost: isGroup ? pricing.totalAmount : pricing.perPersonCost,
     }))
 
     const { error: attendeesError } = await supabase
@@ -102,7 +104,8 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
         .map((client) => ({
           session_id: session.id,
           client_id: client.id,
-          amount: pricing.perPersonCost,
+          // Group sessions: invoice the full amount to the billing agency
+          amount: isGroup ? pricing.totalAmount : pricing.perPersonCost,
           mca_cut: Math.round((pricing.mcaCut / invoiceCount) * 100) / 100,
           contractor_pay: Math.round((pricing.contractorPay / invoiceCount) * 100) / 100,
           rent_amount: Math.round((pricing.rentAmount / invoiceCount) * 100) / 100,
