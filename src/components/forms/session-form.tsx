@@ -98,6 +98,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
   const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
   const [classroom, setClassroom] = useState(existingSession?.classroom || '')
+  // Group billing client (the agency being invoiced, e.g., People Inc, Brylin, OLV)
+  const [groupBillingClientId, setGroupBillingClientId] = useState(
+    existingSession?.attendees?.length === 1 ? existingSession.attendees[0].client_id : ''
+  )
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -170,12 +174,17 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // For groups/mixed, show normal pricing (scholarship handled per-client at invoice time)
   const selectedPaymentMethod = useMemo(() => {
     if (selectedServiceType?.is_scholarship) return 'scholarship'
+    // Group sessions: use the billing agency's payment method
+    if (isGroupService && groupBillingClientId) {
+      const client = clients.find(c => c.id === groupBillingClientId)
+      return client?.payment_method
+    }
     if (selectedClients.length === 1) {
       const client = clients.find(c => c.id === selectedClients[0])
       return client?.payment_method
     }
     return undefined
-  }, [selectedClients, clients, selectedServiceType?.is_scholarship])
+  }, [selectedClients, clients, selectedServiceType?.is_scholarship, isGroupService, groupBillingClientId])
 
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
@@ -318,6 +327,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
         hasErrors = true
       }
+      if (!groupBillingClientId) {
+        setFieldError('groupBillingClient', 'Please select the agency to bill')
+        hasErrors = true
+      }
       if (isScholarshipGroup && classroomOptions.length > 0 && !classroom) {
         setFieldError('classroom', 'Please select a classroom')
         hasErrors = true
@@ -401,11 +414,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           .delete()
           .eq('session_id', existingSession.id)
 
-        if (!isGroupService && selectedClients.length > 0) {
-          const attendees = selectedClients.map((clientId) => ({
+        const editClientIds = isGroupService ? (groupBillingClientId ? [groupBillingClientId] : []) : selectedClients
+        if (editClientIds.length > 0) {
+          const attendees = editClientIds.map((clientId) => ({
             session_id: existingSession.id,
             client_id: clientId,
-            individual_cost: pricing?.perPersonCost || 0,
+            individual_cost: isGroupService ? (pricing?.totalAmount || 0) : (pricing?.perPersonCost || 0),
           }))
 
           const { error: attendeesError } = await supabase
@@ -439,7 +453,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           serviceTypeId,
           contractorId: sessionContractorId,
           organizationId: organization!.id,
-          clientIds: isGroupService || !requiresClient ? [] : selectedClients,
+          clientIds: isGroupService ? (groupBillingClientId ? [groupBillingClientId] : []) : !requiresClient ? [] : selectedClients,
           encryptedNotes,
           encryptedClientNotes,
           status: effectiveStatus,
@@ -495,6 +509,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setGroupHeadcount('')
     setGroupMemberNames('')
     setClassroom('')
+    setGroupBillingClientId('')
     setSelectedClients([])
     setSelectedAdminUserId('')
     setShowSuccess(false)
@@ -781,6 +796,37 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
                   {errors.groupHeadcount}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Group Billing Client - Agency to invoice for group sessions */}
+          {isGroupService && (
+            <div className="space-y-2">
+              <Label htmlFor="groupBillingClient">Bill To (Client/Agency) *</Label>
+              <Select
+                value={groupBillingClientId}
+                onValueChange={(val) => {
+                  setGroupBillingClientId(val)
+                  clearFieldError('groupBillingClient')
+                }}
+              >
+                <SelectTrigger id="groupBillingClient" className={errors.groupBillingClient ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select agency to invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.groupBillingClient && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.groupBillingClient}
                 </p>
               )}
             </div>
