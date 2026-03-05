@@ -74,7 +74,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <Sidebar />
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
-                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-6">
+                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6">
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
                     {children}
