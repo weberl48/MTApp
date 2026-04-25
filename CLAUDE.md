@@ -26,7 +26,7 @@ MCA App is a multi-tenant practice management system for May Creative Arts, hand
 ```bash
 npm run dev          # Start Next.js dev server (http://localhost:3000)
 npm run build        # Production build
-npm run lint         # Run ESLint
+npm run lint         # Run ESLint (flat config in eslint.config.mjs — script is bare `eslint`, NOT `next lint`)
 npx tsc --noEmit     # Type check (used in CI)
 npm run test         # Run Vitest tests
 npm run test -- --watch  # Run tests in watch mode
@@ -68,9 +68,9 @@ npm run health:prod    # Check production
 - Client Components: `import { createClient } from '@/lib/supabase/client'`
 - Service role (webhooks): `import { createServiceClient } from '@/lib/supabase/service'`
 
-**Context Providers**:
-- `OrganizationContext` - Current user + organization data (dashboard)
-- `PortalContext` - Client data for portal (token-based)
+**Context Providers** (files live in `src/contexts/`):
+- `OrganizationContext` (`src/contexts/organization-context.tsx`) - Current user + organization data (dashboard)
+- `PortalContext` (`src/contexts/portal-context.tsx`) - Client data for portal (token-based)
 - `BrandingProvider` - Organization branding (colors, logo)
 
 **Dashboard Provider Stack** (outermost → innermost in `(dashboard)/layout.tsx`):
@@ -185,6 +185,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/health` | GET | Full health check (all services) |
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
+| `/api/health/restore` | POST | Restore a paused Supabase project via Management API (requires `SUPABASE_ACCESS_TOKEN`) |
 | `/api/invites/user` | GET | Get pending invites for user |
 | `/api/invites/validate` | GET | Validate an invite token |
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
@@ -250,6 +251,10 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/features/index.ts` — Feature flag system (`isFeatureEnabled(settings, flag)`, fail-open design)
 - `src/lib/supabase/mfa.ts` — MFA enrollment/verification utilities
 - `src/lib/actions/helpers.ts` — Server action helpers (auth checks, error handling)
+- `src/lib/env.ts` — Runtime env validation (`validateEnv()`); checks required vars in production, warns on missing recommended vars, skips during `next build`
+- `src/lib/invoices/send.ts` — Email dispatch for invoices (shared between API routes and server actions)
+- `src/lib/queries/scholarship.ts` — Scholarship batch queries used by the monthly cron + UI
+- `src/lib/portal/token.ts` — Client portal access token generation/validation
 
 ## Testing
 
@@ -306,6 +311,9 @@ UPSTASH_REDIS_REST_TOKEN=
 
 # Cron job authentication
 CRON_SECRET=secret-for-vercel-cron-jobs
+
+# Supabase Management API (optional — enables auto-restore of paused projects from the login page)
+SUPABASE_ACCESS_TOKEN=
 ```
 
 ## Dark Mode / Theming

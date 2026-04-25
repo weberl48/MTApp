@@ -103,6 +103,9 @@ export function SessionExportDialog({ organizationId, contractorId }: ExportDial
       if (endDate) {
         params.set('endDate', endDate)
       }
+      if (contractorId) {
+        params.set('contractorId', contractorId)
+      }
       params.set('format', 'csv')
 
       const response = await fetch(`/api/sessions/export?${params.toString()}`)

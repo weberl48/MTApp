@@ -18,6 +18,16 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil, Info } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
 import { useContractorRates } from '@/hooks/use-contractor-rates'
 import { parseLocalDate, todayLocal } from '@/lib/dates'
@@ -109,6 +119,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Success state for "Log Another" flow
   const [showSuccess, setShowSuccess] = useState(false)
   const wasScholarshipRef = useRef(false)
+
+  // Linked invoice (edit mode): pending/sent invoice directly tied to this session.
+  // Used to prompt the user before silently letting invoice pricing drift when a session is edited.
+  const [linkedInvoice, setLinkedInvoice] = useState<{ id: string; amount: number; status: string } | null>(null)
+  const [showRegenPrompt, setShowRegenPrompt] = useState(false)
 
   function setFieldError(field: string, message: string) {
     setErrors(prev => ({ ...prev, [field]: message }))
@@ -277,6 +292,27 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     return () => clearTimeout(timeout)
   }, [date, serviceTypeId, selectedClients, isEditMode, supabase])
 
+  // Edit mode: look up any invoice tied to this session so we can prompt before it drifts.
+  useEffect(() => {
+    if (!isEditMode || !existingSession) return
+    let cancelled = false
+
+    async function loadLinkedInvoice() {
+      if (!existingSession) return
+      const { data } = await supabase
+        .from('invoices')
+        .select('id, amount, status')
+        .eq('session_id', existingSession.id)
+        .neq('status', 'paid')
+        .maybeSingle()
+      if (!cancelled && data) {
+        setLinkedInvoice({ id: data.id, amount: Number(data.amount), status: data.status })
+      }
+    }
+    loadLinkedInvoice()
+    return () => { cancelled = true }
+  }, [isEditMode, existingSession, supabase])
+
   function removeClient(clientId: string) {
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
   }
@@ -375,6 +411,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       return
     }
 
+    // Edit mode: if a linked invoice exists and pricing has changed, prompt the user
+    // to decide whether to regenerate the invoice instead of silently letting it drift.
+    if (isEditMode && linkedInvoice && pricing?.totalAmount != null) {
+      const drift = Math.abs(pricing.totalAmount - linkedInvoice.amount) > 0.005
+      if (drift) {
+        setShowRegenPrompt(true)
+        return
+      }
+    }
+
+    await performSave({ regenerateInvoice: false })
+  }
+
+  async function performSave({ regenerateInvoice }: { regenerateInvoice: boolean }) {
     setLoading(true)
 
     try {
@@ -429,7 +479,27 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           if (attendeesError) throw attendeesError
         }
 
-        toast.success('Session updated successfully!')
+        // If the user opted to regenerate, sync the linked invoice's amount fields to
+        // match the new session pricing and reset its status to 'pending' so the admin
+        // can re-send through the normal invoice workflow.
+        if (regenerateInvoice && linkedInvoice && pricing) {
+          await supabase
+            .from('invoices')
+            .update({
+              amount: pricing.totalAmount,
+              mca_cut: pricing.mcaCut,
+              contractor_pay: pricing.contractorPay,
+              rent_amount: pricing.rentAmount,
+              status: 'pending',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', linkedInvoice.id)
+          toast.success('Session updated. Invoice updated — please re-send to the client.')
+        } else if (linkedInvoice) {
+          toast.success('Session updated. Invoice was not regenerated.')
+        } else {
+          toast.success('Session updated successfully!')
+        }
         router.push(`/sessions/${existingSession.id}/`)
         router.refresh()
       } else {
@@ -560,6 +630,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
@@ -1072,5 +1143,37 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         </CardFooter>
       </Card>
     </form>
+
+    <AlertDialog open={showRegenPrompt} onOpenChange={setShowRegenPrompt}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Regenerate invoice?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This session has a{linkedInvoice?.status === 'sent' ? 'n already-sent' : ' pending'} invoice for {formatCurrency(linkedInvoice?.amount ?? 0)}. The new total is {formatCurrency(pricing?.totalAmount ?? 0)}.
+            {' '}
+            Would you like to update the invoice and queue it for re-sending to the client?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            onClick={() => {
+              setShowRegenPrompt(false)
+              performSave({ regenerateInvoice: false })
+            }}
+          >
+            No, just update session
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              setShowRegenPrompt(false)
+              performSave({ regenerateInvoice: true })
+            }}
+          >
+            Yes, regenerate invoice
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Calendar, Users, FileText, DollarSign, Plus } from 'lucide-react'
+import { Calendar, Users, FileText, DollarSign, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { useOrganization } from '@/contexts/organization-context'
@@ -24,6 +24,7 @@ interface DashboardStats {
   clientsCount: number
   pendingInvoicesCount: number
   pendingAmount: number
+  recentlyApprovedCount: number
   isAdmin: boolean
   organizationId: string | null
 }
@@ -122,11 +123,27 @@ export default function DashboardPage() {
         pendingAmount = pendingInvoices?.reduce((sum, inv) => sum + inv.amount, 0) || 0
       }
 
+      // Recently approved sessions (last 30 days). Uses updated_at as a proxy for the
+      // approval timestamp — status transitions touch updated_at on the sessions row.
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      let recentlyApprovedQuery = supabase
+        .from('sessions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'approved')
+        .gte('updated_at', thirtyDaysAgo)
+
+      if (!effectiveIsAdmin) {
+        recentlyApprovedQuery = recentlyApprovedQuery.eq('contractor_id', effectiveContractorId)
+      }
+
+      const { count: recentlyApprovedCount } = await recentlyApprovedQuery
+
       setStats({
         sessionsCount: sessionsCount || 0,
         clientsCount: clientsCount || 0,
         pendingInvoicesCount,
         pendingAmount,
+        recentlyApprovedCount: recentlyApprovedCount || 0,
         isAdmin: effectiveIsAdmin,
         organizationId: userProfile?.organization_id || null,
       })
@@ -208,6 +225,21 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.clientsCount || 0}</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/sessions/">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Recently Approved
+              </CardTitle>
+              <CheckCircle className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.recentlyApprovedCount || 0}</div>
+              <p className="text-xs text-muted-foreground">last 30 days</p>
             </CardContent>
           </Card>
         </Link>
