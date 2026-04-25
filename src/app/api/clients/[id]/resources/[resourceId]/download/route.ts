@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { uuidSchema } from '@/lib/validation/schemas'
 
 /**
  * GET /api/clients/[id]/resources/[resourceId]/download
@@ -13,6 +14,11 @@ export async function GET(
 ) {
   try {
     const { id: clientId, resourceId } = await params
+
+    if (!uuidSchema.safeParse(clientId).success || !uuidSchema.safeParse(resourceId).success) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Verify user is authenticated

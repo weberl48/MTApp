@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -16,9 +16,21 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { X, Calculator, AlertTriangle, AlertCircle, CheckCircle2, Pencil, Info } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { calculateSessionPricing, formatCurrency, getPricingDescription, ContractorPricingOverrides, validateMinimumAttendees } from '@/lib/pricing'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { calculateSessionPricing, formatCurrency, getPricingDescription, validateMinimumAttendees } from '@/lib/pricing'
+import { useContractorRates } from '@/hooks/use-contractor-rates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 import type { ServiceType, Client } from '@/types/database'
 import { toast } from 'sonner'
 import { useOrganization } from '@/contexts/organization-context'
@@ -26,9 +38,12 @@ import { ClientMultiSelect } from '@/components/forms/client-multi-select'
 import {
   clearSessionFormDefaults,
   getSessionFormDefaultsStorageKey,
+  getQuickLogDefaultsStorageKey,
   loadSessionFormDefaults,
   saveSessionFormDefaults,
+  saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
+import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
 
 interface ExistingSession {
@@ -42,6 +57,7 @@ interface ExistingSession {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  classroom: string | null
   attendees: { client_id: string }[]
 }
 
@@ -55,15 +71,23 @@ interface SessionFormProps {
 export function SessionForm({ serviceTypes, clients, contractorId, existingSession }: SessionFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const { organization, can, viewAsContractor } = useOrganization()
+  const { organization, settings, can, viewAsContractor } = useOrganization()
 
   // When "view as" a specific contractor, use their ID for new sessions
   const effectiveContractorId = (!existingSession && viewAsContractor?.id) ? viewAsContractor.id : contractorId
   const showFinancialDetails = can('financial:view-details')
   const isEditMode = !!existingSession
 
+  // Filter service types by contractor restrictions (admins see all)
+  const visibleServiceTypes = useMemo(() => {
+    if (showFinancialDetails) return serviceTypes // Admins/owners see all
+    return serviceTypes.filter((st) =>
+      !st.allowed_contractor_ids || st.allowed_contractor_ids.length === 0 || st.allowed_contractor_ids.includes(effectiveContractorId)
+    )
+  }, [serviceTypes, effectiveContractorId, showFinancialDetails])
+
   const [loading, setLoading] = useState(false)
-  const [date, setDate] = useState(existingSession?.date || new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(existingSession?.date || todayLocal())
   const [time, setTime] = useState(existingSession?.time?.slice(0, 5) || '09:00')
   const [duration, setDuration] = useState(existingSession?.duration_minutes?.toString() || '30')
   const [serviceTypeId, setServiceTypeId] = useState(existingSession?.service_type_id || '')
@@ -76,15 +100,30 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     (existingSession?.status as 'draft' | 'submitted') || 'submitted'
   )
 
+  // Admin work: who did the admin work (admin-role users only)
+  const [adminUsers, setAdminUsers] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedAdminUserId, setSelectedAdminUserId] = useState('')
+
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
-  // groupMemberNames removed — groups now use headcount only
+  const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
+  const [classroom, setClassroom] = useState(existingSession?.classroom || '')
+  // Group billing client (the agency being invoiced, e.g., People Inc, Brylin, OLV)
+  const [groupBillingClientId, setGroupBillingClientId] = useState(
+    existingSession?.attendees?.length === 1 ? existingSession.attendees[0].client_id : ''
+  )
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Success state for "Log Another" flow
   const [showSuccess, setShowSuccess] = useState(false)
+  const wasScholarshipRef = useRef(false)
+
+  // Linked invoice (edit mode): pending/sent invoice directly tied to this session.
+  // Used to prompt the user before silently letting invoice pricing drift when a session is edited.
+  const [linkedInvoice, setLinkedInvoice] = useState<{ id: string; amount: number; status: string } | null>(null)
+  const [showRegenPrompt, setShowRegenPrompt] = useState(false)
 
   function setFieldError(field: string, message: string) {
     setErrors(prev => ({ ...prev, [field]: message }))
@@ -103,44 +142,16 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }
 
   // Contractor-specific pricing overrides
-  const [contractorPayIncrease, setContractorPayIncrease] = useState<number>(0)
-  const [contractorCustomRates, setContractorCustomRates] = useState<Map<string, number>>(new Map())
-
-  // Fetch contractor-specific rates on mount
-  useEffect(() => {
-    async function loadContractorRates() {
-      // Fetch contractor's pay_increase
-      const { data: contractor } = await supabase
-        .from('users')
-        .select('pay_increase')
-        .eq('id', effectiveContractorId)
-        .single()
-
-      if (contractor?.pay_increase) {
-        setContractorPayIncrease(contractor.pay_increase)
-      }
-
-      // Fetch any custom rates for this contractor
-      const { data: rates } = await supabase
-        .from('contractor_rates')
-        .select('service_type_id, contractor_pay')
-        .eq('contractor_id', effectiveContractorId)
-
-      if (rates && rates.length > 0) {
-        const ratesMap = new Map<string, number>()
-        for (const rate of rates) {
-          ratesMap.set(rate.service_type_id, rate.contractor_pay)
-        }
-        setContractorCustomRates(ratesMap)
-      }
-    }
-
-    loadContractorRates()
-  }, [effectiveContractorId, supabase])
+  const { getOverrides: getContractorOverrides, hasMissingRate } = useContractorRates(effectiveContractorId)
 
   const storageKey = useMemo(() => {
     if (!organization?.id) return null
     return getSessionFormDefaultsStorageKey({ organizationId: organization.id, contractorId: effectiveContractorId })
+  }, [organization?.id, effectiveContractorId])
+
+  const quickLogStorageKey = useMemo(() => {
+    if (!organization?.id) return null
+    return getQuickLogDefaultsStorageKey({ organizationId: organization.id, contractorId: effectiveContractorId })
   }, [organization?.id, effectiveContractorId])
 
   // Get selected service type for pricing calculation
@@ -149,42 +160,70 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Check if this is a group service type (has per_person_rate > 0)
   const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
 
-  // For groups, use headcount; for individuals, use selected clients count
+  // Scholarship group sessions show a classroom dropdown
+  const isScholarshipGroup = !!(selectedServiceType?.is_scholarship && isGroupService)
+  const classroomOptions = settings?.custom_lists?.classrooms ?? []
+
+  // Check if this service type requires a client (admin work does not)
+  const requiresClient = selectedServiceType?.requires_client !== false
+
+  // Whether notes are required on submit (configurable via org settings)
+  const notesRequired = settings?.session?.require_notes !== false
+
+  // For groups, use headcount; for no-client services, default to 1; for individuals, use selected clients count
   const attendeeCount = isGroupService
     ? parseInt(groupHeadcount) || 0
-    : selectedClients.length
+    : !requiresClient
+      ? 1
+      : selectedClients.length
 
   // Build contractor pricing overrides for this service type
-  const contractorOverrides: ContractorPricingOverrides | undefined = useMemo(() => {
-    if (!serviceTypeId) return undefined
-    const customPay = contractorCustomRates.get(serviceTypeId)
-    if (!customPay && !contractorPayIncrease) return undefined
-    return {
-      customContractorPay: customPay,
-      payIncrease: contractorPayIncrease,
-    }
-  }, [serviceTypeId, contractorCustomRates, contractorPayIncrease])
+  const contractorOverrides = serviceTypeId ? getContractorOverrides(serviceTypeId) : undefined
 
   // Check if custom rate exists for the selected service type
-  const missingCustomRate = serviceTypeId && contractorCustomRates.size > 0
-    ? !contractorCustomRates.has(serviceTypeId)
-    : serviceTypeId && contractorCustomRates.size === 0
+  const missingCustomRate = serviceTypeId ? hasMissingRate(serviceTypeId) : false
 
   // Determine payment method for pricing (scholarship affects pricing)
+  // Service types flagged as scholarship always use scholarship pricing
   // For single-client sessions, use that client's payment method
   // For groups/mixed, show normal pricing (scholarship handled per-client at invoice time)
   const selectedPaymentMethod = useMemo(() => {
+    if (selectedServiceType?.is_scholarship) return 'scholarship'
+    // Group sessions: use the billing agency's payment method
+    if (isGroupService && groupBillingClientId) {
+      const client = clients.find(c => c.id === groupBillingClientId)
+      return client?.payment_method
+    }
     if (selectedClients.length === 1) {
       const client = clients.find(c => c.id === selectedClients[0])
       return client?.payment_method
     }
     return undefined
-  }, [selectedClients, clients])
+  }, [selectedClients, clients, selectedServiceType?.is_scholarship, isGroupService, groupBillingClientId])
 
   // Calculate pricing whenever service type, attendees, or duration change
   const pricing = selectedServiceType && attendeeCount > 0
-    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod })
+    ? calculateSessionPricing(selectedServiceType, attendeeCount, parseInt(duration), contractorOverrides, { paymentMethod: selectedPaymentMethod, durationBaseMinutes: settings?.pricing?.duration_base_minutes })
     : null
+
+  // Fetch admin-role users when admin work service type is selected
+  useEffect(() => {
+    if (requiresClient) {
+      setAdminUsers([])
+      return
+    }
+
+    async function loadAdminUsers() {
+      const { data } = await supabase
+        .from('users')
+        .select('id, name')
+        .eq('role', 'admin')
+        .eq('organization_id', organization!.id)
+      setAdminUsers(data || [])
+    }
+
+    void loadAdminUsers()
+  }, [requiresClient, supabase, organization])
 
   // Duplicate detection
   const [duplicateWarning, setDuplicateWarning] = useState<{
@@ -253,12 +292,32 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     return () => clearTimeout(timeout)
   }, [date, serviceTypeId, selectedClients, isEditMode, supabase])
 
+  // Edit mode: look up any invoice tied to this session so we can prompt before it drifts.
+  useEffect(() => {
+    if (!isEditMode || !existingSession) return
+    let cancelled = false
+
+    async function loadLinkedInvoice() {
+      if (!existingSession) return
+      const { data } = await supabase
+        .from('invoices')
+        .select('id, amount, status')
+        .eq('session_id', existingSession.id)
+        .neq('status', 'paid')
+        .maybeSingle()
+      if (!cancelled && data) {
+        setLinkedInvoice({ id: data.id, amount: Number(data.amount), status: data.status })
+      }
+    }
+    loadLinkedInvoice()
+    return () => { cancelled = true }
+  }, [isEditMode, existingSession, supabase])
+
   function removeClient(clientId: string) {
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
   }
 
   // Load remembered defaults (new sessions only). Never persist/restore notes.
-  const clientIdSet = useMemo(() => new Set(clients.map((c) => c.id)), [clients])
   const [didApplyDefaults, setDidApplyDefaults] = useState(false)
 
   useEffect(() => {
@@ -274,10 +333,13 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
     setTime(defaults.time)
     setDuration(defaults.duration)
-    setServiceTypeId(defaults.serviceTypeId)
-    setSelectedClients(defaults.selectedClientIds.filter((id) => clientIdSet.has(id)))
     setDidApplyDefaults(true)
-  }, [clientIdSet, didApplyDefaults, isEditMode, storageKey])
+  }, [didApplyDefaults, isEditMode, storageKey])
+
+  // Collapsible setup: contractors with remembered defaults start collapsed on mobile
+  const hasPopulatedDefaults = didApplyDefaults && !isEditMode && !showFinancialDetails
+    && !!time && time !== '09:00'
+  const [setupExpanded, setSetupExpanded] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -295,31 +357,45 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       hasErrors = true
     }
 
-    if (selectedClients.length === 0) {
-      setFieldError('clients', 'Please add at least one client')
-      hasErrors = true
-    }
-
-    // Group session validation
     if (isGroupService) {
       const headcount = parseInt(groupHeadcount)
       if (!headcount || headcount < 1) {
         setFieldError('groupHeadcount', 'Please enter the number of attendees')
         hasErrors = true
       }
-    }
+      if (!groupBillingClientId) {
+        setFieldError('groupBillingClient', 'Please select the agency to bill')
+        hasErrors = true
+      }
+      if (isScholarshipGroup && classroomOptions.length > 0 && !classroom) {
+        setFieldError('classroom', 'Please select a classroom')
+        hasErrors = true
+      }
+    } else if (requiresClient) {
+      if (selectedClients.length === 0) {
+        setFieldError('clients', 'Please add at least one client')
+        hasErrors = true
+      }
 
-    // Validate minimum attendees for service type (e.g., 8-week programs)
-    if (selectedServiceType) {
-      const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
-      if (minAttendeesError) {
-        setFieldError('clients', minAttendeesError)
+      // Validate minimum attendees for service type (e.g., 8-week programs)
+      if (selectedServiceType) {
+        const minAttendeesError = validateMinimumAttendees(selectedServiceType, attendeeCount)
+        if (minAttendeesError) {
+          setFieldError('clients', minAttendeesError)
+          hasErrors = true
+        }
+      }
+    } else {
+      // Admin work: require selecting who did the work
+      if (!selectedAdminUserId) {
+        setFieldError('adminUser', 'Please select who did this work')
         hasErrors = true
       }
     }
 
-    // Require notes when submitting (not for drafts)
-    if (status === 'submitted') {
+    // Require notes when submitting (not for drafts), if enabled in settings
+    // Skip notes validation for admin work (no client = no notes needed)
+    if (status === 'submitted' && notesRequired && requiresClient) {
       if (!notes.trim()) {
         setFieldError('notes', 'Internal notes are required when submitting')
         hasErrors = true
@@ -335,6 +411,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       return
     }
 
+    // Edit mode: if a linked invoice exists and pricing has changed, prompt the user
+    // to decide whether to regenerate the invoice instead of silently letting it drift.
+    if (isEditMode && linkedInvoice && pricing?.totalAmount != null) {
+      const drift = Math.abs(pricing.totalAmount - linkedInvoice.amount) > 0.005
+      if (drift) {
+        setShowRegenPrompt(true)
+        return
+      }
+    }
+
+    await performSave({ regenerateInvoice: false })
+  }
+
+  async function performSave({ regenerateInvoice }: { regenerateInvoice: boolean }) {
     setLoading(true)
 
     try {
@@ -356,7 +446,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             notes: encryptedNotes,
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: null,
+            group_member_names: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
+            classroom: isScholarshipGroup ? classroom || null : null,
+            total_amount: pricing?.totalAmount ?? null,
+            contractor_pay: pricing?.contractorPay ?? null,
+            mca_cut: pricing?.mcaCut ?? null,
             rejection_reason: status === 'submitted' ? null : undefined,
             updated_at: new Date().toISOString(),
           })
@@ -364,104 +458,104 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
         if (sessionError) throw sessionError
 
-        // Delete old attendees and add new ones
+        // Delete old attendees and add new ones (individual sessions only)
         await supabase
           .from('session_attendees')
           .delete()
           .eq('session_id', existingSession.id)
 
-        const attendees = selectedClients.map((clientId) => ({
-          session_id: existingSession.id,
-          client_id: clientId,
-          individual_cost: pricing?.totalAmount || 0,
-        }))
+        const editClientIds = isGroupService ? (groupBillingClientId ? [groupBillingClientId] : []) : selectedClients
+        if (editClientIds.length > 0) {
+          const attendees = editClientIds.map((clientId) => ({
+            session_id: existingSession.id,
+            client_id: clientId,
+            individual_cost: isGroupService ? (pricing?.totalAmount || 0) : (pricing?.perPersonCost || 0),
+          }))
 
-        const { error: attendeesError } = await supabase
-          .from('session_attendees')
-          .insert(attendees)
+          const { error: attendeesError } = await supabase
+            .from('session_attendees')
+            .insert(attendees)
 
-        if (attendeesError) throw attendeesError
+          if (attendeesError) throw attendeesError
+        }
 
-        toast.success('Session updated successfully!')
-        router.push(`/sessions/${existingSession.id}/`)
-        router.refresh()
-      } else {
-        // CREATE new session
-        // Get client payment methods for invoicing
-        const clientData = await supabase
-          .from('clients')
-          .select('id, payment_method')
-          .in('id', selectedClients)
-
-        // Create the session
-        const { data: session, error: sessionError } = await supabase
-          .from('sessions')
-          .insert({
-            date,
-            time: time + ':00',
-            duration_minutes: parseInt(duration),
-            service_type_id: serviceTypeId,
-            contractor_id: effectiveContractorId,
-            status,
-            notes: encryptedNotes,
-            client_notes: encryptedClientNotes,
-            group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
-            group_member_names: null,
-            organization_id: organization!.id,
-          })
-          .select()
-          .single()
-
-        if (sessionError) throw sessionError
-
-        // Add attendees
-        const attendees = selectedClients.map((clientId) => ({
-          session_id: session.id,
-          client_id: clientId,
-          individual_cost: pricing?.totalAmount || 0,
-        }))
-
-        const { error: attendeesError } = await supabase
-          .from('session_attendees')
-          .insert(attendees)
-
-        if (attendeesError) throw attendeesError
-
-        // If submitted, create invoices for each client
-        if (status === 'submitted' && pricing && selectedServiceType) {
-          const invoices = (clientData.data || [])
-            .filter((client) => client.payment_method !== 'scholarship') // Scholarship clients get monthly batch invoices
-            .map((client) => ({
-              session_id: session.id,
-              client_id: client.id,
+        // If the user opted to regenerate, sync the linked invoice's amount fields to
+        // match the new session pricing and reset its status to 'pending' so the admin
+        // can re-send through the normal invoice workflow.
+        if (regenerateInvoice && linkedInvoice && pricing) {
+          await supabase
+            .from('invoices')
+            .update({
               amount: pricing.totalAmount,
               mca_cut: pricing.mcaCut,
               contractor_pay: pricing.contractorPay,
               rent_amount: pricing.rentAmount,
-              payment_method: client.payment_method,
-              status: 'pending' as const,
-              organization_id: organization!.id,
-            }))
+              status: 'pending',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', linkedInvoice.id)
+          toast.success('Session updated. Invoice updated — please re-send to the client.')
+        } else if (linkedInvoice) {
+          toast.success('Session updated. Invoice was not regenerated.')
+        } else {
+          toast.success('Session updated successfully!')
+        }
+        router.push(`/sessions/${existingSession.id}/`)
+        router.refresh()
+      } else {
+        // CREATE new session
+        // Auto-approve: if automation enabled and user chose 'submitted', set to 'approved'
+        const effectiveStatus =
+          status === 'submitted' && settings?.automation?.auto_approve_sessions
+            ? 'approved'
+            : status
 
-          const { error: invoicesError } = await supabase
-            .from('invoices')
-            .insert(invoices)
+        // For admin work, the selected admin is the contractor
+        const sessionContractorId = !requiresClient && selectedAdminUserId
+          ? selectedAdminUserId
+          : effectiveContractorId
 
-          if (invoicesError) {
-            toast.error('Session saved but invoices could not be created. Please create invoices manually.')
-          }
+        const result = await createNewSession({
+          supabase,
+          date,
+          time,
+          durationMinutes: parseInt(duration),
+          serviceTypeId,
+          contractorId: sessionContractorId,
+          organizationId: organization!.id,
+          clientIds: isGroupService ? (groupBillingClientId ? [groupBillingClientId] : []) : !requiresClient ? [] : selectedClients,
+          encryptedNotes,
+          encryptedClientNotes,
+          status: effectiveStatus,
+          groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
+          groupMemberNames: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
+          classroom: isScholarshipGroup ? classroom || null : null,
+          pricing: pricing!,
+          isScholarshipService: selectedServiceType?.is_scholarship ?? false,
+          dueDays: settings?.invoice?.due_days,
+        })
+
+        if (result.invoiceError) {
+          toast.error('Session saved but invoices could not be created. Please create invoices manually.')
         }
 
         if (storageKey) {
           saveSessionFormDefaults(storageKey, {
             time,
             duration,
+          })
+        }
+        // Also save quick-log defaults (includes serviceTypeId for the FAB quick-log drawer)
+        if (quickLogStorageKey) {
+          saveQuickLogDefaults(quickLogStorageKey, {
+            time,
+            duration,
             serviceTypeId,
-            selectedClientIds: selectedClients,
           })
         }
 
         toast.success('Session logged successfully!')
+        wasScholarshipRef.current = selectedPaymentMethod === 'scholarship'
         setShowSuccess(true)
       }
     } catch {
@@ -478,13 +572,19 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Reset form for logging another session
   function handleLogAnother() {
-    setDate(new Date().toISOString().split('T')[0])
+    setDate(todayLocal())
+    setServiceTypeId('')
     setNotes('')
     setClientNotes('')
     setGroupHeadcount('')
+    setGroupMemberNames('')
+    setClassroom('')
+    setGroupBillingClientId('')
+    setSelectedClients([])
+    setSelectedAdminUserId('')
     setShowSuccess(false)
     clearAllErrors()
-    // Keep: time, duration, serviceTypeId, selectedClients (remembered)
+    // Keep: time, duration (remembered)
   }
 
   // Show success state with options after submission
@@ -499,7 +599,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Session Logged!</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
-                Your session has been saved and submitted for approval.
+                {wasScholarshipRef.current
+                  ? 'This scholarship session will appear on the Invoices \u203A Scholarship tab for monthly batch invoicing.'
+                  : 'Your session has been saved and submitted for approval.'}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -528,16 +630,56 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
           <CardTitle>Session Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date and Time - stacks on mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Collapsed summary for contractors with remembered defaults (mobile only) */}
+          {hasPopulatedDefaults && !setupExpanded && (
+            <button
+              type="button"
+              onClick={() => setSetupExpanded(true)}
+              className="w-full text-left p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 lg:hidden"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {date === todayLocal() ? 'Today' : parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {', '}{new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    {' \u00B7 '}{duration} min
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {selectedServiceType?.name || 'Unknown Service'}
+                    {' \u00B7 '}
+                    {isGroupService
+                      ? `${groupHeadcount || '?'} attendees`
+                      : selectedClients.map(id => getClientName(id)).join(', ')}
+                  </p>
+                  {pricing && (
+                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                      Your Earnings: {formatCurrency(pricing.contractorPay)}
+                    </p>
+                  )}
+                </div>
+                <Pencil className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+              </div>
+            </button>
+          )}
+
+          {/* Setup fields: always visible on desktop, collapsible on mobile for contractors */}
+          <div className={hasPopulatedDefaults && !setupExpanded ? 'hidden lg:contents' : 'contents'}>
+          {/* Date and Time - always side-by-side */}
+          <div data-tour="session-form-datetime" className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date *</Label>
+              <Label htmlFor="date" className="flex items-center gap-2">
+                Date *
+                {date === todayLocal() && (
+                  <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
+                )}
+              </Label>
               <Input
                 id="date"
                 type="date"
@@ -561,36 +703,42 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           </div>
 
           {/* Duration */}
-          <div className="space-y-2">
+          <div data-tour="session-form-duration" className="space-y-2">
             <Label htmlFor="duration">Duration (minutes) *</Label>
             <Select value={duration} onValueChange={setDuration}>
               <SelectTrigger>
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="45">45 minutes</SelectItem>
-                <SelectItem value="60">60 minutes</SelectItem>
-                <SelectItem value="90">90 minutes</SelectItem>
+                {(settings?.session?.duration_options ?? [30, 45, 60, 90]).map((mins) => (
+                  <SelectItem key={mins} value={String(mins)}>
+                    {mins} minutes
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           {/* Service Type */}
-          <div className="space-y-2">
+          <div data-tour="session-form-service-type" className="space-y-2">
             <Label htmlFor="serviceType">Service Type *</Label>
             <Select
               value={serviceTypeId}
               onValueChange={(val) => {
                 setServiceTypeId(val)
                 clearFieldError('serviceType')
+                // Clear client selection when switching to a group service
+                const st = serviceTypes.find((s) => s.id === val)
+                if (st && st.per_person_rate > 0) {
+                  setSelectedClients([])
+                }
               }}
             >
               <SelectTrigger className={errors.serviceType ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent>
-                {serviceTypes.map((st) => (
+                {visibleServiceTypes.map((st) => (
                   <SelectItem key={st.id} value={st.id}>
                     {st.name}
                   </SelectItem>
@@ -616,14 +764,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
           </div>
 
-          {/* Clients - For billing entity (e.g., People Inc, BryLin) */}
-          <div className="space-y-2">
-            <Label>{isGroupService ? 'Billing Client *' : 'Clients *'}</Label>
-            {isGroupService && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select the organization or client being billed for this group session.
-              </p>
-            )}
+          {/* Clients - Only for individual (non-group) sessions that require a client */}
+          {!isGroupService && requiresClient && (
+          <div data-tour="session-form-clients" className="space-y-2">
+            <Label>Clients *</Label>
             <div className="flex flex-wrap gap-2 mb-2">
               {selectedClients.map((clientId) => (
                 <Badge
@@ -648,7 +792,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 clients={clients}
                 selectedIds={selectedClients}
                 onChange={(ids) => {
-                  setSelectedClients(isGroupService ? ids.slice(-1) : ids)
+                  setSelectedClients(ids)
                   if (ids.length > 0) clearFieldError('clients')
                 }}
               />
@@ -665,6 +809,42 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </p>
             )}
           </div>
+          )}
+
+          {/* Admin work: who did the admin work */}
+          {!isGroupService && !requiresClient && (
+            <div className="space-y-2">
+              <Label htmlFor="adminUser">Who did this work? *</Label>
+              <Select value={selectedAdminUserId} onValueChange={setSelectedAdminUserId}>
+                <SelectTrigger id="adminUser" className={errors.adminUser ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select admin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {adminUsers.map((admin) => (
+                    <SelectItem key={admin.id} value={admin.id}>
+                      {admin.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.adminUser && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.adminUser}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Scholarship info banner */}
+          {selectedPaymentMethod === 'scholarship' && (
+            <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-blue-700 dark:text-blue-300">
+                Scholarship sessions are invoiced monthly in batch — no per-session invoice will be created.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Group Headcount - Only show for group service types */}
           {isGroupService && (
@@ -692,40 +872,103 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </div>
           )}
 
+          {/* Group Billing Client - Agency to invoice for group sessions */}
+          {isGroupService && (
+            <div className="space-y-2">
+              <Label htmlFor="groupBillingClient">Bill To (Client/Agency) *</Label>
+              <Select
+                value={groupBillingClientId}
+                onValueChange={(val) => {
+                  setGroupBillingClientId(val)
+                  clearFieldError('groupBillingClient')
+                }}
+              >
+                <SelectTrigger id="groupBillingClient" className={errors.groupBillingClient ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select agency to invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.groupBillingClient && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.groupBillingClient}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Group Member Names - Optional free-form names for group sessions */}
+          {isGroupService && (
+            <div className="space-y-2">
+              <Label htmlFor="groupMemberNames">Attendee Names</Label>
+              <Textarea
+                id="groupMemberNames"
+                placeholder="e.g., Sarah, John, Mike (optional)"
+                value={groupMemberNames}
+                onChange={(e) => setGroupMemberNames(e.target.value)}
+                rows={2}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                These names will appear on Square invoices
+              </p>
+            </div>
+          )}
+
+          {/* Classroom - Only show for scholarship group sessions */}
+          {isScholarshipGroup && classroomOptions.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="classroom">Classroom *</Label>
+              <Select value={classroom} onValueChange={(val) => { setClassroom(val); clearFieldError('classroom') }}>
+                <SelectTrigger id="classroom" className={errors.classroom ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select classroom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classroomOptions.map((room) => (
+                    <SelectItem key={room} value={room}>{room}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.classroom && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.classroom}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Pricing Preview */}
-          {pricing && (
+          {pricing && showFinancialDetails && (
             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-900 dark:text-blue-100">
-                    {showFinancialDetails ? 'Pricing Breakdown' : 'Session Summary'}
-                  </span>
+                  <span className="font-medium text-blue-900 dark:text-blue-100">Pricing Breakdown</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {showFinancialDetails && (
+                  <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
+                  <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
+
+                  <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
+                  <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
+
+                  <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
+                  <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
+
+                  {pricing.rentAmount > 0 && (
                     <>
-                      <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
-                      <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
-
-                      <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
-                      <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
-
-                      <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
-                      <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
-
-                      {pricing.rentAmount > 0 && (
-                        <>
-                          <span className="text-gray-600 dark:text-gray-400">Rent:</span>
-                          <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
-                        </>
-                      )}
+                      <span className="text-gray-600 dark:text-gray-400">Rent:</span>
+                      <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
                     </>
                   )}
 
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {showFinancialDetails ? 'Contractor Pay:' : 'Your Earnings:'}
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Contractor Pay:</span>
                   <span className="font-medium text-green-600 dark:text-green-400">
                     {formatCurrency(pricing.contractorPay)}
                   </span>
@@ -733,10 +976,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </CardContent>
             </Card>
           )}
+          {pricing && !showFinancialDetails && (
+            <div className="flex items-center justify-between py-2 px-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Your Earnings</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">
+                {formatCurrency(pricing.contractorPay)}
+              </span>
+            </div>
+          )}
+          </div>{/* end collapsible setup fields wrapper */}
 
-          {/* Internal Notes */}
+          {/* Internal Notes - hidden for admin work */}
+          {requiresClient && (
           <div className="space-y-2">
-            <Label htmlFor="notes">Internal Notes {status === 'submitted' && '*'}</Label>
+            <Label htmlFor="notes">Internal Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
               id="notes"
               placeholder="Internal notes (not visible to client)..."
@@ -745,75 +998,85 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 setNotes(e.target.value)
                 if (e.target.value.trim()) clearFieldError('notes')
               }}
-              rows={3}
+              rows={2}
               className={errors.notes ? 'border-red-500' : ''}
             />
-            {errors.notes ? (
+            {errors.notes && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {errors.notes}
               </p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                These notes are for internal use only and will not be shared with the client.
-              </p>
             )}
           </div>
+          )}
 
-          {/* Client-Facing Notes */}
+          {/* Client-Facing Notes - hidden for admin work */}
+          {requiresClient && (
           <div className="space-y-2">
-            <Label htmlFor="clientNotes">Client Notes {status === 'submitted' && '*'}</Label>
+            <Label htmlFor="clientNotes">Client Notes {notesRequired && status === 'submitted' && '*'}</Label>
             <Textarea
               id="clientNotes"
-              placeholder="Notes to share with the client in their portal..."
+              placeholder="Notes visible to client in their portal..."
               value={clientNotes}
               onChange={(e) => {
                 setClientNotes(e.target.value)
                 if (e.target.value.trim()) clearFieldError('clientNotes')
               }}
-              rows={3}
+              rows={2}
               className={errors.clientNotes ? 'border-red-500' : ''}
             />
-            {errors.clientNotes ? (
+            {errors.clientNotes && (
               <p className="text-sm text-red-500 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {errors.clientNotes}
               </p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                These notes will be visible to the client in their portal.
-              </p>
             )}
           </div>
+          )}
 
           {/* Status */}
-          <div className="space-y-2">
-            <Label>Save as</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value="submitted"
-                  checked={status === 'submitted'}
-                  onChange={() => setStatus('submitted')}
-                  className="w-4 h-4"
-                />
-                <span>Submit for approval</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value="draft"
-                  checked={status === 'draft'}
-                  onChange={() => setStatus('draft')}
-                  className="w-4 h-4"
-                />
-                <span>Save as draft</span>
-              </label>
+          {showFinancialDetails ? (
+            <div data-tour="session-form-status" className="space-y-2">
+              <Label>Save as</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="submitted"
+                    checked={status === 'submitted'}
+                    onChange={() => setStatus('submitted')}
+                    className="w-4 h-4"
+                  />
+                  <span>Submit for approval</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="draft"
+                    checked={status === 'draft'}
+                    onChange={() => setStatus('draft')}
+                    className="w-4 h-4"
+                  />
+                  <span>Save as draft</span>
+                </label>
+              </div>
             </div>
-          </div>
+          ) : (
+            status === 'draft' ? (
+              <div className="flex items-center justify-between text-sm py-1">
+                <span className="text-amber-600 dark:text-amber-400">Saving as draft (not submitted)</span>
+                <button type="button" onClick={() => setStatus('submitted')} className="text-blue-600 dark:text-blue-400 underline">
+                  Submit instead
+                </button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => setStatus('draft')} className="text-xs text-gray-500 dark:text-gray-400 underline">
+                Save as draft instead?
+              </button>
+            )
+          )}
 
           {/* Duplicate Warning */}
           {duplicateWarning && (
@@ -822,10 +1085,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <AlertTitle className="text-yellow-800 dark:text-yellow-200">Potential Duplicate Session</AlertTitle>
               <AlertDescription className="text-yellow-700 dark:text-yellow-300">
                 <strong>{duplicateWarning.clientName}</strong> already has a <strong>{duplicateWarning.serviceTypeName}</strong> session
-                on <strong>{new Date(duplicateWarning.date).toLocaleDateString()}</strong>.
+                on <strong>{parseLocalDate(duplicateWarning.date).toLocaleDateString()}</strong>.
                 <br />
                 <a
-                  href={`/sessions/${duplicateWarning.sessionId}`}
+                  href={`/sessions/${duplicateWarning.sessionId}/`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:no-underline"
@@ -866,7 +1129,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </Button>
             )}
           </div>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" data-tour="session-form-submit" disabled={loading}>
             {loading
               ? isEditMode
                 ? 'Updating session...'
@@ -880,5 +1143,37 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         </CardFooter>
       </Card>
     </form>
+
+    <AlertDialog open={showRegenPrompt} onOpenChange={setShowRegenPrompt}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Regenerate invoice?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This session has a{linkedInvoice?.status === 'sent' ? 'n already-sent' : ' pending'} invoice for {formatCurrency(linkedInvoice?.amount ?? 0)}. The new total is {formatCurrency(pricing?.totalAmount ?? 0)}.
+            {' '}
+            Would you like to update the invoice and queue it for re-sending to the client?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            onClick={() => {
+              setShowRegenPrompt(false)
+              performSave({ regenerateInvoice: false })
+            }}
+          >
+            No, just update session
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              setShowRegenPrompt(false)
+              performSave({ regenerateInvoice: true })
+            }}
+          >
+            Yes, regenerate invoice
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

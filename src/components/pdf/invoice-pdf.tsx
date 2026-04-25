@@ -5,6 +5,9 @@ import {
   View,
   StyleSheet,
 } from '@react-pdf/renderer'
+import { paymentMethodLabels, formatInvoiceNumber } from '@/lib/constants/display'
+import { formatCurrency } from '@/lib/pricing'
+import { parseLocalDate } from '@/lib/dates'
 
 const styles = StyleSheet.create({
   page: {
@@ -216,21 +219,10 @@ interface InvoiceData {
 
 interface InvoicePDFProps {
   invoice: InvoiceData
+  footerText?: string
+  paymentInstructions?: string
 }
 
-const paymentMethodLabels: Record<string, string> = {
-  private_pay: 'Private Pay',
-  self_directed: 'Self-Directed',
-  group_home: 'Group Home',
-  scholarship: 'Scholarship',
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount)
-}
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -240,15 +232,10 @@ function formatDate(dateString: string): string {
   })
 }
 
-function formatShortDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
-export function InvoicePDF({ invoice }: InvoicePDFProps) {
-  const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+
+export function InvoicePDF({ invoice, footerText, paymentInstructions }: InvoicePDFProps) {
+  const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
 
   const titleText = isBatch && invoice.billing_period
@@ -339,7 +326,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
                       </Text>
                     )}
                   </View>
-                  <Text style={styles.col2}>{formatShortDate(item.session_date)}</Text>
+                  <Text style={styles.col2}>{parseLocalDate(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
                   <Text style={[styles.col3, { fontWeight: 'bold' }]}>
                     {formatCurrency(item.amount)}
                   </Text>
@@ -360,7 +347,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
                   </Text>
                 )}
               </View>
-              <Text style={styles.col2}>{formatDate(invoice.session.date)}</Text>
+              <Text style={styles.col2}>{parseLocalDate(invoice.session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
               <Text style={[styles.col3, { fontWeight: 'bold' }]}>
                 {formatCurrency(invoice.amount)}
               </Text>
@@ -390,10 +377,18 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           </View>
         )}
 
+        {/* Payment Instructions */}
+        {paymentInstructions ? (
+          <View style={{ marginTop: 30, padding: 15, backgroundColor: '#f0f9ff', borderRadius: 4 }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#374151', marginBottom: 8 }}>Payment Instructions</Text>
+            <Text style={{ fontSize: 10, color: '#6b7280', lineHeight: 1.5 }}>{paymentInstructions}</Text>
+          </View>
+        ) : null}
+
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Thank you for choosing May Creative Arts!
+            {footerText || 'Thank you for choosing May Creative Arts!'}
           </Text>
           <Text style={[styles.footerText, { marginTop: 4 }]}>
             Questions? Contact us at maycreativearts@gmail.com

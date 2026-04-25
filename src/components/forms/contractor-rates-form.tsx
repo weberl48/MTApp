@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -14,8 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency, calculateSessionPricing } from '@/lib/pricing'
-import { Loader2, DollarSign, Pencil, X, Check } from 'lucide-react'
+import { formatCurrency, calculateSessionPricing, getDefaultIncrement } from '@/lib/pricing'
+import { Loader2, Pencil, X, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ServiceType } from '@/types/database'
 
@@ -23,29 +22,24 @@ interface ContractorRatesFormProps {
   contractorId: string
   contractorName: string
   organizationId: string
-  currentPayIncrease: number
-  onPayIncreaseUpdate?: (newValue: number) => void
 }
 
 interface ContractorRate {
   id: string
   service_type_id: string
   contractor_pay: number
+  duration_increment: number | null
 }
 
 export function ContractorRatesForm({
   contractorId,
   contractorName,
   organizationId,
-  currentPayIncrease,
-  onPayIncreaseUpdate,
 }: ContractorRatesFormProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([])
   const [contractorRates, setContractorRates] = useState<Map<string, ContractorRate>>(new Map())
-  const [payIncrease, setPayIncrease] = useState(currentPayIncrease.toString())
-  const [editingPayIncrease, setEditingPayIncrease] = useState(false)
   const [editingRateId, setEditingRateId] = useState<string | null>(null)
   const [editingRateValue, setEditingRateValue] = useState('')
 
@@ -81,27 +75,6 @@ export function ContractorRatesForm({
     loadData()
   }, [contractorId, organizationId])
 
-  async function handleSavePayIncrease() {
-    setSaving(true)
-    const supabase = createClient()
-    const newValue = parseFloat(payIncrease) || 0
-
-    const { error } = await supabase
-      .from('users')
-      .update({ pay_increase: newValue, updated_at: new Date().toISOString() })
-      .eq('id', contractorId)
-
-    if (error) {
-      toast.error('Failed to update pay increase')
-    } else {
-      toast.success('Pay increase updated')
-      onPayIncreaseUpdate?.(newValue)
-    }
-
-    setSaving(false)
-    setEditingPayIncrease(false)
-  }
-
   async function handleSaveCustomRate(serviceTypeId: string) {
     const customPay = parseFloat(editingRateValue)
     if (isNaN(customPay) || customPay < 0) {
@@ -114,7 +87,6 @@ export function ContractorRatesForm({
     const existingRate = contractorRates.get(serviceTypeId)
 
     if (existingRate) {
-      // Update existing rate
       const { error } = await supabase
         .from('contractor_rates')
         .update({ contractor_pay: customPay, updated_at: new Date().toISOString() })
@@ -129,7 +101,6 @@ export function ContractorRatesForm({
         toast.success('Rate updated')
       }
     } else {
-      // Create new rate
       const { data, error } = await supabase
         .from('contractor_rates')
         .insert({
@@ -185,7 +156,6 @@ export function ContractorRatesForm({
   }
 
   function getDefaultContractorPay(serviceType: ServiceType): number {
-    // Calculate default pay for 1 attendee, 30 min
     const pricing = calculateSessionPricing(serviceType, 1, 30)
     return pricing.contractorPay
   }
@@ -200,73 +170,6 @@ export function ContractorRatesForm({
 
   return (
     <div className="space-y-6">
-      {/* Pay Increase Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5" />
-            Pay Increase Bonus
-          </CardTitle>
-          <CardDescription>
-            Additional amount added to each session for this contractor
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Label className="text-sm text-gray-600">Per-session bonus:</Label>
-            {editingPayIncrease ? (
-              <div className="flex items-center gap-2">
-                <span className="text-lg">$</span>
-                <Input
-                  type="number"
-                  step="0.50"
-                  min="0"
-                  value={payIncrease}
-                  onChange={(e) => setPayIncrease(e.target.value)}
-                  className="w-24"
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleSavePayIncrease}
-                  disabled={saving}
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-green-600" />}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingPayIncrease(false)
-                    setPayIncrease(currentPayIncrease.toString())
-                  }}
-                  disabled={saving}
-                >
-                  <X className="w-4 h-4 text-red-600" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
-                  +{formatCurrency(parseFloat(payIncrease) || 0)}
-                </span>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setEditingPayIncrease(true)}
-                  className="h-8 w-8"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            This bonus is added on top of the calculated contractor pay for each session.
-          </p>
-        </CardContent>
-      </Card>
-
       {/* Custom Rates Table */}
       <Card>
         <CardHeader>
@@ -282,6 +185,7 @@ export function ContractorRatesForm({
                 <TableHead>Service Type</TableHead>
                 <TableHead className="text-right">Default Pay (30 min)</TableHead>
                 <TableHead className="text-right">Custom Pay</TableHead>
+                <TableHead className="text-right">Increment</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -290,6 +194,8 @@ export function ContractorRatesForm({
                 const customRate = contractorRates.get(serviceType.id)
                 const defaultPay = getDefaultContractorPay(serviceType)
                 const isEditing = editingRateId === serviceType.id
+                const defaultIncrement = getDefaultIncrement(serviceType.contractor_pay_schedule)
+                const effectiveIncrement = customRate?.duration_increment ?? defaultIncrement
 
                 return (
                   <TableRow key={serviceType.id} className={!customRate ? 'bg-amber-50/50 dark:bg-amber-950/10' : ''}>
@@ -321,6 +227,15 @@ export function ContractorRatesForm({
                         </span>
                       ) : (
                         <span className="text-amber-600 dark:text-amber-400 font-medium">Not set</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {effectiveIncrement !== null ? (
+                        <span className={customRate?.duration_increment !== null && customRate?.duration_increment !== undefined ? 'text-green-600 font-medium' : 'text-gray-500'}>
+                          +{formatCurrency(effectiveIncrement)}/15m
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

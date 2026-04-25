@@ -10,6 +10,8 @@ import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { redirect } from 'next/navigation'
+import { EarningsChart } from '@/components/charts/earnings-chart'
+import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
 
 interface EarningsSummary {
   ytdEarnings: number
@@ -39,7 +41,7 @@ export default function EarningsPage() {
   // Only contractors (or those viewing as a contractor) should see this page
   const effectiveRole = viewAsRole || actualRole
   if (user && effectiveRole !== 'contractor' && !viewAsContractor) {
-    redirect('/dashboard')
+    redirect('/dashboard/')
   }
 
   useEffect(() => {
@@ -88,22 +90,17 @@ export default function EarningsPage() {
       }
 
       // Fetch contractor-specific rates
-      const [{ data: contractorData }, { data: customRates }] = await Promise.all([
-        supabase
-          .from('users')
-          .select('pay_increase')
-          .eq('id', contractorId)
-          .single(),
-        supabase
-          .from('contractor_rates')
-          .select('service_type_id, contractor_pay')
-          .eq('contractor_id', contractorId)
-      ])
+      const { data: customRates } = await supabase
+        .from('contractor_rates')
+        .select('service_type_id, contractor_pay, duration_increment')
+        .eq('contractor_id', contractorId)
 
-      const payIncrease = contractorData?.pay_increase || 0
-      const customRatesMap = new Map<string, number>()
+      const customRatesMap = new Map<string, { contractorPay: number; durationIncrement: number | null }>()
       for (const rate of customRates || []) {
-        customRatesMap.set(rate.service_type_id, rate.contractor_pay)
+        customRatesMap.set(rate.service_type_id, {
+          contractorPay: rate.contractor_pay,
+          durationIncrement: rate.duration_increment,
+        })
       }
 
       // Calculate earnings from sessions
@@ -130,16 +127,17 @@ export default function EarningsPage() {
           || Math.max(1, (session.attendees as { id: string }[])?.length || 1)
 
         // Build contractor pricing overrides
-        const customPay = customRatesMap.get(serviceType.id)
+        const rateData = customRatesMap.get(serviceType.id)
         const overrides: ContractorPricingOverrides | undefined =
-          customPay || payIncrease ? { customContractorPay: customPay, payIncrease } : undefined
+          rateData ? { customContractorPay: rateData.contractorPay, durationIncrement: rateData.durationIncrement } : undefined
 
         // Use shared pricing calculation
         const pricing = calculateSessionPricing(
           serviceType as ServiceType,
           attendeeCount,
           session.duration_minutes || 30,
-          overrides
+          overrides,
+          { durationBaseMinutes: organization?.settings?.pricing?.duration_base_minutes }
         )
 
         // Use actual paid amount if available, otherwise use calculated
@@ -197,12 +195,24 @@ export default function EarningsPage() {
     fetchEarnings()
   }, [contractorId, organization])
 
+  // Prepare chart data (reverse for chronological order)
+  const chartData = [...monthlyBreakdown].reverse()
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Earnings</h1>
-          <p className="text-gray-500 dark:text-gray-400">Loading your earnings data...</p>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="rounded-lg border bg-card p-6">
+          <Skeleton className="h-[250px] w-full" />
         </div>
       </div>
     )
@@ -211,8 +221,8 @@ export default function EarningsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Earnings</h1>
-        <p className="text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold">My Earnings</h1>
+        <p className="text-muted-foreground">
           Track your earnings and payment status
         </p>
       </div>
@@ -271,6 +281,9 @@ export default function EarningsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Earnings Chart */}
+      <EarningsChart data={chartData} />
 
       {/* Monthly Breakdown */}
       <Card>
