@@ -21,8 +21,10 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null)
   const [checking, setChecking] = useState(true)
 
-  // Check if MFA is required for this user's role
-  const requireMfa = settings?.security?.require_mfa ?? false
+  // Check if MFA is required for this user's role (skip in local dev)
+  const requireMfa = process.env.NODE_ENV === 'production'
+    ? (settings?.security?.require_mfa ?? false)
+    : false
   const isPrivilegedUser = can('session:view-all')
 
   useEffect(() => {

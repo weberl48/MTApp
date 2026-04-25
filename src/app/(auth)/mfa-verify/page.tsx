@@ -13,6 +13,13 @@ export default function MfaVerifyPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Skip MFA entirely in local development
+    if (process.env.NODE_ENV !== 'production') {
+      router.push('/dashboard/')
+      router.refresh()
+      return
+    }
+
     async function check() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
