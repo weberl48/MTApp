@@ -95,7 +95,7 @@ export default function SessionsPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'client_asc' | 'client_desc'>('date_desc')
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'client_asc' | 'client_desc' | 'price_asc' | 'price_desc'>('date_desc')
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
@@ -145,10 +145,11 @@ export default function SessionsPage() {
       setSessions((data as unknown as Session[]) || [])
 
       // Fetch contractors for filter (admin only, not when viewing as contractor)
-      if (!shouldFilterByContractor) {
+      if (!shouldFilterByContractor && organization?.id) {
         const { data: contractorData } = await supabase
           .from('users')
           .select('id, name')
+          .eq('organization_id', organization.id)
           .in('role', ['contractor', 'admin', 'owner'])
           .order('name')
         setContractors(contractorData || [])
@@ -160,7 +161,7 @@ export default function SessionsPage() {
     }
 
     loadSessions()
-  }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter])
+  }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter, organization?.id])
 
   async function handleInlineApprove(e: React.MouseEvent, sessionId: string) {
     e.preventDefault()
@@ -256,6 +257,14 @@ export default function SessionsPage() {
         })
         break
       }
+      case 'price_asc':
+      case 'price_desc': {
+        sorted.sort((a, b) => {
+          const cmp = (a.total_amount ?? 0) - (b.total_amount ?? 0)
+          return sortBy === 'price_asc' ? cmp : -cmp
+        })
+        break
+      }
     }
     return sorted
   }, [filteredSessions, sortBy])
@@ -301,8 +310,8 @@ export default function SessionsPage() {
             {isAdmin ? 'View and manage all sessions' : 'Your session history'}
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
-          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-full sm:w-[200px]">
+        <div className="flex items-center gap-3">
+          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-[200px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="list">
                 <List className="w-4 h-4 mr-2" />
@@ -320,8 +329,9 @@ export default function SessionsPage() {
               contractorId={shouldFilterByContractor ? contractorIdToFilter || undefined : undefined}
             />
           )}
-          <Link href="/sessions/new/" data-tour="sessions-new-button">
-            <Button className="w-full sm:w-auto justify-center">
+          {/* Hidden on mobile — FAB handles new session on small screens */}
+          <Link href="/sessions/new/" data-tour="sessions-new-button" className="hidden sm:block">
+            <Button>
               <Plus className="w-4 h-4 mr-2" />
               New Session
             </Button>
@@ -355,6 +365,8 @@ export default function SessionsPage() {
                     <SelectItem value="date_asc">Date (Oldest)</SelectItem>
                     <SelectItem value="client_asc">Client (A-Z)</SelectItem>
                     <SelectItem value="client_desc">Client (Z-A)</SelectItem>
+                    <SelectItem value="price_asc">Price (Low to High)</SelectItem>
+                    <SelectItem value="price_desc">Price (High to Low)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button

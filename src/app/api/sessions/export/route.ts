@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
     const clientId = searchParams.get('clientId')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const contractorIdParam = searchParams.get('contractorId')
     const formatType = searchParams.get('format') || 'csv' // csv or json
 
     // Build query
@@ -92,9 +93,12 @@ export async function GET(request: NextRequest) {
       .eq('organization_id', userProfile.organization_id)
       .order('date', { ascending: false })
 
-    // Contractors can only export their own sessions
+    // Contractors can only export their own sessions.
+    // Admins may scope to a specific contractor (e.g., when using "View As Contractor").
     if (isContractor) {
       query = query.eq('contractor_id', user.id)
+    } else if (isAdmin && contractorIdParam) {
+      query = query.eq('contractor_id', contractorIdParam)
     }
 
     // Apply filters
