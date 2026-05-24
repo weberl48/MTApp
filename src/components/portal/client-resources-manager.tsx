@@ -35,6 +35,7 @@ import {
   Download,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Resource {
   id: string
@@ -61,6 +62,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
   const [dialogType, setDialogType] = useState<'homework' | 'link' | 'file' | null>(null)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
 
   // Form state
   const [title, setTitle] = useState('')
@@ -209,31 +211,35 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
     }
   }
 
-  async function handleDelete(resource: Resource) {
-    if (!confirm(`Delete "${resource.title}"?`)) return
+  function handleDelete(resource: Resource) {
+    openConfirm({
+      title: 'Delete Resource',
+      description: `Delete "${resource.title}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        setDeletingId(resource.id)
+        try {
+          const response = await fetch(`/api/clients/${clientId}/resources`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resourceId: resource.id }),
+          })
 
-    setDeletingId(resource.id)
+          if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to delete')
+          }
 
-    try {
-      const response = await fetch(`/api/clients/${clientId}/resources`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resourceId: resource.id }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to delete')
-      }
-
-      toast.success('Resource deleted')
-      setResources((prev) => prev.filter((r) => r.id !== resource.id))
-    } catch (error) {
-      console.error('[MCA] Error deleting resource')
-      toast.error(error instanceof Error ? error.message : 'Failed to delete')
-    } finally {
-      setDeletingId(null)
-    }
+          toast.success('Resource deleted')
+          setResources((prev) => prev.filter((r) => r.id !== resource.id))
+        } catch (error) {
+          console.error('[MCA] Error deleting resource')
+          toast.error(error instanceof Error ? error.message : 'Failed to delete')
+        } finally {
+          setDeletingId(null)
+        }
+      },
+    })
   }
 
   function formatDate(dateStr: string) {
@@ -495,6 +501,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...confirmDialogProps} />
     </Card>
   )
 }

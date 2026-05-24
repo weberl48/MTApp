@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 export type ClientMultiSelectOption = {
   id: string
   name: string
+  payment_method?: string
 }
 
 interface ClientMultiSelectProps {
@@ -102,7 +103,14 @@ export function ClientMultiSelect({ clients, selectedIds, onChange, disabled }: 
                         onCheckedChange={(next) => setClientChecked(client.id, next === true)}
                         aria-label={`Select ${client.name}`}
                       />
-                      <span className="flex-1 truncate">{client.name}</span>
+                      <span className="flex-1 truncate">
+                        {client.name}
+                        {client.payment_method === 'scholarship' && (
+                          <span className="ml-1.5 inline-flex items-center rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                            Scholarship
+                          </span>
+                        )}
+                      </span>
                     </div>
                   )
                 })}

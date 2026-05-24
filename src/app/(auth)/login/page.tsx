@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Clock, Lock } from 'lucide-react'
-import { MfaChallenge } from '@/components/forms/mfa-challenge'
+import { AlertCircle, Clock, Loader2, Lock } from 'lucide-react'
 import { needsMfaVerification } from '@/lib/supabase/mfa'
 
 export default function LoginPage() {
@@ -18,9 +17,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [sessionExpired, setSessionExpired] = useState(false)
-  const [mfaRequired, setMfaRequired] = useState(false)
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
   const [lockoutMinutes, setLockoutMinutes] = useState(0)
+  const [restoring, setRestoring] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -47,6 +45,30 @@ export default function LoginPage() {
     }, 60000)
     return () => clearInterval(timer)
   }, [lockoutMinutes])
+
+  function isNetworkError(msg: string) {
+    return msg === 'Failed to fetch' || msg === 'Load failed'
+  }
+
+  async function attemptRestore() {
+    setRestoring(true)
+    setError('Server unavailable — attempting to restore automatically...')
+    try {
+      const res = await fetch('/api/health/restore/', { method: 'POST' })
+      if (res.ok) {
+        setError('Server is restoring — this usually takes 1-2 minutes. Please try signing in again shortly.')
+      } else {
+        const data = await res.json().catch(() => null)
+        setError(data?.error === 'SUPABASE_ACCESS_TOKEN not configured'
+          ? 'Server unavailable. Automatic restore is not configured — please restore the project from the Supabase dashboard.'
+          : 'Server unavailable — automatic restore failed. Please try again later or restore manually from the Supabase dashboard.')
+      }
+    } catch {
+      setError('Server unavailable — could not attempt automatic restore. Please try again later.')
+    } finally {
+      setRestoring(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -76,6 +98,11 @@ export default function LoginPage() {
       })
 
       if (error) {
+        if (isNetworkError(error.message)) {
+          await attemptRestore()
+          return
+        }
+
         // Record failed attempt
         fetch('/api/auth/lockout/', {
           method: 'POST',
@@ -95,34 +122,24 @@ export default function LoginPage() {
       })
 
       // Check if MFA verification is needed
-      const { needsVerification, factorId } = await needsMfaVerification()
+      const { needsVerification } = await needsMfaVerification()
 
-      if (needsVerification && factorId) {
-        setMfaRequired(true)
-        setMfaFactorId(factorId)
+      if (needsVerification) {
+        router.push('/mfa-verify/')
         return
       }
 
       router.push('/dashboard/')
       router.refresh()
-    } catch {
-      setError('An unexpected error occurred')
+    } catch (err) {
+      if (err instanceof TypeError && isNetworkError(err.message)) {
+        await attemptRestore()
+      } else {
+        setError('An unexpected error occurred')
+      }
     } finally {
       setLoading(false)
     }
-  }
-
-  function handleMfaCancel() {
-    // Sign out and reset state
-    supabase.auth.signOut()
-    setMfaRequired(false)
-    setMfaFactorId(null)
-    setPassword('')
-  }
-
-  // Show MFA challenge if required
-  if (mfaRequired && mfaFactorId) {
-    return <MfaChallenge factorId={mfaFactorId} onCancel={handleMfaCancel} />
   }
 
   const isLockedOut = lockoutMinutes > 0
@@ -150,8 +167,15 @@ export default function LoginPage() {
             </div>
           )}
           {error && !isLockedOut && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <div className={`p-3 text-sm rounded-md flex items-center gap-2 ${
+              restoring
+                ? 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+                : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
+            }`}>
+              {restoring
+                ? <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin" />
+                : <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              }
               <span>{error}</span>
             </div>
           )}
@@ -171,7 +195,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
               <Link
-                href="/forgot-password"
+                href="/forgot-password/"
                 className="text-sm text-blue-600 hover:underline dark:text-blue-400"
               >
                 Forgot password?
@@ -193,7 +217,7 @@ export default function LoginPage() {
           </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/signup/" className="text-blue-600 hover:underline dark:text-blue-400">
               Sign up
             </Link>
           </p>

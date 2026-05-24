@@ -64,6 +64,12 @@ const TABLE_LABELS: Record<string, string> = {
   service_types: 'Service Types',
   session_attendees: 'Session Attendees',
   organizations: 'Organization',
+  contractor_rates: 'Contractor Rates',
+  client_goals: 'Client Goals',
+  user_invites: 'User Invites',
+  client_access_tokens: 'Portal Tokens',
+  session_requests: 'Session Requests',
+  client_resources: 'Client Resources',
 }
 
 const ACTION_ICONS = {

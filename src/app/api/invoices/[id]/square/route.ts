@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createSquareInvoice } from '@/lib/square/invoices'
+import { createSquareInvoice, buildSquareProcessingFee } from '@/lib/square/invoices'
 import { isSquareConfigured } from '@/lib/square/client'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { formatInvoiceNumber } from '@/lib/constants/display'
+import { parseLocalDate } from '@/lib/dates'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole, OrganizationSettings } from '@/types/database'
 
 export async function POST(
   request: NextRequest,
@@ -42,8 +46,8 @@ export async function POST(
       .eq('id', user.id)
       .single<{ role: string; organization_id: string }>()
 
-    const role = userProfile?.role
-    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+    const role = userProfile?.role as UserRole | undefined
+    if (!can(role ?? null, 'invoice:send')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -57,7 +61,7 @@ export async function POST(
           id,
           date,
           duration_minutes,
-          notes,
+          group_member_names,
           contractor:users(id, name),
           service_type:service_types(name)
         )
@@ -67,6 +71,23 @@ export async function POST(
 
     if (error || !invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+    }
+
+    // Get attendee names: prefer free-form group_member_names, then session_attendees, then billed client
+    let attendeeNames: string[] = []
+    if (invoice.session?.group_member_names) {
+      // Free-form names entered for group sessions
+      attendeeNames = [invoice.session.group_member_names]
+    } else if (invoice.session?.id) {
+      // Look up tracked attendees from the database
+      const { data: attendees } = await supabase
+        .from('session_attendees')
+        .select('client:clients(name)')
+        .eq('session_id', invoice.session.id)
+
+      attendeeNames = (attendees || [])
+        .map((a) => (a.client as unknown as { name: string } | null)?.name)
+        .filter((n): n is string => !!n)
     }
 
     // Verify organization ownership (developers can access all)
@@ -91,7 +112,7 @@ export async function POST(
     }
 
     // Create the invoice number
-    const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+    const invoiceNumber = formatInvoiceNumber(invoice.id)
 
     // Calculate due date (30 days from now if not set)
     const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -106,7 +127,7 @@ export async function POST(
       // Fetch invoice items for batch invoices
       const { data: items } = await supabase
         .from('invoice_items')
-        .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
+        .select('description, session_id, session_date, duration_minutes, amount, service_type_name, contractor_name')
         .eq('invoice_id', id)
         .order('session_date', { ascending: true })
 
@@ -117,28 +138,64 @@ export async function POST(
 
       description = `Monthly Statement - ${periodLabel} (${itemCount} session${itemCount !== 1 ? 's' : ''})`
 
-      // Build a detailed note with session line items
+      // Fetch attendee names for all sessions in the batch
+      const sessionIds = (items || []).map(i => i.session_id).filter(Boolean)
+      const { data: batchAttendees } = sessionIds.length > 0
+        ? await supabase
+            .from('session_attendees')
+            .select('session_id, client:clients(name)')
+            .in('session_id', sessionIds)
+        : { data: [] as { session_id: string; client: { name: string } | null }[] }
+
+      // Group attendee names by session_id
+      const attendeesBySession = new Map<string, string[]>()
+      for (const a of batchAttendees || []) {
+        const name = (a.client as unknown as { name: string } | null)?.name
+        if (name && a.session_id) {
+          const list = attendeesBySession.get(a.session_id) || []
+          list.push(name)
+          attendeesBySession.set(a.session_id, list)
+        }
+      }
+
+      // Build a detailed note with session line items and attendee names
       if (items && items.length > 0) {
         const lines = items.map((item) => {
-          const date = new Date(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          const date = parseLocalDate(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
           const svc = item.service_type_name || 'Session'
           const dur = item.duration_minutes ? ` (${item.duration_minutes} min)` : ''
-          return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}`
+          const names = item.session_id ? attendeesBySession.get(item.session_id)?.join(', ') : ''
+          const namesSuffix = names ? ` — ${names}` : ''
+          return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}${namesSuffix}`
         })
         note = lines.join('\n')
       }
     } else {
       const sessionDate = invoice.session?.date
-        ? new Date(invoice.session.date).toLocaleDateString('en-US', {
+        ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
             year: 'numeric',
           })
         : 'N/A'
 
-      description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate}`
-      note = invoice.session?.notes || undefined
+      // Include attendee names in the description for agencies
+      const names = attendeeNames.length > 0 ? attendeeNames : [invoice.client.name]
+      const nameList = names.join(', ')
+
+      description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate} — ${nameList}`
+      note = nameList
     }
+
+    // Fetch organization settings for processing fee
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', invoice.organization_id)
+      .single()
+
+    const pricingSettings = (org?.settings as OrganizationSettings)?.pricing
+    const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
 
     // Create Square invoice
     const squareResult = await createSquareInvoice({
@@ -149,6 +206,7 @@ export async function POST(
       dueDate,
       invoiceNumber,
       note,
+      serviceCharge,
     })
 
     // Update our invoice with Square invoice ID and URL

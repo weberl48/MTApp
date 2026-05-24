@@ -11,10 +11,11 @@ import {
   Settings,
   Menu,
   X,
-  BarChart3,
   Wallet,
   UsersRound,
   DollarSign,
+  BarChart3,
+  ChevronRight,
   HelpCircle,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -30,30 +31,38 @@ type NavItem = {
   ownerOnly?: boolean      // Visible to owner, developer only (NOT admin)
   contractorOnly?: boolean // Visible to contractor only
   feature?: keyof FeatureFlags // Hide when this feature is disabled
+  children?: NavItem[]     // Sub-navigation items
 }
 
 const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Sessions', href: '/sessions', icon: Calendar },
-  { name: 'Clients', href: '/clients', icon: Users, adminOnly: true },
-  { name: 'Invoices', href: '/invoices', icon: FileText, adminOnly: true },
-  { name: 'Earnings', href: '/earnings', icon: DollarSign, contractorOnly: true },
-  { name: 'Team', href: '/team', icon: UsersRound, adminOnly: true },
-  { name: 'Payments', href: '/payments', icon: Wallet, ownerOnly: true },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, ownerOnly: true },
-  { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Help', href: '/help', icon: HelpCircle },
+  { name: 'Dashboard', href: '/dashboard/', icon: LayoutDashboard },
+  { name: 'Sessions', href: '/sessions/', icon: Calendar },
+  { name: 'Clients', href: '/clients/', icon: Users, adminOnly: true },
+  {
+    name: 'Billing',
+    href: '/invoices/',
+    icon: FileText,
+    adminOnly: true,
+    children: [
+      { name: 'Invoices', href: '/invoices/', icon: FileText },
+      { name: 'Payroll', href: '/payments/', icon: Wallet, ownerOnly: true },
+    ],
+  },
+  { name: 'Analytics', href: '/analytics/', icon: BarChart3, ownerOnly: true },
+  { name: 'Earnings', href: '/earnings/', icon: DollarSign, contractorOnly: true },
+  { name: 'Team', href: '/team/', icon: UsersRound, adminOnly: true },
+  { name: 'Settings', href: '/settings/', icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const { can, user, feature } = useOrganization()
 
   const isContractor = user?.role === 'contractor'
 
-  // Filter navigation based on user role and feature flags
-  const filteredNavigation = navigation.filter((item) => {
+  function shouldShowItem(item: NavItem): boolean {
     // Feature gate: hide if the feature is disabled
     if (item.feature && !feature(item.feature)) {
       return false
@@ -75,7 +84,103 @@ export function Sidebar() {
     }
     // Default: show to everyone
     return true
+  }
+
+  // Filter navigation based on user role and feature flags
+  const filteredNavigation = navigation.flatMap((item) => {
+    if (!shouldShowItem(item)) return []
+    // For items with children, filter children too
+    if (item.children) {
+      return [{ ...item, children: item.children.filter(shouldShowItem) }]
+    }
+    return [item]
   })
+
+  // Auto-expand Billing when on a billing sub-route
+  const isBillingActive = pathname.startsWith('/invoices') || pathname.startsWith('/payments')
+
+  function toggleExpanded(name: string) {
+    setExpandedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
+
+  function renderNavItem(item: NavItem) {
+    const hasChildren = item.children && item.children.length > 0
+
+    if (hasChildren) {
+      const isExpanded = expandedItems.has(item.name) || isBillingActive
+      const isActive = item.children!.some((child) => pathname.startsWith(child.href))
+
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleExpanded(item.name)}
+            aria-expanded={isExpanded}
+            className={cn(
+              'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+              isActive
+                ? 'text-blue-700 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+            )}
+          >
+            <item.icon className="w-5 h-5 mr-3" />
+            {item.name}
+            <ChevronRight
+              className={cn(
+                'w-4 h-4 ml-auto transition-transform',
+                isExpanded && 'rotate-90'
+              )}
+            />
+          </button>
+          {isExpanded && (
+            <div className="ml-4 mt-1 space-y-1">
+              {item.children!.filter(shouldShowItem).map((child) => {
+                const childActive = pathname.startsWith(child.href)
+                return (
+                  <Link
+                    key={child.name}
+                    href={child.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
+                      childActive
+                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    <child.icon className="w-4 h-4 mr-3" />
+                    {child.name}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    const isActive = pathname.startsWith(item.href)
+    return (
+      <Link
+        key={item.name}
+        href={item.href}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(
+          'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+          isActive
+            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        )}
+      >
+        <item.icon className="w-5 h-5 mr-3" />
+        {item.name}
+      </Link>
+    )
+  }
 
   return (
     <>
@@ -110,7 +215,7 @@ export function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-800">
-            <Link href="/dashboard" className="flex items-center">
+            <Link href="/dashboard/" className="flex items-center">
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 MCA
               </span>
@@ -121,27 +226,26 @@ export function Sidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            {filteredNavigation.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                  )}
-                >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  {item.name}
-                </Link>
-              )
-            })}
+          <nav aria-label="Main navigation" className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            {filteredNavigation.map(renderNavItem)}
           </nav>
+
+          {/* Help link */}
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
+            <Link
+              href="/help/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                pathname.startsWith('/help')
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              )}
+            >
+              <HelpCircle className="w-5 h-5 mr-3" />
+              Help
+            </Link>
+          </div>
         </div>
       </aside>
     </>

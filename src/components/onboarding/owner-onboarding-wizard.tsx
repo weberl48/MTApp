@@ -26,42 +26,42 @@ export const OWNER_ONBOARDING_STEPS: OwnerOnboardingStep[] = [
     description:
       'This quick setup will walk you through the main areas of the app so you can start managing clients, sessions, and invoices with confidence.',
     ctaLabel: 'Go to Dashboard',
-    href: '/dashboard',
+    href: '/dashboard/',
   },
   {
     title: 'Invite your team',
     description:
       'Invite contractors so they can log sessions. You can copy an invite link from Settings → Team.',
     ctaLabel: 'Open Settings',
-    href: '/settings',
+    href: '/settings/',
   },
   {
     title: 'Add your first client',
     description:
       'Clients power everything else: sessions, invoices, portal access, and goals.',
     ctaLabel: 'Open Clients',
-    href: '/clients',
+    href: '/clients/',
   },
   {
     title: 'Configure service types',
     description:
       'Service Types define pricing, MCA cut, caps, and location. You can add or edit them from Settings → Services.',
     ctaLabel: 'Open Services',
-    href: '/settings',
+    href: '/settings/',
   },
   {
     title: 'Log a session and generate invoices',
     description:
       'Create a new session, add attendees, and submit. Invoices can be reviewed and sent from the Invoices section.',
     ctaLabel: 'Create a Session',
-    href: '/sessions/new',
+    href: '/sessions/new/',
   },
   {
     title: 'Review invoices',
     description:
       'Track invoice status (pending/sent/paid), send invoices, and manage payments and reconciliation.',
     ctaLabel: 'Open Invoices',
-    href: '/invoices',
+    href: '/invoices/',
   },
 ]
 

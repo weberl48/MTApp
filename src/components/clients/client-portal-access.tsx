@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Key, Copy, Check, Loader2, ExternalLink, RefreshCw, Trash2, Eye, Mail } from 'lucide-react'
 import { toast } from 'sonner'
+import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface ClientPortalAccessProps {
   clientId: string
@@ -27,6 +28,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   const [generating, setGenerating] = useState(false)
   const [sendingInvite, setSendingInvite] = useState(false)
   const [copied, setCopied] = useState(false)
+  const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
 
   useEffect(() => {
     async function loadTokens() {
@@ -80,29 +82,32 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
     }
   }
 
-  async function revokeToken(tokenId: string) {
-    if (!confirm('Revoke this portal access? The client will no longer be able to use this link.')) {
-      return
-    }
+  function revokeToken(tokenId: string) {
+    openConfirm({
+      title: 'Revoke Portal Access',
+      description: 'Revoke this portal access? The client will no longer be able to use this link.',
+      confirmLabel: 'Revoke',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/clients/${clientId}/access-token`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tokenId }),
+          })
 
-    try {
-      const response = await fetch(`/api/clients/${clientId}/access-token`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tokenId }),
-      })
+          if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to revoke token')
+          }
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to revoke token')
-      }
-
-      toast.success('Portal access revoked')
-      setTokens((prev) => prev.filter((t) => t.id !== tokenId))
-    } catch (error) {
-      console.error('[MCA] Error revoking token')
-      toast.error(error instanceof Error ? error.message : 'Failed to revoke token')
-    }
+          toast.success('Portal access revoked')
+          setTokens((prev) => prev.filter((t) => t.id !== tokenId))
+        } catch (error) {
+          console.error('[MCA] Error revoking token')
+          toast.error(error instanceof Error ? error.message : 'Failed to revoke token')
+        }
+      },
+    })
   }
 
   async function sendInvite() {
@@ -332,6 +337,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
           </>
         )}
       </CardContent>
+      <ConfirmDialog {...confirmDialogProps} />
     </Card>
   )
 }

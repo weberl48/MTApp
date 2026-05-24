@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useOrganization } from '@/contexts/organization-context'
 import { hasMfaEnabled } from '@/lib/supabase/mfa'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,13 +17,14 @@ import Link from 'next/link'
  */
 export function MfaEnforcementGuard({ children }: { children: React.ReactNode }) {
   const { user, settings, can } = useOrganization()
-  useRouter() // Router available for navigation if needed
   const pathname = usePathname()
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null)
   const [checking, setChecking] = useState(true)
 
-  // Check if MFA is required for this user's role
-  const requireMfa = settings?.security?.require_mfa ?? false
+  // Check if MFA is required for this user's role (skip in local dev)
+  const requireMfa = process.env.NODE_ENV === 'production'
+    ? (settings?.security?.require_mfa ?? false)
+    : false
   const isPrivilegedUser = can('session:view-all')
 
   useEffect(() => {
@@ -50,8 +51,12 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
   // Don't block on settings page (so they can set up MFA)
   const isSettingsPage = pathname?.startsWith('/settings')
 
-  // If checking, show nothing extra
+  // Show children while checking for non-privileged users or when MFA isn't required
+  // For privileged users with MFA required, show nothing to prevent content flash
   if (checking) {
+    if (requireMfa && isPrivilegedUser) {
+      return null
+    }
     return <>{children}</>
   }
 
@@ -71,7 +76,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/settings?tab=security">
+            <Link href="/settings/?tab=security">
               <Button>
                 <Shield className="w-4 h-4 mr-2" />
                 Set Up Two-Factor Authentication
@@ -94,7 +99,7 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
               Your account does not have two-factor authentication enabled.
               For better security, we recommend setting up 2FA.
             </span>
-            <Link href="/settings?tab=security">
+            <Link href="/settings/?tab=security">
               <Button variant="outline" size="sm" className="flex-shrink-0">
                 Set Up 2FA
               </Button>

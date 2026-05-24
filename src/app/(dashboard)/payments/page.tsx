@@ -14,6 +14,8 @@ import { ContractorPaymentsTable } from '@/components/tables/contractor-payments
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
 import { AdminGuard } from '@/components/guards/admin-guard'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 interface InvoiceData {
   id: string
@@ -49,6 +51,7 @@ interface SessionWithInvoices {
   duration_minutes: number
   contractor_id: string
   contractor_paid_date: string | null
+  contractor_pay: number | null
   service_type: { name: string } | null
   contractor: { id: string; name: string; email: string } | null
   invoices: { contractor_pay: number }[]
@@ -71,6 +74,7 @@ export default function PaymentsPage() {
   const [invoices, setInvoices] = useState<InvoiceData[]>([])
   const [contractors, setContractors] = useState<ContractorPayment[]>([])
   const [unpaidContractors, setUnpaidContractors] = useState<ContractorPayout[]>([])
+  const [canDeleteSession, setCanDeleteSession] = useState(false)
   const [activeTab, setActiveTab] = useState('payroll')
 
   // Date range filtering
@@ -96,11 +100,13 @@ export default function PaymentsPage() {
       .eq('id', user.id)
       .single<{ role: string }>()
 
-    const role = userProfile?.role
-    if (role !== 'admin' && role !== 'owner' && role !== 'developer') {
+    const role = userProfile?.role as UserRole | undefined
+    if (!can(role ?? null, 'payments:view')) {
       router.push('/dashboard/')
       return
     }
+
+    setCanDeleteSession(can(role ?? null, 'session:delete'))
 
     // Fetch all invoices with contractor information (for the history tab)
     const { data: invoicesData } = await supabase
@@ -168,6 +174,7 @@ export default function PaymentsPage() {
         duration_minutes,
         contractor_id,
         contractor_paid_date,
+        contractor_pay,
         service_type:service_types(name),
         contractor:users(id, name, email),
         invoices(contractor_pay),
@@ -186,8 +193,9 @@ export default function PaymentsPage() {
       const contractor = session.contractor
       if (!contractor?.id) return
 
-      // Calculate contractor pay from invoices
-      const contractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+      // Calculate contractor pay from invoices, falling back to session-level value (group sessions)
+      const invoiceContractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
+      const contractorPay = invoiceContractorPay > 0 ? invoiceContractorPay : Number(session.contractor_pay || 0)
 
       if (!unpaidByContractor[contractor.id]) {
         unpaidByContractor[contractor.id] = {
@@ -398,6 +406,7 @@ export default function PaymentsPage() {
               <PayrollHubTable
                 contractors={filteredUnpaidContractors}
                 onPayoutComplete={loadPayments}
+                canDelete={canDeleteSession}
               />
             </CardContent>
           </Card>

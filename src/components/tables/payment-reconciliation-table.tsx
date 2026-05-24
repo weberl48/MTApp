@@ -42,6 +42,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/dates'
 import { toast } from 'sonner'
 
 interface InvoiceWithDetails {
@@ -337,7 +338,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                   <TableRow key={invoice.id}>
                     <TableCell className="text-sm">
                       {invoice.session?.date
-                        ? format(new Date(invoice.session.date), 'MMM d, yyyy')
+                        ? format(parseLocalDate(invoice.session.date), 'MMM d, yyyy')
                         : format(new Date(invoice.created_at), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell>

@@ -83,7 +83,7 @@ export default function HelpArticlePage({
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back Link */}
       <Link
-        href="/help"
+        href="/help/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -130,7 +130,7 @@ export default function HelpArticlePage({
           <h2 className="text-lg font-semibold">Related Articles</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {relatedArticles.map(related => (
-              <Link key={related.slug} href={`/help/${related.slug}`}>
+              <Link key={related.slug} href={`/help/${related.slug}/`}>
                 <Card className="h-full hover:bg-muted/50 transition-colors">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{related.title}</CardTitle>
@@ -155,7 +155,7 @@ export default function HelpArticlePage({
             {categoryArticles.map(catArticle => (
               <Link
                 key={catArticle.slug}
-                href={`/help/${catArticle.slug}`}
+                href={`/help/${catArticle.slug}/`}
                 className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
               >
                 <h3 className="font-medium">{catArticle.title}</h3>
