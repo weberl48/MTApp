@@ -24,6 +24,40 @@ export function useWalkthrough() {
   return ctx
 }
 
+/** Extract only the pathname from an href (strip query string and hash). */
+function hrefPathname(href: string): string {
+  try { return new URL(href, window.location.origin).pathname }
+  catch { return href.split('?')[0].split('#')[0] }
+}
+
+/**
+ * Scroll an element into view within its nearest scrollable ancestor.
+ * Standard scrollIntoView scrolls the whole page; this scrolls the
+ * dialog/overflow container so the field is visible.
+ */
+function scrollElementIntoView(el: Element) {
+  // Find the closest scrollable parent (e.g., the dialog content)
+  let scrollParent: Element | null = el.parentElement
+  while (scrollParent) {
+    const style = window.getComputedStyle(scrollParent)
+    if (
+      (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+      scrollParent.scrollHeight > scrollParent.clientHeight
+    ) {
+      break
+    }
+    scrollParent = scrollParent.parentElement
+  }
+
+  if (scrollParent) {
+    const parentRect = scrollParent.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    // Scroll so the element is near the top of the scrollable area with some padding
+    const scrollOffset = elRect.top - parentRect.top - 20
+    scrollParent.scrollBy({ top: scrollOffset, behavior: 'smooth' })
+  }
+}
+
 export function WalkthroughProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -40,7 +74,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
 
     // Navigate to the first step's page if needed
     const firstStep = walkthrough.steps[0]
-    if (firstStep.href && !pathname.startsWith(firstStep.href)) {
+    if (firstStep.href && !pathname.startsWith(hrefPathname(firstStep.href))) {
       router.push(firstStep.href)
     }
 
@@ -52,20 +86,40 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         overlayColor: 'black',
         stagePadding: 8,
         stageRadius: 8,
+        allowClose: false,
         popoverClass: 'mca-walkthrough-popover',
+        // The X button still works via onCloseClick even with allowClose: false
+        onCloseClick: () => {
+          driverInstance.destroy()
+        },
         steps: walkthrough.steps.map((step, i) => ({
           element: step.element || undefined,
           popover: {
             title: step.title,
             description: step.description,
-            side: 'bottom' as const,
+            side: step.popoverSide || ('bottom' as const),
             align: 'center' as const,
+            showButtons: ['next', 'previous', 'close'] as const,
           },
           onHighlightStarted: () => {
             setStepIndex(i)
-            // Navigate if this step is on a different page
-            if (step.href && !window.location.pathname.startsWith(step.href)) {
-              router.push(step.href)
+            // Navigate if this step requires a different URL
+            if (step.href) {
+              const currentUrl = window.location.pathname + window.location.search
+              const stepPath = hrefPathname(step.href)
+              const needsNavigation = !window.location.pathname.startsWith(stepPath)
+                || (step.href.includes('?') && !currentUrl.includes(step.href.split('?')[1]))
+              if (needsNavigation) {
+                router.push(step.href)
+              }
+            }
+
+            // Scroll the target element into view within its scrollable container
+            if (step.element) {
+              requestAnimationFrame(() => {
+                const el = document.querySelector(step.element!)
+                if (el) scrollElementIntoView(el)
+              })
             }
           },
         })),

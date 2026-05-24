@@ -156,11 +156,11 @@ Service types are configured by your organization. Some types are restricted to 
 
 ### Remembered Defaults
 
-The session form remembers your last-used time, duration, and service type. These are pre-filled the next time you open the form to speed up repeat entries.
+The session form remembers your last-used time and duration. These are pre-filled the next time you open the form to speed up repeat entries. The service type is **not** remembered — you always choose it fresh to avoid accidentally logging under the wrong type.
 
 ### Quick Session on Mobile
 
-On mobile devices, contractors see a floating action button that opens a simplified quick-log drawer at the bottom of the screen. This lets you capture the essential details and submit in seconds without leaving your current view.
+On mobile devices, contractors see a floating action button that opens a simplified quick-log drawer at the bottom of the screen. The quick-log drawer remembers your full previous settings (including service type) so you can re-log the same session in seconds.
 
 ### Pricing Preview
 
@@ -170,7 +170,7 @@ After selecting a service type and client, a pricing summary appears below the f
 
 Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If it is rejected, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
 
-If you want to log another session right away, click the **Log Another** button that appears on the success screen.
+If you want to log another session right away, click the **Log Another** button that appears on the success screen. The form resets the date, service type, clients, and notes, but keeps your time and duration from the previous entry.
     `,
   },
   {
@@ -209,7 +209,15 @@ Some service types have a maximum total defined. If the calculated total would e
 
 ### Contractor Pay
 
-Contractor earnings scale with the headcount the same way the total does. As more clients attend, both the total billed and the contractor's pay increase (up to any configured cap).
+For most group services, contractor pay scales based on the MCA percentage formula or the pay schedule (the same way it works for individual sessions).
+
+However, the owner can also set up a **headcount-based pay matrix** for any group service type. When configured, the contractor's pay is looked up based on both the **number of clients** and the **session duration**. For example, a 30-minute group session might pay $40 for 1 client, $49 for 2, $63 for 3, and so on up to a "6+" cap.
+
+If a headcount/duration combination is not defined in the matrix, the system falls back to the normal pay schedule or formula. This feature is configured in **Settings > Business Rules > Services** when editing a group service type.
+
+### Classroom Selection
+
+For scholarship group sessions, a **Classroom** dropdown appears on the session form. This lets contractors indicate which classroom the session took place in. The list of classrooms is configurable by the owner in **Settings > Business Rules > Sessions**. The classroom is recorded on the session and included in data exports.
 
 ### Separate Invoices
 
@@ -284,6 +292,10 @@ Once an invoice has been generated, you can deliver it to the client by email or
 
 When you use the Square option, a Square invoice is created in your connected Square account and sent to the client automatically. When the client pays using the Square link, MCA Manager receives a webhook notification and marks the invoice as paid without any manual action.
 
+### Square Processing Fee
+
+You can add an automatic processing fee to every Square invoice to cover online payment costs. Go to **Settings > Business Rules > Invoices** and enable the **Square Processing Fee** option. You can choose a fixed dollar amount (e.g., $3.00) or a percentage (e.g., 2.9% + $0.30 to match Square's standard rate). The fee appears as a separate "Online Processing Fee" line item on the Square invoice.
+
 ### Bulk Actions
 
 To handle multiple invoices at once:
@@ -352,7 +364,7 @@ When someone leaves, deactivate their account rather than deleting it. Deactivat
     description: 'How to set up service types, pricing fields, and contractor restrictions.',
     walkthrough: 'configure-services',
     adminOnly: true,
-    relatedArticles: ['group-sessions', 'managing-contractor-rates', 'scholarship-billing'],
+    relatedArticles: ['editing-service-types', 'group-sessions', 'managing-contractor-rates', 'scholarship-billing'],
     content: `
 ## Configuring Service Types
 
@@ -382,6 +394,257 @@ Navigate to **Settings > Business Rules > Services** tab.
 Duration scales from the base rate, which is defined for 30 minutes. A 60-minute session is twice the base rate, a 90-minute session is three times the base rate.
 
 For scholarship services, the total billed is the flat scholarship rate regardless of duration. The contractor is still paid based on normal pricing rules, and the organization absorbs any difference.
+
+### Learn More
+
+For a detailed walkthrough of how to use each field to customize your practice, see **Editing Service Types: A Complete Guide**.
+    `,
+  },
+  {
+    slug: 'editing-service-types',
+    title: 'Editing Service Types: A Complete Guide',
+    category: 'settings',
+    description: 'A deep dive into every service type field and how to use them to customize pricing, pay, and workflows for your practice.',
+    walkthrough: 'edit-service-type',
+    adminOnly: true,
+    relatedArticles: ['configuring-services', 'managing-contractor-rates', 'group-sessions', 'scholarship-billing'],
+    content: `
+## Editing Service Types: A Complete Guide
+
+Service types are the single most powerful tool you have as an owner to customize how your practice runs. Every session that gets logged, every invoice that gets generated, and every contractor payment that gets calculated flows through the service type configuration. This guide walks through each field and shows you how to use them together.
+
+### Getting There
+
+1. Go to **Settings** in the sidebar.
+2. Click the **Business Rules** tab, then the **Services** sub-tab.
+3. Click any existing service type to edit it, or click **Add Service Type** to create a new one.
+
+Changes you make to a service type only affect new sessions going forward. Existing sessions and invoices keep their original pricing.
+
+---
+
+## The Basics
+
+### Service Name
+
+The name appears everywhere: the session form dropdown, invoices, the payroll hub, and analytics. Choose something clear and specific.
+
+Good examples:
+- "In-Home Individual Music Therapy"
+- "Group Art Therapy (Matt's Music)"
+- "Admin Work"
+
+Avoid vague names like "Session" or "Standard" since contractors need to pick the right one quickly.
+
+### Category
+
+Categories organize your service types and appear in analytics breakdowns. The available categories are:
+
+- **Music - Individual**
+- **Music - Group**
+- **Art - Individual**
+- **Art - Group**
+
+Pick the category that best matches the service. This does not affect pricing, only reporting.
+
+### Location
+
+Where the service takes place. Options are **In-Home**, **Matt's Music**, or **Other**. The location is shown on session records and can help you track which services happen at which facility. When Matt's Music is selected, you will typically pair it with a rent percentage (see below).
+
+---
+
+## Pricing Fields
+
+These fields control what clients are billed. All amounts are based on a 30-minute session and scale up proportionally for longer durations.
+
+### Base Rate
+
+The total amount billed for a single-client, 30-minute session. This is the starting point for all pricing calculations.
+
+For example, if your base rate is $80:
+- A 30-minute session bills $80
+- A 45-minute session bills $120 (1.5x)
+- A 60-minute session bills $160 (2x)
+- A 90-minute session bills $240 (3x)
+
+### Per-Person Rate
+
+Used for group services. This is the additional amount charged per attendee on top of the base rate.
+
+- Set to **$0** for individual (one-on-one) services.
+- Set to a dollar amount for group services.
+
+For example, with a base rate of $50 and a per-person rate of $20 with 4 attendees:
+- Total = $50 + ($20 x 4) = $130
+
+If only one person shows up, the per-person rate is not charged (the "solo exception"). The total is just the base rate.
+
+### Total Cap
+
+An optional ceiling on the total billed amount, regardless of how many people attend. This protects clients from unexpectedly high bills in large groups.
+
+For example, with a base rate of $50, per-person rate of $20, and a total cap of $150:
+- 4 attendees: $50 + ($20 x 4) = $130 (under cap, billed normally)
+- 8 attendees: $50 + ($20 x 8) = $210, but capped at **$150**
+
+Leave this empty if you do not need a maximum.
+
+---
+
+## Organization and Contractor Pay
+
+### MCA Percentage
+
+The percentage of the total session amount that stays with the organization. The remainder (after rent, if applicable) goes to the contractor.
+
+For example, with a $100 session total and 20% MCA percentage:
+- MCA keeps $20
+- Contractor receives $80 (before rent)
+
+Set this to **0%** for services where the contractor keeps the full amount (common for certain group arrangements).
+
+### Contractor Cap
+
+An optional maximum on what the contractor can earn per session. Even if the formula would pay them more, their pay is capped at this amount.
+
+This is useful when you want the session total to scale with headcount for billing purposes, but do not want the contractor's pay to scale the same way.
+
+Leave empty if you do not need a ceiling on contractor pay.
+
+### Contractor Pay by Duration
+
+This is the most precise way to control contractor pay. Instead of relying on the formula (total minus MCA percentage), you set exact dollar amounts for each session duration.
+
+For example:
+- 30 min = $38.50
+- 45 min = $54.00
+- 60 min = $65.00
+- 90 min = $90.00
+
+When a pay schedule is set, the system uses these values as the baseline contractor pay. If a contractor also has a custom rate (set in Team > Rates), their custom rate is combined with the schedule to calculate the final pay for non-30-minute sessions.
+
+The form shows an "auto" value next to each duration so you can see what the formula would calculate. Fill in only the durations you want to override. Leave a duration empty to use the automatic calculation.
+
+### Group Contractor Pay by Headcount
+
+This section only appears when the per-person rate is greater than zero (i.e., the service is a group service). It lets you set exact contractor pay amounts based on both the **number of clients** and the **session duration**.
+
+The table has rows for 1 through 6+ clients and columns for each configured duration (e.g., 30, 45, 60, 90 minutes). Fill in the dollar amount for each combination.
+
+For example, a contractor agreement might specify:
+- 1 client, 30 min = $40
+- 2 clients, 30 min = $49
+- 3 clients, 30 min = $63
+- 6+ clients, 30 min = $105
+
+The **6+ row** acts as a cap. If 8 clients attend, the system uses the 6+ amount. Leave cells empty to fall back to the normal pay schedule or MCA percentage formula for that combination.
+
+This is the most precise way to match contractor agreements that specify different pay rates for different group sizes.
+
+### Rent Percentage
+
+The percentage of the session total withheld for facility rent. This is subtracted after the MCA cut and before contractor pay.
+
+Common setup: set this to **10%** for services at Matt's Music. Set to **0%** for in-home or other locations where no rent applies.
+
+---
+
+## Special Behaviors
+
+### Requires Client
+
+When turned **on** (the default), the session form requires selecting a client before the session can be submitted. This is the normal behavior for therapy sessions.
+
+When turned **off**, the session form skips the client selection and notes fields, and instead shows a "Who did this work?" dropdown for selecting which admin-role team member performed the task. Use this for administrative work, paperwork, meetings, or other tasks that are not client-facing but still need to be tracked for pay.
+
+Sessions logged with "Requires Client" off still flow through the same approval and payroll process as regular sessions.
+
+### Scholarship Service
+
+When toggled on, two things happen:
+
+1. A **Scholarship Rate** field appears where you set a flat dollar amount per session. This is the amount billed to the scholarship fund, regardless of session duration.
+2. Sessions using this service type are routed to **monthly batch invoicing** on the Invoices > Scholarship tab instead of generating a per-session invoice.
+
+The contractor is still paid based on normal pricing rules. The organization absorbs any difference between the scholarship rate and what the contractor earns. This means switching a client to scholarship does not reduce their therapist's pay.
+
+### Restrict to Contractors
+
+By default, every contractor in your organization can select any active service type when logging sessions. Use this field to limit a service type to specific team members.
+
+Check the boxes next to the contractors who should have access. When at least one contractor is checked, only those contractors will see this service type in their session form. Admins and owners can always see all service types regardless of restrictions.
+
+Common uses:
+- Restrict art therapy service types to art therapists only
+- Limit a specialized service to the one contractor trained for it
+- Keep the admin work type visible only to administrators
+
+### Active Toggle
+
+When turned **off**, the service type no longer appears in the session form dropdown. Existing sessions that used this service type are not affected. Use this to retire old service types without deleting them, preserving historical data.
+
+---
+
+## Putting It All Together
+
+### Example: Standard Individual Music Therapy
+
+- **Name**: In-Home Individual Music Therapy
+- **Category**: Music - Individual
+- **Location**: In-Home
+- **Base Rate**: $80
+- **Per-Person Rate**: $0
+- **MCA Percentage**: 20%
+- **Rent Percentage**: 0%
+- **Requires Client**: On
+
+Result: A 30-min session bills $80. MCA keeps $16, contractor earns $64. A 60-min session bills $160, MCA keeps $32, contractor earns $128.
+
+### Example: Group Music at Matt's Music
+
+- **Name**: Group Music Therapy (Matt's Music)
+- **Category**: Music - Group
+- **Location**: Matt's Music
+- **Base Rate**: $60
+- **Per-Person Rate**: $15
+- **MCA Percentage**: 25%
+- **Total Cap**: $150
+- **Rent Percentage**: 10%
+- **Requires Client**: On
+
+Result: With 5 attendees, total = $60 + ($15 x 5) = $135. MCA takes $33.75, rent is $13.50, contractor gets $87.75.
+
+### Example: Scholarship Individual Therapy
+
+- **Name**: Scholarship Music Therapy
+- **Category**: Music - Individual
+- **Scholarship Service**: On
+- **Scholarship Rate**: $60
+- **MCA Percentage**: 20%
+- **Contractor Pay Schedule**: 30 min = $38.50, 60 min = $65.00
+
+Result: Client is billed $60 flat regardless of duration. Contractor gets $38.50 for 30 min or $65 for 60 min. MCA absorbs the gap between what the contractor earns and the $60 scholarship rate.
+
+### Example: Admin Work
+
+- **Name**: Admin Work
+- **Category**: Music - Individual
+- **Base Rate**: $25
+- **MCA Percentage**: 0%
+- **Requires Client**: Off
+- **Restrict to Contractors**: Check only admin-role team members
+
+Result: When logging a session, the form asks "Who did this work?" instead of asking for a client. The admin earns $25 for 30 minutes of work, $50 for 60 minutes, and so on. No invoice is generated since there is no client.
+
+---
+
+## Tips
+
+- **Start simple**: set the base rate and MCA percentage first. You can always add caps, schedules, and restrictions later.
+- **Use the pricing preview**: when creating or editing a service type, the form shows an "auto" calculation next to each duration in the pay schedule. Use this to verify the numbers make sense before saving.
+- **Changes are forward-only**: editing a service type does not retroactively change existing sessions or invoices. You can safely adjust rates without worrying about past records.
+- **Combine with custom rates**: service type pricing sets the default. Per-contractor custom rates (Team > Rates) override the default for individual contractors. Both systems work together.
+- **Test with View As**: after making changes, use View As mode to simulate a contractor's experience and confirm they see the right service types and pricing.
     `,
   },
   {
@@ -519,12 +782,17 @@ Contractors are paid based on normal pricing rules, not the scholarship rate. If
 
 If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month (1-28) on which invoices are automatically created, covering the previous month's unbilled sessions. Generated invoices start in Pending status so you can review them before sending.
 
+### Classroom Tracking
+
+For scholarship group sessions, contractors select a **Classroom** from a dropdown when logging the session. This helps track which room or location the group met in. The classroom list is configured by the owner under **Settings > Business Rules > Sessions > Classrooms**.
+
 ### Setting Up Scholarship Billing
 
 1. **Configure a scholarship service type** - Go to Settings > Services, create or edit a service type, and check "Scholarship Service". Set the flat scholarship rate.
 2. **Set client payment method** - Go to Clients, edit the client, and set their payment method to "Scholarship".
-3. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
-4. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
+3. **(Optional) Configure classrooms** - Go to Settings > Business Rules > Sessions and add classroom names so contractors can select a room when logging scholarship group sessions.
+4. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
+5. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
     `,
   },
   {

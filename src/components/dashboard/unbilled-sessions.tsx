@@ -83,34 +83,32 @@ export function UnbilledSessions({ organizationId }: Props) {
   return (
     <Card className="border-purple-200 dark:border-purple-800">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-purple-600" />
-            <CardTitle>Unbilled Scholarship Sessions</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            {canBulkAction && (
-              <Button
-                size="sm"
-                onClick={handleGenerateAll}
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                ) : (
-                  <Plus className="w-4 h-4 mr-1" />
-                )}
-                Generate All ({groups.length})
-              </Button>
-            )}
-            <Link href="/invoices/?tab=scholarship">
-              <Button variant="outline" size="sm">View Details</Button>
-            </Link>
-          </div>
+        <div className="flex items-center gap-2">
+          <Receipt className="w-5 h-5 text-purple-600 shrink-0" />
+          <CardTitle>Unbilled Scholarship Sessions</CardTitle>
         </div>
         <CardDescription>
           {totalSessions} session{totalSessions !== 1 ? 's' : ''} across {groups.length} client{groups.length !== 1 ? 's' : ''}/month{groups.length !== 1 ? 's' : ''}
         </CardDescription>
+        <div className="flex items-center gap-2 pt-1">
+          {canBulkAction && (
+            <Button
+              size="sm"
+              onClick={handleGenerateAll}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 mr-1" />
+              )}
+              Generate All ({groups.length})
+            </Button>
+          )}
+          <Link href="/invoices/?tab=scholarship">
+            <Button variant="outline" size="sm">View Details</Button>
+          </Link>
+        </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-2">

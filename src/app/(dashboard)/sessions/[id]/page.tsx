@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle, MapPin } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { decryptPHI } from '@/lib/crypto/actions'
@@ -43,7 +43,11 @@ interface SessionDetails {
   client_notes: string | null
   group_headcount: number | null
   group_member_names: string | null
+  classroom: string | null
   rejection_reason: string | null
+  total_amount: number | null
+  contractor_pay: number | null
+  mca_cut: number | null
   created_at: string
   updated_at: string
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
@@ -55,6 +59,7 @@ export default function SessionDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { can, user, effectiveUserId, loading: contextLoading } = useOrganization()
+  const showFinancialDetails = can('financial:view-details')
   const [session, setSession] = useState<SessionDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
@@ -88,7 +93,11 @@ export default function SessionDetailPage() {
           client_notes,
           group_headcount,
           group_member_names,
+          classroom,
           rejection_reason,
+          total_amount,
+          contractor_pay,
+          mca_cut,
           created_at,
           updated_at,
           service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage),
@@ -188,7 +197,7 @@ export default function SessionDetailPage() {
     if (!session) return
     openConfirm({
       title: 'Delete Session',
-      description: 'Are you sure you want to delete this session? This cannot be undone.',
+      description: 'Are you sure you want to delete this session? This will also delete all linked invoices, attendee records, and payment data. This action cannot be undone.',
       confirmLabel: 'Delete',
       onConfirm: () => {
         startTransition(async () => {
@@ -233,11 +242,13 @@ export default function SessionDetailPage() {
     return null
   }
 
-  const totalCost = session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0) || 0
+  const totalCost = session.total_amount
+    ?? session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0)
+    ?? 0
   const isActiveSession = !['no_show', 'cancelled'].includes(session.status)
   const isOwnDraft = session.contractor?.id === currentUserId && session.status === 'draft'
   const canEdit = isActiveSession && (can('session:approve') || isOwnDraft)
-  const canDelete = isActiveSession && (can('session:delete') || isOwnDraft)
+  const canDelete = isActiveSession && can('session:delete')
   const canApprove = can('session:approve') && session.status === 'submitted'
   const canMarkNoShow = can('session:mark-no-show') && isActiveSession && session.status !== 'draft'
   const canCancel = isActiveSession && (can('session:cancel') || isOwnDraft)
@@ -381,7 +392,7 @@ export default function SessionDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Service Type</p>
                 <p className="font-medium">{session.service_type?.name || 'Unknown'}</p>
-                {session.service_type && (
+                {showFinancialDetails && session.service_type && (
                   <p className="text-sm text-muted-foreground">
                     Base: {formatCurrency(session.service_type.base_rate)}
                     {session.service_type.per_person_rate > 0 && (
@@ -394,46 +405,68 @@ export default function SessionDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing Summary</CardTitle>
-            <CardDescription>Financial breakdown for this session</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Attendees</p>
-                <p className="font-medium">
-                  {session.attendees?.length || 0} client{session.attendees?.length !== 1 ? 's' : ''}
-                </p>
+        {showFinancialDetails && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing Summary</CardTitle>
+              <CardDescription>Financial breakdown for this session</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Attendees</p>
+                  <p className="font-medium">
+                    {session.group_headcount || session.attendees?.length || 0} client{(session.group_headcount || session.attendees?.length || 0) !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <DollarSign className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Amount</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
+              <div className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Amount</p>
+                  <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
+                </div>
               </div>
-            </div>
 
-            {session.group_headcount && session.group_headcount > 1 && (
-              <div className="text-sm text-muted-foreground">
-                {formatCurrency(totalCost / session.group_headcount)} per person
-              </div>
-            )}
+              {session.group_headcount && session.group_headcount > 1 && totalCost > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  {formatCurrency(totalCost / session.group_headcount)} per person
+                </div>
+              )}
 
-            {/* Group session indicator */}
-            {session.group_headcount && (
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                  Group Session - {session.group_headcount} participants
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {session.contractor_pay != null && (
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Contractor Pay</p>
+                    <p className="font-medium">{formatCurrency(session.contractor_pay)}</p>
+                  </div>
+                </div>
+              )}
+
+              {session.mca_cut != null && (
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">MCA Cut</p>
+                    <p className="font-medium">{formatCurrency(session.mca_cut)}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Group session indicator */}
+              {session.group_headcount && (
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                    Group Session - {session.group_headcount} participants
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Group Session Details */}
@@ -451,6 +484,26 @@ export default function SessionDetailPage() {
                 <p className="font-medium">{session.group_headcount} people</p>
               </div>
             </div>
+
+            {session.group_member_names && (
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-purple-500 mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Attendee Names</p>
+                  <p className="font-medium">{session.group_member_names}</p>
+                </div>
+              </div>
+            )}
+
+            {session.classroom && (
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-purple-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Classroom</p>
+                  <p className="font-medium">{session.classroom}</p>
+                </div>
+              </div>
+            )}
 
           </CardContent>
         </Card>
@@ -475,9 +528,11 @@ export default function SessionDetailPage() {
                       <p className="text-sm text-muted-foreground">{attendee.client.contact_email}</p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">{formatCurrency(attendee.individual_cost)}</p>
-                  </div>
+                  {showFinancialDetails && (
+                    <div className="text-right">
+                      <p className="font-medium">{formatCurrency(attendee.individual_cost)}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
