@@ -45,14 +45,23 @@ export async function updateSession(request: NextRequest) {
   }
 
   // MFA enforcement: check AAL level once for all authenticated user redirects
+  // Skip MFA checks entirely in local development
+  const skipMfa = process.env.NODE_ENV !== 'production'
   const isMfaVerifyPath = request.nextUrl.pathname.startsWith('/mfa-verify')
   const authPaths = ['/login', '/signup']
   const isAuthPath = authPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
 
+  // In dev, redirect away from mfa-verify page since we're skipping MFA
+  if (skipMfa && isMfaVerifyPath && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard/'
+    return NextResponse.redirect(url)
+  }
+
   // Fetch AAL once for any authenticated path that needs it
-  const needsAalCheck = user && (isProtectedPath || isAuthPath || isMfaVerifyPath)
+  const needsAalCheck = !skipMfa && user && (isProtectedPath || isAuthPath || isMfaVerifyPath)
   const aalData = needsAalCheck
     ? (await supabase.auth.mfa.getAuthenticatorAssuranceLevel()).data
     : null

@@ -233,7 +233,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
           <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete this invoice for <strong>{invoice.client?.name || 'this client'}</strong>?
-            This action cannot be undone.
+            This will also delete the linked session(s), attendee records, and payment data. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

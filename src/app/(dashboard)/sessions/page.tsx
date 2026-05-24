@@ -39,6 +39,7 @@ interface Session {
   notes: string | null
   created_at: string
   group_headcount: number | null
+  total_amount: number | null
   rejection_reason: string | null
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number } | null
   contractor: { id: string; name: string } | null
@@ -71,6 +72,7 @@ export default function SessionsPage() {
 
   // Use effective permissions (respects "view as" role)
   const isAdmin = can('session:view-all')
+  const showFinancialDetails = can('financial:view-details')
   // When viewing as a specific contractor, filter to their sessions even if effective role is still admin
   const shouldFilterByContractor = viewAsContractor || !isAdmin
   const contractorIdToFilter = viewAsContractor?.id || effectiveUserId
@@ -93,7 +95,7 @@ export default function SessionsPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'client_asc' | 'client_desc'>('date_desc')
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'client_asc' | 'client_desc' | 'price_asc' | 'price_desc'>('date_desc')
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
@@ -123,6 +125,7 @@ export default function SessionsPage() {
           notes,
           created_at,
           group_headcount,
+          total_amount,
           rejection_reason,
           service_type:service_types(id, name, base_rate, per_person_rate),
           contractor:users(id, name),
@@ -142,10 +145,11 @@ export default function SessionsPage() {
       setSessions((data as unknown as Session[]) || [])
 
       // Fetch contractors for filter (admin only, not when viewing as contractor)
-      if (!shouldFilterByContractor) {
+      if (!shouldFilterByContractor && organization?.id) {
         const { data: contractorData } = await supabase
           .from('users')
           .select('id, name')
+          .eq('organization_id', organization.id)
           .in('role', ['contractor', 'admin', 'owner'])
           .order('name')
         setContractors(contractorData || [])
@@ -157,7 +161,7 @@ export default function SessionsPage() {
     }
 
     loadSessions()
-  }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter])
+  }, [refreshTrigger, shouldFilterByContractor, contractorIdToFilter, organization?.id])
 
   async function handleInlineApprove(e: React.MouseEvent, sessionId: string) {
     e.preventDefault()
@@ -253,6 +257,14 @@ export default function SessionsPage() {
         })
         break
       }
+      case 'price_asc':
+      case 'price_desc': {
+        sorted.sort((a, b) => {
+          const cmp = (a.total_amount ?? 0) - (b.total_amount ?? 0)
+          return sortBy === 'price_asc' ? cmp : -cmp
+        })
+        break
+      }
     }
     return sorted
   }, [filteredSessions, sortBy])
@@ -298,8 +310,8 @@ export default function SessionsPage() {
             {isAdmin ? 'View and manage all sessions' : 'Your session history'}
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
-          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-full sm:w-[200px]">
+        <div className="flex items-center gap-3">
+          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-[200px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="list">
                 <List className="w-4 h-4 mr-2" />
@@ -317,8 +329,9 @@ export default function SessionsPage() {
               contractorId={shouldFilterByContractor ? contractorIdToFilter || undefined : undefined}
             />
           )}
-          <Link href="/sessions/new/">
-            <Button className="w-full sm:w-auto justify-center">
+          {/* Hidden on mobile — FAB handles new session on small screens */}
+          <Link href="/sessions/new/" data-tour="sessions-new-button" className="hidden sm:block">
+            <Button>
               <Plus className="w-4 h-4 mr-2" />
               New Session
             </Button>
@@ -328,7 +341,7 @@ export default function SessionsPage() {
 
       {/* Filters */}
       {view === 'list' && (
-        <Card>
+        <Card data-tour="sessions-filters">
           <CardContent className="pt-4">
             <div className="flex flex-col gap-4">
               {/* Search and filter toggle */}
@@ -352,6 +365,8 @@ export default function SessionsPage() {
                     <SelectItem value="date_asc">Date (Oldest)</SelectItem>
                     <SelectItem value="client_asc">Client (A-Z)</SelectItem>
                     <SelectItem value="client_desc">Client (Z-A)</SelectItem>
+                    <SelectItem value="price_asc">Price (Low to High)</SelectItem>
+                    <SelectItem value="price_desc">Price (High to Low)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -478,7 +493,7 @@ export default function SessionsPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card data-tour="sessions-bulk-actions" className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
@@ -512,7 +527,7 @@ export default function SessionsPage() {
       )}
 
       {view === 'list' ? (
-        <Card>
+        <Card data-tour="sessions-list">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -548,10 +563,12 @@ export default function SessionsPage() {
             {paginatedSessions.length > 0 ? (
               <div className="space-y-4">
                 {paginatedSessions.map((session) => {
-                  const totalCost = session.attendees?.reduce(
-                    (sum, a) => sum + (a.individual_cost || 0),
-                    0
-                  ) || 0
+                  const totalCost = session.total_amount
+                    ?? session.attendees?.reduce(
+                      (sum, a) => sum + (a.individual_cost || 0),
+                      0
+                    )
+                    ?? 0
 
                   return (
                     <Link
@@ -559,96 +576,95 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className={`flex items-center justify-between p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                        {isAdmin && session.status === 'submitted' && (
-                          <div className="mr-3 shrink-0" onClick={(e) => e.preventDefault()}>
-                            <Checkbox
-                              checked={selectedIds.has(session.id)}
-                              onCheckedChange={(checked) => {
-                                setSelectedIds((prev) => {
-                                  const next = new Set(prev)
-                                  if (checked) next.add(session.id)
-                                  else next.delete(session.id)
-                                  return next
-                                })
-                              }}
-                              aria-label={`Select session`}
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
-                            <span className="font-medium truncate">
-                              {session.service_type?.name || 'Unknown Service'}
-                            </span>
-                            <Badge className={
-                              session.status === 'draft' && session.rejection_reason
-                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                : sessionStatusColors[session.status]
-                            }>
-                              {session.status === 'draft' && session.rejection_reason
-                                ? 'Needs Revision'
-                                : sessionStatusLabels[session.status] || session.status}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-x-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span>
+                      <div className={`p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        <div className="flex items-start gap-3">
+                          {isAdmin && session.status === 'submitted' && (
+                            <div className="shrink-0 pt-0.5" onClick={(e) => e.preventDefault()}>
+                              <Checkbox
+                                checked={selectedIds.has(session.id)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedIds((prev) => {
+                                    const next = new Set(prev)
+                                    if (checked) next.add(session.id)
+                                    else next.delete(session.id)
+                                    return next
+                                  })
+                                }}
+                                aria-label={`Select session`}
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            {/* Row 1: Service type + status badge + amount */}
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-medium truncate">
+                                  {session.service_type?.name || 'Unknown Service'}
+                                </span>
+                                <Badge className={`shrink-0 ${
+                                  session.status === 'draft' && session.rejection_reason
+                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                    : sessionStatusColors[session.status]
+                                }`}>
+                                  {session.status === 'draft' && session.rejection_reason
+                                    ? 'Needs Revision'
+                                    : sessionStatusLabels[session.status] || session.status}
+                                </Badge>
+                              </div>
+                              {showFinancialDetails && (
+                                <span className="font-medium shrink-0">{formatCurrency(totalCost)}</span>
+                              )}
+                            </div>
+                            {/* Row 2: Date · duration · attendees · contractor */}
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {parseLocalDate(session.date).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 month: 'short',
                                 day: 'numeric',
-                                year: 'numeric',
                               })}
-                            </span>
-                            <span>{session.duration_minutes} min</span>
-                            {(() => {
-                              const count = session.group_headcount || session.attendees?.length || 0
-                              return count > 0 ? (
-                                <span>
-                                  {count} attendee{count !== 1 ? 's' : ''}
-                                </span>
-                              ) : null
-                            })()}
-                            {isAdmin && session.contractor && (
-                              <span>by {session.contractor.name}</span>
+                              {' · '}{session.duration_minutes} min
+                              {(() => {
+                                const count = session.group_headcount || session.attendees?.length || 0
+                                return count > 0 ? ` · ${count} attendee${count !== 1 ? 's' : ''}` : ''
+                              })()}
+                              {isAdmin && session.contractor ? ` · ${session.contractor.name}` : ''}
+                            </p>
+                            {/* Row 3: Client names */}
+                            {session.attendees?.length > 0 && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                {session.attendees
+                                  .map((a) => a.client?.name)
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </p>
+                            )}
+                            {/* Row 4: Action buttons (mobile-friendly) */}
+                            {isAdmin && session.status === 'submitted' && (
+                              <div className="flex gap-2 mt-2" onClick={(e) => e.preventDefault()}>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="h-7 px-3 text-xs"
+                                  disabled={approvingId === session.id}
+                                  onClick={(e) => handleInlineApprove(e, session.id)}
+                                >
+                                  {approvingId === session.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    'Approve'
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-3 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                                  onClick={(e) => handleInlineReject(e, session.id)}
+                                >
+                                  Revise
+                                </Button>
+                              </div>
                             )}
                           </div>
-                          {session.attendees?.length > 0 && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
-                              {session.attendees
-                                .map((a) => a.client?.name)
-                                .filter(Boolean)
-                                .join(', ')}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 ml-4">
-                          <span className="font-medium">{formatCurrency(totalCost)}</span>
-                          {isAdmin && session.status === 'submitted' && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="h-7 px-2 text-xs"
-                                disabled={approvingId === session.id}
-                                onClick={(e) => handleInlineApprove(e, session.id)}
-                              >
-                                {approvingId === session.id ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  'Approve'
-                                )}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
-                                onClick={(e) => handleInlineReject(e, session.id)}
-                              >
-                                Revise
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </Link>

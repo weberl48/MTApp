@@ -49,6 +49,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
       client_notes,
       group_headcount,
       group_member_names,
+      classroom,
       rejection_reason,
       attendees:session_attendees(client_id)
     `)
@@ -91,6 +92,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
     client_notes: decryptedClientNotes,
     group_headcount: session.group_headcount,
     group_member_names: session.group_member_names,
+    classroom: session.classroom,
     rejection_reason: session.rejection_reason,
     attendees: (session.attendees as { client_id: string }[]) || [],
   }

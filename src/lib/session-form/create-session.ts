@@ -17,6 +17,8 @@ interface CreateSessionParams {
   encryptedClientNotes: string | null
   status: 'draft' | 'submitted' | 'approved'
   groupHeadcount: number | null
+  groupMemberNames: string | null
+  classroom: string | null
   pricing: PricingCalculation
   isScholarshipService?: boolean
   dueDays?: number
@@ -36,7 +38,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
     supabase, date, time, durationMinutes, serviceTypeId,
     contractorId, organizationId, clientIds,
     encryptedNotes, encryptedClientNotes, status,
-    groupHeadcount, pricing, isScholarshipService, dueDays,
+    groupHeadcount, groupMemberNames, classroom, pricing, isScholarshipService, dueDays,
   } = params
 
   // Create the session
@@ -52,7 +54,11 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
       notes: encryptedNotes,
       client_notes: encryptedClientNotes,
       group_headcount: groupHeadcount,
-      group_member_names: null,
+      group_member_names: groupMemberNames,
+      classroom: classroom ?? null,
+      total_amount: pricing.totalAmount,
+      contractor_pay: pricing.contractorPay,
+      mca_cut: pricing.mcaCut,
       organization_id: organizationId,
     })
     .select()
@@ -62,12 +68,14 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
 
   let invoiceError = false
 
-  // Add attendees and create invoices (individual sessions only)
+  // Add attendees and create invoices
   if (clientIds.length > 0) {
+    const isGroup = groupHeadcount != null && groupHeadcount > 0
+
     const attendees = clientIds.map((clientId) => ({
       session_id: session.id,
       client_id: clientId,
-      individual_cost: pricing.totalAmount,
+      individual_cost: isGroup ? pricing.totalAmount : pricing.perPersonCost,
     }))
 
     const { error: attendeesError } = await supabase
@@ -88,15 +96,19 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
         ? format(addDays(parseLocalDate(date), dueDays), 'yyyy-MM-dd')
         : undefined
 
-      const invoices = (clientData || [])
+      const nonScholarshipClients = (clientData || [])
         .filter((client) => client.payment_method !== 'scholarship')
+      const invoiceCount = nonScholarshipClients.length
+
+      const invoices = nonScholarshipClients
         .map((client) => ({
           session_id: session.id,
           client_id: client.id,
-          amount: pricing.totalAmount,
-          mca_cut: pricing.mcaCut,
-          contractor_pay: pricing.contractorPay,
-          rent_amount: pricing.rentAmount,
+          // Group sessions: invoice the full amount to the billing agency
+          amount: isGroup ? pricing.totalAmount : pricing.perPersonCost,
+          mca_cut: Math.round((pricing.mcaCut / invoiceCount) * 100) / 100,
+          contractor_pay: Math.round((pricing.contractorPay / invoiceCount) * 100) / 100,
+          rent_amount: Math.round((pricing.rentAmount / invoiceCount) * 100) / 100,
           payment_method: client.payment_method,
           status: 'pending' as const,
           organization_id: organizationId,
