@@ -9,7 +9,7 @@ import { formatCurrency, calculateSessionPricing, ContractorPricingOverrides } f
 import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { EarningsChart } from '@/components/charts/earnings-chart'
 import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
 
@@ -30,6 +30,7 @@ interface MonthlyBreakdown {
 }
 
 export default function EarningsPage() {
+  const router = useRouter()
   const { user, organization, viewAsContractor, viewAsRole, actualRole } = useOrganization()
   const [summary, setSummary] = useState<EarningsSummary | null>(null)
   const [monthlyBreakdown, setMonthlyBreakdown] = useState<MonthlyBreakdown[]>([])
@@ -38,14 +39,18 @@ export default function EarningsPage() {
   // Use effective contractor ID (respects "view as" impersonation)
   const contractorId = viewAsContractor?.id || user?.id
 
-  // Only contractors (or those viewing as a contractor) should see this page
+  // Only contractors (or those viewing as a contractor) should see this page.
+  // Redirect from inside an effect — calling redirect() mid-render between
+  // other hooks violates the rules of hooks.
   const effectiveRole = viewAsRole || actualRole
-  if (user && effectiveRole !== 'contractor' && !viewAsContractor) {
-    redirect('/dashboard/')
-  }
+  const shouldRedirect = !!user && effectiveRole !== 'contractor' && !viewAsContractor
+  useEffect(() => {
+    if (shouldRedirect) router.replace('/dashboard/')
+  }, [shouldRedirect, router])
 
   useEffect(() => {
     async function fetchEarnings() {
+      if (shouldRedirect) return
       if (!contractorId || !organization) return
 
       const supabase = createClient()
@@ -193,7 +198,7 @@ export default function EarningsPage() {
     }
 
     fetchEarnings()
-  }, [contractorId, organization])
+  }, [contractorId, organization, shouldRedirect])
 
   // Prepare chart data (reverse for chronological order)
   const chartData = [...monthlyBreakdown].reverse()

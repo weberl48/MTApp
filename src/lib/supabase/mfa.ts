@@ -165,7 +165,12 @@ export async function getAuthenticatorAssuranceLevel(): Promise<'aal1' | 'aal2' 
     return null
   }
 
-  return data?.currentLevel || null
+  // Newer @supabase/ssr widens AuthenticatorAssuranceLevels with a `string & {}`
+  // fallback for forward-compat. Narrow to the levels we actually support.
+  const level = data?.currentLevel
+  if (level === 'aal1') return 'aal1'
+  if (level === 'aal2') return 'aal2'
+  return null
 }
 
 /**
