@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -265,10 +265,9 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
               </TableRow>
             ) : (
               filteredContractors.map((contractor) => (
-                <>
+                <Fragment key={contractor.id}>
                   {/* Contractor row */}
                   <TableRow
-                    key={contractor.id}
                     className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => toggleExpand(contractor.id)}
                   >
@@ -358,7 +357,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))
             )}
           </TableBody>

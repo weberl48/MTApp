@@ -352,11 +352,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       hasErrors = true
     }
 
-    if (serviceTypeId && missingCustomRate) {
-      setFieldError('serviceType', 'No custom rate set for this contractor and service type. Please set a rate in Team > Rates.')
-      hasErrors = true
-    }
-
     if (isGroupService) {
       const headcount = parseInt(groupHeadcount)
       if (!headcount || headcount < 1) {
