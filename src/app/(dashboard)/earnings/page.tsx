@@ -9,7 +9,7 @@ import { formatCurrency, calculateSessionPricing, ContractorPricingOverrides } f
 import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
 import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
-import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { monthBoundaries, formatMonthlyBreakdown } from '@/lib/earnings/buckets'
 import { useRouter } from 'next/navigation'
 import { EarningsChart } from '@/components/charts/earnings-chart'
 import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
@@ -55,11 +55,7 @@ export default function EarningsPage() {
       if (!contractorId || !organization) return
 
       const supabase = createClient()
-      const yearStart = startOfYear(new Date()).toISOString().split('T')[0]
-      const monthStart = startOfMonth(new Date()).toISOString().split('T')[0]
-      const monthEnd = endOfMonth(new Date()).toISOString().split('T')[0]
-      const lastMonthStart = startOfMonth(subMonths(new Date(), 1)).toISOString().split('T')[0]
-      const lastMonthEnd = endOfMonth(subMonths(new Date(), 1)).toISOString().split('T')[0]
+      const { yearStart, monthStart, monthEnd, lastMonthStart, lastMonthEnd } = monthBoundaries(new Date())
 
       // Fetch all sessions for this contractor YTD
       const { data: sessions, error } = await supabase
@@ -184,15 +180,8 @@ export default function EarningsPage() {
         sessionsYtd,
       })
 
-      // Convert monthly map to array, sorted by month descending
-      const breakdown = Array.from(monthlyMap.entries())
-        .map(([month, data]) => ({
-          month: format(new Date(month + '-01'), 'MMMM yyyy'),
-          earnings: data.earnings,
-          sessions: data.sessions,
-        }))
-        .sort((a, b) => b.month.localeCompare(a.month))
-        .slice(0, 6) // Last 6 months
+      // Convert monthly map to array, sorted by YYYY-MM key descending (last 6 months)
+      const breakdown = formatMonthlyBreakdown(Array.from(monthlyMap.entries()))
 
       setMonthlyBreakdown(breakdown)
       setLoading(false)
