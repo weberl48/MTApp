@@ -43,7 +43,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { format } from 'date-fns'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 import { toast } from 'sonner'
 
 interface InvoiceWithDetails {
@@ -117,7 +117,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
     isOpen: boolean
     invoice: InvoiceWithDetails | null
   }>({ isOpen: false, invoice: null })
-  const [paidDate, setPaidDate] = useState(new Date().toISOString().split('T')[0])
+  const [paidDate, setPaidDate] = useState(todayLocal())
   const [isProcessing, setIsProcessing] = useState(false)
 
   const pageSize = 20
@@ -396,7 +396,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                           variant="outline"
                           onClick={() => {
                             setMarkPaidDialog({ isOpen: true, invoice })
-                            setPaidDate(new Date().toISOString().split('T')[0])
+                            setPaidDate(todayLocal())
                           }}
                         >
                           <DollarSign className="w-3 h-3 mr-1" />
