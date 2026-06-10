@@ -205,7 +205,7 @@ export function UnsentInvoices() {
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {invoice.invoice_type === 'batch' && invoice.billing_period
-                    ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                     : invoice.session?.date
                       ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                       : ''}
