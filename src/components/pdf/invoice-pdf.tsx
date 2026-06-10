@@ -8,6 +8,7 @@ import {
 import { paymentMethodLabels, formatInvoiceNumber } from '@/lib/constants/display'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
+import { clientInvoiceNotes } from '@/lib/invoices/pdf-notes'
 
 const styles = StyleSheet.create({
   page: {
@@ -206,7 +207,10 @@ interface InvoiceData {
   session?: {
     date: string
     duration_minutes?: number
+    /** Internal/staff notes — NEVER rendered on the client-facing PDF. */
     notes?: string
+    /** Client-facing notes — safe to show on the invoice. */
+    client_notes?: string
     service_type: {
       name: string
     }
@@ -369,11 +373,12 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
           </View>
         </View>
 
-        {/* Session Notes (single-session only) */}
-        {!isBatch && invoice.session?.notes && (
+        {/* Session Notes (single-session only) — CLIENT-FACING notes only.
+            Internal `session.notes` is staff PHI and must never appear here. */}
+        {!isBatch && clientInvoiceNotes(invoice.session) && (
           <View style={styles.notes}>
             <Text style={styles.notesTitle}>Session Notes</Text>
-            <Text style={styles.notesText}>{invoice.session.notes}</Text>
+            <Text style={styles.notesText}>{clientInvoiceNotes(invoice.session)}</Text>
           </View>
         )}
 
