@@ -162,6 +162,11 @@ export default function TeamMemberPage() {
   }, [id, router])
 
   async function handleSaveRole() {
+    if (!can(currentUserRole as UserRole, 'team:manage')) {
+      toast.error('You do not have permission to change roles')
+      setEditingRole(false)
+      return
+    }
     if (!member || !newRole || newRole === member.role) {
       setEditingRole(false)
       return
@@ -210,6 +215,10 @@ export default function TeamMemberPage() {
   if (!member) {
     return null
   }
+
+  // Only owners/developers may change a member's role. Admins (who can reach this page
+  // via team:view) must not see the role editor — it includes an "Owner" option.
+  const canManageTeam = can(currentUserRole as UserRole, 'team:manage')
 
   // Calculate stats
   const totalSessions = sessions.length
@@ -266,14 +275,16 @@ export default function TeamMemberPage() {
                 <Badge variant={member.role === 'admin' || member.role === 'owner' ? 'default' : 'secondary'}>
                   {member.role}
                 </Badge>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={startEditingRole}
-                  className="h-6 w-6"
-                >
-                  <Pencil className="w-3 h-3" />
-                </Button>
+                {canManageTeam && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={startEditingRole}
+                    className="h-6 w-6"
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </Button>
+                )}
               </div>
             )}
           </div>
