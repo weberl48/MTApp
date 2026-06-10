@@ -48,6 +48,10 @@ export async function POST(request: NextRequest) {
 
     const { email, action, success } = parsed.data
 
+    // The platform sets x-forwarded-for to the real client IP (clients can't spoof it on
+    // Vercel); we scope lockout by this IP so failed attempts can't lock out other IPs.
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+
     // Look up org-specific lockout settings
     const security = await getOrgSecuritySettings(email)
     const lockoutOptions = security
@@ -55,13 +59,12 @@ export async function POST(request: NextRequest) {
       : undefined
 
     if (action === 'check') {
-      const status = await checkLockout(email, lockoutOptions)
+      const status = await checkLockout(email, ip, lockoutOptions)
       return NextResponse.json(status)
     }
 
     if (action === 'record') {
-      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      await recordLoginAttempt(email, !!success, ip)
+      await recordLoginAttempt(email, !!success, ip ?? undefined)
       return NextResponse.json({ recorded: true })
     }
 
