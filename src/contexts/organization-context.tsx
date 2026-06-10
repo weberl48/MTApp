@@ -1,9 +1,10 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Organization, User, UserRole, OrganizationSettings, FeatureFlags } from '@/types/database'
 import { can, type Permission } from '@/lib/auth/permissions'
+import { mergeOrganizationSettings } from '@/lib/organization/settings'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
 
@@ -39,74 +40,6 @@ interface OrganizationContextType {
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined)
 
-// Default settings for new organizations
-const DEFAULT_SETTINGS: OrganizationSettings = {
-  invoice: {
-    footer_text: 'Thank you for your business!',
-    payment_instructions: '',
-    due_days: 30,
-    send_reminders: true,
-    reminder_days: [7, 1],
-  },
-  session: {
-    default_duration: 30,
-    duration_options: [30, 45, 60, 90],
-    require_notes: false,
-    auto_submit: false,
-    reminder_hours: 24,
-    send_reminders: true,
-  },
-  notification: {
-    email_on_session_submit: true,
-    email_on_invoice_paid: true,
-    admin_email: '',
-  },
-  security: {
-    session_timeout_minutes: 30,
-    require_mfa: false,
-    max_login_attempts: 5,
-    lockout_duration_minutes: 15,
-  },
-  pricing: {
-    no_show_fee: 60,
-    duration_base_minutes: 30,
-    square_processing_fee_enabled: false,
-    square_processing_fee_type: 'fixed' as const,
-    square_processing_fee_amount: 0,
-    square_processing_fee_percentage: 0,
-    square_processing_fee_fixed_cents: 0,
-  },
-  portal: {
-    token_expiry_days: 90,
-  },
-  features: {
-    client_portal: true,
-  },
-  custom_lists: {
-    payment_methods: {
-      private_pay: { label: 'Private Pay', visible: true },
-      self_directed: { label: 'Self-Directed', visible: true },
-      group_home: { label: 'Group Home', visible: true },
-      scholarship: { label: 'Scholarship', visible: true },
-      venmo: { label: 'Venmo', visible: true },
-    },
-    billing_methods: {
-      square: { label: 'Square', visible: true },
-      check: { label: 'Check', visible: true },
-      email: { label: 'Email', visible: true },
-      other: { label: 'Other', visible: true },
-    },
-    classrooms: [],
-  },
-  automation: {
-    auto_approve_sessions: false,
-    auto_send_invoice_on_approve: false,
-    auto_send_invoice_method: 'none',
-    auto_generate_scholarship_invoices: false,
-    scholarship_invoice_day: 1,
-  },
-}
-
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [user, setUser] = useState<User | null>(null)
@@ -134,55 +67,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   // Effective user ID for data queries (use simulated contractor if set, otherwise actual user)
   const effectiveUserId = viewAsContractor?.id || user?.id || null
 
-  // Parse settings with defaults (deep merge)
-  const settings: OrganizationSettings | null = organization
-    ? {
-        invoice: {
-          ...DEFAULT_SETTINGS.invoice,
-          ...((organization.settings as OrganizationSettings)?.invoice || {}),
-        },
-        session: {
-          ...DEFAULT_SETTINGS.session,
-          ...((organization.settings as OrganizationSettings)?.session || {}),
-        },
-        notification: {
-          ...DEFAULT_SETTINGS.notification,
-          ...((organization.settings as OrganizationSettings)?.notification || {}),
-        },
-        security: {
-          ...DEFAULT_SETTINGS.security,
-          ...((organization.settings as OrganizationSettings)?.security || {}),
-        },
-        pricing: {
-          ...DEFAULT_SETTINGS.pricing,
-          ...((organization.settings as OrganizationSettings)?.pricing || {}),
-        },
-        portal: {
-          ...DEFAULT_SETTINGS.portal,
-          ...((organization.settings as OrganizationSettings)?.portal || {}),
-        },
-        features: {
-          ...DEFAULT_SETTINGS.features,
-          ...((organization.settings as OrganizationSettings)?.features || {}),
-        },
-        custom_lists: {
-          payment_methods: {
-            ...DEFAULT_SETTINGS.custom_lists.payment_methods,
-            ...((organization.settings as OrganizationSettings)?.custom_lists?.payment_methods || {}),
-          },
-          billing_methods: {
-            ...DEFAULT_SETTINGS.custom_lists.billing_methods,
-            ...((organization.settings as OrganizationSettings)?.custom_lists?.billing_methods || {}),
-          },
-          classrooms: (organization.settings as OrganizationSettings)?.custom_lists?.classrooms
-            ?? DEFAULT_SETTINGS.custom_lists.classrooms,
-        },
-        automation: {
-          ...DEFAULT_SETTINGS.automation,
-          ...((organization.settings as OrganizationSettings)?.automation || {}),
-        },
-      }
-    : null
+  // Parse settings with defaults (deep merge). Memoized on `organization` so a re-render that
+  // doesn't change the organization keeps a STABLE settings identity. Settings forms mirror
+  // this value into local state via useEffect; an unstable identity (a fresh object every
+  // render) re-fired those effects and wiped the user's unsaved edits.
+  const settings: OrganizationSettings | null = useMemo(
+    () => (organization ? mergeOrganizationSettings(organization.settings as OrganizationSettings) : null),
+    [organization]
+  )
 
   const loadOrganization = useCallback(async (targetOrgId?: string) => {
     const supabase = createClient()
@@ -326,7 +218,11 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      // Don't reload the whole org/user on routine token refreshes (fired ~hourly and on tab
+      // refocus). It churns context state and wiped unsaved edits in settings forms. Reload
+      // only on real identity changes (sign in/out, user update).
+      if (event === 'TOKEN_REFRESHED') return
       loadOrganization()
     })
 
