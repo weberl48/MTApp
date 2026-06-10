@@ -1,9 +1,7 @@
-import { vi, type Mock } from 'vitest'
+import { vi } from 'vitest'
 import { checkLockout, recordLoginAttempt } from './lockout'
 
 // Mock Supabase service client
-const mockSelect = vi.fn()
-const mockInsert = vi.fn()
 const mockFrom = vi.fn()
 
 vi.mock('@/lib/supabase/service', () => ({
@@ -129,7 +127,7 @@ describe('checkLockout', () => {
       }),
     })
 
-    const result = await checkLockout('user@test.com', {
+    const result = await checkLockout('user@test.com', null, {
       maxAttempts: 3,
       lockoutMinutes: 30,
     })
@@ -137,6 +135,26 @@ describe('checkLockout', () => {
     expect(result.locked).toBe(false)
     expect(result.maxAttempts).toBe(3)
     expect(result.attempts).toBe(2)
+  })
+
+  it('scopes the lockout count to the requesting IP (regression for #2 — lockout DoS)', async () => {
+    // With an IP, the query must filter on ip_address so an attacker spamming a victim's
+    // email from a different IP cannot lock the victim out from their own (clean) IP.
+    const ipEq = vi.fn().mockReturnValue({
+      gte: vi.fn().mockResolvedValue({ count: 1 }),
+    })
+    const successEq = vi.fn().mockReturnValue({ eq: ipEq })
+    const emailEq = vi.fn().mockReturnValue({ eq: successEq })
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({ eq: emailEq }),
+    })
+
+    const result = await checkLockout('victim@test.com', '203.0.113.9')
+
+    expect(emailEq).toHaveBeenCalledWith('email', 'victim@test.com')
+    expect(ipEq).toHaveBeenCalledWith('ip_address', '203.0.113.9')
+    expect(result.attempts).toBe(1)
+    expect(result.locked).toBe(false)
   })
 
   it('lowercases the email for queries', async () => {
