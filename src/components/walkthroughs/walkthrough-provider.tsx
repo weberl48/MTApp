@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
@@ -64,10 +64,19 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
   const [activeWalkthrough, setActiveWalkthrough] = useState<Walkthrough | null>(null)
   const [stepIndex, setStepIndex] = useState(0)
   const driverRef = useRef<Driver | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const startWalkthrough = useCallback((id: string) => {
     const walkthrough = getWalkthroughById(id)
     if (!walkthrough) return
+
+    // Tear down anything already in-flight so a double-start can't leave two live driver
+    // instances / overlays, and a pending start-timeout can't fire after this one.
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (driverRef.current) {
+      driverRef.current.destroy()
+      driverRef.current = null
+    }
 
     setActiveWalkthrough(walkthrough)
     setStepIndex(0)
@@ -79,7 +88,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
     }
 
     // Small delay to let navigation settle before highlighting
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       const driverInstance = driver({
         showProgress: true,
         animate: true,
@@ -136,11 +145,24 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
   }, [pathname, router])
 
   const stopWalkthrough = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     if (driverRef.current) {
       driverRef.current.destroy()
     }
     setActiveWalkthrough(null)
     setStepIndex(0)
+  }, [])
+
+  // On unmount (e.g. the dashboard tears down after a session-timeout sign-out mid-tour),
+  // destroy any live driver overlay and clear a pending start-timeout so nothing lingers.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (driverRef.current) {
+        driverRef.current.destroy()
+        driverRef.current = null
+      }
+    }
   }, [])
 
   return (
