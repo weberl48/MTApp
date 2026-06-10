@@ -6,6 +6,7 @@ import { useOrganization } from '@/contexts/organization-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formatCurrency, calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
+import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
 import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { format, startOfYear, startOfMonth, endOfMonth, subMonths } from 'date-fns'
@@ -85,7 +86,7 @@ export default function EarningsPage() {
         .eq('contractor_id', contractorId)
         .eq('organization_id', organization.id)
         .gte('date', yearStart)
-        .in('status', ['submitted', 'approved'])
+        .in('status', UNPAID_PAYROLL_STATUSES)
         .order('date', { ascending: false })
 
       if (error) {
