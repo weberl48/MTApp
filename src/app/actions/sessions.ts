@@ -91,26 +91,31 @@ export async function approveSession(sessionId: string) {
 }
 
 export async function bulkApproveSessions(sessionIds: string[]) {
-  if (sessionIds.length === 0) return { success: true as const, count: 0 }
+  if (sessionIds.length === 0) return { success: true as const, count: 0, approvedIds: [] as string[], autoSent: 0 }
 
   const permErr = await requirePermission('session:approve')
   if (permErr) return permErr
 
   const supabase = await createClient()
 
-  const { error } = await supabase
+  const { data: approved, error } = await supabase
     .from('sessions')
     .update({ status: 'approved', updated_at: new Date().toISOString() })
     .in('id', sessionIds)
     .eq('status', 'submitted') // Safety: only approve submitted sessions
+    .select('id')
 
   const err = handleSupabaseError(error)
   if (err) return err
 
+  // Only the rows that were actually 'submitted' got approved — others (already approved/
+  // rejected by someone else) are skipped, so report and act on the real set.
+  const approvedIds = (approved || []).map((s) => s.id)
+
   // Auto-send invoices per the org's automation settings (email or square), using the SAME
-  // gate as single approve — never auto-send when auto_send_invoice_on_approve is off.
+  // gate as single approve, ONLY for the sessions actually approved here.
   const autoSendResults = await Promise.allSettled(
-    sessionIds.map((id) => autoSendInvoicesOnApprove(supabase, id))
+    approvedIds.map((id) => autoSendInvoicesOnApprove(supabase, id))
   )
 
   const autoSent = autoSendResults.reduce(
@@ -120,7 +125,7 @@ export async function bulkApproveSessions(sessionIds: string[]) {
 
   revalidateSessionPaths()
 
-  return { success: true as const, count: sessionIds.length, autoSent }
+  return { success: true as const, count: approvedIds.length, approvedIds, autoSent }
 }
 
 export async function markSessionNoShow(sessionId: string) {

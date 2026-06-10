@@ -90,7 +90,9 @@ export function PendingApprovals() {
       const result = await bulkApproveSessions(Array.from(selectedIds))
       if (result.success) {
         toast.success(`Approved ${result.count} session${result.count !== 1 ? 's' : ''}`)
-        setSessions((prev) => prev.filter((s) => !selectedIds.has(s.id)))
+        // Only remove the sessions that were actually approved (others stay pending).
+        const approvedSet = new Set(result.approvedIds)
+        setSessions((prev) => prev.filter((s) => !approvedSet.has(s.id)))
         setSelectedIds(new Set())
       } else {
         toast.error('error' in result ? result.error : 'Failed to approve sessions')
