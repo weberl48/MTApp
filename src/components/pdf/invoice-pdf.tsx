@@ -243,7 +243,7 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
   const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
 
   const titleText = isBatch && invoice.billing_period
-    ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+    ? `Monthly Statement - ${parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
     : 'INVOICE'
 
   return (

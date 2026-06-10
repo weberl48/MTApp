@@ -36,6 +36,7 @@ import type { UserRole, InvoiceItem } from '@/types/database'
 import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
 import { format } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
+import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
 
@@ -223,11 +224,9 @@ export default function InvoiceDetailPage() {
     )
   }
 
-  // Calculate overdue status
-  const isOverdue = invoice.status === 'sent' && invoice.due_date && new Date() > new Date(invoice.due_date)
-  const daysOverdue = isOverdue && invoice.due_date
-    ? Math.ceil((new Date().getTime() - new Date(invoice.due_date).getTime()) / (1000 * 60 * 60 * 24))
-    : 0
+  // Calculate overdue status (local calendar dates — no UTC off-by-one)
+  const isOverdue = isInvoiceOverdue(invoice.status, invoice.due_date)
+  const daysOverdue = invoiceDaysOverdue(invoice.due_date)
 
   return (
     <div className="space-y-6">
@@ -242,7 +241,7 @@ export default function InvoiceDetailPage() {
           </h1>
           <p className="text-muted-foreground">
             {invoice.invoice_type === 'batch' && invoice.billing_period
-              ? `Monthly Statement - ${new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
+              ? `Monthly Statement - ${parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} (${invoiceItems.length} sessions)`
               : `${invoice.session?.service_type?.name} - ${invoice.session?.date && parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
@@ -304,7 +303,7 @@ export default function InvoiceDetailPage() {
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500">Due Date</p>
-                  <p className="font-medium">{new Date(invoice.due_date).toLocaleDateString()}</p>
+                  <p className="font-medium">{parseLocalDate(invoice.due_date).toLocaleDateString()}</p>
                 </div>
               </div>
             )}
@@ -314,7 +313,7 @@ export default function InvoiceDetailPage() {
                 <Calendar className="w-5 h-5 text-green-500" />
                 <div>
                   <p className="text-sm text-gray-500">Paid Date</p>
-                  <p className="font-medium text-green-600">{new Date(invoice.paid_date).toLocaleDateString()}</p>
+                  <p className="font-medium text-green-600">{parseLocalDate(invoice.paid_date).toLocaleDateString()}</p>
                 </div>
               </div>
             )}

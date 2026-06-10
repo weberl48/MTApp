@@ -13,6 +13,7 @@ import {
   type UnbilledGroup,
 } from '@/lib/queries/scholarship'
 import { useOrganization } from '@/contexts/organization-context'
+import { parseLocalDate } from '@/lib/dates'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -114,7 +115,7 @@ export function UnbilledSessions({ organizationId }: Props) {
         <div className="space-y-2">
           {groups.map((group) => {
             const key = `${group.clientId}::${group.month}`
-            const monthLabel = new Date(group.month + '-01').toLocaleDateString('en-US', {
+            const monthLabel = parseLocalDate(group.month + '-01').toLocaleDateString('en-US', {
               month: 'long',
               year: 'numeric',
             })

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
 import { scholarshipBatchToasts } from '@/lib/invoices/scholarship-batch-feedback'
+import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -67,17 +68,8 @@ function getInvoiceStatus(invoice: Invoice): { status: string; isOverdue: boolea
     return { status: 'paid', isOverdue: false, daysOverdue: 0 }
   }
 
-  if (invoice.due_date && invoice.status === 'sent') {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const dueDate = new Date(invoice.due_date)
-    dueDate.setHours(0, 0, 0, 0)
-
-    if (today > dueDate) {
-      const diffTime = today.getTime() - dueDate.getTime()
-      const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      return { status: 'overdue', isOverdue: true, daysOverdue }
-    }
+  if (isInvoiceOverdue(invoice.status, invoice.due_date)) {
+    return { status: 'overdue', isOverdue: true, daysOverdue: invoiceDaysOverdue(invoice.due_date) }
   }
 
   return { status: invoice.status, isOverdue: false, daysOverdue: 0 }
@@ -175,7 +167,7 @@ function InvoiceTable({
               </TableCell>
               <TableCell>
                 {invoice.invoice_type === 'batch' && invoice.billing_period
-                  ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                  ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                   : invoice.session?.date
                     ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                         month: 'short',
@@ -719,7 +711,7 @@ export default function InvoicesPage() {
                     <div className="space-y-4">
                       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Unbilled Sessions</h3>
                       {unbilledByClientMonth.map((group) => {
-                        const monthLabel = new Date(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                        const monthLabel = parseLocalDate(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
                         const groupKey = `${group.clientId}::${group.month}`
                         const isGenerating = generatingBatch === groupKey
 
