@@ -1,9 +1,11 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
 import { handleSupabaseError, revalidateTeamPaths } from '@/lib/actions/helpers'
+import { logger } from '@/lib/logger'
 
 export async function removeTeamMember(memberId: string) {
   const supabase = await createClient()
@@ -20,7 +22,7 @@ export async function removeTeamMember(memberId: string) {
   // Check if current user is owner, admin, or developer
   const { data: currentUser } = await supabase
     .from('users')
-    .select('role')
+    .select('role, organization_id')
     .eq('id', user.id)
     .single()
 
@@ -71,14 +73,30 @@ export async function removeTeamMember(memberId: string) {
     }
   }
 
-  // Delete the user from the users table
-  const { error } = await supabase
-    .from('users')
-    .delete()
-    .eq('id', memberId)
+  // The users table has no DELETE RLS policy, so the session-scoped client silently deletes
+  // 0 rows (the original bug: "success" while the member stayed). Use the service role for
+  // the delete AFTER all the authz + session checks above. Scope by org for non-developers
+  // as defense in depth, since the service role bypasses RLS.
+  const service = createServiceClient()
+  let deleteQuery = service.from('users').delete({ count: 'exact' }).eq('id', memberId)
+  if (currentUser?.role !== 'developer') {
+    deleteQuery = deleteQuery.eq('organization_id', currentUser?.organization_id ?? '')
+  }
+  const { error, count } = await deleteQuery
 
   const err = handleSupabaseError(error)
   if (err) return err
+
+  if (!count) {
+    return { success: false as const, error: 'Team member not found' }
+  }
+
+  // Best-effort: also remove the auth identity so the person can no longer sign in.
+  try {
+    await service.auth.admin.deleteUser(memberId)
+  } catch (e) {
+    logger.error('Failed to delete auth user after team removal', e)
+  }
 
   revalidateTeamPaths()
 
