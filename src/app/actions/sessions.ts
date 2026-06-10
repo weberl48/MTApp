@@ -5,6 +5,7 @@ import { autoSendInvoicesViaSquare } from '@/lib/square/auto-send'
 import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
+import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
 import type { OrganizationSettings } from '@/types/database'
 
 async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string) {
@@ -189,11 +190,9 @@ export async function rejectSession(sessionId: string, reason: string) {
 
   const supabase = await createClient()
 
-  // Delete pending per-session invoices (created on submit, must be removed when reverting to draft)
-  const { error: invoicesError } = await supabase
-    .from('invoices')
-    .delete()
-    .eq('session_id', sessionId)
+  // Delete only PENDING per-session invoices (created on submit). Never delete sent/paid
+  // invoices — those are financial records.
+  const { error: invoicesError } = await deletePendingSessionInvoices(supabase, sessionId)
 
   const invoiceErr = handleSupabaseError(invoicesError)
   if (invoiceErr) return invoiceErr
@@ -225,11 +224,9 @@ export async function cancelSession(sessionId: string) {
 
   const supabase = await createClient()
 
-  // Delete any per-session invoices for this session
-  const { error: invoicesError } = await supabase
-    .from('invoices')
-    .delete()
-    .eq('session_id', sessionId)
+  // Delete only PENDING per-session invoices. Never delete sent/paid invoices —
+  // those are financial records.
+  const { error: invoicesError } = await deletePendingSessionInvoices(supabase, sessionId)
 
   const invoiceErr = handleSupabaseError(invoicesError)
   if (invoiceErr) return invoiceErr
@@ -257,14 +254,19 @@ export async function deleteSession(sessionId: string) {
 
   const supabase = await createClient()
 
+  // Don't allow deleting a session whose invoice was already sent or paid (financial record)
+  if (await hasBilledSessionInvoice(supabase, sessionId)) {
+    return {
+      success: false as const,
+      error: 'This session has a sent or paid invoice and cannot be deleted. Void the invoice first.',
+    }
+  }
+
   // Remove from any pending batch invoices (scholarship)
   await removeSessionFromBatchInvoices(supabase, sessionId)
 
-  // Delete per-session invoices (foreign key constraint)
-  const { error: invoicesError } = await supabase
-    .from('invoices')
-    .delete()
-    .eq('session_id', sessionId)
+  // Delete only PENDING per-session invoices (foreign key constraint)
+  const { error: invoicesError } = await deletePendingSessionInvoices(supabase, sessionId)
 
   const invoiceErr = handleSupabaseError(invoicesError)
   if (invoiceErr) return invoiceErr
