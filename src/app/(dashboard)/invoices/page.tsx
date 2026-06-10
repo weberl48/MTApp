@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from
 import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
+import { scholarshipBatchToasts } from '@/lib/invoices/scholarship-batch-feedback'
 import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -694,15 +695,13 @@ export default function InvoicesPage() {
                           setGeneratingAll(true)
                           const result = await generateAllUnbilledScholarshipInvoices(organization?.id || '')
                           setGeneratingAll(false)
-                          if (result.success) {
-                            if (result.generated > 0) {
-                              toast.success(`Generated ${result.generated} invoice${result.generated !== 1 ? 's' : ''}`)
-                            }
-                            if (result.failed.length > 0) {
-                              toast.warning(`${result.failed.length} failed`)
-                            }
-                            handleRefresh()
+                          for (const t of scholarshipBatchToasts(result)) {
+                            if (t.level === 'success') toast.success(t.message)
+                            else if (t.level === 'warning') toast.warning(t.message)
+                            else if (t.level === 'info') toast.info(t.message)
+                            else toast.error(t.message)
                           }
+                          if (result.success) handleRefresh()
                         }}
                       >
                         {generatingAll ? (
