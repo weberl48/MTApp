@@ -189,8 +189,10 @@ export default function SessionsPage() {
       const result = await bulkApproveSessions(Array.from(selectedIds))
       if (result.success) {
         toast.success(`Approved ${result.count} session${result.count !== 1 ? 's' : ''}`)
+        // Only flip the sessions that were actually approved (others were skipped server-side).
+        const approvedSet = new Set(result.approvedIds)
         setSessions((prev) =>
-          prev.map((s) => (selectedIds.has(s.id) ? { ...s, status: 'approved' } : s))
+          prev.map((s) => (approvedSet.has(s.id) ? { ...s, status: 'approved' } : s))
         )
         setSelectedIds(new Set())
       } else {
