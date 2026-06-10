@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
+import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
 import { DollarSign, Users, Calendar, Loader2, AlertCircle, Receipt, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -181,7 +182,7 @@ export default function PaymentsPage() {
         session_attendees(client:clients(name))
       `)
       .is('contractor_paid_date', null)
-      .eq('status', 'submitted')
+      .in('status', UNPAID_PAYROLL_STATUSES)
       .order('date', { ascending: false })
 
     const typedSessions = (unpaidSessions as unknown as SessionWithInvoices[]) || []
