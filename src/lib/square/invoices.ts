@@ -23,6 +23,20 @@ interface CreateSquareInvoiceParams {
   invoiceNumber: string
   note?: string
   serviceCharge?: SquareServiceCharge
+  /** Stable basis (the local invoice id) for DETERMINISTIC Square idempotency keys. */
+  idempotencyKey: string
+}
+
+/**
+ * Deterministic Square idempotency keys for the order/invoice/publish steps, derived from a
+ * stable base (the local invoice id). Square treats a repeated key as the same request, so a
+ * retry after a timeout — or two concurrent "Send via Square" clicks — reuse the same Square
+ * order/invoice instead of creating duplicates. (Previously every call used randomUUID(), so
+ * each retry created a new live Square invoice.) Square caps keys at 45 chars; a UUID base
+ * keeps these well under.
+ */
+export function squareIdempotencyKeys(base: string): { order: string; invoice: string; publish: string } {
+  return { order: `o:${base}`, invoice: `i:${base}`, publish: `p:${base}` }
 }
 
 interface SquareInvoiceResult {
@@ -71,6 +85,8 @@ async function findOrCreateCustomer(
 export async function createSquareInvoice(
   params: CreateSquareInvoiceParams
 ): Promise<SquareInvoiceResult> {
+  const idem = squareIdempotencyKeys(params.idempotencyKey)
+
   // In sandbox mode, redirect all emails to dev email
   const customerEmail = isSquareSandbox() ? DEV_EMAIL : params.clientEmail
   const customerName = isSquareSandbox() ? `[TEST] ${params.clientName}` : params.clientName
@@ -138,7 +154,7 @@ export async function createSquareInvoice(
         serviceCharges,
         state: 'OPEN',
       },
-      idempotencyKey: randomUUID(),
+      idempotencyKey: idem.order,
     })
 
     if (!orderResult?.order?.id) {
@@ -193,7 +209,7 @@ export async function createSquareInvoice(
           cashAppPay: true,
         },
       },
-      idempotencyKey: randomUUID(),
+      idempotencyKey: idem.invoice,
     })
   } catch (error) {
     console.error('[MCA] Failed to create Square invoice')
@@ -212,7 +228,7 @@ export async function createSquareInvoice(
     publishResult = await squareClient.invoices.publish({
       invoiceId,
       version: invoiceResult.invoice.version!,
-      idempotencyKey: randomUUID(),
+      idempotencyKey: idem.publish,
     })
   } catch (error) {
     console.error('[MCA] Failed to publish Square invoice')
