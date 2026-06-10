@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { todayLocal } from '@/lib/dates'
 import {
   useReactTable,
   getCoreRowModel,
@@ -222,7 +223,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `contractor-payments-${new Date().toISOString().split('T')[0]}.xlsx`
+    a.download = `contractor-payments-${todayLocal()}.xlsx`
     a.click()
     URL.revokeObjectURL(url)
   }

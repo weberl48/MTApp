@@ -38,7 +38,7 @@ import { deleteSession } from '@/app/actions/sessions'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 
 export interface UnpaidSession {
   id: string
@@ -71,7 +71,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     isOpen: boolean
     contractor: ContractorPayout | null
   }>({ isOpen: false, contractor: null })
-  const [payoutDate, setPayoutDate] = useState(new Date().toISOString().split('T')[0])
+  const [payoutDate, setPayoutDate] = useState(todayLocal())
   const [isProcessing, setIsProcessing] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean
@@ -99,7 +99,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
 
   function openMarkPaidDialog(contractor: ContractorPayout) {
     setMarkPaidDialog({ isOpen: true, contractor })
-    setPayoutDate(new Date().toISOString().split('T')[0])
+    setPayoutDate(todayLocal())
   }
 
   async function handleMarkPaid() {
@@ -209,7 +209,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `unpaid-payroll-${new Date().toISOString().split('T')[0]}.xlsx`
+    a.download = `unpaid-payroll-${todayLocal()}.xlsx`
     a.click()
     URL.revokeObjectURL(url)
   }
