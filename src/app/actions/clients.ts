@@ -57,6 +57,9 @@ export async function addClient(data: {
   notes?: string | null
   organization_id: string
 }) {
+  const permErr = await requirePermission('client:manage')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { data: newClient, error } = await supabase
@@ -90,6 +93,9 @@ export async function updateClient(
     notes?: string | null
   }
 ) {
+  const permErr = await requirePermission('client:manage')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   const { error } = await supabase

@@ -13,6 +13,7 @@ export type Permission =
   | 'team:view'
   | 'team:manage'
   | 'team:invite'
+  | 'client:manage'
   | 'settings:edit'
   | 'analytics:view'
   | 'payments:view'
@@ -30,6 +31,7 @@ const ROLE_PERMISSIONS: Record<Permission, UserRole[]> = {
   'team:view':              ['developer', 'owner', 'admin'],
   'team:manage':            ['developer', 'owner'],
   'team:invite':            ['developer', 'owner', 'admin'],
+  'client:manage':          ['developer', 'owner', 'admin'],
   'settings:edit':          ['developer', 'owner'],
   'analytics:view':         ['developer', 'owner'],
   'payments:view':          ['developer', 'owner'],

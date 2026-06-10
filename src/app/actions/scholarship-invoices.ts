@@ -19,6 +19,9 @@ export async function generateScholarshipBatchInvoice({
   billingPeriod,
   organizationId,
 }: GenerateBatchInvoiceParams) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+
   const supabase = await createClient()
 
   // 1. Check for existing batch invoice for this client+month
