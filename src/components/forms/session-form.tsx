@@ -44,6 +44,7 @@ import {
   saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
+import { resolveDurationOptions } from '@/lib/settings/input'
 import { encryptPHI } from '@/lib/crypto/actions'
 
 interface ExistingSession {
@@ -705,7 +706,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
-                {(settings?.session?.duration_options ?? [30, 45, 60, 90]).map((mins) => (
+                {resolveDurationOptions(settings?.session?.duration_options).map((mins) => (
                   <SelectItem key={mins} value={String(mins)}>
                     {mins} minutes
                   </SelectItem>
