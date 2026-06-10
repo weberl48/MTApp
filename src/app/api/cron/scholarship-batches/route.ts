@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { OrganizationSettings, ServiceType } from '@/types/database'
-import { calculateSessionPricing } from '@/lib/pricing'
+import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
+import { buildContractorRateMap, type ContractorRateRow } from '@/lib/queries/scholarship'
 
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization')
@@ -31,8 +32,8 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     .select(`
       client_id,
       session:sessions!inner(
-        id, date, duration_minutes, status,
-        service_type:service_types(name, scholarship_rate, base_rate, mca_percentage, contractor_cap, rent_percentage, per_person_rate)
+        id, date, duration_minutes, status, group_headcount, contractor_id,
+        service_type:service_types(*)
       )
     `)
     .in('client_id', clientIds)
@@ -57,6 +58,8 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     date: string
     duration_minutes: number
     status: string
+    group_headcount: number | null
+    contractor_id: string | null
     service_type: ServiceType | null
   }
 
@@ -66,6 +69,8 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     clientName: string
     date: string
     durationMinutes: number
+    groupHeadcount: number | null
+    contractorId: string | null
     serviceType: ServiceType
   }[] = []
 
@@ -81,6 +86,8 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
       clientName: clientMap.get(row.client_id) || 'Unknown',
       date: session.date,
       durationMinutes: session.duration_minutes,
+      groupHeadcount: session.group_headcount,
+      contractorId: session.contractor_id,
       serviceType: session.service_type,
     })
   }
@@ -120,6 +127,18 @@ export async function GET(request: NextRequest) {
       const unbilled = await fetchOrgUnbilledScholarship(supabase, org.id)
       if (unbilled.length === 0) continue
 
+      // Build the contractor rate map so batch contractor pay reflects custom rates
+      // (matches the manual "Generate All" path; the cron previously ignored overrides).
+      const contractorIds = [...new Set(unbilled.map((u) => u.contractorId).filter((id): id is string => !!id))]
+      let rateMap = new Map<string, ContractorPricingOverrides>()
+      if (contractorIds.length > 0) {
+        const { data: rates } = await supabase
+          .from('contractor_rates')
+          .select('contractor_id, service_type_id, contractor_pay, duration_increment')
+          .in('contractor_id', contractorIds)
+        rateMap = buildContractorRateMap(rates as ContractorRateRow[] | null)
+      }
+
       // Group by client + month
       const groups = new Map<string, typeof unbilled>()
       for (const s of unbilled) {
@@ -154,8 +173,9 @@ export async function GET(request: NextRequest) {
         let totalRent = 0
 
         const itemData = sessions.map((s) => {
+          const overrides = s.contractorId ? rateMap.get(`${s.contractorId}:${s.serviceType.id}`) : undefined
           const pricing = calculateSessionPricing(
-            s.serviceType, 1, s.durationMinutes, undefined,
+            s.serviceType, s.groupHeadcount || 1, s.durationMinutes, overrides,
             { paymentMethod: 'scholarship' }
           )
           totalAmount += pricing.totalAmount
@@ -193,8 +213,13 @@ export async function GET(request: NextRequest) {
             contractor_pay: round(d.pricing.contractorPay),
             rent_amount: round(d.pricing.rentAmount),
           }))
-          await supabase.from('invoice_items').insert(items)
-          generated++
+          const { error: itemsError } = await supabase.from('invoice_items').insert(items)
+          if (itemsError) {
+            // Don't leave an orphaned invoice with no line items (mirror the manual action).
+            await supabase.from('invoices').delete().eq('id', invoice.id)
+          } else {
+            generated++
+          }
         }
       }
 
