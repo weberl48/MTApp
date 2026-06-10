@@ -3,8 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
 import { calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
-import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth } from '@/lib/queries/scholarship'
+import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth, buildContractorRateMap, type ContractorRateRow } from '@/lib/queries/scholarship'
 import type { ServiceType, OrganizationSettings } from '@/types/database'
+import { logger } from '@/lib/logger'
 import { addDays, format } from 'date-fns'
 
 interface GenerateBatchInvoiceParams {
@@ -107,19 +108,18 @@ export async function generateScholarshipBatchInvoice({
       .filter((id): id is string => !!id)
   )]
 
-  const rateMap = new Map<string, ContractorPricingOverrides>()
+  let rateMap = new Map<string, ContractorPricingOverrides>()
   if (contractorIds.length > 0) {
-    const { data: rates } = await supabase
+    const { data: rates, error: ratesError } = await supabase
       .from('contractor_rates')
-      .select('user_id, service_type_id, contractor_pay, duration_increment')
-      .in('user_id', contractorIds)
+      .select('contractor_id, service_type_id, contractor_pay, duration_increment')
+      .in('contractor_id', contractorIds)
 
-    for (const rate of rates || []) {
-      rateMap.set(`${rate.user_id}:${rate.service_type_id}`, {
-        customContractorPay: rate.contractor_pay,
-        durationIncrement: rate.duration_increment,
-      })
+    if (ratesError) {
+      logger.error('Failed to load contractor rates for scholarship batch', ratesError)
     }
+
+    rateMap = buildContractorRateMap(rates as ContractorRateRow[] | null)
   }
 
   // 5. Calculate totals and build line items
