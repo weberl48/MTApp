@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
+import { clientSearchFilterIds } from '@/lib/invoices/client-search'
 import {
   Table,
   TableBody,
@@ -154,7 +155,17 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
     }
 
     if (searchTerm) {
-      query = query.or(`client.name.ilike.%${searchTerm}%`)
+      // An embedded-resource filter (client.name) can't go inside a top-level .or() — PostgREST
+      // fails to parse it and the whole query errors (so the table always blanked). Look up the
+      // matching client ids first, then filter invoices by them (works with pagination + count).
+      const { data: matchingClients } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('organization_id', organization.id)
+        .ilike('name', `%${searchTerm}%`)
+      const clientIds = (matchingClients || []).map((c) => c.id)
+      // No matches → force an empty result rather than returning everything.
+      query = query.in('client_id', clientSearchFilterIds(clientIds))
     }
 
     const { data, count, error } = await query
