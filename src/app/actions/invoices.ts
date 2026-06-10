@@ -84,13 +84,16 @@ export async function bulkUpdateInvoiceStatus(
 }
 
 export async function bulkSendInvoices(invoiceIds: string[]) {
-  if (invoiceIds.length === 0) return { success: true as const, sent: 0, failed: [] as string[] }
+  if (invoiceIds.length === 0) {
+    return { success: true as const, sent: 0, failed: [] as string[], sentIds: [] as string[] }
+  }
 
   const permErr = await requirePermission('invoice:send')
   if (permErr) return permErr
 
   const supabase = await createClient()
-  const results = { sent: 0, failed: [] as string[] }
+  // Track which ids actually sent so callers can remove only those (failed ones stay visible).
+  const results = { sent: 0, failed: [] as string[], sentIds: [] as string[] }
 
   // Process sequentially to avoid overwhelming email service
   for (const id of invoiceIds) {
@@ -98,6 +101,7 @@ export async function bulkSendInvoices(invoiceIds: string[]) {
       const result = await sendInvoiceById(supabase, id)
       if (result.success) {
         results.sent++
+        results.sentIds.push(id)
       } else {
         results.failed.push(result.error || `Failed to send invoice ${id}`)
       }
