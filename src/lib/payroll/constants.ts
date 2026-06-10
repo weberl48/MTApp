@@ -8,7 +8,7 @@
  * as pending on the contractor's earnings page — and was never marked paid,
  * causing contractors to be underpaid. Keep both views pointed at this constant.
  *
- * Note: when the no-show flow is fixed (adds the `no_show` enum value and reprices
- * the invoice), add `'no_show'` here so no-show pay is also payable in both views.
+ * `no_show` is included because a no-show still pays the contractor their normal session
+ * pay (the client is billed a flat no-show fee instead).
  */
-export const UNPAID_PAYROLL_STATUSES: string[] = ['submitted', 'approved']
+export const UNPAID_PAYROLL_STATUSES: string[] = ['submitted', 'approved', 'no_show']
