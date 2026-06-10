@@ -6,9 +6,10 @@ import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
+import { resolveAutoSendMethod } from '@/lib/invoices/auto-send-policy'
 import type { OrganizationSettings } from '@/types/database'
 
-async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string) {
+async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string): Promise<number> {
   // Get the session's organization settings
   const { data: session } = await supabase
     .from('sessions')
@@ -16,7 +17,7 @@ async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof cre
     .eq('id', sessionId)
     .single()
 
-  if (!session) return
+  if (!session) return 0
 
   const { data: org } = await supabase
     .from('organizations')
@@ -25,14 +26,16 @@ async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof cre
     .single()
 
   const settings = org?.settings as OrganizationSettings | undefined
-  const method = settings?.automation?.auto_send_invoice_method
+  const method = resolveAutoSendMethod(settings)
 
-  if (!settings?.automation?.auto_send_invoice_on_approve || method === 'none') return
+  if (!method) return 0
 
   if (method === 'square') {
-    await autoSendInvoicesViaSquare(sessionId)
+    const res = await autoSendInvoicesViaSquare(sessionId)
+    return res?.sent ?? 0
   } else if (method === 'email') {
     // Find pending invoices for this session — only send to email-billed clients
+    let sent = 0
     const { data: invoices } = await supabase
       .from('invoices')
       .select('id, client:clients(billing_method)')
@@ -48,12 +51,16 @@ async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof cre
 
         try {
           await sendInvoiceById(supabase, inv.id)
+          sent++
         } catch (e) {
           logger.error('Auto-send email invoice failed', e)
         }
       }
     }
+    return sent
   }
+
+  return 0
 }
 
 export async function approveSession(sessionId: string) {
@@ -99,18 +106,20 @@ export async function bulkApproveSessions(sessionIds: string[]) {
   const err = handleSupabaseError(error)
   if (err) return err
 
-  // Auto-send invoices via Square for each session (non-blocking)
-  const squareResults = await Promise.allSettled(
-    sessionIds.map((id) => autoSendInvoicesViaSquare(id))
+  // Auto-send invoices per the org's automation settings (email or square), using the SAME
+  // gate as single approve — never auto-send when auto_send_invoice_on_approve is off.
+  const autoSendResults = await Promise.allSettled(
+    sessionIds.map((id) => autoSendInvoicesOnApprove(supabase, id))
   )
 
-  const squareSent = squareResults.filter(
-    (r) => r.status === 'fulfilled' && r.value.sent > 0
-  ).length
+  const autoSent = autoSendResults.reduce(
+    (n, r) => n + (r.status === 'fulfilled' ? r.value : 0),
+    0
+  )
 
   revalidateSessionPaths()
 
-  return { success: true as const, count: sessionIds.length, squareSent }
+  return { success: true as const, count: sessionIds.length, autoSent }
 }
 
 export async function markSessionNoShow(sessionId: string) {
