@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { handleSupabaseError, revalidateInvoicePaths, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import { sendInvoiceById } from '@/lib/invoices/send'
+import { invoiceStatusUpdate } from '@/lib/invoices/status'
 import { logger } from '@/lib/logger'
 
 export async function deleteInvoice(invoiceId: string) {
@@ -43,11 +44,7 @@ export async function updateInvoiceStatus(
 
   const supabase = await createClient()
 
-  const updates: { status: string; paid_date?: string } = { status }
-
-  if (status === 'paid') {
-    updates.paid_date = new Date().toISOString().split('T')[0]
-  }
+  const updates = invoiceStatusUpdate(status, new Date().toISOString().split('T')[0])
 
   const { error } = await supabase
     .from('invoices')
@@ -71,11 +68,7 @@ export async function bulkUpdateInvoiceStatus(
 
   const supabase = await createClient()
 
-  const updates: { status: string; paid_date?: string } = { status }
-
-  if (status === 'paid') {
-    updates.paid_date = new Date().toISOString().split('T')[0]
-  }
+  const updates = invoiceStatusUpdate(status, new Date().toISOString().split('T')[0])
 
   const { error } = await supabase
     .from('invoices')
