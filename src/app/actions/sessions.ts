@@ -7,7 +7,8 @@ import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
 import { resolveAutoSendMethod } from '@/lib/invoices/auto-send-policy'
-import type { OrganizationSettings } from '@/types/database'
+import { calculateNoShowPricing, type ContractorPricingOverrides } from '@/lib/pricing'
+import type { OrganizationSettings, ServiceType } from '@/types/database'
 
 async function autoSendInvoicesOnApprove(supabase: Awaited<ReturnType<typeof createClient>>, sessionId: string): Promise<number> {
   // Get the session's organization settings
@@ -128,13 +129,76 @@ export async function markSessionNoShow(sessionId: string) {
 
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // Load the session + its service type so we can reprice to the no-show fee.
+  const { data: session } = await supabase
     .from('sessions')
-    .update({ status: 'no_show', updated_at: new Date().toISOString() })
+    .select('id, organization_id, contractor_id, service_type_id, service_type:service_types(*)')
     .eq('id', sessionId)
+    .single()
+
+  if (!session) {
+    return { success: false as const, error: 'Session not found' }
+  }
+
+  const serviceType = (Array.isArray(session.service_type)
+    ? session.service_type[0]
+    : session.service_type) as ServiceType | null
+
+  // Org no-show fee (falls back to the pricing default inside calculateNoShowPricing).
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', session.organization_id)
+    .single()
+  const settings = org?.settings as OrganizationSettings | undefined
+  const noShowFee = settings?.pricing?.no_show_fee
+
+  // Contractor's custom rate (so the contractor keeps their normal pay on a no-show).
+  let overrides: ContractorPricingOverrides | undefined
+  if (session.contractor_id && session.service_type_id) {
+    const { data: rate } = await supabase
+      .from('contractor_rates')
+      .select('contractor_pay, duration_increment')
+      .eq('contractor_id', session.contractor_id)
+      .eq('service_type_id', session.service_type_id)
+      .maybeSingle()
+    if (rate) {
+      overrides = { customContractorPay: rate.contractor_pay, durationIncrement: rate.duration_increment }
+    }
+  }
+
+  const pricing = serviceType ? calculateNoShowPricing(serviceType, overrides, noShowFee) : null
+
+  // Mark no-show and reprice the session to the flat no-show fee (contractor keeps normal pay).
+  const sessionUpdate: Record<string, unknown> = {
+    status: 'no_show',
+    updated_at: new Date().toISOString(),
+  }
+  if (pricing) {
+    sessionUpdate.total_amount = pricing.totalAmount
+    sessionUpdate.contractor_pay = pricing.contractorPay
+    sessionUpdate.mca_cut = pricing.mcaCut
+  }
+
+  const { error } = await supabase.from('sessions').update(sessionUpdate).eq('id', sessionId)
 
   const err = handleSupabaseError(error)
   if (err) return err
+
+  // Reprice any PENDING per-session invoice to the no-show fee. Sent/paid invoices are
+  // left alone (they are financial records; handle those manually).
+  if (pricing) {
+    await supabase
+      .from('invoices')
+      .update({
+        amount: pricing.totalAmount,
+        contractor_pay: pricing.contractorPay,
+        mca_cut: pricing.mcaCut,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('session_id', sessionId)
+      .eq('status', 'pending')
+  }
 
   revalidateSessionPaths(sessionId)
 

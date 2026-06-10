@@ -12,6 +12,10 @@ describe('UNPAID_PAYROLL_STATUSES (payroll/earnings parity — regression for #6
     expect(UNPAID_PAYROLL_STATUSES).toContain('submitted')
   })
 
+  it("includes 'no_show' (contractor keeps normal pay on a no-show)", () => {
+    expect(UNPAID_PAYROLL_STATUSES).toContain('no_show')
+  })
+
   it('does not include terminal/non-payable statuses', () => {
     expect(UNPAID_PAYROLL_STATUSES).not.toContain('draft')
     expect(UNPAID_PAYROLL_STATUSES).not.toContain('cancelled')
