@@ -17,7 +17,7 @@ export function SquareStatusBadge() {
   useEffect(() => {
     async function fetchStatus() {
       try {
-        const res = await fetch('/api/square/status')
+        const res = await fetch('/api/square/status/')
         if (res.ok) {
           const data = await res.json()
           setStatus(data)

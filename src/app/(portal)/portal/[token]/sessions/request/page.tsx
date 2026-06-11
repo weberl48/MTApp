@@ -46,7 +46,7 @@ export default function RequestSessionPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/portal/session-requests', {
+      const response = await fetch('/api/portal/session-requests/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
