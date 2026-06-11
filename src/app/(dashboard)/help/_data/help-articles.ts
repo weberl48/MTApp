@@ -918,7 +918,7 @@ Clients can request a new session from the portal by submitting preferred dates 
 
 ### Token Expiry
 
-Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. After a link expires, you send a new invite to regenerate access.
+Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. When a link expires, the client sees a "This Link Has Expired" screen with a **Get a New Link** button where they can request a fresh link by entering their email — or you can send a new invite from the client's page.
     `,
   },
   {

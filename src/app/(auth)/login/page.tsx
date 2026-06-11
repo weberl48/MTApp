@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Clock, Loader2, Lock } from 'lucide-react'
@@ -110,7 +111,9 @@ export default function LoginPage() {
           body: JSON.stringify({ email, action: 'record', success: false }),
         })
 
-        setError(error.message)
+        setError(error.message === 'Invalid login credentials'
+          ? 'Invalid email or password. Double-check both, or use "Forgot password?" to reset it.'
+          : error.message)
         return
       }
 
@@ -167,7 +170,7 @@ export default function LoginPage() {
             </div>
           )}
           {error && !isLockedOut && (
-            <div className={`p-3 text-sm rounded-md flex items-center gap-2 ${
+            <div role="alert" className={`p-3 text-sm rounded-md flex items-center gap-2 ${
               restoring
                 ? 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
                 : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
@@ -201,9 +204,8 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
