@@ -74,7 +74,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
   useEffect(() => {
     async function loadResources() {
       try {
-        const response = await fetch(`/api/clients/${clientId}/resources`)
+        const response = await fetch(`/api/clients/${clientId}/resources/`)
         if (response.ok) {
           const data = await response.json()
           setResources(data.resources || [])
@@ -139,7 +139,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
           formData.append('description', description.trim())
         }
 
-        const response = await fetch(`/api/clients/${clientId}/resources/upload`, {
+        const response = await fetch(`/api/clients/${clientId}/resources/upload/`, {
           method: 'POST',
           body: formData,
         })
@@ -154,7 +154,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
         setResources((prev) => [data.resource, ...prev])
       } else {
         // Handle homework or link
-        const response = await fetch(`/api/clients/${clientId}/resources`, {
+        const response = await fetch(`/api/clients/${clientId}/resources/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -190,7 +190,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
 
   async function handleDownload(resource: Resource) {
     try {
-      const response = await fetch(`/api/clients/${clientId}/resources/${resource.id}/download`)
+      const response = await fetch(`/api/clients/${clientId}/resources/${resource.id}/download/`)
 
       if (!response.ok) {
         throw new Error('Failed to download file')
@@ -219,7 +219,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
       onConfirm: async () => {
         setDeletingId(resource.id)
         try {
-          const response = await fetch(`/api/clients/${clientId}/resources`, {
+          const response = await fetch(`/api/clients/${clientId}/resources/`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ resourceId: resource.id }),

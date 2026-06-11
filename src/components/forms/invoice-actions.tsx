@@ -44,7 +44,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
   async function downloadPdf() {
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoice.id}/pdf`)
+      const response = await fetch(`/api/invoices/${invoice.id}/pdf/`)
       if (!response.ok) throw new Error('Failed to generate PDF')
 
       const blob = await response.blob()
@@ -74,7 +74,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoice.id}/send`, {
+      const response = await fetch(`/api/invoices/${invoice.id}/send/`, {
         method: 'POST',
       })
 
@@ -101,7 +101,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoice.id}/square`, {
+      const response = await fetch(`/api/invoices/${invoice.id}/square/`, {
         method: 'POST',
       })
 

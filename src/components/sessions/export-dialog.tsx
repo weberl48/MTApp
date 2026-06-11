@@ -108,7 +108,7 @@ export function SessionExportDialog({ organizationId, contractorId }: ExportDial
       }
       params.set('format', 'csv')
 
-      const response = await fetch(`/api/sessions/export?${params.toString()}`)
+      const response = await fetch(`/api/sessions/export/?${params.toString()}`)
 
       if (!response.ok) {
         throw new Error('Export failed')

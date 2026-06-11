@@ -47,9 +47,9 @@ export default function PortalDashboard() {
         const headers = { Authorization: `Bearer ${token}` }
 
         const [sessionsRes, resourcesRes, goalsRes] = await Promise.all([
-          fetch('/api/portal/sessions', { headers }),
-          fetch('/api/portal/resources', { headers }),
-          fetch('/api/portal/goals', { headers }),
+          fetch('/api/portal/sessions/', { headers }),
+          fetch('/api/portal/resources/', { headers }),
+          fetch('/api/portal/goals/', { headers }),
         ])
 
         if (sessionsRes.ok) {

@@ -44,7 +44,7 @@ export function PortalProvider({ children, token }: PortalProviderProps) {
         setLoading(true)
         setError(null)
 
-        const response = await fetch('/api/portal/validate', {
+        const response = await fetch('/api/portal/validate/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
