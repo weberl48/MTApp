@@ -16,8 +16,8 @@ const BASE_URL = process.argv[2] || 'http://localhost:3000'
 interface HealthResponse {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string
-  version: string
-  checks: Record<string, { status: string; message: string; latency?: number }>
+  version?: string
+  checks?: Record<string, { status: string; message: string; latency?: number }>
 }
 
 async function checkEndpoint(path: string, name: string): Promise<boolean> {
@@ -64,20 +64,28 @@ async function main() {
 
   try {
     const response = await fetch(`${BASE_URL}/api/health`, {
-      headers: { 'Cache-Control': 'no-cache' },
+      headers: {
+        'Cache-Control': 'no-cache',
+        // Detailed checks are gated behind CRON_SECRET in production; pass it when available.
+        ...(process.env.CRON_SECRET ? { Authorization: `Bearer ${process.env.CRON_SECRET}` } : {}),
+      },
     })
     const health: HealthResponse = await response.json()
 
     const statusEmoji = health.status === 'healthy' ? '💚' : health.status === 'degraded' ? '💛' : '❤️'
     console.log(`Status: ${statusEmoji} ${health.status.toUpperCase()}`)
-    console.log(`Version: ${health.version}`)
+    if (health.version) console.log(`Version: ${health.version}`)
     console.log(`Time: ${health.timestamp}\n`)
 
-    console.log('Checks:')
-    for (const [name, check] of Object.entries(health.checks)) {
-      const emoji = check.status === 'pass' ? '✅' : check.status === 'warn' ? '⚠️' : '❌'
-      const latencyStr = check.latency ? ` (${check.latency}ms)` : ''
-      console.log(`  ${emoji} ${name}: ${check.message}${latencyStr}`)
+    if (health.checks) {
+      console.log('Checks:')
+      for (const [name, check] of Object.entries(health.checks)) {
+        const emoji = check.status === 'pass' ? '✅' : check.status === 'warn' ? '⚠️' : '❌'
+        const latencyStr = check.latency ? ` (${check.latency}ms)` : ''
+        console.log(`  ${emoji} ${name}: ${check.message}${latencyStr}`)
+      }
+    } else {
+      console.log('(per-check detail hidden — set CRON_SECRET to view in production)')
     }
 
     console.log('\n' + '─'.repeat(50))
