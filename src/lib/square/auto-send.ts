@@ -96,6 +96,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
         dueDate,
         invoiceNumber,
         serviceCharge,
+        idempotencyKey: invoice.id,
       })
 
       await supabase

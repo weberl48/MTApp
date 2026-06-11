@@ -17,6 +17,7 @@ interface LockoutStatus {
  */
 export async function checkLockout(
   email: string,
+  ipAddress?: string | null,
   options?: { maxAttempts?: number; lockoutMinutes?: number }
 ): Promise<LockoutStatus> {
   const supabase = createServiceClient()
@@ -25,22 +26,33 @@ export async function checkLockout(
 
   const windowStart = new Date(Date.now() - lockoutMinutes * 60 * 1000).toISOString()
 
-  const { count } = await supabase
+  // Scope the lockout to the requesting IP so an attacker cannot lock out a victim's
+  // account by spamming failed attempts from a different IP — the victim logging in from
+  // their own (clean) IP is unaffected. Falls back to email-only when the IP is unknown
+  // (local dev; in production the platform always sets x-forwarded-for).
+  let countQuery = supabase
     .from('login_attempts')
     .select('*', { count: 'exact', head: true })
     .eq('email', email.toLowerCase())
     .eq('success', false)
-    .gte('attempted_at', windowStart)
+  if (ipAddress) {
+    countQuery = countQuery.eq('ip_address', ipAddress)
+  }
+  const { count } = await countQuery.gte('attempted_at', windowStart)
 
   const attempts = count ?? 0
 
   if (attempts >= maxAttempts) {
-    // Find the most recent failed attempt to calculate remaining lockout time
-    const { data: latest } = await supabase
+    // Find the most recent failed attempt (same scope) to calculate remaining lockout time
+    let latestQuery = supabase
       .from('login_attempts')
       .select('attempted_at')
       .eq('email', email.toLowerCase())
       .eq('success', false)
+    if (ipAddress) {
+      latestQuery = latestQuery.eq('ip_address', ipAddress)
+    }
+    const { data: latest } = await latestQuery
       .order('attempted_at', { ascending: false })
       .limit(1)
       .single()
@@ -65,7 +77,8 @@ export async function checkLockout(
 export async function recordLoginAttempt(
   email: string,
   success: boolean,
-  ipAddress?: string
+  ipAddress?: string,
+  organizationId?: string | null
 ): Promise<void> {
   const supabase = createServiceClient()
 
@@ -73,5 +86,6 @@ export async function recordLoginAttempt(
     email: email.toLowerCase(),
     success,
     ip_address: ipAddress ?? null,
+    organization_id: organizationId ?? null,
   })
 }

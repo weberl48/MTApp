@@ -36,7 +36,7 @@ export default function PortalGoalsPage() {
   useEffect(() => {
     async function loadGoals() {
       try {
-        const response = await fetch('/api/portal/goals', {
+        const response = await fetch('/api/portal/goals/', {
           headers: { Authorization: `Bearer ${token}` },
         })
 

@@ -17,6 +17,7 @@ describe('can (permission check)', () => {
     'team:view',
     'team:manage',
     'team:invite',
+    'client:manage',
     'settings:edit',
     'analytics:view',
     'payments:view',
@@ -54,6 +55,7 @@ describe('can (permission check)', () => {
       'invoice:send',
       'team:view',
       'team:invite',
+      'client:manage',
     ]
 
     const adminDenied: Permission[] = [
@@ -117,6 +119,13 @@ describe('can (permission check)', () => {
     it('team:invite includes admin but not contractor', () => {
       expect(can('admin', 'team:invite')).toBe(true)
       expect(can('contractor', 'team:invite')).toBe(false)
+    })
+
+    it('client:manage includes admin but not contractor (regression for #42)', () => {
+      expect(can('developer', 'client:manage')).toBe(true)
+      expect(can('owner', 'client:manage')).toBe(true)
+      expect(can('admin', 'client:manage')).toBe(true)
+      expect(can('contractor', 'client:manage')).toBe(false)
     })
   })
 })

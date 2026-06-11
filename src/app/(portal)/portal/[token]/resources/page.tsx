@@ -55,7 +55,7 @@ export default function PortalResourcesPage() {
   useEffect(() => {
     async function loadResources() {
       try {
-        const response = await fetch('/api/portal/resources', {
+        const response = await fetch('/api/portal/resources/', {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -75,7 +75,7 @@ export default function PortalResourcesPage() {
   async function toggleHomeworkComplete(resource: Resource) {
     setUpdatingId(resource.id)
     try {
-      const response = await fetch('/api/portal/resources', {
+      const response = await fetch('/api/portal/resources/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export default function PortalResourcesPage() {
     setPreviewResource(resource)
     setPreviewLoading(true)
     try {
-      const response = await fetch(`/api/portal/resources/${resource.id}/download`, {
+      const response = await fetch(`/api/portal/resources/${resource.id}/download/`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -146,7 +146,7 @@ export default function PortalResourcesPage() {
   async function downloadFile(resource: Resource) {
     setDownloadingId(resource.id)
     try {
-      const response = await fetch(`/api/portal/resources/${resource.id}/download`, {
+      const response = await fetch(`/api/portal/resources/${resource.id}/download/`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 

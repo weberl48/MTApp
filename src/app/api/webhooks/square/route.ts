@@ -5,6 +5,7 @@ import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { logger } from '@/lib/logger'
+import { resolveSquareWebhookStatus } from '@/lib/square/webhook-status'
 
 // Types for Supabase join results
 interface ClientJoinResult {
@@ -135,7 +136,11 @@ function verifySquareSignature(
   const hmac = crypto.createHmac('sha256', webhookSignatureKey)
   hmac.update(notificationUrl + body)
   const expectedSignature = hmac.digest('base64')
-  return signature === expectedSignature
+  // Constant-time comparison to avoid leaking the expected HMAC via timing.
+  const sigBuf = Buffer.from(signature)
+  const expBuf = Buffer.from(expectedSignature)
+  if (sigBuf.length !== expBuf.length) return false
+  return crypto.timingSafeEqual(sigBuf, expBuf)
 }
 
 export async function POST(request: NextRequest) {
@@ -173,6 +178,22 @@ export async function POST(request: NextRequest) {
     const eventType = String(event.type).replace(/[\r\n]/g, '')
     logger.info(`Square webhook event: ${eventType}`)
 
+    // Replay/duplicate protection: record the event id first. A unique violation means we've
+    // already handled this delivery (Square retries and can send overlapping events for one
+    // payment), so ack and skip re-processing.
+    const eventId = typeof event.event_id === 'string' ? event.event_id : null
+    if (eventId) {
+      const { error: dedupeError } = await getSupabaseAdmin()
+        .from('square_webhook_events')
+        .insert({ event_id: eventId, event_type: event.type })
+      if (dedupeError) {
+        if (dedupeError.code === '23505') {
+          return NextResponse.json({ received: true, duplicate: true })
+        }
+        logger.error('Square webhook dedupe insert failed', dedupeError)
+      }
+    }
+
     // Handle invoice events
     if (event.type === 'invoice.payment_made' || event.type === 'invoice.updated') {
       const invoiceData = event.data?.object?.invoice
@@ -185,48 +206,37 @@ export async function POST(request: NextRequest) {
       const squareInvoiceId = invoiceData.id
       const squareStatus = invoiceData.status
 
-      // Map Square status to our status
-      let ourStatus: 'pending' | 'sent' | 'paid' = 'sent'
-      let paidDate: string | null = null
-
-      if (squareStatus === 'PAID') {
-        ourStatus = 'paid'
-        paidDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-      } else if (squareStatus === 'UNPAID' || squareStatus === 'SCHEDULED') {
-        ourStatus = 'sent'
-      } else if (squareStatus === 'CANCELED' || squareStatus === 'DRAFT') {
-        ourStatus = 'pending'
-      }
-
-      // First check if we have this invoice
-      const { data: existingInvoice, error: findError } = await getSupabaseAdmin()
+      // Find our invoice
+      const { data: existingInvoice } = await getSupabaseAdmin()
         .from('invoices')
         .select('id, status, square_invoice_id')
         .eq('square_invoice_id', squareInvoiceId)
         .single()
 
-      // Update our invoice
-      const updateData: Record<string, unknown> = { status: ourStatus }
-      if (paidDate) {
-        updateData.paid_date = paidDate
-      }
+      // Resolve the new status forward-only (never un-pay a paid invoice).
+      const resolved = resolveSquareWebhookStatus(existingInvoice?.status, squareStatus)
+      if (resolved) {
+        const updateData: Record<string, unknown> = { status: resolved.status }
+        if (resolved.setPaidDate) {
+          updateData.paid_date = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+        }
 
-      const { error, count } = await getSupabaseAdmin()
-        .from('invoices')
-        .update(updateData)
-        .eq('square_invoice_id', squareInvoiceId)
-        .select()
+        const { error } = await getSupabaseAdmin()
+          .from('invoices')
+          .update(updateData)
+          .eq('square_invoice_id', squareInvoiceId)
 
-      if (error) {
-        logger.error('Error updating invoice from webhook')
-        return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
-      }
+        if (error) {
+          logger.error('Error updating invoice from webhook')
+          return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
+        }
 
-      logger.info(`Updated invoice to status ${ourStatus}`)
+        logger.info(`Updated invoice to status ${resolved.status}`)
 
-      // Send notification to owner when invoice is paid
-      if (ourStatus === 'paid') {
-        await sendPaymentNotification(squareInvoiceId)
+        // Notify the owner only on the transition INTO paid (not on every paid event/replay).
+        if (resolved.status === 'paid' && existingInvoice?.status !== 'paid') {
+          await sendPaymentNotification(squareInvoiceId)
+        }
       }
     }
 
@@ -236,17 +246,27 @@ export async function POST(request: NextRequest) {
       const invoiceId = paymentData?.invoice_id
 
       if (invoiceId) {
-        const { error } = await getSupabaseAdmin()
+        const { data: existingInvoice } = await getSupabaseAdmin()
           .from('invoices')
-          .update({
-            status: 'paid',
-            paid_date: new Date().toISOString().split('T')[0],
-          })
+          .select('id, status')
           .eq('square_invoice_id', invoiceId)
+          .single()
 
-        if (!error) {
-          logger.info('Marked invoice as paid from payment event')
-          await sendPaymentNotification(invoiceId)
+        // Only act on the transition into paid — avoids a second notification for the same
+        // payment when invoice.payment_made already marked it paid.
+        if (existingInvoice && existingInvoice.status !== 'paid') {
+          const { error } = await getSupabaseAdmin()
+            .from('invoices')
+            .update({
+              status: 'paid',
+              paid_date: new Date().toISOString().split('T')[0],
+            })
+            .eq('square_invoice_id', invoiceId)
+
+          if (!error) {
+            logger.info('Marked invoice as paid from payment event')
+            await sendPaymentNotification(invoiceId)
+          }
         }
       }
     }

@@ -44,6 +44,8 @@ import {
   saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
+import { resolveDurationOptions } from '@/lib/settings/input'
+import { perClientInvoiceShare } from '@/lib/invoices/split'
 import { encryptPHI } from '@/lib/crypto/actions'
 
 interface ExistingSession {
@@ -122,7 +124,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Linked invoice (edit mode): pending/sent invoice directly tied to this session.
   // Used to prompt the user before silently letting invoice pricing drift when a session is edited.
-  const [linkedInvoice, setLinkedInvoice] = useState<{ id: string; amount: number; status: string } | null>(null)
+  const [linkedInvoices, setLinkedInvoices] = useState<Array<{ id: string; amount: number; status: string }>>([])
   const [showRegenPrompt, setShowRegenPrompt] = useState(false)
 
   function setFieldError(field: string, message: string) {
@@ -299,19 +301,24 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
     async function loadLinkedInvoice() {
       if (!existingSession) return
+      // A session can have more than one non-paid invoice (one per client on a multi-client
+      // session), so fetch them all — .maybeSingle() would error on >1 and silently disable the
+      // drift prompt + resync, leaving those invoices stale after an edit.
       const { data } = await supabase
         .from('invoices')
         .select('id, amount, status')
         .eq('session_id', existingSession.id)
         .neq('status', 'paid')
-        .maybeSingle()
       if (!cancelled && data) {
-        setLinkedInvoice({ id: data.id, amount: Number(data.amount), status: data.status })
+        setLinkedInvoices(data.map((d) => ({ id: d.id, amount: Number(d.amount), status: d.status })))
       }
     }
     loadLinkedInvoice()
     return () => { cancelled = true }
   }, [isEditMode, existingSession, supabase])
+
+  const linkedInvoiceTotal = linkedInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+  const linkedInvoiceHasSent = linkedInvoices.some((inv) => inv.status === 'sent')
 
   function removeClient(clientId: string) {
     setSelectedClients(selectedClients.filter((id) => id !== clientId))
@@ -408,8 +415,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
     // Edit mode: if a linked invoice exists and pricing has changed, prompt the user
     // to decide whether to regenerate the invoice instead of silently letting it drift.
-    if (isEditMode && linkedInvoice && pricing?.totalAmount != null) {
-      const drift = Math.abs(pricing.totalAmount - linkedInvoice.amount) > 0.005
+    if (isEditMode && linkedInvoices.length > 0 && pricing?.totalAmount != null) {
+      const drift = Math.abs(pricing.totalAmount - linkedInvoiceTotal) > 0.005
       if (drift) {
         setShowRegenPrompt(true)
         return
@@ -477,20 +484,22 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         // If the user opted to regenerate, sync the linked invoice's amount fields to
         // match the new session pricing and reset its status to 'pending' so the admin
         // can re-send through the normal invoice workflow.
-        if (regenerateInvoice && linkedInvoice && pricing) {
-          await supabase
-            .from('invoices')
-            .update({
-              amount: pricing.totalAmount,
-              mca_cut: pricing.mcaCut,
-              contractor_pay: pricing.contractorPay,
-              rent_amount: pricing.rentAmount,
-              status: 'pending',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', linkedInvoice.id)
+        if (regenerateInvoice && linkedInvoices.length > 0 && pricing) {
+          // Split the pricing across the linked invoices the same way createNewSession does, so
+          // each client's invoice gets its share (not the full total on every one).
+          const count = linkedInvoices.length
+          for (const inv of linkedInvoices) {
+            await supabase
+              .from('invoices')
+              .update({
+                ...perClientInvoiceShare(pricing, count, !!isGroupService),
+                status: 'pending',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', inv.id)
+          }
           toast.success('Session updated. Invoice updated — please re-send to the client.')
-        } else if (linkedInvoice) {
+        } else if (linkedInvoices.length > 0) {
           toast.success('Session updated. Invoice was not regenerated.')
         } else {
           toast.success('Session updated successfully!')
@@ -705,7 +714,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
-                {(settings?.session?.duration_options ?? [30, 45, 60, 90]).map((mins) => (
+                {resolveDurationOptions(settings?.session?.duration_options).map((mins) => (
                   <SelectItem key={mins} value={String(mins)}>
                     {mins} minutes
                   </SelectItem>
@@ -1144,7 +1153,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         <AlertDialogHeader>
           <AlertDialogTitle>Regenerate invoice?</AlertDialogTitle>
           <AlertDialogDescription>
-            This session has a{linkedInvoice?.status === 'sent' ? 'n already-sent' : ' pending'} invoice for {formatCurrency(linkedInvoice?.amount ?? 0)}. The new total is {formatCurrency(pricing?.totalAmount ?? 0)}.
+            This session has {linkedInvoices.length > 1 ? 'linked invoices' : `a${linkedInvoiceHasSent ? 'n already-sent' : ' pending'} invoice`} totaling {formatCurrency(linkedInvoiceTotal)}. The new total is {formatCurrency(pricing?.totalAmount ?? 0)}.
             {' '}
             Would you like to update the invoice and queue it for re-sending to the client?
           </AlertDialogDescription>

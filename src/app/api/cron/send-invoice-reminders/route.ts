@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       // Fetch sent invoices with due dates for this org
       const { data: invoices, error: invoicesError } = await db
         .from('invoices')
-        .select('id, amount, due_date, reminder_sent_days, client:clients(name, contact_email)')
+        .select('id, amount, due_date, client:clients(name, contact_email)')
         .eq('organization_id', org.id)
         .eq('status', 'sent')
         .not('due_date', 'is', null)
@@ -73,42 +73,16 @@ export async function GET(request: NextRequest) {
 
         const dueDate = parseISO(invoice.due_date!)
         const daysUntilDue = differenceInCalendarDays(dueDate, today)
-        const alreadySent: number[] = (invoice.reminder_sent_days as number[]) || []
 
-        // Check each configured reminder day
+        // Check each configured reminder day. Claim the day ATOMICALLY before sending, so a
+        // reminder is sent at most once even under cron retries or overlapping runs.
         for (const day of reminderDays) {
-          if (daysUntilDue === day && !alreadySent.includes(day)) {
-            // Time to send this reminder
-            try {
-              await sendInvoiceReminderEmail({
-                to: client.contact_email,
-                clientName: client.name,
-                invoiceNumber: formatInvoiceNumber(invoice.id),
-                amount: Number(invoice.amount),
-                dueDate: invoice.due_date!,
-                isOverdue: false,
-                paymentInstructions,
-                footerText,
-              })
-
-              // Record that this reminder day was sent
-              await db
-                .from('invoices')
-                .update({ reminder_sent_days: [...alreadySent, day] })
-                .eq('id', invoice.id)
-
-              alreadySent.push(day) // Update local copy for subsequent iterations
-              totalSent++
-            } catch {
-              console.error('[MCA] Failed to send invoice reminder for', invoice.id)
-              totalFailed++
-            }
-          }
-        }
-
-        // Check for overdue (day 0 in reminder_days means "on due date", negative means past due)
-        if (daysUntilDue < 0 && reminderDays.includes(0) && !alreadySent.includes(-1)) {
-          // Send overdue notice (use -1 as the sentinel for "overdue sent")
+          if (daysUntilDue !== day) continue
+          const { data: claimed } = await db.rpc('claim_invoice_reminder_day', {
+            p_invoice_id: invoice.id,
+            p_day: day,
+          })
+          if (!claimed) continue
           try {
             await sendInvoiceReminderEmail({
               to: client.contact_email,
@@ -116,20 +90,40 @@ export async function GET(request: NextRequest) {
               invoiceNumber: formatInvoiceNumber(invoice.id),
               amount: Number(invoice.amount),
               dueDate: invoice.due_date!,
-              isOverdue: true,
+              isOverdue: false,
               paymentInstructions,
               footerText,
             })
-
-            await db
-              .from('invoices')
-              .update({ reminder_sent_days: [...alreadySent, -1] })
-              .eq('id', invoice.id)
-
             totalSent++
           } catch {
-            console.error('[MCA] Failed to send overdue notice for', invoice.id)
+            console.error('[MCA] Failed to send invoice reminder for', invoice.id)
             totalFailed++
+          }
+        }
+
+        // Overdue notice (claimed once via the -1 sentinel — previously this re-sent EVERY day).
+        if (daysUntilDue < 0 && reminderDays.includes(0)) {
+          const { data: claimed } = await db.rpc('claim_invoice_reminder_day', {
+            p_invoice_id: invoice.id,
+            p_day: -1,
+          })
+          if (claimed) {
+            try {
+              await sendInvoiceReminderEmail({
+                to: client.contact_email,
+                clientName: client.name,
+                invoiceNumber: formatInvoiceNumber(invoice.id),
+                amount: Number(invoice.amount),
+                dueDate: invoice.due_date!,
+                isOverdue: true,
+                paymentInstructions,
+                footerText,
+              })
+              totalSent++
+            } catch {
+              console.error('[MCA] Failed to send overdue notice for', invoice.id)
+              totalFailed++
+            }
           }
         }
       }

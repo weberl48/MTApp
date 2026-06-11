@@ -22,7 +22,7 @@ export default function PortalLoginPage() {
     setDevUrl(null)
 
     try {
-      const response = await fetch('/api/portal/request-link', {
+      const response = await fetch('/api/portal/request-link/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

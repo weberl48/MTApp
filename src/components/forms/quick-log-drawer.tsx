@@ -27,6 +27,7 @@ import {
 import { createNewSession } from '@/lib/session-form/create-session'
 import { encryptPHI } from '@/lib/crypto/actions'
 import { calculateSessionPricing, formatCurrency } from '@/lib/pricing'
+import { todayLocal } from '@/lib/dates'
 import type { ServiceType } from '@/types/database'
 
 interface QuickLogDrawerProps {
@@ -45,7 +46,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
   const [submitting, setSubmitting] = useState(false)
 
   // Form state
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayLocal())
   const [notes, setNotes] = useState('')
   const [clientNotes, setClientNotes] = useState('')
 
@@ -80,7 +81,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
   // Reset form when drawer opens
   useEffect(() => {
     if (open) {
-      setDate(new Date().toISOString().split('T')[0])
+      setDate(todayLocal())
       setNotes('')
       setClientNotes('')
     }
@@ -210,7 +211,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
               <div className="space-y-2">
                 <Label htmlFor="quick-date" className="flex items-center gap-2">
                   Date
-                  {date === new Date().toISOString().split('T')[0] && (
+                  {date === todayLocal() && (
                     <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
                   )}
                 </Label>

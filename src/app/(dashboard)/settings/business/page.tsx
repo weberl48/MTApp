@@ -43,6 +43,7 @@ import type {
   FeatureFlags,
 } from '@/types/database'
 import { FEATURE_DEFINITIONS } from '@/lib/features'
+import { parseSettingNumber } from '@/lib/settings/input'
 
 export default function BusinessSettingsPage() {
   const { organization, can, settings, feature, updateSettings } = useOrganization()
@@ -562,7 +563,7 @@ export default function BusinessSettingsPage() {
                     step="5"
                     value={localSettings.pricing?.no_show_fee ?? 60}
                     onChange={(e) =>
-                      setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, no_show_fee: parseFloat(e.target.value) || 60 } })
+                      setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, no_show_fee: parseSettingNumber(e.target.value, 60) } })
                     }
                   />
                   <p className="text-xs text-gray-500">Flat fee charged for no-show sessions</p>

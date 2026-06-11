@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
 import { portalTokenSchema } from '@/lib/validation/schemas'
+import { decryptClientNotesForPortal } from '@/lib/portal/decrypt-notes'
 
 /**
  * GET /api/portal/sessions
@@ -70,21 +71,23 @@ export async function GET(request: NextRequest) {
       throw sessionsError
     }
 
-    // Transform data - don't expose internal notes
-    const transformedSessions = (sessions || []).map((session) => ({
-      id: session.id,
-      date: session.date,
-      time: session.time,
-      duration_minutes: session.duration_minutes,
-      client_notes: session.client_notes,
-      status: session.status,
-      service_type: Array.isArray(session.service_type)
-        ? session.service_type[0]
-        : session.service_type,
-      contractor: Array.isArray(session.contractor)
-        ? session.contractor[0]
-        : session.contractor,
-    }))
+    // Transform data - don't expose internal notes; decrypt client-facing notes for display
+    const transformedSessions = await Promise.all(
+      (sessions || []).map(async (session) => ({
+        id: session.id,
+        date: session.date,
+        time: session.time,
+        duration_minutes: session.duration_minutes,
+        client_notes: await decryptClientNotesForPortal(session.client_notes),
+        status: session.status,
+        service_type: Array.isArray(session.service_type)
+          ? session.service_type[0]
+          : session.service_type,
+        contractor: Array.isArray(session.contractor)
+          ? session.contractor[0]
+          : session.contractor,
+      }))
+    )
 
     return NextResponse.json({ sessions: transformedSessions })
   } catch (error) {
