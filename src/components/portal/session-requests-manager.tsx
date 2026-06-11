@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { getPendingSessionRequests } from '@/app/actions/session-requests'
 import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -60,37 +60,9 @@ export function SessionRequestsManager({
 
   useEffect(() => {
     async function loadRequests() {
-      const supabase = createClient()
-
-      const { data, error } = await supabase
-        .from('session_requests')
-        .select(`
-          id,
-          preferred_date,
-          preferred_time,
-          alternative_date,
-          alternative_time,
-          duration_minutes,
-          notes,
-          status,
-          response_notes,
-          created_at,
-          client:clients(id, name)
-        `)
-        .eq('organization_id', organizationId)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true })
-
-      if (error) {
-        console.error('[MCA] Error loading session requests')
-      } else {
-        const transformed = (data || []).map((req) => ({
-          ...req,
-          client: Array.isArray(req.client) ? req.client[0] : req.client,
-        }))
-        setRequests(transformed as SessionRequest[])
-      }
-
+      // Server action so the client-submitted notes (PHI) come back decrypted.
+      const data = await getPendingSessionRequests()
+      setRequests(data as unknown as SessionRequest[])
       setLoading(false)
     }
     loadRequests()
