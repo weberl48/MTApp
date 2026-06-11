@@ -77,7 +77,8 @@ export async function checkLockout(
 export async function recordLoginAttempt(
   email: string,
   success: boolean,
-  ipAddress?: string
+  ipAddress?: string,
+  organizationId?: string | null
 ): Promise<void> {
   const supabase = createServiceClient()
 
@@ -85,5 +86,6 @@ export async function recordLoginAttempt(
     email: email.toLowerCase(),
     success,
     ip_address: ipAddress ?? null,
+    organization_id: organizationId ?? null,
   })
 }

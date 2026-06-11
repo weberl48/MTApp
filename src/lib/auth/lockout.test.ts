@@ -204,7 +204,19 @@ describe('recordLoginAttempt', () => {
       email: 'user@test.com',
       success: false,
       ip_address: '192.168.1.1',
+      organization_id: null,
     })
+  })
+
+  it('records the organization id when provided', async () => {
+    const insertMock = vi.fn().mockResolvedValue({})
+    mockFrom.mockReturnValue({ insert: insertMock })
+
+    await recordLoginAttempt('user@test.com', false, '1.2.3.4', 'org-123')
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ organization_id: 'org-123' })
+    )
   })
 
   it('inserts a successful login attempt', async () => {
@@ -217,6 +229,7 @@ describe('recordLoginAttempt', () => {
       email: 'user@test.com',
       success: true,
       ip_address: null,
+      organization_id: null,
     })
   })
 
