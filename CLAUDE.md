@@ -90,11 +90,13 @@ Core tables with RLS policies:
 - `clients` - Patients with payment method
 - `service_types` - Pricing configuration per organization
 - `contractor_rates` - Per-contractor-per-service custom pay rates
-- `sessions` - Session logs with status workflow (draft → submitted → approved)
+- `sessions` - Session logs with status workflow (draft → submitted → approved; also `cancelled`, `no_show`)
 - `session_attendees` - Many-to-many for group sessions
 - `invoices` - Generated from sessions, Square integration fields, `reminder_sent_days` JSONB tracks which reminders have been sent
 
-Schema is in `supabase/schema.sql`. Run migrations via Supabase Dashboard or CLI.
+Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND via the Supabase SQL editor** — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
+
+Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn; table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
 ### Configurable Organization Settings
 
@@ -255,6 +257,14 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/invoices/send.ts` — Email dispatch for invoices (shared between API routes and server actions)
 - `src/lib/queries/scholarship.ts` — Scholarship batch queries used by the monthly cron + UI
 - `src/lib/portal/token.ts` — Client portal access token generation/validation
+- `src/lib/invoices/status.ts` — `invoiceStatusUpdate()`: builds an invoice status change, always (re)setting `paid_date` (null unless status is `paid`, so leaving paid clears it)
+- `src/lib/invoices/batch-totals.ts` — `sumInvoiceItemTotals()`: recompute a batch invoice header from its surviving line items (avoids concurrent-decrement drift)
+- `src/lib/invoices/split.ts` — `perClientInvoiceShare()`: split session pricing across per-client invoices (mirrors `createNewSession`'s division)
+- `src/lib/invoices/client-search.ts` — `clientSearchFilterIds()`: turn a client-name search into a `client_id` `.in()` filter (an embedded-resource filter can't live in a top-level PostgREST `.or()`)
+- `src/lib/settings/input.ts` — `parseSettingNumber()` (allows `0`, unlike `x || fallback`) and `resolveDurationOptions()` (never returns an empty list)
+- `src/lib/health/detail-auth.ts` — `isHealthDetailAuthorized()`: gates `/api/health` per-check detail behind `CRON_SECRET` in production
+- `src/app/actions/session-requests.ts` — `getPendingSessionRequests()`: staff read of pending session requests with the client-submitted notes decrypted
+- Atomic payroll mark-paid: `markSessionsPaid()` in `src/app/actions/sessions.ts` → the `mark_sessions_paid(uuid[], date)` Postgres function (one statement, only touches not-yet-paid rows, snapshots each session's `contractor_pay`)
 
 ## Testing
 
@@ -332,6 +342,8 @@ The root layout uses `next-themes` (`ThemeProvider` with `attribute="class"`) su
 
 CI uses Node 20.
 
+**Known issue:** `deploy.yml`'s PR **preview** deploy step fails with "prebuilt environment mismatch" (it runs `vercel build` for the production target, then `vercel deploy --prebuilt` for the preview target). Production deploys (push to `main`) succeed, and Vercel's native GitHub integration deploys regardless — so a red `build-and-deploy` check on a PR is non-blocking and expected until the workflow is fixed (use `--prebuilt --prod` or drop `--prod` from the preview build).
+
 ## Development Principles
 
 ### HIPAA Security
@@ -339,7 +351,7 @@ CI uses Node 20.
 When handling Protected Health Information (PHI):
 
 - **Encrypt PHI fields** using `src/lib/crypto/` utilities before storing in database
-- **PHI fields include**: session notes, client notes, goal descriptions, medical info
+- **PHI fields include**: session notes (`sessions.notes`/`client_notes`), client notes (`clients.notes`), goal descriptions (`client_goals.description`), session-request notes (`session_requests.notes`), medical info. Canonical list: `PHI_FIELDS` in `src/lib/crypto/phi.ts`. Browser-written PHI (e.g. the client add/edit dialog) must route through a server action to encrypt, since `ENCRYPTION_KEY` is server-only.
 - **Never log PHI** - use `hashForAudit()` from `src/lib/crypto/` for audit trails
 - **Use safe logger** - `import { logger } from '@/lib/logger'` instead of raw `console.error` in server code
 - **Validate and sanitize** all user inputs before processing
