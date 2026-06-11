@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { isHealthDetailAuthorized } from '@/lib/health/detail-auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -112,7 +113,7 @@ function determineOverallStatus(checks: HealthCheck['checks']): HealthCheck['sta
   return 'healthy'
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const [database, auth] = await Promise.all([
     checkDatabase(),
     checkAuth(),
@@ -126,14 +127,28 @@ export async function GET() {
     email: checkEmail(),
   }
 
+  const status = determineOverallStatus(checks)
+  const statusCode = status === 'unhealthy' ? 503 : 200
+
+  // Only expose per-check detail (version, integration config, error messages) to authorized
+  // callers — otherwise it's an info-disclosure vector. Anonymous callers still get the overall
+  // status + HTTP code, which is all a monitor needs.
+  const authorized = isHealthDetailAuthorized(
+    request.headers.get('authorization'),
+    process.env.CRON_SECRET,
+    process.env.NODE_ENV === 'production'
+  )
+
+  if (!authorized) {
+    return NextResponse.json({ status, timestamp: new Date().toISOString() }, { status: statusCode })
+  }
+
   const health: HealthCheck = {
-    status: determineOverallStatus(checks),
+    status,
     timestamp: new Date().toISOString(),
     version: process.env.NEXT_PUBLIC_APP_VERSION || process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'dev',
     checks,
   }
-
-  const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503
 
   return NextResponse.json(health, { status: statusCode })
 }
