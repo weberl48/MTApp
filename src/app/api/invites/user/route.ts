@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendTeamInviteEmail } from '@/lib/email'
 import { can } from '@/lib/auth/permissions'
+import { canTargetOrgForInvite } from '@/lib/auth/invite-scope'
 import type { UserRole } from '@/types/database'
 
 function generateSecureToken(): string {
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Check permissions: developers/owners can create any invite, admins can only create contractor invites
     const { data: profile } = await supabase
       .from('users')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
       .single()
 
@@ -64,6 +65,12 @@ export async function POST(request: NextRequest) {
 
     // Team managers can create any invite, others with invite permission can only create contractor invites
     if (!canManageTeam && !(canInvite && role === 'contractor')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Tenant scoping: only developers/owners may invite into an org other than their own.
+    // (This route writes with the service role, which bypasses RLS, so the check is here.)
+    if (!canTargetOrgForInvite(profile.role as UserRole, profile.organization_id, organizationId)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

@@ -6,6 +6,7 @@ import { uuidSchema } from '@/lib/validation/schemas'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { parseLocalDate } from '@/lib/dates'
 import { can } from '@/lib/auth/permissions'
+import { logger } from '@/lib/logger'
 import type { UserRole, OrganizationSettings } from '@/types/database'
 
 export async function POST(
@@ -103,6 +104,14 @@ export async function POST(
       )
     }
 
+    // Don't create a Square invoice for one that's already been paid (e.g. by check)
+    if (invoice.status === 'paid') {
+      return NextResponse.json(
+        { error: 'This invoice is already marked paid' },
+        { status: 400 }
+      )
+    }
+
     // Check if Square invoice already exists
     if (invoice.square_invoice_id) {
       return NextResponse.json(
@@ -133,7 +142,7 @@ export async function POST(
 
       const itemCount = items?.length || 0
       const periodLabel = invoice.billing_period
-        ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
         : 'Monthly'
 
       description = `Monthly Statement - ${periodLabel} (${itemCount} session${itemCount !== 1 ? 's' : ''})`
@@ -197,7 +206,8 @@ export async function POST(
     const pricingSettings = (org?.settings as OrganizationSettings)?.pricing
     const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
 
-    // Create Square invoice
+    // Create Square invoice. The deterministic idempotency key (the local invoice id) means a
+    // retry after a timeout, or two concurrent sends, reuse the same Square invoice.
     const squareResult = await createSquareInvoice({
       clientName: invoice.client.name,
       clientEmail: invoice.client.contact_email,
@@ -207,10 +217,12 @@ export async function POST(
       invoiceNumber,
       note,
       serviceCharge,
+      idempotencyKey: invoice.id,
     })
 
-    // Update our invoice with Square invoice ID and URL
-    await supabase
+    // Update our invoice with Square invoice ID and URL. If this write fails the Square invoice
+    // exists but we've lost the mapping (the webhook won't be able to match it), so surface it.
+    const { error: updateError } = await supabase
       .from('invoices')
       .update({
         square_invoice_id: squareResult.invoiceId,
@@ -218,6 +230,17 @@ export async function POST(
         status: 'sent',
       })
       .eq('id', id)
+
+    if (updateError) {
+      logger.error('Square invoice created but failed to save mapping', updateError)
+      return NextResponse.json(
+        {
+          error: 'Square invoice was created but saving it failed. Check the invoice before retrying.',
+          squareInvoiceId: squareResult.invoiceId,
+        },
+        { status: 500 }
+      )
+    }
 
     // Save Square customer ID on the client for future auto-send
     if (squareResult.customerId && invoice.client?.id) {

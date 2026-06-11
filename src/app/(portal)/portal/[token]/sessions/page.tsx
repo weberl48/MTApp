@@ -43,8 +43,8 @@ export default function PortalSessionsPage() {
         const headers = { Authorization: `Bearer ${token}` }
 
         const [sessionsRes, requestsRes] = await Promise.all([
-          fetch('/api/portal/sessions', { headers }),
-          fetch('/api/portal/session-requests', { headers }),
+          fetch('/api/portal/sessions/', { headers }),
+          fetch('/api/portal/session-requests/', { headers }),
         ])
 
         if (sessionsRes.ok) {

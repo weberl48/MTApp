@@ -33,12 +33,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { formatCurrency } from '@/lib/pricing'
-import { createClient } from '@/lib/supabase/client'
-import { deleteSession } from '@/app/actions/sessions'
+import { deleteSession, markSessionsPaid } from '@/app/actions/sessions'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 
 export interface UnpaidSession {
   id: string
@@ -71,7 +70,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     isOpen: boolean
     contractor: ContractorPayout | null
   }>({ isOpen: false, contractor: null })
-  const [payoutDate, setPayoutDate] = useState(new Date().toISOString().split('T')[0])
+  const [payoutDate, setPayoutDate] = useState(todayLocal())
   const [isProcessing, setIsProcessing] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean
@@ -99,46 +98,31 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
 
   function openMarkPaidDialog(contractor: ContractorPayout) {
     setMarkPaidDialog({ isOpen: true, contractor })
-    setPayoutDate(new Date().toISOString().split('T')[0])
+    setPayoutDate(todayLocal())
   }
 
   async function handleMarkPaid() {
     if (!markPaidDialog.contractor) return
 
     setIsProcessing(true)
-    const supabase = createClient()
 
     try {
-      // Get session IDs to update
       const sessionIds = markPaidDialog.contractor.unpaidSessions.map((s) => s.id)
+      // Atomic server action: marks all not-yet-paid sessions in one statement (no mixed state
+      // on partial failure, no double-pay) and returns how many were actually marked.
+      const result = await markSessionsPaid(sessionIds, payoutDate)
 
-      // Update all sessions with the paid date and amounts
-      const updates = markPaidDialog.contractor.unpaidSessions.map((session) => ({
-        id: session.id,
-        contractor_paid_date: payoutDate,
-        contractor_paid_amount: session.contractor_pay,
-      }))
-
-      // Batch update sessions
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('sessions')
-          .update({
-            contractor_paid_date: update.contractor_paid_date,
-            contractor_paid_amount: update.contractor_paid_amount,
-          })
-          .eq('id', update.id)
-
-        if (error) throw error
+      if (!result.success) {
+        toast.error('error' in result ? result.error : 'Failed to mark sessions as paid')
+        return
       }
 
       toast.success(
-        `Marked ${sessionIds.length} sessions as paid for ${markPaidDialog.contractor.name}`
+        `Marked ${result.count} session${result.count !== 1 ? 's' : ''} as paid for ${markPaidDialog.contractor.name}`
       )
       setMarkPaidDialog({ isOpen: false, contractor: null })
       onPayoutComplete()
-    } catch (error) {
-      console.error('[MCA] Error marking sessions as paid')
+    } catch {
       toast.error('Failed to mark sessions as paid')
     } finally {
       setIsProcessing(false)
@@ -209,7 +193,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `unpaid-payroll-${new Date().toISOString().split('T')[0]}.xlsx`
+    a.download = `unpaid-payroll-${todayLocal()}.xlsx`
     a.click()
     URL.revokeObjectURL(url)
   }

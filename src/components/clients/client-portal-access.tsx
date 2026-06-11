@@ -33,7 +33,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   useEffect(() => {
     async function loadTokens() {
       try {
-        const response = await fetch(`/api/clients/${clientId}/access-token`)
+        const response = await fetch(`/api/clients/${clientId}/access-token/`)
         if (response.ok) {
           const data = await response.json()
           setTokens(data.tokens || [])
@@ -49,7 +49,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
 
   async function refreshTokens() {
     try {
-      const response = await fetch(`/api/clients/${clientId}/access-token`)
+      const response = await fetch(`/api/clients/${clientId}/access-token/`)
       if (response.ok) {
         const data = await response.json()
         setTokens(data.tokens || [])
@@ -62,7 +62,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   async function generateToken() {
     setGenerating(true)
     try {
-      const response = await fetch(`/api/clients/${clientId}/access-token`, {
+      const response = await fetch(`/api/clients/${clientId}/access-token/`, {
         method: 'POST',
       })
 
@@ -89,7 +89,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
       confirmLabel: 'Revoke',
       onConfirm: async () => {
         try {
-          const response = await fetch(`/api/clients/${clientId}/access-token`, {
+          const response = await fetch(`/api/clients/${clientId}/access-token/`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ tokenId }),
@@ -118,7 +118,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
 
     setSendingInvite(true)
     try {
-      const response = await fetch(`/api/clients/${clientId}/send-invite`, {
+      const response = await fetch(`/api/clients/${clientId}/send-invite/`, {
         method: 'POST',
       })
 

@@ -100,8 +100,12 @@ export function UnsentInvoices() {
         if (result.failed.length > 0) {
           toast.warning(`${result.failed.length} failed: ${result.failed[0]}`)
         }
-        setInvoices((prev) => prev.filter((inv) => !emailableIds.includes(inv.id)))
-        setSelectedIds(new Set())
+        // Remove only the invoices that actually sent — keep failed ones in the list/selection.
+        const sentIds = new Set(result.sentIds)
+        setInvoices((prev) => prev.filter((inv) => !sentIds.has(inv.id)))
+        setSelectedIds((prev) => new Set([...prev].filter((id) => !sentIds.has(id))))
+      } else {
+        toast.error(result.error || 'Failed to send invoices')
       }
     })
   }
@@ -205,7 +209,7 @@ export function UnsentInvoices() {
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {invoice.invoice_type === 'batch' && invoice.billing_period
-                    ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                     : invoice.session?.date
                       ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                       : ''}

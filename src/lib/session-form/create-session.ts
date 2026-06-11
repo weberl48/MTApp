@@ -82,7 +82,12 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
       .from('session_attendees')
       .insert(attendees)
 
-    if (attendeesError) throw attendeesError
+    if (attendeesError) {
+      // Compensate: delete the just-created session so a failed attendee insert doesn't leave
+      // an orphaned session (no attendees, invisible to client views but counted in payroll).
+      await supabase.from('sessions').delete().eq('id', session.id)
+      throw attendeesError
+    }
 
     // If submitted, create invoices for each non-scholarship client
     // Skip all per-session invoices for scholarship service types (they use batch invoicing)

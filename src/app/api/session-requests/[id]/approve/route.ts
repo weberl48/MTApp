@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { sendSessionRequestStatusEmail } from '@/lib/email'
 import { logger } from '@/lib/logger'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { createNewSession } from '@/lib/session-form/create-session'
+import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
+import type { ServiceType, OrganizationSettings, PaymentMethod } from '@/types/database'
 
 /**
  * POST /api/session-requests/[id]/approve
@@ -52,7 +55,7 @@ export async function POST(
     // Get the request with client and organization info
     const { data: sessionRequest, error: fetchError } = await supabase
       .from('session_requests')
-      .select('*, client:clients(id, name, contact_email), organization:organizations(id, name)')
+      .select('*, client:clients(id, name, contact_email, payment_method), organization:organizations(id, name)')
       .eq('id', requestId)
       .single()
 
@@ -98,41 +101,71 @@ export async function POST(
         )
       }
 
-      const { data: newSession, error: sessionError } = await supabase
-        .from('sessions')
-        .insert({
-          date: session_date,
-          time: session_time || null,
-          duration_minutes: sessionRequest.duration_minutes,
-          service_type_id,
-          contractor_id,
-          status: 'approved',
-          organization_id: sessionRequest.organization_id,
-        })
-        .select()
-        .single()
-
-      if (sessionError) {
-        throw sessionError
-      }
-
-      createdSessionId = newSession.id
-
-      // Add the client as an attendee
-      // Get pricing info for individual_cost
+      // Fetch the full service type so we can price the session properly
       const { data: serviceType } = await supabase
         .from('service_types')
-        .select('base_rate')
+        .select('*')
         .eq('id', service_type_id)
         .single()
 
-      const individualCost = serviceType?.base_rate || 0
+      if (!serviceType) {
+        return NextResponse.json({ error: 'Service type not found' }, { status: 400 })
+      }
 
-      await supabase.from('session_attendees').insert({
-        session_id: newSession.id,
-        client_id: sessionRequest.client_id,
-        individual_cost: individualCost,
+      const client = Array.isArray(sessionRequest.client) ? sessionRequest.client[0] : sessionRequest.client
+
+      // Contractor's custom rate (if any), so their pay matches their negotiated rate
+      let overrides: ContractorPricingOverrides | undefined
+      const { data: rate } = await supabase
+        .from('contractor_rates')
+        .select('contractor_pay, duration_increment')
+        .eq('contractor_id', contractor_id)
+        .eq('service_type_id', service_type_id)
+        .maybeSingle()
+      if (rate) {
+        overrides = { customContractorPay: rate.contractor_pay, durationIncrement: rate.duration_increment }
+      }
+
+      const durationMinutes = sessionRequest.duration_minutes || 30
+      const pricing = calculateSessionPricing(
+        serviceType as ServiceType,
+        1,
+        durationMinutes,
+        overrides,
+        { paymentMethod: client?.payment_method as PaymentMethod | undefined }
+      )
+
+      // Org invoice due-days for the generated invoice
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('settings')
+        .eq('id', sessionRequest.organization_id)
+        .single()
+      const dueDays = (org?.settings as OrganizationSettings | undefined)?.invoice?.due_days
+
+      // Reuse the shared creation path: prices the session, inserts attendees (rolling back the
+      // session if that fails), and generates the invoice — the old inline insert did none of these.
+      const result = await createNewSession({
+        supabase,
+        date: session_date,
+        time: session_time ? String(session_time).slice(0, 5) : '09:00',
+        durationMinutes,
+        serviceTypeId: service_type_id,
+        contractorId: contractor_id,
+        organizationId: sessionRequest.organization_id,
+        clientIds: [sessionRequest.client_id],
+        encryptedNotes: null,
+        encryptedClientNotes: null,
+        status: 'approved',
+        groupHeadcount: null,
+        groupMemberNames: null,
+        classroom: null,
+        pricing,
+        isScholarshipService: serviceType.is_scholarship ?? false,
+        dueDays,
       })
+
+      createdSessionId = result.sessionId
     }
 
     // Update the request

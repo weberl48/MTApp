@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { parseLocalDate } from '@/lib/dates'
+import type { ContractorPricingOverrides } from '@/lib/pricing'
 
 export interface UnbilledScholarshipSession {
   sessionId: string
@@ -16,6 +17,34 @@ export interface UnbilledGroup {
   clientName: string
   month: string
   sessions: UnbilledScholarshipSession[]
+}
+
+export interface ContractorRateRow {
+  contractor_id: string
+  service_type_id: string
+  contractor_pay: number
+  duration_increment: number | null
+}
+
+/**
+ * Build a per-contractor rate-override lookup keyed by `${contractor_id}:${service_type_id}`.
+ *
+ * The key MUST use `contractor_id` (the real `contractor_rates` column). A prior bug both
+ * selected/filtered and keyed on a nonexistent `user_id` column, so the query errored,
+ * the error was swallowed, the map was always empty, and scholarship batches mispriced
+ * every contractor who had a custom rate.
+ */
+export function buildContractorRateMap(
+  rates: ContractorRateRow[] | null | undefined
+): Map<string, ContractorPricingOverrides> {
+  const map = new Map<string, ContractorPricingOverrides>()
+  for (const rate of rates || []) {
+    map.set(`${rate.contractor_id}:${rate.service_type_id}`, {
+      customContractorPay: rate.contractor_pay,
+      durationIncrement: rate.duration_increment,
+    })
+  }
+  return map
 }
 
 /**

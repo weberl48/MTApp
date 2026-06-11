@@ -140,7 +140,7 @@ import type { UserRole } from '@/types/database'
 const allowed = can(userProfile.role as UserRole, 'session:approve')
 ```
 
-**Available permissions**: `session:approve`, `session:delete`, `session:cancel`, `session:mark-no-show`, `session:view-all`, `invoice:bulk-action`, `invoice:delete`, `invoice:send`, `team:view`, `team:manage`, `team:invite`, `settings:edit`, `analytics:view`, `payments:view`, `financial:view-details`
+**Available permissions**: `session:approve`, `session:delete`, `session:cancel`, `session:mark-no-show`, `session:view-all`, `invoice:bulk-action`, `invoice:delete`, `invoice:send`, `team:view`, `team:manage`, `team:invite`, `client:manage`, `settings:edit`, `analytics:view`, `payments:view`, `financial:view-details`
 
 ### Service Types
 

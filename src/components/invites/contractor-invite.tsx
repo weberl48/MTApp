@@ -36,7 +36,7 @@ export function ContractorInvite(props: { organizationId: string; role?: 'contra
     setLoading(true)
     setEmailSent(false)
     try {
-      const response = await fetch('/api/invites/user', {
+      const response = await fetch('/api/invites/user/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
