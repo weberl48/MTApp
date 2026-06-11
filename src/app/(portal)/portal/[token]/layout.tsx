@@ -26,7 +26,7 @@ function PortalNav() {
           : pathname.startsWith(item.href)
 
         return (
-          <Link key={item.href} href={item.href}>
+          <Link key={item.href} href={item.href} aria-current={isActive ? 'page' : undefined}>
             <Button
               variant={isActive ? 'default' : 'ghost'}
               size="sm"
@@ -85,8 +85,8 @@ function PortalContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+        <div role="status" aria-live="polite" className="text-center">
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin mx-auto text-blue-600" />
           <p className="mt-2 text-muted-foreground">Loading your portal...</p>
         </div>
       </div>
@@ -98,25 +98,25 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 text-center">
+        <div role="alert" className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 text-center">
           <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            <AlertCircle aria-hidden="true" className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <h1 className="text-xl font-semibold text-foreground mb-2">
-            {isPortalDisabled ? 'Portal Unavailable' : 'Access Link Expired'}
+            {isPortalDisabled ? 'Portal Unavailable' : 'This Link Has Expired'}
           </h1>
           <p className="text-muted-foreground mb-6">
             {isPortalDisabled
               ? 'The client portal is not currently available. Please contact your provider for assistance.'
-              : error || 'This portal link is no longer valid.'}
+              : error || 'For your privacy, portal links only work for a limited time. Nothing is wrong with your account — you just need a fresh link.'}
           </p>
           {!isPortalDisabled && (
             <>
               <p className="text-sm text-muted-foreground mb-6">
-                Please request a new link by entering your email below, or contact your therapist.
+                Tap the button below and enter your email to get a new link, or contact your therapist.
               </p>
               <Button onClick={() => router.push('/portal/')} className="w-full">
-                Request New Link
+                Get a New Link
               </Button>
             </>
           )}
