@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useTransition } from 'react'
+import { useEffect, useRef, useState, useMemo, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -99,6 +99,51 @@ export default function SessionsPage() {
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
+
+  // Restore filters/sort/view from the URL on first load so a refresh, shared link,
+  // or back-navigation keeps the current view. Written back below via
+  // history.replaceState (shallow — no server round-trip per keystroke).
+  // setState-in-effect is intentional: window.location isn't readable during SSR,
+  // and lazy initializers reading it would cause hydration mismatches.
+  const skipFirstUrlSync = useRef(true)
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const q = params.get('q')
+    const status = params.get('status')
+    const contractor = params.get('contractor')
+    const from = params.get('from')
+    const to = params.get('to')
+    const sort = params.get('sort')
+    if (q) setSearchQuery(q)
+    if (status) setStatusFilter(status)
+    if (contractor) setContractorFilter(contractor)
+    if (from) setDateFrom(from)
+    if (to) setDateTo(to)
+    if (sort === 'date_asc' || sort === 'client_asc' || sort === 'client_desc' || sort === 'price_asc' || sort === 'price_desc') {
+      setSortBy(sort)
+    }
+    if (params.get('view') === 'calendar') setView('calendar')
+    if (status || contractor || from || to) setShowFilters(true)
+  }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    if (skipFirstUrlSync.current) {
+      skipFirstUrlSync.current = false
+      return
+    }
+    const params = new URLSearchParams()
+    if (searchQuery) params.set('q', searchQuery)
+    if (statusFilter !== 'all') params.set('status', statusFilter)
+    if (contractorFilter !== 'all') params.set('contractor', contractorFilter)
+    if (dateFrom) params.set('from', dateFrom)
+    if (dateTo) params.set('to', dateTo)
+    if (sortBy !== 'date_desc') params.set('sort', sortBy)
+    if (view === 'calendar') params.set('view', 'calendar')
+    const qs = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`)
+  }, [searchQuery, statusFilter, contractorFilter, dateFrom, dateTo, sortBy, view])
 
   useEffect(() => {
     async function loadSessions() {
@@ -295,7 +340,7 @@ export default function SessionsPage() {
     setContractorFilter('all')
     setDateFrom('')
     setDateTo('')
-    setSortBy('date_desc')
+    // Sort order is a view preference, not a filter — clearing filters keeps it
     setVisibleCount(ITEMS_PER_PAGE) // Reset pagination when clearing filters
   }
 

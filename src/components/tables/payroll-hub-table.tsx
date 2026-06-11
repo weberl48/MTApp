@@ -303,7 +303,53 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                     <TableRow>
                       <TableCell colSpan={5} className="bg-gray-50 dark:bg-gray-900 p-0">
                         <div className="p-4">
-                          <table className="w-full text-sm">
+                          {/* Mobile: stacked cards — the 5-column table is unreadable at 375px */}
+                          <ul className="space-y-2 sm:hidden">
+                            {contractor.unpaidSessions.map((session) => (
+                              <li
+                                key={session.id}
+                                className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="font-medium">
+                                      {format(parseLocalDate(session.date), 'MMM d, yyyy')}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                      {session.service_type?.name || '-'}
+                                    </div>
+                                    {session.clients.length > 0 && (
+                                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                        {session.clients.join(', ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col items-end gap-1">
+                                    <span className="font-medium">{formatCurrency(session.contractor_pay)}</span>
+                                    {canDelete && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                                        aria-label={`Delete session on ${format(parseLocalDate(session.date), 'MMM d, yyyy')} for ${contractor.name}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setDeleteDialog({
+                                            isOpen: true,
+                                            session,
+                                            contractorName: contractor.name,
+                                          })
+                                        }}
+                                      >
+                                        <Trash2 aria-hidden="true" className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                          <table className="w-full text-sm hidden sm:table">
                             <thead>
                               <tr className="text-gray-500">
                                 <th className="text-left pb-2 font-medium">Date</th>

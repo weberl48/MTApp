@@ -13,11 +13,14 @@ import {
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme()
 
-  // Wait for client-side hydration - resolvedTheme is undefined during SSR
+  // Wait for client-side hydration - resolvedTheme is undefined during SSR.
+  // Placeholder matches the real button's size and label so there is no layout
+  // shift and assistive tech doesn't encounter an unnamed dead button.
   if (typeof resolvedTheme === 'undefined') {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
+      <Button variant="ghost" size="icon" className="h-9 w-9 disabled:opacity-100" disabled>
         <Sun className="h-4 w-4" />
+        <span className="sr-only">Toggle theme</span>
       </Button>
     )
   }

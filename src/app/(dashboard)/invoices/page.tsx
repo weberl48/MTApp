@@ -142,6 +142,7 @@ function InvoiceTable({
               className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
               tabIndex={0}
               role="link"
+              aria-label={`Open invoice for ${invoice.client?.name ?? 'client'}`}
               onClick={() => router.push(`/invoices/${invoice.id}/`)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -292,15 +293,26 @@ export default function InvoicesPage() {
   const selectedInvoices = invoices.filter((inv) => selectedIds.has(inv.id))
   const selectedTotal = selectedInvoices.reduce((sum, inv) => sum + inv.amount, 0)
 
-  // Bulk action handlers
+  // Bulk action handlers — optimistic: the rows flip status immediately instead of
+  // waiting on a full refetch; on server failure the previous list is restored.
+  const applyBulkStatusOptimistically = (ids: string[], status: 'paid' | 'sent') => {
+    const idSet = new Set(ids)
+    const previous = invoices
+    setInvoices((prev) => prev.map((inv) => (idSet.has(inv.id) ? { ...inv, status } : inv)))
+    setSelectedIds(new Set())
+    return () => setInvoices(previous)
+  }
+
   const handleBulkMarkPaid = () => {
     if (selectedIds.size === 0) return
+    const ids = Array.from(selectedIds)
+    const rollback = applyBulkStatusOptimistically(ids, 'paid')
     startTransition(async () => {
-      const result = await bulkUpdateInvoiceStatus(Array.from(selectedIds), 'paid')
+      const result = await bulkUpdateInvoiceStatus(ids, 'paid')
       if (result.success) {
-        toast.success(`Marked ${selectedIds.size} invoice(s) as paid`)
-        handleRefresh()
+        toast.success(`Marked ${ids.length} invoice(s) as paid`)
       } else {
+        rollback()
         toast.error(result.error || 'Failed to mark invoices as paid')
       }
     })
@@ -308,12 +320,14 @@ export default function InvoicesPage() {
 
   const handleBulkMarkSent = () => {
     if (selectedIds.size === 0) return
+    const ids = Array.from(selectedIds)
+    const rollback = applyBulkStatusOptimistically(ids, 'sent')
     startTransition(async () => {
-      const result = await bulkUpdateInvoiceStatus(Array.from(selectedIds), 'sent')
+      const result = await bulkUpdateInvoiceStatus(ids, 'sent')
       if (result.success) {
-        toast.success(`Marked ${selectedIds.size} invoice(s) as sent`)
-        handleRefresh()
+        toast.success(`Marked ${ids.length} invoice(s) as sent`)
       } else {
+        rollback()
         toast.error(result.error || 'Failed to mark invoices as sent')
       }
     })
