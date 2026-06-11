@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
 import { resolveAutoSendMethod } from '@/lib/invoices/auto-send-policy'
+import { sumInvoiceItemTotals } from '@/lib/invoices/batch-totals'
 import { calculateNoShowPricing, type ContractorPricingOverrides } from '@/lib/pricing'
 import type { OrganizationSettings, ServiceType } from '@/types/database'
 
@@ -228,7 +229,7 @@ async function removeSessionFromBatchInvoices(supabase: Awaited<ReturnType<typeo
     // Check if the parent invoice is still pending
     const { data: invoice } = await supabase
       .from('invoices')
-      .select('id, status, amount, mca_cut, contractor_pay, rent_amount')
+      .select('id, status')
       .eq('id', item.invoice_id)
       .single()
 
@@ -237,26 +238,20 @@ async function removeSessionFromBatchInvoices(supabase: Awaited<ReturnType<typeo
     // Delete the item
     await supabase.from('invoice_items').delete().eq('id', item.id)
 
-    // Check remaining items
-    const { count } = await supabase
+    // Recompute the header totals from the SURVIVING items (idempotent — avoids the
+    // concurrent-decrement drift of arithmetic subtraction).
+    const { data: remaining } = await supabase
       .from('invoice_items')
-      .select('id', { count: 'exact', head: true })
+      .select('amount, mca_cut, contractor_pay, rent_amount')
       .eq('invoice_id', item.invoice_id)
 
-    if (count === 0) {
+    if (!remaining || remaining.length === 0) {
       // No items left — delete the batch invoice
       await supabase.from('invoices').delete().eq('id', item.invoice_id)
     } else {
-      // Recalculate totals
       await supabase
         .from('invoices')
-        .update({
-          amount: Math.round((invoice.amount - item.amount) * 100) / 100,
-          mca_cut: Math.round((invoice.mca_cut - item.mca_cut) * 100) / 100,
-          contractor_pay: Math.round((invoice.contractor_pay - item.contractor_pay) * 100) / 100,
-          rent_amount: Math.round((invoice.rent_amount - item.rent_amount) * 100) / 100,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ ...sumInvoiceItemTotals(remaining), updated_at: new Date().toISOString() })
         .eq('id', item.invoice_id)
     }
   }
