@@ -371,3 +371,29 @@ export async function deleteSession(sessionId: string) {
 
   return { success: true as const }
 }
+
+/**
+ * Mark a set of sessions paid for payroll, atomically. Delegates to the mark_sessions_paid()
+ * function which updates the whole set in one statement, only touches not-yet-paid sessions
+ * (no double-pay / mixed state on partial failure), and snapshots each session's own
+ * contractor_pay. Returns how many were actually marked.
+ */
+export async function markSessionsPaid(sessionIds: string[], paidDate: string) {
+  const permErr = await requirePermission('invoice:bulk-action')
+  if (permErr) return permErr
+  if (sessionIds.length === 0) return { success: true as const, count: 0 }
+
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.rpc('mark_sessions_paid', {
+    p_ids: sessionIds,
+    p_paid_date: paidDate,
+  })
+
+  const err = handleSupabaseError(error)
+  if (err) return err
+
+  revalidateSessionPaths()
+
+  return { success: true as const, count: (data as number) ?? 0 }
+}
