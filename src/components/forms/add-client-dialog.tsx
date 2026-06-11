@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { addClient, updateClient, getDecryptedClientNotes } from '@/app/actions/clients'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,7 +38,6 @@ interface ClientDialogProps {
 
 export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) {
   const router = useRouter()
-  const supabase = createClient()
   const { organization, settings, feature } = useOrganization()
   const paymentMethods = getPaymentMethodOptions(settings)
   const billingMethods = getBillingMethodOptions(settings)
@@ -62,7 +61,10 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       setPhone(client.contact_phone || '')
       setPaymentMethod(client.payment_method)
       setBillingMethod(client.billing_method || 'square')
-      setNotes(client.notes || '')
+      // Notes are PHI (encrypted at rest) — fetch the decrypted value for editing.
+      getDecryptedClientNotes(client.id)
+        .then(setNotes)
+        .catch(() => setNotes(client.notes || ''))
     }
   }, [client, open])
 
@@ -88,44 +90,36 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
 
     try {
       if (isEditMode) {
-        // Update existing client
-        const { error } = await supabase
-          .from('clients')
-          .update({
-            name: name.trim(),
-            contact_email: email.trim() || null,
-            contact_phone: phone.trim() || null,
-            payment_method: paymentMethod,
-            billing_method: billingMethod,
-            notes: notes.trim() || null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', client.id)
+        // Update via server action (encrypts PHI notes server-side)
+        const result = await updateClient(client.id, {
+          name: name.trim(),
+          contact_email: email.trim() || null,
+          contact_phone: phone.trim() || null,
+          payment_method: paymentMethod,
+          billing_method: billingMethod,
+          notes: notes.trim() || null,
+        })
 
-        if (error) throw error
+        if (!result.success) throw new Error(result.error)
         toast.success('Client updated successfully!')
       } else {
-        // Create new client
-        const { data: newClient, error } = await supabase
-          .from('clients')
-          .insert({
-            name: name.trim(),
-            contact_email: email.trim() || null,
-            contact_phone: phone.trim() || null,
-            payment_method: paymentMethod,
-            billing_method: billingMethod,
-            notes: notes.trim() || null,
-            organization_id: organization!.id,
-          })
-          .select('id')
-          .single()
+        // Create via server action (encrypts PHI notes server-side)
+        const result = await addClient({
+          name: name.trim(),
+          contact_email: email.trim() || null,
+          contact_phone: phone.trim() || null,
+          payment_method: paymentMethod,
+          billing_method: billingMethod,
+          notes: notes.trim() || null,
+          organization_id: organization!.id,
+        })
 
-        if (error) throw error
+        if (!result.success) throw new Error(result.error)
 
         // Send portal invite if requested and email is provided
         if (sendInvite && email.trim()) {
           try {
-            const response = await fetch(`/api/clients/${newClient.id}/send-invite`, {
+            const response = await fetch(`/api/clients/${result.clientId}/send-invite/`, {
               method: 'POST',
             })
             if (response.ok) {
