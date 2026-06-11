@@ -18,7 +18,7 @@ import {
   ChevronRight,
   HelpCircle,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOrganization } from '@/contexts/organization-context'
 import type { FeatureFlags } from '@/types/database'
@@ -61,6 +61,16 @@ export function Sidebar() {
   const { can, user, feature } = useOrganization()
 
   const isContractor = user?.role === 'contractor'
+
+  // WCAG 2.1.1: the mobile menu behaves as a dialog, so Escape must dismiss it
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mobileMenuOpen])
 
   function shouldShowItem(item: NavItem): boolean {
     // Feature gate: hide if the feature is disabled
@@ -114,12 +124,14 @@ export function Sidebar() {
     if (hasChildren) {
       const isExpanded = expandedItems.has(item.name) || isBillingActive
       const isActive = item.children!.some((child) => pathname.startsWith(child.href))
+      const submenuId = `nav-submenu-${item.name.toLowerCase().replace(/\s+/g, '-')}`
 
       return (
         <div key={item.name}>
           <button
             onClick={() => toggleExpanded(item.name)}
             aria-expanded={isExpanded}
+            aria-controls={submenuId}
             className={cn(
               'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
               isActive
@@ -137,7 +149,7 @@ export function Sidebar() {
             />
           </button>
           {isExpanded && (
-            <div className="ml-4 mt-1 space-y-1">
+            <div id={submenuId} className="ml-4 mt-1 space-y-1">
               {item.children!.filter(shouldShowItem).map((child) => {
                 const childActive = pathname.startsWith(child.href)
                 return (
@@ -145,6 +157,7 @@ export function Sidebar() {
                     key={child.name}
                     href={child.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    aria-current={childActive ? 'page' : undefined}
                     className={cn(
                       'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
                       childActive
@@ -169,6 +182,7 @@ export function Sidebar() {
         key={item.name}
         href={item.href}
         onClick={() => setMobileMenuOpen(false)}
+        aria-current={isActive ? 'page' : undefined}
         className={cn(
           'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
           isActive
@@ -202,6 +216,7 @@ export function Sidebar() {
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -219,7 +234,7 @@ export function Sidebar() {
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 MCA
               </span>
-              <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                 Manager
               </span>
             </Link>
@@ -235,6 +250,7 @@ export function Sidebar() {
             <Link
               href="/help/"
               onClick={() => setMobileMenuOpen(false)}
+              aria-current={pathname.startsWith('/help') ? 'page' : undefined}
               className={cn(
                 'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
                 pathname.startsWith('/help')

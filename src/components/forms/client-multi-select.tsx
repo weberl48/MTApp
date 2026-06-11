@@ -93,8 +93,9 @@ export function ClientMultiSelect({ clients, selectedIds, onChange, disabled }: 
                         }
                       }}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2 text-sm cursor-pointer select-none',
-                        'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        'flex min-h-11 items-center gap-3 px-3 py-2.5 text-sm cursor-pointer select-none',
+                        'hover:bg-gray-50 dark:hover:bg-gray-800',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring'
                       )}
                     >
                       <Checkbox
