@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/lib/portal/token'
 import { createServiceClient } from '@/lib/supabase/service'
 import { portalTokenSchema, sessionRequestSchema } from '@/lib/validation/schemas'
+import { encryptField, decryptField } from '@/lib/crypto'
 
 /**
  * GET /api/portal/session-requests
@@ -51,12 +52,15 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    // Transform data
-    const transformedRequests = (requests || []).map((req) => ({
-      ...req,
-      service_type: Array.isArray(req.service_type) ? req.service_type[0] : req.service_type,
-      responded_by: Array.isArray(req.responded_by) ? req.responded_by[0] : req.responded_by,
-    }))
+    // Transform data; decrypt the client-submitted notes (PHI, encrypted at rest)
+    const transformedRequests = await Promise.all(
+      (requests || []).map(async (req) => ({
+        ...req,
+        notes: req.notes ? await decryptField(req.notes) : null,
+        service_type: Array.isArray(req.service_type) ? req.service_type[0] : req.service_type,
+        responded_by: Array.isArray(req.responded_by) ? req.responded_by[0] : req.responded_by,
+      }))
+    )
 
     return NextResponse.json({ requests: transformedRequests })
   } catch (error) {
@@ -126,6 +130,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Encrypt the client-submitted notes (PHI) before storing
+    const encryptedNotes = notes ? await encryptField(notes) : null
+
     // Create the request
     const { data: newRequest, error } = await supabase
       .from('session_requests')
@@ -138,7 +145,7 @@ export async function POST(request: NextRequest) {
         alternative_time: alternative_time || null,
         duration_minutes: duration_minutes || 30,
         service_type_id: service_type_id || null,
-        notes: notes || null,
+        notes: encryptedNotes,
         status: 'pending',
       })
       .select()
@@ -153,7 +160,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      request: newRequest,
+      // Return the client's notes in plaintext (they just typed them)
+      request: { ...newRequest, notes },
     })
   } catch (error) {
     console.error('[MCA] Error creating session request')

@@ -12,6 +12,7 @@ export const PHI_FIELDS = {
   sessions: ['notes', 'client_notes'],
   clients: ['notes'],
   client_goals: ['description'],
+  session_requests: ['notes'],
 } as const
 
 type PhiTable = keyof typeof PHI_FIELDS
