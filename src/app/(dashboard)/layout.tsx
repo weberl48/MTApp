@@ -41,8 +41,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center justify-center gap-3 min-h-screen bg-gray-50 dark:bg-gray-950"
+      >
+        <Loader2 aria-hidden="true" className="w-8 h-8 animate-spin text-blue-600" />
+        <p className="text-sm text-gray-600 dark:text-gray-400">Loading your workspace…</p>
       </div>
     )
   }
@@ -70,11 +75,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <ActivityTracker>
         <WalkthroughProvider>
           <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+            >
+              Skip to main content
+            </a>
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
-                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6">
+                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none">
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
                     {children}

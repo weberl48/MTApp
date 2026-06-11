@@ -6,7 +6,7 @@ import { useOrganization } from '@/contexts/organization-context'
 import { hasMfaEnabled } from '@/lib/supabase/mfa'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Shield, AlertTriangle } from 'lucide-react'
+import { Shield, AlertTriangle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 /**
@@ -51,11 +51,21 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
   // Don't block on settings page (so they can set up MFA)
   const isSettingsPage = pathname?.startsWith('/settings')
 
-  // Show children while checking for non-privileged users or when MFA isn't required
-  // For privileged users with MFA required, show nothing to prevent content flash
+  // Show children while checking for non-privileged users or when MFA isn't required.
+  // For privileged users with MFA required, show an announced loading state instead of
+  // a blank page to avoid both content flash and an invisible system status.
   if (checking) {
     if (requireMfa && isPrivilegedUser) {
-      return null
+      return (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex flex-col items-center justify-center gap-3 py-16"
+        >
+          <Loader2 aria-hidden="true" className="w-6 h-6 animate-spin text-blue-600" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">Verifying security settings…</p>
+        </div>
+      )
     }
     return <>{children}</>
   }

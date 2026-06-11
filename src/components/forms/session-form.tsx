@@ -348,6 +348,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     && !!time && time !== '09:00'
   const [setupExpanded, setSetupExpanded] = useState(false)
 
+  // Unsaved-changes guard: warn before the browser discards a partially filled form
+  // (tab close, refresh, hard navigation). Baseline is captured after remembered
+  // defaults are applied so auto-populated values don't count as user edits.
+  const formSnapshot = JSON.stringify({
+    date, time, duration, serviceTypeId, selectedClients, notes, clientNotes,
+    groupHeadcount, groupMemberNames, classroom, groupBillingClientId, selectedAdminUserId,
+  })
+  const baselineSnapshotRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!isEditMode && !didApplyDefaults) return
+    if (baselineSnapshotRef.current === null) baselineSnapshotRef.current = formSnapshot
+  }, [isEditMode, didApplyDefaults, formSnapshot])
+
+  const isDirty = baselineSnapshotRef.current !== null && formSnapshot !== baselineSnapshotRef.current
+
+  useEffect(() => {
+    if (!isDirty || loading || showSuccess) return
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [isDirty, loading, showSuccess])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     clearAllErrors()
@@ -738,7 +763,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 }
               }}
             >
-              <SelectTrigger className={errors.serviceType ? 'border-red-500' : ''}>
+              <SelectTrigger
+                className={errors.serviceType ? 'border-red-500' : ''}
+                aria-invalid={!!errors.serviceType}
+                aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
+              >
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent>
@@ -750,8 +779,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               </SelectContent>
             </Select>
             {errors.serviceType && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
+              <p id="serviceType-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.serviceType}
               </p>
             )}
@@ -783,10 +812,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   <button
                     type="button"
                     onClick={() => removeClient(clientId)}
-                    className="ml-1 hover:text-red-500"
+                    className="ml-0.5 -my-1 -mr-2 flex items-center justify-center rounded-full p-1.5 hover:bg-red-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     aria-label={`Remove ${getClientName(clientId)}`}
                   >
-                    <X className="w-3 h-3" />
+                    <X aria-hidden="true" className="w-3.5 h-3.5" />
                   </button>
                 </Badge>
               ))}
@@ -802,8 +831,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               />
             )}
             {errors.clients && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
+              <p id="clients-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.clients}
               </p>
             )}
@@ -820,7 +849,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <div className="space-y-2">
               <Label htmlFor="adminUser">Who did this work? *</Label>
               <Select value={selectedAdminUserId} onValueChange={setSelectedAdminUserId}>
-                <SelectTrigger id="adminUser" className={errors.adminUser ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  id="adminUser"
+                  className={errors.adminUser ? 'border-red-500' : ''}
+                  aria-invalid={!!errors.adminUser}
+                  aria-describedby={errors.adminUser ? 'adminUser-error' : undefined}
+                >
                   <SelectValue placeholder="Select admin" />
                 </SelectTrigger>
                 <SelectContent>
@@ -832,8 +866,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 </SelectContent>
               </Select>
               {errors.adminUser && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p id="adminUser-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.adminUser}
                 </p>
               )}
@@ -866,10 +900,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 }}
                 placeholder="Enter headcount"
                 className={errors.groupHeadcount ? 'border-red-500' : ''}
+                aria-invalid={!!errors.groupHeadcount}
+                aria-describedby={errors.groupHeadcount ? 'groupHeadcount-error' : undefined}
               />
               {errors.groupHeadcount && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p id="groupHeadcount-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.groupHeadcount}
                 </p>
               )}
@@ -887,7 +923,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   clearFieldError('groupBillingClient')
                 }}
               >
-                <SelectTrigger id="groupBillingClient" className={errors.groupBillingClient ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  id="groupBillingClient"
+                  className={errors.groupBillingClient ? 'border-red-500' : ''}
+                  aria-invalid={!!errors.groupBillingClient}
+                  aria-describedby={errors.groupBillingClient ? 'groupBillingClient-error' : undefined}
+                >
                   <SelectValue placeholder="Select agency to invoice" />
                 </SelectTrigger>
                 <SelectContent>
@@ -899,8 +940,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 </SelectContent>
               </Select>
               {errors.groupBillingClient && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p id="groupBillingClient-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.groupBillingClient}
                 </p>
               )}
@@ -929,7 +970,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <div className="space-y-2">
               <Label htmlFor="classroom">Classroom *</Label>
               <Select value={classroom} onValueChange={(val) => { setClassroom(val); clearFieldError('classroom') }}>
-                <SelectTrigger id="classroom" className={errors.classroom ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  id="classroom"
+                  className={errors.classroom ? 'border-red-500' : ''}
+                  aria-invalid={!!errors.classroom}
+                  aria-describedby={errors.classroom ? 'classroom-error' : undefined}
+                >
                   <SelectValue placeholder="Select classroom" />
                 </SelectTrigger>
                 <SelectContent>
@@ -939,8 +985,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 </SelectContent>
               </Select>
               {errors.classroom && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p id="classroom-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.classroom}
                 </p>
               )}
@@ -1004,10 +1050,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               }}
               rows={2}
               className={errors.notes ? 'border-red-500' : ''}
+              aria-invalid={!!errors.notes}
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
             {errors.notes && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
+              <p id="notes-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.notes}
               </p>
             )}
@@ -1028,10 +1076,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               }}
               rows={2}
               className={errors.clientNotes ? 'border-red-500' : ''}
+              aria-invalid={!!errors.clientNotes}
+              aria-describedby={errors.clientNotes ? 'clientNotes-error' : undefined}
             />
             {errors.clientNotes && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
+              <p id="clientNotes-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.clientNotes}
               </p>
             )}

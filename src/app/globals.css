@@ -45,6 +45,11 @@
 
 :root {
   --radius: 0.625rem;
+  /* Motion tokens — entrances use ease-out, exits use ease-in.
+     Use via duration-[var(--motion-fast)] etc. so all transitions share one scale. */
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-slow: 250ms;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -160,5 +165,19 @@ html {
   button, a, [role="button"] {
     min-height: 44px;
     min-width: 44px;
+  }
+}
+
+/* WCAG 2.3.3 / Nielsen "user control": honor OS-level reduced-motion preference.
+   Collapses all transitions/animations to near-instant without breaking
+   animation-driven logic (animationend/transitionend still fire). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

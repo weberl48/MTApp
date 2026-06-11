@@ -252,14 +252,24 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                 <Fragment key={contractor.id}>
                   {/* Contractor row */}
                   <TableRow
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                     onClick={() => toggleExpand(contractor.id)}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expandedContractors.has(contractor.id)}
+                    aria-label={`${expandedContractors.has(contractor.id) ? 'Collapse' : 'Expand'} unpaid sessions for ${contractor.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        toggleExpand(contractor.id)
+                      }
+                    }}
                   >
                     <TableCell className="w-8">
                       {expandedContractors.has(contractor.id) ? (
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                        <ChevronDown aria-hidden="true" className="h-4 w-4 text-gray-400" />
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <ChevronRight aria-hidden="true" className="h-4 w-4 text-gray-400" />
                       )}
                     </TableCell>
                     <TableCell>
@@ -319,7 +329,8 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                      className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                                      aria-label={`Delete session on ${format(parseLocalDate(session.date), 'MMM d, yyyy')} for ${contractor.name}`}
                                       onClick={(e) => {
                                         e.stopPropagation()
                                         setDeleteDialog({
@@ -329,7 +340,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                                         })
                                       }}
                                     >
-                                      <Trash2 className="h-3.5 w-3.5" />
+                                      <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
                                     </Button>
                                   </td>
                                   )}
