@@ -246,8 +246,9 @@ export function ContractorRatesForm({
                             variant="ghost"
                             onClick={() => handleSaveCustomRate(serviceType.id)}
                             disabled={saving}
+                            aria-label={`Save rate for ${serviceType.name}`}
                           >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-green-600" />}
+                            {saving ? <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" /> : <Check aria-hidden="true" className="w-4 h-4 text-green-600" />}
                           </Button>
                           <Button
                             size="icon"
@@ -257,27 +258,30 @@ export function ContractorRatesForm({
                               setEditingRateValue('')
                             }}
                             disabled={saving}
+                            aria-label={`Cancel editing rate for ${serviceType.name}`}
                           >
-                            <X className="w-4 h-4 text-red-600" />
+                            <X aria-hidden="true" className="w-4 h-4 text-red-600" />
                           </Button>
                         </div>
                       ) : (
                         <div className="flex items-center justify-end gap-1">
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
                             onClick={() => startEditingRate(serviceType.id, customRate?.contractor_pay || defaultPay)}
+                            aria-label={`Edit rate for ${serviceType.name}`}
                           >
-                            <Pencil className="w-4 h-4" />
+                            <Pencil aria-hidden="true" className="w-4 h-4" />
                           </Button>
                           {customRate && (
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="ghost"
                               onClick={() => handleRemoveCustomRate(serviceType.id)}
                               disabled={saving}
+                              aria-label={`Remove custom rate for ${serviceType.name}`}
                             >
-                              <X className="w-4 h-4 text-red-500" />
+                              <X aria-hidden="true" className="w-4 h-4 text-red-600 dark:text-red-400" />
                             </Button>
                           )}
                         </div>
