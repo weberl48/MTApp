@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
+import { updateUserRole } from '@/app/actions/team'
 import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
 import { Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
@@ -173,16 +174,13 @@ export default function TeamMemberPage() {
     }
 
     setSavingRole(true)
-    const supabase = createClient()
 
-    const { error } = await supabase
-      .from('users')
-      .update({ role: newRole, updated_at: new Date().toISOString() })
-      .eq('id', member.id)
+    // Role changes go through a server action (service role + authz). A DB trigger blocks
+    // direct browser writes to `role`, so this must not use the anon client.
+    const result = await updateUserRole(member.id, newRole as UserRole)
 
-    if (error) {
-      console.error('[MCA] Error updating role')
-      toast.error('Failed to update role')
+    if (!result.success) {
+      toast.error(result.error || 'Failed to update role')
     } else {
       setMember({ ...member, role: newRole })
       toast.success('Role updated successfully')

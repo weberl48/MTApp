@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { sendSessionRequestStatusEmail } from '@/lib/email'
 import { logger } from '@/lib/logger'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 /**
  * POST /api/session-requests/[id]/decline
@@ -43,9 +45,9 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Only staff can decline
-    const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
-    if (!allowedRoles.includes(profile.role)) {
+    // Declining is part of the approval workflow — gate it on the same permission so a
+    // contractor cannot act on session requests.
+    if (!can(profile.role as UserRole, 'session:approve')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

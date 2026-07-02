@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { validatePassword } from '@/lib/auth/password'
 import { Button } from '@/components/ui/button'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
@@ -40,8 +41,11 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+    // Apply the SAME complexity policy as signup (upper/lower/number/special, min length).
+    // Reset previously only checked length >= 8, letting a user reset to a weak password.
+    const validation = validatePassword(password)
+    if (!validation.isValid) {
+      setError(validation.message || 'Password does not meet the requirements')
       return
     }
 
