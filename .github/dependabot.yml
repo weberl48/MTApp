@@ -9,6 +9,10 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    # Wait before adopting freshly-published versions (guards against a compromised release
+    # being pulled in the moment it lands).
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     reviewers:
       - "lwebe"
@@ -74,6 +78,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "ci"
