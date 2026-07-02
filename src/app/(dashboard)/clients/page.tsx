@@ -6,6 +6,7 @@ import { AddClientDialog } from '@/components/forms/add-client-dialog'
 import { ClientsTable } from '@/components/clients/clients-table'
 import type { Client, UserRole } from '@/types/database'
 import { can } from '@/lib/auth/permissions'
+import { decryptField, isEncrypted } from '@/lib/crypto'
 
 export default async function ClientsPage() {
   const supabase = await createClient()
@@ -31,7 +32,15 @@ export default async function ClientsPage() {
     .select('*')
     .order('name')
 
-  const allClients = (clients || []) as Client[]
+  // Decrypt notes SERVER-SIDE. `notes` is PHI encrypted at rest; the list previously rendered the
+  // raw value, so any client edited since encryption was enabled showed an `enc:...` ciphertext
+  // blob in the table + tooltip. ENCRYPTION_KEY is server-only, so this must happen here.
+  const allClients = await Promise.all(
+    ((clients || []) as Client[]).map(async (c) => ({
+      ...c,
+      notes: c.notes && isEncrypted(c.notes) ? await decryptField(c.notes) : c.notes,
+    }))
+  )
   const noContactCount = allClients.filter(c => !c.contact_email && !c.contact_phone).length
 
   return (

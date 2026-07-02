@@ -43,6 +43,13 @@ export async function sendInvoiceById(
     return { success: false, invoiceId, error: 'Invoice not found' }
   }
 
+  // Never (re)send — and never regress the status of — an invoice that is already paid. This
+  // path sets status to 'sent', so sending a paid invoice would un-pay it (clearing dunning
+  // state and re-entering the reminder cron). A paid invoice is a settled financial record.
+  if (invoice.status === 'paid') {
+    return { success: false, invoiceId, error: 'Invoice is already paid' }
+  }
+
   if (!invoice.client?.contact_email) {
     return { success: false, invoiceId, error: 'Client has no email address on file' }
   }
@@ -105,11 +112,13 @@ export async function sendInvoiceById(
     return { success: false, invoiceId, error: 'Failed to send email' }
   }
 
-  // Update invoice status to 'sent' only after email succeeds
+  // Update invoice status to 'sent' only after email succeeds. Guard with neq('paid') so a
+  // webhook that marked it paid between the fetch above and here can't be clobbered back to 'sent'.
   const { error: updateError } = await supabase
     .from('invoices')
     .update({ status: 'sent' })
     .eq('id', invoiceId)
+    .neq('status', 'paid')
 
   if (updateError) {
     return { success: false, invoiceId, error: 'Email sent but failed to update invoice status' }

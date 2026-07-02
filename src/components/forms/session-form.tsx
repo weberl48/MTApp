@@ -513,11 +513,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           // Split the pricing across the linked invoices the same way createNewSession does, so
           // each client's invoice gets its share (not the full total on every one).
           const count = linkedInvoices.length
-          for (const inv of linkedInvoices) {
+          for (let idx = 0; idx < linkedInvoices.length; idx++) {
+            const inv = linkedInvoices[idx]
             await supabase
               .from('invoices')
               .update({
-                ...perClientInvoiceShare(pricing, count, !!isGroupService),
+                ...perClientInvoiceShare(pricing, count, !!isGroupService, idx),
                 status: 'pending',
                 updated_at: new Date().toISOString(),
               })

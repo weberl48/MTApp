@@ -8,6 +8,7 @@ import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '
 import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
 import { resolveAutoSendMethod } from '@/lib/invoices/auto-send-policy'
 import { sumInvoiceItemTotals } from '@/lib/invoices/batch-totals'
+import { distributeAmount } from '@/lib/invoices/split'
 import { calculateNoShowPricing, type ContractorPricingOverrides } from '@/lib/pricing'
 import type { OrganizationSettings, ServiceType } from '@/types/database'
 
@@ -71,13 +72,24 @@ export async function approveSession(sessionId: string) {
 
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // Only approve a currently-submitted session, and only auto-send if this call is the one that
+  // actually flipped it. Without the status guard a double-click (or a single+bulk race) both see
+  // 'pending' invoices and each fires auto-send, double-emailing the client — and a draft/cancelled
+  // session could be "approved" and trigger auto-send.
+  const { data: approved, error } = await supabase
     .from('sessions')
     .update({ status: 'approved', updated_at: new Date().toISOString() })
     .eq('id', sessionId)
+    .eq('status', 'submitted')
+    .select('id')
 
   const err = handleSupabaseError(error)
   if (err) return err
+
+  if (!approved || approved.length === 0) {
+    // Already approved (or not in a submittable state) — nothing to do, don't re-send.
+    return { success: true as const, alreadyProcessed: true as const }
+  }
 
   // Auto-send via automation settings (email or square)
   try {
@@ -191,19 +203,35 @@ export async function markSessionNoShow(sessionId: string) {
   const err = handleSupabaseError(error)
   if (err) return err
 
-  // Reprice any PENDING per-session invoice to the no-show fee. Sent/paid invoices are
-  // left alone (they are financial records; handle those manually).
+  // Reprice PENDING per-session invoices to the no-show fee. Sent/paid invoices are left alone
+  // (they are financial records; handle those manually). The fee must be SPLIT across the pending
+  // invoices, not written in full to each — a 2-client session previously billed the whole
+  // no-show fee to both invoices (double-billing).
   if (pricing) {
-    await supabase
+    const { data: pendingInvoices } = await supabase
       .from('invoices')
-      .update({
-        amount: pricing.totalAmount,
-        contractor_pay: pricing.contractorPay,
-        mca_cut: pricing.mcaCut,
-        updated_at: new Date().toISOString(),
-      })
+      .select('id')
       .eq('session_id', sessionId)
       .eq('status', 'pending')
+      .order('created_at', { ascending: true })
+
+    const count = pendingInvoices?.length ?? 0
+    if (count > 0) {
+      const amountShares = distributeAmount(pricing.totalAmount, count)
+      const contractorShares = distributeAmount(pricing.contractorPay, count)
+      const mcaShares = distributeAmount(pricing.mcaCut, count)
+      for (let i = 0; i < count; i++) {
+        await supabase
+          .from('invoices')
+          .update({
+            amount: amountShares[i],
+            contractor_pay: contractorShares[i],
+            mca_cut: mcaShares[i],
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', pendingInvoices![i].id)
+      }
+    }
   }
 
   revalidateSessionPaths(sessionId)

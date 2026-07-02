@@ -2,9 +2,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Captures what the action writes.
-const captured: { sessionUpdate?: any; invoiceUpdate?: any; invoiceFilters: Array<[string, unknown]> } = {
-  invoiceFilters: [],
+const captured: {
+  sessionUpdate?: any
+  invoiceUpdates: Array<{ id: unknown; payload: any }>
+} = {
+  invoiceUpdates: [],
 }
+
+// The set of PENDING invoices the mock returns for the session (tests reassign this).
+let pendingInvoices: Array<{ id: string }> = [{ id: 'inv1' }]
 
 // $60 base, 30% MCA → normal 30-min contractor pay = $42, MCA = $18.
 const SERVICE_TYPE = {
@@ -62,17 +68,21 @@ function makeClient() {
       }
       if (table === 'invoices') {
         return {
-          update: (payload: any) => {
-            captured.invoiceUpdate = payload
-            const chain: any = {
-              eq: (col: string, val: unknown) => {
-                captured.invoiceFilters.push([col, val])
-                return chain
-              },
-              then: (resolve: (v: { error: null }) => unknown) => resolve({ error: null }),
-            }
-            return chain
-          },
+          // Fetch the PENDING linked invoices for the session.
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                order: () => Promise.resolve({ data: pendingInvoices, error: null }),
+              }),
+            }),
+          }),
+          // Per-invoice reprice: update(payload).eq('id', invoiceId)
+          update: (payload: any) => ({
+            eq: (_col: string, val: unknown) => {
+              captured.invoiceUpdates.push({ id: val, payload })
+              return Promise.resolve({ error: null })
+            },
+          }),
         }
       }
       return {}
@@ -96,11 +106,13 @@ vi.mock('@/lib/actions/session-invoice-cleanup', () => ({
 
 import { markSessionNoShow } from './sessions'
 
+const sum = (arr: number[]) => Math.round(arr.reduce((a, b) => a + b, 0) * 100) / 100
+
 describe('markSessionNoShow (regression for #5 — no-show reprices to the fee)', () => {
   beforeEach(() => {
     captured.sessionUpdate = undefined
-    captured.invoiceUpdate = undefined
-    captured.invoiceFilters = []
+    captured.invoiceUpdates = []
+    pendingInvoices = [{ id: 'inv1' }]
   })
 
   it("sets status='no_show' and reprices the session to the no-show fee (contractor keeps normal pay)", async () => {
@@ -112,11 +124,22 @@ describe('markSessionNoShow (regression for #5 — no-show reprices to the fee)'
     expect(captured.sessionUpdate.mca_cut).toBe(18)
   })
 
-  it('reprices only the PENDING linked invoice', async () => {
+  it('reprices the single PENDING linked invoice to the full fee', async () => {
     await markSessionNoShow('s1')
-    expect(captured.invoiceUpdate.amount).toBe(60)
-    expect(captured.invoiceUpdate.contractor_pay).toBe(42)
-    expect(captured.invoiceFilters).toContainEqual(['session_id', 's1'])
-    expect(captured.invoiceFilters).toContainEqual(['status', 'pending'])
+    expect(captured.invoiceUpdates).toHaveLength(1)
+    expect(captured.invoiceUpdates[0].id).toBe('inv1')
+    expect(captured.invoiceUpdates[0].payload.amount).toBe(60)
+    expect(captured.invoiceUpdates[0].payload.contractor_pay).toBe(42)
+    expect(captured.invoiceUpdates[0].payload.mca_cut).toBe(18)
+  })
+
+  it('SPLITS the fee across multiple pending invoices (no double-billing)', async () => {
+    pendingInvoices = [{ id: 'a' }, { id: 'b' }]
+    await markSessionNoShow('s1')
+    expect(captured.invoiceUpdates).toHaveLength(2)
+    // Shares must SUM to the fee, not equal the full fee on each invoice.
+    expect(sum(captured.invoiceUpdates.map((u) => u.payload.amount))).toBe(60)
+    expect(sum(captured.invoiceUpdates.map((u) => u.payload.contractor_pay))).toBe(42)
+    expect(sum(captured.invoiceUpdates.map((u) => u.payload.mca_cut))).toBe(18)
   })
 })
