@@ -19,11 +19,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # Use `npm install` (not `npm ci`): @tailwindcss/oxide's nested wasm @emnapi deps
+        # resolve to different versions on Windows (dev) vs Linux (CI), so a lockfile committed
+        # from one OS fails the strict `npm ci` sync check on the other. `npm install` reconciles
+        # the lock and installs. Versions stay bounded by package.json ranges.
+        run: npm install --no-audit --no-fund
 
       - name: Run linter
         run: npm run lint
@@ -49,11 +53,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # Use `npm install` (not `npm ci`): @tailwindcss/oxide's nested wasm @emnapi deps
+        # resolve to different versions on Windows (dev) vs Linux (CI), so a lockfile committed
+        # from one OS fails the strict `npm ci` sync check on the other. `npm install` reconciles
+        # the lock and installs. Versions stay bounded by package.json ranges.
+        run: npm install --no-audit --no-fund
 
       - name: Build
         run: npm run build
