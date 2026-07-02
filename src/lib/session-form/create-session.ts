@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PricingCalculation } from '@/lib/pricing'
+import { distributeAmount } from '@/lib/invoices/split'
 import { addDays, format } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
 
@@ -105,15 +106,21 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
         .filter((client) => client.payment_method !== 'scholarship')
       const invoiceCount = nonScholarshipClients.length
 
+      // Remainder-aware split so the per-client mca_cut / contractor_pay / rent shares sum
+      // back to the session total (independent rounding would drift by a cent per split).
+      const mcaShares = distributeAmount(pricing.mcaCut, invoiceCount)
+      const contractorShares = distributeAmount(pricing.contractorPay, invoiceCount)
+      const rentShares = distributeAmount(pricing.rentAmount, invoiceCount)
+
       const invoices = nonScholarshipClients
-        .map((client) => ({
+        .map((client, i) => ({
           session_id: session.id,
           client_id: client.id,
           // Group sessions: invoice the full amount to the billing agency
           amount: isGroup ? pricing.totalAmount : pricing.perPersonCost,
-          mca_cut: Math.round((pricing.mcaCut / invoiceCount) * 100) / 100,
-          contractor_pay: Math.round((pricing.contractorPay / invoiceCount) * 100) / 100,
-          rent_amount: Math.round((pricing.rentAmount / invoiceCount) * 100) / 100,
+          mca_cut: mcaShares[i],
+          contractor_pay: contractorShares[i],
+          rent_amount: rentShares[i],
           payment_method: client.payment_method,
           status: 'pending' as const,
           organization_id: organizationId,

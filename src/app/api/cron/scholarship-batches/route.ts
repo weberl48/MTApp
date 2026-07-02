@@ -38,20 +38,35 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     `)
     .in('client_id', clientIds)
 
-  // Get already-invoiced session IDs
-  const { data: invoicedRows } = await supabase
-    .from('invoices')
-    .select('session_id')
-    .in('client_id', clientIds)
-    .not('session_id', 'is', null)
+  // Candidate session ids from these clients' attendee rows. We scope the "already billed"
+  // lookups to these ids so neither read is silently truncated at PostgREST's 1000-row cap —
+  // the unscoped `invoice_items` scan would, past 1000 rows, make already-invoiced sessions
+  // look unbilled and get billed AGAIN.
+  const candidateSessionIds = Array.from(
+    new Set(
+      (attendeeRows || [])
+        .map((row) => (row.session as { id?: string } | null)?.id)
+        .filter((id): id is string => !!id)
+    )
+  )
 
-  const invoicedIds = new Set((invoicedRows || []).map((r) => r.session_id))
+  const invoicedIds = new Set<string>()
+  const itemizedIds = new Set<string>()
 
-  const { data: itemRows } = await supabase
-    .from('invoice_items')
-    .select('session_id')
+  if (candidateSessionIds.length > 0) {
+    const { data: invoicedRows } = await supabase
+      .from('invoices')
+      .select('session_id')
+      .in('session_id', candidateSessionIds)
+      .not('session_id', 'is', null)
+    for (const r of invoicedRows || []) if (r.session_id) invoicedIds.add(r.session_id)
 
-  const itemizedIds = new Set((itemRows || []).map((r) => r.session_id))
+    const { data: itemRows } = await supabase
+      .from('invoice_items')
+      .select('session_id')
+      .in('session_id', candidateSessionIds)
+    for (const r of itemRows || []) if (r.session_id) itemizedIds.add(r.session_id)
+  }
 
   type SessionData = {
     id: string
@@ -182,7 +197,7 @@ export async function GET(request: NextRequest) {
           totalMcaCut += pricing.mcaCut
           totalContractorPay += pricing.contractorPay
           totalRent += pricing.rentAmount
-          return { sessionId: s.sessionId, pricing }
+          return { session: s, pricing }
         })
 
         const round = (v: number) => Math.round(v * 100) / 100
@@ -207,7 +222,14 @@ export async function GET(request: NextRequest) {
         if (invoice) {
           const items = itemData.map((d) => ({
             invoice_id: invoice.id,
-            session_id: d.sessionId,
+            session_id: d.session.sessionId,
+            // description + session_date are NOT NULL on invoice_items; omitting them (the prior
+            // bug) failed every insert, so the batch invoice was deleted and the cron generated
+            // ZERO invoices. Mirror the manual action's line-item shape.
+            description: `${d.session.serviceType.name} - ${d.session.durationMinutes} min`,
+            session_date: d.session.date,
+            duration_minutes: d.session.durationMinutes,
+            service_type_name: d.session.serviceType.name,
             amount: round(d.pricing.totalAmount),
             mca_cut: round(d.pricing.mcaCut),
             contractor_pay: round(d.pricing.contractorPay),

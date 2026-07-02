@@ -66,6 +66,7 @@ export default function EarningsPage() {
           status,
           contractor_paid_date,
           contractor_paid_amount,
+          contractor_pay,
           duration_minutes,
           group_headcount,
           service_type:service_types(
@@ -133,17 +134,21 @@ export default function EarningsPage() {
         const overrides: ContractorPricingOverrides | undefined =
           rateData ? { customContractorPay: rateData.contractorPay, durationIncrement: rateData.durationIncrement } : undefined
 
-        // Use shared pricing calculation
-        const pricing = calculateSessionPricing(
-          serviceType as ServiceType,
-          attendeeCount,
-          session.duration_minutes || 30,
-          overrides,
-          { durationBaseMinutes: organization?.settings?.pricing?.duration_base_minutes }
-        )
-
-        // Use actual paid amount if available, otherwise use calculated
-        const earnings = session.contractor_paid_amount || pricing.contractorPay
+        // Prefer the amount the session was ACTUALLY priced/paid at over a recompute. The
+        // recompute below doesn't fetch contractor_pay_schedule / group_contractor_pay / total_cap,
+        // so it silently falls back to the formula and overstates pay for schedule/matrix/capped
+        // services. Use the paid snapshot when paid, else the stored contractor_pay (what the
+        // Payroll Hub pays), and only recompute for legacy rows that never stored a value.
+        const storedPay = session.contractor_paid_amount ?? session.contractor_pay
+        const earnings = storedPay != null
+          ? Number(storedPay)
+          : calculateSessionPricing(
+              serviceType as ServiceType,
+              attendeeCount,
+              session.duration_minutes || 30,
+              overrides,
+              { durationBaseMinutes: organization?.settings?.pricing?.duration_base_minutes }
+            ).contractorPay
 
         ytdEarnings += earnings
         if (session.contractor_paid_date) {
