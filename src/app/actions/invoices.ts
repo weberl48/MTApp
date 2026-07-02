@@ -12,6 +12,18 @@ export async function deleteInvoice(invoiceId: string) {
 
   const supabase = await createClient()
 
+  // A PAID invoice is a settled financial record — deleting it destroys the paid_date and the
+  // Square mapping. Refuse; the invoice must be marked unpaid first (a deliberate separate step).
+  const { data: existing } = await supabase
+    .from('invoices')
+    .select('status')
+    .eq('id', invoiceId)
+    .single()
+
+  if (existing?.status === 'paid') {
+    return { success: false as const, error: 'Cannot delete a paid invoice. Mark it unpaid first if this was a mistake.' }
+  }
+
   // Delete ONLY the invoice. Its invoice_items cascade via ON DELETE CASCADE.
   // The linked session(s) are intentionally preserved — they simply revert to un-billed
   // (and can be re-invoiced). Deleting a financial document must never destroy the
@@ -21,6 +33,7 @@ export async function deleteInvoice(invoiceId: string) {
     .from('invoices')
     .delete({ count: 'exact' })
     .eq('id', invoiceId)
+    .neq('status', 'paid')
 
   const err = handleSupabaseError(error)
   if (err) return err

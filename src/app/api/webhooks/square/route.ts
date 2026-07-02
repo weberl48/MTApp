@@ -178,19 +178,19 @@ export async function POST(request: NextRequest) {
     const eventType = String(event.type).replace(/[\r\n]/g, '')
     logger.info(`Square webhook event: ${eventType}`)
 
-    // Replay/duplicate protection: record the event id first. A unique violation means we've
-    // already handled this delivery (Square retries and can send overlapping events for one
-    // payment), so ack and skip re-processing.
+    // Replay/duplicate protection (CHECK): if this delivery was already fully processed, ack and
+    // skip. We record the event id only AFTER processing succeeds (see end of handler) — recording
+    // it first meant a transient failure during processing left the row committed, so Square's
+    // retry was treated as a duplicate and the payment update was permanently lost.
     const eventId = typeof event.event_id === 'string' ? event.event_id : null
     if (eventId) {
-      const { error: dedupeError } = await getSupabaseAdmin()
+      const { data: seen } = await getSupabaseAdmin()
         .from('square_webhook_events')
-        .insert({ event_id: eventId, event_type: event.type })
-      if (dedupeError) {
-        if (dedupeError.code === '23505') {
-          return NextResponse.json({ received: true, duplicate: true })
-        }
-        logger.error('Square webhook dedupe insert failed', dedupeError)
+        .select('event_id')
+        .eq('event_id', eventId)
+        .maybeSingle()
+      if (seen) {
+        return NextResponse.json({ received: true, duplicate: true })
       }
     }
 
@@ -268,6 +268,19 @@ export async function POST(request: NextRequest) {
             await sendPaymentNotification(invoiceId)
           }
         }
+      }
+    }
+
+    // Record the event ONLY after successful processing, so a failure above (which returns 500)
+    // leaves no dedupe row and Square's retry reprocesses. A concurrent duplicate delivery could
+    // still both process, but the invoice status mapping is forward-only and idempotent, so that
+    // is safe (worst case: a second owner notification, already possible for distinct events).
+    if (eventId) {
+      const { error: dedupeError } = await getSupabaseAdmin()
+        .from('square_webhook_events')
+        .insert({ event_id: eventId, event_type: event.type })
+      if (dedupeError && dedupeError.code !== '23505') {
+        logger.error('Square webhook dedupe insert failed', dedupeError)
       }
     }
 

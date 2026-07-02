@@ -5,7 +5,8 @@ import { logger } from '@/lib/logger'
 import { uuidSchema } from '@/lib/validation/schemas'
 import { createNewSession } from '@/lib/session-form/create-session'
 import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
-import type { ServiceType, OrganizationSettings, PaymentMethod } from '@/types/database'
+import { can } from '@/lib/auth/permissions'
+import type { ServiceType, OrganizationSettings, PaymentMethod, UserRole } from '@/types/database'
 
 /**
  * POST /api/session-requests/[id]/approve
@@ -46,9 +47,9 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Only staff can approve
-    const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
-    if (!allowedRoles.includes(profile.role)) {
+    // Approving a session request creates an approved, billable session, so it requires the
+    // same permission as approving a session. Contractors must NOT be able to self-approve.
+    if (!can(profile.role as UserRole, 'session:approve')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
