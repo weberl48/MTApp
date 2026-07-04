@@ -250,10 +250,10 @@ export async function generateAllUnbilledScholarshipInvoices(organizationId: str
   const groups = groupUnbilledByClientMonth(unbilled)
 
   if (groups.length === 0) {
-    return { success: true as const, generated: 0, failed: [] as string[] }
+    return { success: true as const, generated: 0, failed: [] as string[], invoiceIds: [] as string[] }
   }
 
-  const results: { generated: number; failed: string[] } = { generated: 0, failed: [] }
+  const results: { generated: number; failed: string[]; invoiceIds: string[] } = { generated: 0, failed: [], invoiceIds: [] }
 
   for (const group of groups) {
     const result = await generateScholarshipBatchInvoice({
@@ -264,6 +264,7 @@ export async function generateAllUnbilledScholarshipInvoices(organizationId: str
 
     if (result.success) {
       results.generated++
+      results.invoiceIds.push(result.invoiceId)
     } else {
       results.failed.push(`${group.clientName} (${group.month}): ${result.error}`)
     }

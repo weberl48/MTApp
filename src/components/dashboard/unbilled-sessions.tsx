@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,7 @@ export function UnbilledSessions({ organizationId }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [generatingKey, setGeneratingKey] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const { can } = useOrganization()
   const canBulkAction = can('invoice:bulk-action')
 
@@ -58,7 +60,13 @@ export function UnbilledSessions({ organizationId }: Props) {
     }).then((result) => {
       setGeneratingKey(null)
       if (result.success) {
-        toast.success(`Invoice generated for ${group.clientName}`)
+        const invoiceId = result.invoiceId
+        toast.success(`Invoice generated for ${group.clientName}`, {
+          action: {
+            label: 'View',
+            onClick: () => router.push(`/invoices/${invoiceId}/`),
+          },
+        })
         setGroups((prev) => prev.filter((g) => `${g.clientId}::${g.month}` !== key))
       } else {
         toast.error(result.error || 'Failed to generate invoice')
@@ -71,7 +79,13 @@ export function UnbilledSessions({ organizationId }: Props) {
       const result = await generateAllUnbilledScholarshipInvoices(organizationId)
       if (result.success) {
         if (result.generated > 0) {
-          toast.success(`Generated ${result.generated} scholarship invoice${result.generated !== 1 ? 's' : ''}`)
+          const ids = result.invoiceIds ?? []
+          toast.success(`Generated ${result.generated} scholarship invoice${result.generated !== 1 ? 's' : ''}`, {
+            action: {
+              label: 'View',
+              onClick: () => router.push(ids.length === 1 ? `/invoices/${ids[0]}/` : '/invoices/'),
+            },
+          })
         }
         if (result.failed.length > 0) {
           toast.warning(`${result.failed.length} failed: ${result.failed[0]}`)

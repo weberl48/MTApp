@@ -21,6 +21,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 40,
   },
+  // The two header columns must be width-constrained: with both auto-sized,
+  // a long title ("Monthly Statement - February 2026") overlapped the logo
+  // and ran off the page edge.
+  headerLeft: {
+    maxWidth: '45%',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
   logo: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -35,11 +45,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#111827',
+    textAlign: 'right' as const,
+  },
+  statementTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+    textAlign: 'right' as const,
+  },
+  statementPeriod: {
+    fontSize: 13,
+    color: '#374151',
+    marginTop: 2,
+    textAlign: 'right' as const,
   },
   invoiceNumber: {
     fontSize: 10,
     color: '#6b7280',
     marginTop: 4,
+    textAlign: 'right' as const,
   },
   section: {
     marginBottom: 20,
@@ -195,28 +219,28 @@ interface InvoiceData {
   contractor_pay: number
   status: 'pending' | 'sent' | 'paid'
   payment_method: string
-  invoice_type?: string
+  invoice_type?: string | null
   billing_period?: string | null
   created_at: string
-  due_date?: string
-  paid_date?: string
+  due_date?: string | null
+  paid_date?: string | null
   client: {
     name: string
-    contact_email?: string
-  }
+    contact_email?: string | null
+  } | null
   session?: {
     date: string
-    duration_minutes?: number
+    duration_minutes?: number | null
     /** Internal/staff notes — NEVER rendered on the client-facing PDF. */
-    notes?: string
+    notes?: string | null
     /** Client-facing notes — safe to show on the invoice. */
-    client_notes?: string
+    client_notes?: string | null
     service_type: {
       name: string
-    }
+    } | null
     contractor: {
       name: string
-    }
+    } | null
   } | null
   items?: InvoiceLineItem[]
 }
@@ -229,7 +253,11 @@ interface InvoicePDFProps {
 
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  // Date-only strings (due_date, paid_date) must be parsed as local dates —
+  // new Date('2026-08-03') is UTC midnight, which renders as August 2 in any
+  // western timezone. Timestamps (created_at) parse normally.
+  const date = dateString.includes('T') ? new Date(dateString) : parseLocalDate(dateString)
+  return date.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -242,21 +270,26 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
   const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch' && invoice.items && invoice.items.length > 0
 
-  const titleText = isBatch && invoice.billing_period
-    ? `Monthly Statement - ${parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
-    : 'INVOICE'
+  const billingPeriodLabel = isBatch && invoice.billing_period
+    ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : null
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={styles.logo}>May Creative Arts</Text>
             <Text style={styles.logoSubtext}>Music Therapy Services</Text>
           </View>
-          <View>
-            <Text style={styles.invoiceTitle}>{titleText}</Text>
+          <View style={styles.headerRight}>
+            <Text style={isBatch ? styles.statementTitle : styles.invoiceTitle}>
+              {isBatch ? 'MONTHLY STATEMENT' : 'INVOICE'}
+            </Text>
+            {billingPeriodLabel && (
+              <Text style={styles.statementPeriod}>{billingPeriodLabel}</Text>
+            )}
             <Text style={styles.invoiceNumber}>{invoiceNumber}</Text>
           </View>
         </View>
@@ -266,9 +299,9 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
           <View style={{ flex: 1 }}>
             <Text style={styles.sectionTitle}>Bill To</Text>
             <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>
-              {invoice.client.name}
+              {invoice.client?.name || 'Client'}
             </Text>
-            {invoice.client.contact_email && (
+            {invoice.client?.contact_email && (
               <Text style={{ color: '#6b7280' }}>{invoice.client.contact_email}</Text>
             )}
           </View>
@@ -341,10 +374,12 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
             // Single session invoice
             <View style={styles.tableRow}>
               <View style={styles.col1}>
-                <Text style={{ fontWeight: 'bold' }}>{invoice.session.service_type.name}</Text>
-                <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
-                  Therapist: {invoice.session.contractor.name}
-                </Text>
+                <Text style={{ fontWeight: 'bold' }}>{invoice.session.service_type?.name || 'Session'}</Text>
+                {invoice.session.contractor?.name && (
+                  <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                    Therapist: {invoice.session.contractor.name}
+                  </Text>
+                )}
                 {invoice.session.duration_minutes && (
                   <Text style={{ fontSize: 9, color: '#6b7280' }}>
                     Duration: {invoice.session.duration_minutes} minutes

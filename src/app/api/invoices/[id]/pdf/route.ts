@@ -5,8 +5,8 @@ import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { createElement, ReactElement } from 'react'
 import { can } from '@/lib/auth/permissions'
 import { uuidSchema } from '@/lib/validation/schemas'
-import { isEncrypted, decryptField } from '@/lib/crypto'
-import type { UserRole, OrganizationSettings } from '@/types/database'
+import { fetchInvoicePdfData } from '@/lib/invoices/pdf-data'
+import type { UserRole } from '@/types/database'
 
 export async function GET(
   request: NextRequest,
@@ -41,71 +41,30 @@ export async function GET(
 
     const isAdmin = can(userProfile.role as UserRole, 'invoice:bulk-action')
 
-    // Fetch invoice with related data
-    const { data: invoice, error } = await supabase
-      .from('invoices')
-      .select(`
-        *,
-        client:clients(id, name, contact_email),
-        session:sessions(
-          id,
-          date,
-          duration_minutes,
-          notes,
-          contractor_id,
-          contractor:users(id, name),
-          service_type:service_types(name)
-        )
-      `)
-      .eq('id', id)
-      .single()
-
-    if (error || !invoice) {
+    // Same data source as the email sender, so a previewed PDF is byte-for-byte
+    // what sendInvoiceById would attach.
+    const bundle = await fetchInvoicePdfData(supabase, id)
+    if (!bundle) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
+    const { invoice, footerText, paymentInstructions } = bundle
 
     // Authorization: developers can access all, admins can access their org, contractors can access their own sessions
     const isDeveloper = userProfile.role === 'developer'
     const isOrgAdmin = isAdmin && invoice.organization_id === userProfile.organization_id
-    const isOwnSession = (invoice.session as { contractor_id?: string })?.contractor_id === user.id
+    const isOwnSession = invoice.session?.contractor_id === user.id
 
     if (!isDeveloper && !isOrgAdmin && !isOwnSession) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Fetch org settings for footer_text and payment_instructions
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('settings')
-      .eq('id', invoice.organization_id)
-      .single()
-
-    const orgSettings = org?.settings as OrganizationSettings | undefined
-    const footerText = orgSettings?.invoice?.footer_text || undefined
-    const paymentInstructions = orgSettings?.invoice?.payment_instructions || undefined
-
-    // Fetch invoice items for batch invoices
-    let items: Array<{ description: string; session_date: string; duration_minutes: number | null; amount: number; service_type_name: string | null; contractor_name: string | null }> = []
-    if (invoice.invoice_type === 'batch') {
-      const { data: itemsData } = await supabase
-        .from('invoice_items')
-        .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
-        .eq('invoice_id', id)
-        .order('session_date', { ascending: true })
-
-      items = itemsData || []
-    }
-
-    // Decrypt session notes if encrypted
-    if (invoice.session?.notes && isEncrypted(invoice.session.notes)) {
-      invoice.session.notes = await decryptField(invoice.session.notes)
-    }
-
     // Generate PDF
-    const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
     const pdfBuffer = await renderToBuffer(
-      createElement(InvoicePDF, { invoice: invoiceData, footerText, paymentInstructions }) as ReactElement<DocumentProps>
+      createElement(InvoicePDF, { invoice, footerText, paymentInstructions }) as ReactElement<DocumentProps>
     )
+
+    // ?inline=1 renders in the browser (invoice preview); default stays a download.
+    const inline = request.nextUrl.searchParams.get('inline') === '1'
 
     // Return PDF response
     // Convert Buffer to Uint8Array for NextResponse compatibility
@@ -113,10 +72,14 @@ export async function GET(
     return new NextResponse(uint8Array, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="invoice-${id.slice(0, 8)}.pdf"`,
+        'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename="invoice-${id.slice(0, 8)}.pdf"`,
+        // Allow the invoice detail page's same-origin preview iframe; the
+        // global next.config headers would otherwise send DENY/'none'.
+        'X-Frame-Options': 'SAMEORIGIN',
+        'Content-Security-Policy': "frame-ancestors 'self'",
       },
     })
-  } catch (error) {
+  } catch {
     console.error('[MCA] PDF generation error')
     return NextResponse.json(
       { error: 'Failed to generate PDF' },

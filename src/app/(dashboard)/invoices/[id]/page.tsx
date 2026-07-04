@@ -38,6 +38,7 @@ import { format } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
 import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
+import { InvoiceClientPreview } from '@/components/invoices/invoice-client-preview'
 import type { PaymentMethod, InvoiceStatus } from '@/types/database'
 
 interface InvoiceDetails {
@@ -262,6 +263,15 @@ export default function InvoiceDetailPage() {
           {isAdmin && <InvoiceActions invoice={invoice} canDelete={isAdmin} onStatusChange={() => router.push('/invoices/')} />}
         </div>
       </div>
+
+      {isAdmin && (
+        <InvoiceClientPreview
+          invoiceId={invoice.id}
+          clientName={invoice.client?.name}
+          squareInvoiceId={invoice.square_invoice_id}
+          squarePaymentUrl={invoice.square_payment_url}
+        />
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Invoice Details */}
