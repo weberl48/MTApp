@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Calendar, Users, FileText, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
+import { sessionStatusLabels } from '@/lib/constants/display'
 import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
@@ -307,7 +308,7 @@ export default function DashboardPage() {
                             : 'bg-muted text-muted-foreground'
                         }`}
                       >
-                        {session.status}
+                        {sessionStatusLabels[session.status] || session.status}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">

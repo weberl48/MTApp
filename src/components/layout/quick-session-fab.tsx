@@ -30,6 +30,7 @@ export function QuickSessionFab() {
       <>
         <Button
           size="lg"
+          data-tour="quick-session-fab"
           className="lg:hidden fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
           aria-label="Log new session"
           onClick={() => setDrawerOpen(true)}
@@ -46,6 +47,7 @@ export function QuickSessionFab() {
     <Link href="/sessions/new/" className="lg:hidden fixed bottom-6 right-6 z-40">
       <Button
         size="lg"
+        data-tour="quick-session-fab"
         className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
         aria-label="Log new session"
       >

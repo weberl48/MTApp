@@ -72,6 +72,17 @@ export function Sidebar() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [mobileMenuOpen])
 
+  // Walkthroughs highlight nav links; on mobile those live in this off-canvas
+  // drawer, so the walkthrough provider asks us to open/close it per step.
+  useEffect(() => {
+    function onWalkthroughNav(e: Event) {
+      const detail = (e as CustomEvent<{ open?: boolean }>).detail
+      setMobileMenuOpen(!!detail?.open)
+    }
+    window.addEventListener('mca:walkthrough-nav', onWalkthroughNav)
+    return () => window.removeEventListener('mca:walkthrough-nav', onWalkthroughNav)
+  }, [])
+
   function shouldShowItem(item: NavItem): boolean {
     // Feature gate: hide if the feature is disabled
     if (item.feature && !feature(item.feature)) {
@@ -132,6 +143,7 @@ export function Sidebar() {
             onClick={() => toggleExpanded(item.name)}
             aria-expanded={isExpanded}
             aria-controls={submenuId}
+            data-tour={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
             className={cn(
               'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
               isActive
