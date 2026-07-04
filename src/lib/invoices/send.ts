@@ -2,9 +2,9 @@ import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/invoice-pdf'
 import { sendInvoiceEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
+import { fetchInvoicePdfData } from '@/lib/invoices/pdf-data'
 import { createElement, type ReactElement } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { OrganizationSettings } from '@/types/database'
 
 interface SendResult {
   success: boolean
@@ -15,33 +15,23 @@ interface SendResult {
 /**
  * Send a single invoice via email: generates PDF, sends email, updates status.
  * Works with any Supabase client (server or service role).
+ *
+ * PDF data comes from fetchInvoicePdfData — the same source as the
+ * /api/invoices/[id]/pdf preview/download route, so what the owner previews is
+ * exactly what this attaches.
  */
 export async function sendInvoiceById(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any, any, any>,
   invoiceId: string
 ): Promise<SendResult> {
-  // Fetch invoice with related data
-  const { data: invoice, error } = await supabase
-    .from('invoices')
-    .select(`
-      *,
-      client:clients(id, name, contact_email),
-      session:sessions(
-        id,
-        date,
-        duration_minutes,
-        notes,
-        contractor:users(id, name),
-        service_type:service_types(name)
-      )
-    `)
-    .eq('id', invoiceId)
-    .single()
+  const bundle = await fetchInvoicePdfData(supabase, invoiceId)
 
-  if (error || !invoice) {
+  if (!bundle) {
     return { success: false, invoiceId, error: 'Invoice not found' }
   }
+
+  const { invoice, footerText, paymentInstructions } = bundle
 
   // Never (re)send — and never regress the status of — an invoice that is already paid. This
   // path sets status to 'sent', so sending a paid invoice would un-pay it (clearing dunning
@@ -54,42 +44,15 @@ export async function sendInvoiceById(
     return { success: false, invoiceId, error: 'Client has no email address on file' }
   }
 
-  // Fetch org settings for footer_text and payment_instructions
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('settings')
-    .eq('id', invoice.organization_id)
-    .single()
-
-  const settings = org?.settings as OrganizationSettings | undefined
-  const footerText = settings?.invoice?.footer_text || undefined
-  const paymentInstructions = settings?.invoice?.payment_instructions || undefined
-
-  // Fetch invoice items for batch invoices
-  let items: Array<{
-    description: string; session_date: string; duration_minutes: number | null
-    amount: number; service_type_name: string | null; contractor_name: string | null
-  }> = []
-
-  if (invoice.invoice_type === 'batch') {
-    const { data: itemsData } = await supabase
-      .from('invoice_items')
-      .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
-      .eq('invoice_id', invoiceId)
-      .order('session_date', { ascending: true })
-
-    items = itemsData || []
-  }
-
   // Generate PDF
-  const invoiceData = { ...invoice, items: items.length > 0 ? items : undefined }
   const pdfBuffer = await renderToBuffer(
-    createElement(InvoicePDF, { invoice: invoiceData, footerText, paymentInstructions }) as ReactElement<DocumentProps>
+    createElement(InvoicePDF, { invoice, footerText, paymentInstructions }) as ReactElement<DocumentProps>
   )
 
   // Send email
   const invoiceNumber = formatInvoiceNumber(invoice.id)
   const isBatch = invoice.invoice_type === 'batch'
+  const itemCount = invoice.items?.length ?? 0
 
   try {
     await sendInvoiceEmail({
@@ -101,9 +64,9 @@ export async function sendInvoiceById(
         ? (invoice.billing_period ? new Date(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : invoice.created_at)
         : (invoice.session?.date || invoice.created_at),
       serviceType: isBatch
-        ? `Monthly Statement (${items.length} sessions)`
+        ? `Monthly Statement (${itemCount} sessions)`
         : (invoice.session?.service_type?.name || 'Session'),
-      dueDate: invoice.due_date,
+      dueDate: invoice.due_date ?? undefined,
       pdfBuffer: Buffer.from(pdfBuffer),
       footerText,
       paymentInstructions,

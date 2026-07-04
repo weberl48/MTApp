@@ -251,6 +251,7 @@ Invoices in MCA Manager are created automatically. You do not need to build them
 - Financial breakdown: total amount, MCA portion, contractor portion
 - Payment instructions (configured in Settings)
 - An activity log showing status changes and when it was sent or paid
+- A **Client Preview** that displays the exact document the client receives
 
 ### Invoice Statuses
 
@@ -308,9 +309,15 @@ To handle multiple invoices at once:
 
 This is useful for recording offline payments or preparing a batch export for your records.
 
+### Previewing an Invoice
+
+Before sending, you can see exactly what the client will receive. Open the invoice and click **Show preview** on the **Client Preview** card — the invoice document appears right on the page, no download needed. This is the same PDF that gets attached to the email, so what you see is precisely what the client gets. (For Square-billed invoices, the client receives Square's hosted invoice instead; the preview card notes this and links to it.)
+
+On a phone, the preview opens in a new tab instead of displaying inline.
+
 ### Downloading a PDF
 
-From any invoice detail page, you can download a PDF copy of the invoice using the download button. The PDF includes all financial details and your organization's payment instructions.
+From any invoice detail page, you can download a PDF copy of the invoice using the download button on the Client Preview card (or **Download PDF** in the actions menu). The PDF includes all financial details and your organization's payment instructions.
 
 ### Auto-Send
 
@@ -770,7 +777,9 @@ The Scholarship tab displays all approved scholarship sessions that have not yet
 - **Generate Invoice** (per group) - Creates one invoice for that client covering the selected month's sessions.
 - **Generate All** - Creates invoices for every unbilled group shown on the page.
 
-All generated invoices start in **Pending** status. Review them before sending to make sure the details are correct. Once generated, batch invoices appear under the "Batch Invoices" section on the same tab.
+After generating, the confirmation message includes a **View** button — click it to jump straight to the new invoice (or to the invoice list when several were created at once).
+
+All generated invoices start in **Pending** status. Review them before sending to make sure the details are correct — the invoice page's **Client Preview** shows exactly what the client will receive. Once generated, batch invoices appear under the "Batch Invoices" section on the same tab.
 
 ### Scholarship Rate
 

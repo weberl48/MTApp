@@ -251,10 +251,19 @@ function InvoiceTable({
 }
 
 export default function InvoicesPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
   const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
   const [generatingAll, setGeneratingAll] = useState(false)
+  // Controlled so post-generate toasts can jump to the All tab; null = default tab.
+  // Seeded from ?tab= so links like /invoices/?tab=scholarship (dashboard widget)
+  // actually land on that tab. window is read in the initializer (not
+  // useSearchParams) to avoid the Suspense-boundary requirement; the tabs only
+  // render after data loads, so there is no hydration mismatch.
+  const [activeTab, setActiveTab] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null
+  )
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -617,7 +626,10 @@ export default function InvoicesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={overdueInvoices.length > 0 ? 'overdue' : 'pending'}>
+          <Tabs
+            value={activeTab ?? (overdueInvoices.length > 0 ? 'overdue' : 'pending')}
+            onValueChange={setActiveTab}
+          >
             <TabsList className="mb-4">
               {overdueInvoices.length > 0 && (
                 <TabsTrigger value="overdue" className="text-red-600 dark:text-red-400">
@@ -702,7 +714,17 @@ export default function InvoicesPage() {
                           const result = await generateAllUnbilledScholarshipInvoices(organization?.id || '')
                           setGeneratingAll(false)
                           for (const t of scholarshipBatchToasts(result)) {
-                            if (t.level === 'success') toast.success(t.message)
+                            const view = t.view
+                            const action = view
+                              ? {
+                                  label: 'View',
+                                  onClick: () => {
+                                    if (view.kind === 'invoice') router.push(`/invoices/${view.invoiceId}/`)
+                                    else setActiveTab('all')
+                                  },
+                                }
+                              : undefined
+                            if (t.level === 'success') toast.success(t.message, { action })
                             else if (t.level === 'warning') toast.warning(t.message)
                             else if (t.level === 'info') toast.info(t.message)
                             else toast.error(t.message)
@@ -754,7 +776,13 @@ export default function InvoicesPage() {
                                         })
                                         setGeneratingBatch(null)
                                         if (result.success) {
-                                          toast.success('Monthly invoice generated')
+                                          const invoiceId = result.invoiceId
+                                          toast.success('Monthly invoice generated', {
+                                            action: {
+                                              label: 'View',
+                                              onClick: () => router.push(`/invoices/${invoiceId}/`),
+                                            },
+                                          })
                                           handleRefresh()
                                         } else {
                                           toast.error(result.error || 'Failed to generate invoice')

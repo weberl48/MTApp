@@ -53,6 +53,17 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Invoice PDFs are previewed in a same-origin <iframe> on the invoice
+      // detail page. The global DENY / frame-ancestors 'none' would block
+      // that, so this endpoint (and only this endpoint) allows same-origin
+      // framing. Everything else keeps the strict global policy.
+      ...["/api/invoices/:id/pdf", "/api/invoices/:id/pdf/"].map((source) => ({
+        source,
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+        ],
+      })),
     ];
   },
 };
