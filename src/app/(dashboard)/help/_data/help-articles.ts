@@ -143,12 +143,12 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
 2. Fill in the session details:
    - **Date** - The date the session took place.
    - **Time** - Session start time.
-   - **Duration** - Select 30, 45, 60, or 90 minutes.
+   - **Duration** - Select the session length. The default options are 30, 45, 60, or 90 minutes (your organization can customize this list).
    - **Service Type** - The type of therapy provided. Only service types you are authorized for will appear.
    - **Client(s)** - Select the client. For group sessions, you can select multiple clients.
    - **Internal Notes** - Notes for your team. These are encrypted and never visible to clients.
    - **Client Notes** - Notes that may be shared with the client through the portal.
-3. Click **Save as Draft** to save without submitting, or **Submit** to send for admin review.
+3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
 
 ### Service Types and Restrictions
 
@@ -283,10 +283,12 @@ Once an invoice has been generated, you can deliver it to the client by email or
 
 ### Sending an Individual Invoice
 
-1. Navigate to **Invoices** in the sidebar.
+1. Navigate to **Billing > Invoices** in the sidebar.
 2. Click on the invoice you want to send.
-3. On the invoice detail page, open the **InvoiceActions** dropdown.
+3. On the invoice detail page, open the **actions menu** (the "⋯" button in the top corner).
 4. Choose **Send via Email** to email the invoice with a PDF attachment, or **Send via Square** to create a Square invoice with an online payment link.
+
+The same menu also lets you **Mark as Sent**, **Mark as Paid** (including a Venmo option), **Mark as Unpaid**, or **Download PDF** — useful when payment happens outside the app.
 
 ### Sending via Square
 
@@ -302,7 +304,7 @@ To handle multiple invoices at once:
 
 1. Go to the Invoices list.
 2. Use the checkboxes to select the invoices you want to act on.
-3. Open the bulk actions menu and choose **Mark Sent**, **Mark Paid**, or **Export CSV**.
+3. A blue action bar appears above the list showing the selection count and total, with **Export CSV**, **Mark Sent**, and **Mark Paid** buttons.
 
 This is useful for recording offline payments or preparing a batch export for your records.
 
@@ -718,9 +720,9 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 
 To approve multiple sessions at once:
 
-1. Use the checkboxes on the Sessions list to select all submitted sessions.
-2. Open the bulk actions menu.
-3. Click **Approve**.
+1. On the Sessions list, tick the checkboxes on individual session cards, or use **Select all submitted** at the top of the list.
+2. A blue bar appears showing how many sessions are selected.
+3. Click **Approve (N)** in that bar to approve them all at once.
 
 This is useful at the end of a pay period when all submissions are ready to process at once.
 
@@ -826,18 +828,18 @@ At the top of the Analytics page, four summary cards give you a quick snapshot:
 
 - **Total Revenue** - All amounts billed to clients in the selected period.
 - **MCA Earnings** - The organization's share of revenue after contractor pay and rent.
-- **Total Sessions** - The number of approved sessions in the period.
-- **Active Clients** - Clients who had at least one session in the period.
+- **Total Sessions** - The number of sessions in the period.
+- **Active Clients** - The total number of clients on your roster.
 
 ### Charts
 
-- **Revenue by Month** - A bar chart showing total billing per month. Useful for spotting seasonal patterns.
-- **Sessions: Individual vs. Group** - A breakdown of session types over time.
-- **Payment Status** - A pie chart showing the proportion of invoices that are paid, pending, overdue, or sent.
+- **Revenue Overview** - A monthly revenue chart. Useful for spotting seasonal patterns.
+- **Sessions by Type** - A bar chart breaking sessions down into Individual vs. Group per month.
+- **Invoice Status** - A donut chart showing the proportion of invoices that are pending, sent, or paid.
 
-### Payment Summary Table
+### Payment Summary
 
-Below the charts, a table lists payment totals by payment method and status. This gives you a detailed view of where revenue is coming from and what is still outstanding.
+Next to the invoice status chart, the Payment Summary card totals what has been **Collected**, what is **Awaiting Payment**, what is still **Pending Review**, and the overall **Total Outstanding**.
     `,
   },
   {
@@ -858,11 +860,11 @@ Click **Billing > Payroll** in the sidebar.
 
 ### Payroll Hub Tab
 
-The Payroll Hub lists all contractors who have approved, unpaid sessions. For each contractor, you can see:
+The Payroll Hub lists all contractors with unpaid work — sessions that are submitted, approved, or marked no-show but not yet paid out. For each contractor, you can see:
 
-- Total amount owed based on approved sessions.
-- A breakdown by service type and session date.
-- A button to **Mark as Paid**, which records the payment and removes those sessions from the unpaid queue.
+- The number of unpaid sessions and total amount pending.
+- An expandable breakdown showing each session's service type and date.
+- A **Mark Paid** button, which records the payment and removes those sessions from the unpaid queue.
 
 Use this tab at the end of each pay period to process contractor payments.
 

@@ -7,7 +7,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
   steps: [
     {
       title: 'Welcome to the Dashboard',
-      description: 'This is your home base. The stats grid gives you a quick snapshot of sessions this month, total clients, pending invoices, and outstanding amounts.',
+      description: 'This is your home base. The stats grid gives you a quick snapshot: sessions this month, total clients, recently approved sessions, and pending invoices with the total amount outstanding.',
       element: '[data-tour="dashboard-stats"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
@@ -15,7 +15,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Action Center',
-      description: 'Below the stats you\'ll find action items that need attention — pending approvals, unbilled sessions, unsent invoices, and overdue invoices. Address these to keep your practice running smoothly.',
+      description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on.',
       element: '[data-tour="dashboard-action-center"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
@@ -23,7 +23,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Recent Sessions',
-      description: 'A quick view of the latest session entries. Click any session to see its full details, or click "View all sessions" to go to the Sessions page.',
+      description: 'A quick view of the latest session entries. Click any session\'s View button to see its full details, or head to the Sessions page for the complete list.',
       element: '[data-tour="dashboard-recent-sessions"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
@@ -36,6 +36,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
+      mobileNav: true,
     },
     {
       title: 'Clients',
@@ -44,14 +45,16 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
+      mobileNav: true,
     },
     {
       title: 'Invoices',
-      description: 'View and manage all invoices. Track pending, sent, paid, and overdue invoices. Scholarship billing has its own tab for monthly batch invoicing.',
-      element: 'nav a[href="/invoices/"]',
+      description: 'Invoices live under the Billing menu. Track pending, sent, paid, and overdue invoices. Scholarship billing has its own tab for monthly batch invoicing.',
+      element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
+      mobileNav: true,
     },
     {
       title: 'Settings',
@@ -60,6 +63,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Finish',
       href: '/dashboard/',
+      mobileNav: true,
     },
   ],
 }
@@ -76,6 +80,7 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Go to Clients',
       href: '/clients/',
+      mobileNav: true,
     },
     {
       title: 'Your Client List',
@@ -109,8 +114,8 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
   steps: [
     {
       title: 'Start a New Session',
-      description: 'Navigate to Sessions and click "New Session" to begin. On mobile, you can also use the floating + button at the bottom of the screen.',
-      element: '[data-tour="sessions-new-button"]',
+      description: 'Navigate to Sessions and click "New Session" to begin. On mobile, use the floating + button at the bottom of the screen.',
+      element: '[data-tour="sessions-new-button"], [data-tour="quick-session-fab"]',
       popoverSide: 'bottom',
       ctaLabel: 'Go to New Session',
       href: '/sessions/',
@@ -178,6 +183,7 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Go to Team',
       href: '/team/',
+      mobileNav: true,
     },
     {
       title: 'Team Summary',
@@ -205,7 +211,7 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Send an Invite',
-      description: 'Click "Invite Team Member", enter their email, and select their role (Contractor, Admin, or Owner). They\'ll receive an email with a link to create their account.',
+      description: 'Click "Invite Team Member" and select their role (Contractor or Admin). Enter their email to send the invite, or generate a link to share directly. They\'ll get a link to create their account.',
       element: '[data-tour="team-invite-button"]',
       popoverSide: 'bottom',
       ctaLabel: 'Finish',
@@ -226,6 +232,7 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Go to Settings',
       href: '/settings/business/',
+      mobileNav: true,
     },
     {
       title: 'Service Types List',
@@ -260,6 +267,7 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
       popoverSide: 'right',
       ctaLabel: 'Go to Sessions',
       href: '/sessions/',
+      mobileNav: true,
     },
     {
       title: 'Filter and Search',
@@ -279,13 +287,13 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Inline Approve',
-      description: 'For submitted sessions, you\'ll see an "Approve" button right on the session card. Click it to approve instantly without opening the details page.',
+      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note.',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
     {
       title: 'Bulk Approve',
-      description: 'Use the "Select all submitted" checkbox at the top of the list to select multiple sessions, then click the "Approve" button in the bulk action bar to approve them all at once.',
+      description: 'Use the "Select all submitted" checkbox at the top of the list (or the checkboxes on each card) to select multiple sessions. A blue bar appears with an "Approve (N)" button that approves them all at once.',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
@@ -305,11 +313,12 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
   steps: [
     {
       title: 'Go to Invoices',
-      description: 'Navigate to the Invoices page from the sidebar.',
-      element: 'nav a[href="/invoices/"]',
+      description: 'Navigate to Invoices from the sidebar — it lives under the Billing menu.',
+      element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
       popoverSide: 'right',
       ctaLabel: 'Go to Invoices',
       href: '/invoices/',
+      mobileNav: true,
     },
     {
       title: 'Invoice Summary',
@@ -363,6 +372,7 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
       element: 'nav a[href="/settings/"]',
       ctaLabel: 'Go to Settings',
       href: '/settings/business/',
+      mobileNav: true,
     },
     {
       title: 'Open a Service Type',
