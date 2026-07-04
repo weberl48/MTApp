@@ -98,7 +98,7 @@ Core tables with RLS policies:
 
 Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND via the Supabase SQL editor** — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
 
-Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn; table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
+Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
 ### Configurable Organization Settings
 
