@@ -56,6 +56,8 @@ export async function addClient(data: {
   contact_phone?: string | null
   payment_method: string
   billing_method?: string | null
+  billing_frequency?: 'per_session' | 'monthly'
+  square_fee_enabled?: boolean
   notes?: string | null
   organization_id: string
 }) {
@@ -75,6 +77,8 @@ export async function addClient(data: {
       contact_phone: data.contact_phone?.trim() || null,
       payment_method: data.payment_method,
       billing_method: data.billing_method || null,
+      billing_frequency: data.billing_frequency || 'per_session',
+      square_fee_enabled: data.square_fee_enabled ?? false,
       notes,
       organization_id: data.organization_id,
     })
@@ -97,6 +101,8 @@ export async function updateClient(
     contact_phone?: string | null
     payment_method: string
     billing_method?: string | null
+    billing_frequency?: 'per_session' | 'monthly'
+    square_fee_enabled?: boolean
     notes?: string | null
   }
 ) {
@@ -116,6 +122,8 @@ export async function updateClient(
       contact_phone: data.contact_phone?.trim() || null,
       payment_method: data.payment_method,
       billing_method: data.billing_method || null,
+      ...(data.billing_frequency && { billing_frequency: data.billing_frequency }),
+      ...(data.square_fee_enabled !== undefined && { square_fee_enabled: data.square_fee_enabled }),
       notes,
       updated_at: new Date().toISOString(),
     })

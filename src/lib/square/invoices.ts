@@ -246,12 +246,20 @@ export async function createSquareInvoice(
 /**
  * Build a Square service charge from organization pricing settings.
  * For percentage + fixed cents, computes total as a fixed amount (Square doesn't support combined natively).
+ *
+ * `applyOverride` is the per-invoice decision (invoices.apply_square_fee,
+ * snapshotted from the client's opt-in at generation and editable until the
+ * Square invoice exists): null/undefined = follow the org-wide toggle;
+ * true = charge the configured fee even when the org toggle is off;
+ * false = never charge it.
  */
 export function buildSquareProcessingFee(
   pricingSettings: { square_processing_fee_enabled?: boolean; square_processing_fee_type?: string; square_processing_fee_amount?: number; square_processing_fee_percentage?: number; square_processing_fee_fixed_cents?: number } | undefined,
-  invoiceAmount: number
+  invoiceAmount: number,
+  applyOverride?: boolean | null
 ): SquareServiceCharge | undefined {
-  if (!pricingSettings?.square_processing_fee_enabled) return undefined
+  const apply = applyOverride ?? pricingSettings?.square_processing_fee_enabled
+  if (!apply || !pricingSettings) return undefined
 
   const feeType = pricingSettings.square_processing_fee_type || 'fixed'
 

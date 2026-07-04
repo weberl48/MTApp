@@ -38,6 +38,17 @@ export async function generateScholarshipBatchInvoice({
     return { success: false as const, error: 'A batch invoice already exists for this client and month' }
   }
 
+  // The client's payment method decides pricing: scholarship clients get the
+  // scholarship rate; monthly-batched clients are priced normally.
+  const { data: batchClient } = await supabase
+    .from('clients')
+    .select('payment_method, square_fee_enabled')
+    .eq('id', clientId)
+    .single()
+
+  const clientPaymentMethod = (batchClient?.payment_method ?? 'scholarship') as
+    'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
+
   // 2. Find sessions for this client in the given month
   const [year, month] = billingPeriod.split('-')
   const startDate = `${year}-${month}-01`
@@ -158,9 +169,15 @@ export async function generateScholarshipBatchInvoice({
     const overrides = session.contractor
       ? rateMap.get(`${session.contractor.id}:${serviceType.id}`)
       : undefined
+    // Scholarship pricing applies when the client is scholarship-funded OR the
+    // service type itself is a scholarship service; monthly-batched clients of
+    // other payment methods are priced normally.
+    const pricingPaymentMethod = clientPaymentMethod === 'scholarship' || serviceType.is_scholarship
+      ? 'scholarship'
+      : clientPaymentMethod
     const pricing = calculateSessionPricing(
       serviceType, attendeeCount, session.duration_minutes, overrides,
-      { paymentMethod: 'scholarship' }
+      { paymentMethod: pricingPaymentMethod }
     )
 
     totalAmount += pricing.totalAmount
@@ -205,10 +222,12 @@ export async function generateScholarshipBatchInvoice({
       mca_cut: Math.round(totalMcaCut * 100) / 100,
       contractor_pay: Math.round(totalContractorPay * 100) / 100,
       rent_amount: Math.round(totalRent * 100) / 100,
-      payment_method: 'scholarship' as const,
+      payment_method: clientPaymentMethod,
       status: 'pending' as const,
       invoice_type: 'batch',
       billing_period: billingPeriod,
+      // Snapshot the client's Square-fee opt-in; null = follow org setting.
+      apply_square_fee: batchClient?.square_fee_enabled ? true : null,
       organization_id: organizationId,
       ...(dueDate && { due_date: dueDate }),
     })

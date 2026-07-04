@@ -100,6 +100,8 @@ Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are a
 
 Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
+July 2026 billing-controls objects (20260704_client_billing_controls.sql): columns `clients.billing_frequency` (`per_session`|`monthly` — monthly clients skip per-session invoices and batch on the Scholarship tab at normal pricing), `clients.square_fee_enabled` + `invoices.apply_square_fee` (per-client Square-fee opt-in snapshotted per invoice; null = follow org setting), `sessions.submitted_at`/`approved_at` (maintained by the `set_session_status_timestamps()` BEFORE trigger — do NOT set them in app code).
+
 ### Configurable Organization Settings
 
 Business rules are stored in `organization.settings` (JSONB) rather than hardcoded. The `OrganizationSettings` type in `src/types/database.ts` defines all sections:
@@ -113,7 +115,7 @@ Business rules are stored in `organization.settings` (JSONB) rather than hardcod
 | `pricing` | `no_show_fee`, `duration_base_minutes`, `square_processing_fee_enabled`, `square_processing_fee_type` (`'fixed'\|'percentage'`), `square_processing_fee_amount`, `square_processing_fee_percentage`, `square_processing_fee_fixed_cents` | $60, 30 min, fee disabled |
 | `portal` | `token_expiry_days` | 90 days |
 | `features` | `client_portal` | Enabled (fail-open: missing flags default to `true`) |
-| `custom_lists` | `payment_methods`, `billing_methods`, `classrooms` (string[] for the session form's classroom dropdown) | All methods visible with default labels; no classrooms |
+| `custom_lists` | `payment_methods`, `billing_methods`, `classrooms` (string[] for the session form's classroom dropdown), `classrooms_by_client` (Record<clientId, string[]> — per-agency lists that win over the global list and show for any payment type) | All methods visible with default labels; no classrooms |
 | `automation` | `auto_approve_sessions`, `auto_send_invoice_on_approve`, `auto_send_invoice_method`, `auto_generate_scholarship_invoices`, `scholarship_invoice_day` | All off, method `'none'`, day 1 |
 
 Defaults live in `DEFAULT_SETTINGS` and are applied via `mergeOrganizationSettings()` in `src/lib/organization/settings.ts` (called from `OrganizationContext`) — organizations without new fields automatically get default values. The merge is pure and memoized at the call site: settings forms mirror the value into local state, so an unstable identity would wipe unsaved edits on re-render.

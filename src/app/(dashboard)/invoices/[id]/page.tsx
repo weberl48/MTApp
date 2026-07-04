@@ -21,7 +21,12 @@ import {
   Plus,
   Pencil,
   Trash2,
+  CreditCard,
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { toast } from 'sonner'
+import { setInvoiceSquareFee } from '@/app/actions/invoices'
+import { useOrganization } from '@/contexts/organization-context'
 import {
   Table,
   TableBody,
@@ -57,6 +62,7 @@ interface InvoiceDetails {
   paid_date: string | null
   square_invoice_id: string | null
   square_payment_url: string | null
+  apply_square_fee: boolean | null
   reminder_sent_days: number[]
   organization_id: string
   created_at: string
@@ -123,6 +129,7 @@ function getActivityDescription(log: AuditLog): string {
 export default function InvoiceDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { settings } = useOrganization()
   const [invoice, setInvoice] = useState<InvoiceDetails | null>(null)
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([])
   const [activityLogs, setActivityLogs] = useState<AuditLog[]>([])
@@ -325,6 +332,36 @@ export default function InvoiceDetailPage() {
                   <p className="text-sm text-gray-500">Paid Date</p>
                   <p className="font-medium text-green-600">{parseLocalDate(invoice.paid_date).toLocaleDateString()}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Square processing fee — editable until the Square invoice exists */}
+            {isAdmin && !invoice.square_invoice_id && invoice.status !== 'paid' && (
+              <div className="flex items-center gap-3">
+                <CreditCard className="w-5 h-5 text-gray-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-500">Square Processing Fee</p>
+                  <p className="text-xs text-gray-400">
+                    {(invoice.apply_square_fee ?? settings?.pricing?.square_processing_fee_enabled)
+                      ? 'Will be added when this invoice is sent via Square'
+                      : 'Not applied to this invoice'}
+                  </p>
+                </div>
+                <Switch
+                  aria-label="Apply Square processing fee to this invoice"
+                  checked={invoice.apply_square_fee ?? settings?.pricing?.square_processing_fee_enabled ?? false}
+                  onCheckedChange={async (checked) => {
+                    const previous = invoice.apply_square_fee
+                    setInvoice({ ...invoice, apply_square_fee: checked })
+                    const result = await setInvoiceSquareFee(invoice.id, checked)
+                    if (!result.success) {
+                      setInvoice((inv) => (inv ? { ...inv, apply_square_fee: previous } : inv))
+                      toast.error(result.error || 'Failed to update processing fee')
+                    } else {
+                      toast.success(checked ? 'Processing fee will be added' : 'Processing fee removed')
+                    }
+                  }}
+                />
               </div>
             )}
 

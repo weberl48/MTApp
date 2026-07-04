@@ -98,8 +98,14 @@ Clients must be added before sessions can be logged for them. Only admins and ow
    - **Phone** - Optional contact number.
    - **Payment Method** - How this client's sessions are billed. See below.
    - **Billing Method** - How invoices are delivered and collected.
+   - **Invoicing** - **Per session** (default) creates an invoice each time a session is approved. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
+   - **Add Square processing fee to invoices** - Check this for clients who pay online; their Square invoices automatically include the processing fee configured in Settings > Business Rules > Invoices. You can still remove the fee from an individual invoice before sending it.
    - **Notes** - Internal notes visible only to your team (encrypted for HIPAA compliance).
 4. Click **Save** to create the client.
+
+### Monthly Batch Invoicing
+
+Set **Invoicing** to **Monthly batch** for clients or agencies who prefer one invoice at the end of the month instead of one per session. Their approved sessions are held and appear on the **Scholarship** tab of the Invoices page, grouped by month, ready to generate as a single combined invoice. Unlike scholarship clients, monthly-batched clients are billed at **normal pricing** — only the invoice timing changes. Auto-generation (Settings > Customize and Automate > Automation) covers these clients too.
 
 ### Payment Methods
 
@@ -146,6 +152,7 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
    - **Duration** - Select the session length. The default options are 30, 45, 60, or 90 minutes (your organization can customize this list).
    - **Service Type** - The type of therapy provided. Only service types you are authorized for will appear.
    - **Client(s)** - Select the client. For group sessions, you can select multiple clients.
+   - **Classroom / Program** - Appears when the billed client/agency has a classroom or program list configured (e.g., schools, day habs, group homes), or for scholarship group sessions using the general classroom list. Pick where the session took place.
    - **Internal Notes** - Notes for your team. These are encrypted and never visible to clients.
    - **Client Notes** - Notes that may be shared with the client through the portal.
 3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
@@ -261,9 +268,15 @@ Invoices in MCA Manager are created automatically. You do not need to build them
 
 Sent invoices that are past their due date are displayed with an **Overdue** indicator and a count of days late. This is a visual flag, not a separate status.
 
-### Scholarship Sessions
+### Scholarship and Monthly-Batched Sessions
 
 Scholarship clients are handled differently. Sessions for scholarship clients are NOT automatically invoiced one at a time. Instead, they are batched monthly and invoiced together from the Scholarship tab on the Invoices page.
+
+The same applies to any client whose **Invoicing** setting (Clients > Edit Client) is **Monthly batch** — their sessions are held and combined into one monthly invoice at normal pricing.
+
+### Editing a Session That Already Has an Invoice
+
+If you edit a session in a way that changes its price and it already has an invoice, you'll be asked what to do: **No, just update session** leaves the invoice untouched, **Regenerate only** updates the invoice amounts and resets it to Pending for you to re-send, and **Regenerate & send** updates the invoice and immediately emails it to the client.
 
 ### Automation
 
@@ -298,6 +311,14 @@ When you use the Square option, a Square invoice is created in your connected Sq
 ### Square Processing Fee
 
 You can add an automatic processing fee to every Square invoice to cover online payment costs. Go to **Settings > Business Rules > Invoices** and enable the **Square Processing Fee** option. You can choose a fixed dollar amount (e.g., $3.00) or a percentage (e.g., 2.9% + $0.30 to match Square's standard rate). The fee appears as a separate "Online Processing Fee" line item on the Square invoice.
+
+**Per-client:** instead of charging everyone, you can leave the org-wide toggle off and check **Add Square processing fee to invoices** on individual clients (Clients > Edit Client) — for example, clients who always pay online. Configure the fee amount in Settings either way.
+
+**Per-invoice:** every unpaid invoice that hasn't been sent to Square yet shows a **Square Processing Fee** switch on its detail page. Flip it off if a client decides not to pay online after all (or on, to add the fee just once). Once the Square invoice exists, the fee can no longer be changed from here.
+
+### Sorting the Invoice List
+
+Use the **sort dropdown** at the top of the invoices list to order by newest/oldest, **date submitted** (when the contractor submitted the session), **date approved** (when an admin approved it), or amount. The sort applies to every tab. Monthly batch invoices sort by their generation date for the submitted/approved options.
 
 ### Bulk Actions
 
@@ -755,6 +776,8 @@ Once approved, the session status changes to "Approved" and an invoice is create
 
 Scholarship clients are billed differently from private-pay clients. Rather than generating an invoice for every session, scholarship sessions are grouped by month and invoiced as a single batch per client.
 
+The same tab also handles clients whose **Invoicing** setting is **Monthly batch** (Clients > Edit Client). Their sessions batch identically, but are billed at **normal pricing** — the scholarship rate only applies to scholarship-funded clients and scholarship service types.
+
 ### Where to Find It
 
 Navigate to **Invoices** and click the **Scholarship** tab. This tab is always visible for admins and owners, even when there are no scholarship sessions in the system yet. When there is nothing to show, you will see a message explaining what the tab is for.
@@ -796,6 +819,8 @@ If you prefer to automate this process, go to **Settings > Customize and Automat
 ### Classroom Tracking
 
 For scholarship group sessions, contractors select a **Classroom** from a dropdown when logging the session. This helps track which room or location the group met in. The classroom list is configured by the owner under **Settings > Business Rules > Sessions > Classrooms**.
+
+**Per-agency lists:** each billed client/agency (e.g., a school district, day hab, or group home) can have its **own** classroom/program list — configure these under **Settings > Business Rules > Sessions > Per-Agency Classroom / Program Lists**. When a session is billed to an agency with its own list, the session form shows that agency's options — for any payment type, not just scholarship groups.
 
 ### Setting Up Scholarship Billing
 

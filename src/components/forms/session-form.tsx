@@ -164,7 +164,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
   // Scholarship group sessions show a classroom dropdown
   const isScholarshipGroup = !!(selectedServiceType?.is_scholarship && isGroupService)
-  const classroomOptions = settings?.custom_lists?.classrooms ?? []
+  // Per-agency lists win: when the billed client/agency (group Bill To, or the
+  // single selected client) has its own classroom/program list configured, the
+  // dropdown shows it for ANY payment type. Otherwise fall back to the global
+  // list, which applies to scholarship group sessions only.
+  const billedClientId = isGroupService
+    ? groupBillingClientId
+    : (selectedClients.length === 1 ? selectedClients[0] : '')
+  const agencyClassrooms = billedClientId
+    ? settings?.custom_lists?.classrooms_by_client?.[billedClientId]
+    : undefined
+  const classroomOptions = agencyClassrooms && agencyClassrooms.length > 0
+    ? agencyClassrooms
+    : (isScholarshipGroup ? settings?.custom_lists?.classrooms ?? [] : [])
+  const showClassroom = classroomOptions.length > 0
 
   // Check if this service type requires a client (admin work does not)
   const requiresClient = selectedServiceType?.requires_client !== false
@@ -394,7 +407,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         setFieldError('groupBillingClient', 'Please select the agency to bill')
         hasErrors = true
       }
-      if (isScholarshipGroup && classroomOptions.length > 0 && !classroom) {
+      if (showClassroom && !classroom) {
         setFieldError('classroom', 'Please select a classroom')
         hasErrors = true
       }
@@ -451,7 +464,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     await performSave({ regenerateInvoice: false })
   }
 
-  async function performSave({ regenerateInvoice }: { regenerateInvoice: boolean }) {
+  async function performSave({ regenerateInvoice, sendAfterRegenerate = false }: { regenerateInvoice: boolean; sendAfterRegenerate?: boolean }) {
     setLoading(true)
 
     try {
@@ -474,7 +487,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
             group_member_names: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
-            classroom: isScholarshipGroup ? classroom || null : null,
+            classroom: showClassroom ? classroom || null : null,
             total_amount: pricing?.totalAmount ?? null,
             contractor_pay: pricing?.contractorPay ?? null,
             mca_cut: pricing?.mcaCut ?? null,
@@ -524,7 +537,34 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               })
               .eq('id', inv.id)
           }
-          toast.success('Session updated. Invoice updated — please re-send to the client.')
+
+          if (sendAfterRegenerate) {
+            // Email each regenerated invoice through the normal send route.
+            let sent = 0
+            const failures: string[] = []
+            for (const inv of linkedInvoices) {
+              try {
+                const res = await fetch(`/api/invoices/${inv.id}/send/`, { method: 'POST' })
+                if (res.ok) {
+                  sent++
+                } else {
+                  const body = await res.json().catch(() => null)
+                  failures.push(body?.error || 'Failed to send')
+                }
+              } catch {
+                failures.push('Failed to send')
+              }
+            }
+            if (sent > 0 && failures.length === 0) {
+              toast.success(`Session updated. Invoice regenerated and sent to the client.`)
+            } else if (sent > 0) {
+              toast.warning(`Session updated. Invoice regenerated; ${sent} sent, ${failures.length} failed: ${failures[0]}`)
+            } else {
+              toast.warning(`Session updated. Invoice regenerated but sending failed: ${failures[0] || 'unknown error'}`)
+            }
+          } else {
+            toast.success('Session updated. Invoice updated — please re-send to the client.')
+          }
         } else if (linkedInvoices.length > 0) {
           toast.success('Session updated. Invoice was not regenerated.')
         } else {
@@ -559,7 +599,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           status: effectiveStatus,
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
           groupMemberNames: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
-          classroom: isScholarshipGroup ? classroom || null : null,
+          classroom: showClassroom ? classroom || null : null,
           pricing: pricing!,
           isScholarshipService: selectedServiceType?.is_scholarship ?? false,
           dueDays: settings?.invoice?.due_days,
@@ -966,10 +1006,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </div>
           )}
 
-          {/* Classroom - Only show for scholarship group sessions */}
-          {isScholarshipGroup && classroomOptions.length > 0 && (
+          {/* Classroom / program — shown when the billed agency has its own list,
+              or (global list) for scholarship group sessions */}
+          {showClassroom && (
             <div className="space-y-2">
-              <Label htmlFor="classroom">Classroom *</Label>
+              <Label htmlFor="classroom">Classroom / Program *</Label>
               <Select value={classroom} onValueChange={(val) => { setClassroom(val); clearFieldError('classroom') }}>
                 <SelectTrigger
                   id="classroom"
@@ -1206,7 +1247,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           <AlertDialogDescription>
             This session has {linkedInvoices.length > 1 ? 'linked invoices' : `a${linkedInvoiceHasSent ? 'n already-sent' : ' pending'} invoice`} totaling {formatCurrency(linkedInvoiceTotal)}. The new total is {formatCurrency(pricing?.totalAmount ?? 0)}.
             {' '}
-            Would you like to update the invoice and queue it for re-sending to the client?
+            Would you like to generate a new invoice — and automatically send it to the client?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -1224,7 +1265,15 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               performSave({ regenerateInvoice: true })
             }}
           >
-            Yes, regenerate invoice
+            Regenerate only
+          </AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => {
+              setShowRegenPrompt(false)
+              performSave({ regenerateInvoice: true, sendAfterRegenerate: true })
+            }}
+          >
+            Regenerate &amp; send
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

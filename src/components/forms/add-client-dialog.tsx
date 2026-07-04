@@ -26,7 +26,7 @@ import {
 import { Plus, Pencil, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import type { PaymentMethod, BillingMethod, Client } from '@/types/database'
+import type { PaymentMethod, BillingMethod, BillingFrequency, Client } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
 import { getPaymentMethodOptions, getBillingMethodOptions } from '@/lib/constants/display'
 
@@ -50,6 +50,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
   const [phone, setPhone] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('private_pay')
   const [billingMethod, setBillingMethod] = useState<BillingMethod>('square')
+  const [billingFrequency, setBillingFrequency] = useState<BillingFrequency>('per_session')
+  const [squareFeeEnabled, setSquareFeeEnabled] = useState(false)
   const [notes, setNotes] = useState('')
   const [sendInvite, setSendInvite] = useState(false)
 
@@ -61,6 +63,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       setPhone(client.contact_phone || '')
       setPaymentMethod(client.payment_method)
       setBillingMethod(client.billing_method || 'square')
+      setBillingFrequency(client.billing_frequency || 'per_session')
+      setSquareFeeEnabled(client.square_fee_enabled ?? false)
       // Notes are PHI (encrypted at rest) — fetch the decrypted value for editing.
       getDecryptedClientNotes(client.id)
         .then(setNotes)
@@ -74,6 +78,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
     setPhone('')
     setPaymentMethod('private_pay')
     setBillingMethod('square')
+    setBillingFrequency('per_session')
+    setSquareFeeEnabled(false)
     setNotes('')
     setSendInvite(false)
   }
@@ -97,6 +103,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
           contact_phone: phone.trim() || null,
           payment_method: paymentMethod,
           billing_method: billingMethod,
+          billing_frequency: billingFrequency,
+          square_fee_enabled: squareFeeEnabled,
           notes: notes.trim() || null,
         })
 
@@ -110,6 +118,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
           contact_phone: phone.trim() || null,
           payment_method: paymentMethod,
           billing_method: billingMethod,
+          billing_frequency: billingFrequency,
+          square_fee_enabled: squareFeeEnabled,
           notes: notes.trim() || null,
           organization_id: organization!.id,
         })
@@ -238,6 +248,44 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billingFrequency">Invoicing</Label>
+              <Select
+                value={billingFrequency}
+                onValueChange={(value) => setBillingFrequency(value as BillingFrequency)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select invoicing schedule" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="per_session">Per session (invoice on approval)</SelectItem>
+                  <SelectItem value="monthly">Monthly batch (one invoice at end of month)</SelectItem>
+                </SelectContent>
+              </Select>
+              {billingFrequency === 'monthly' && (
+                <p className="text-xs text-muted-foreground">
+                  Sessions are held and combined into a single monthly invoice, generated from the
+                  Scholarship &amp; Monthly tab on the Invoices page (or automatically, if enabled in Settings).
+                </p>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="squareFee"
+                checked={squareFeeEnabled}
+                onCheckedChange={(checked) => setSquareFeeEnabled(checked === true)}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label htmlFor="squareFee" className="text-sm font-medium leading-none">
+                  Add Square processing fee to invoices
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Applies the fee configured in Settings &gt; Business Rules &gt; Invoices when this
+                  client&apos;s invoices are sent via Square. You can remove it from an individual
+                  invoice before sending.
+                </p>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>

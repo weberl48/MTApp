@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ServiceTypeForm } from '@/components/forms/service-type-form'
+import { ClassroomsByClientEditor } from '@/components/settings/classrooms-by-client'
 import { useOrganization } from '@/contexts/organization-context'
 import {
   ArrowLeft,
@@ -604,6 +605,24 @@ export default function BusinessSettingsPage() {
                     placeholder="Room A, Room B, Music Hall"
                   />
                   <p className="text-xs text-gray-500">Comma-separated list of classroom options for scholarship group sessions</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Per-Agency Classroom / Program Lists</Label>
+                  {organization && (
+                    <ClassroomsByClientEditor
+                      organizationId={organization.id}
+                      value={localSettings.custom_lists?.classrooms_by_client ?? {}}
+                      onChange={(next) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          custom_lists: {
+                            ...localSettings.custom_lists,
+                            classrooms_by_client: next,
+                          },
+                        })
+                      }
+                    />
+                  )}
                 </div>
 
                 {feature('client_portal') && (

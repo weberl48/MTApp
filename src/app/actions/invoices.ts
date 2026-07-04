@@ -48,6 +48,47 @@ export async function deleteInvoice(invoiceId: string) {
   return { success: true as const }
 }
 
+/**
+ * Set the per-invoice Square processing fee decision (invoices.apply_square_fee).
+ * true = charge the org-configured fee; false = don't; null = follow the org toggle.
+ * Only allowed until the Square invoice actually exists — after that the fee is
+ * already on the Square order and can't be silently changed from here.
+ */
+export async function setInvoiceSquareFee(invoiceId: string, apply: boolean | null) {
+  const permErr = await requirePermission('invoice:send')
+  if (permErr) return permErr
+
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('invoices')
+    .select('square_invoice_id, status')
+    .eq('id', invoiceId)
+    .single()
+
+  if (!existing) {
+    return { success: false as const, error: 'Invoice not found' }
+  }
+  if (existing.square_invoice_id) {
+    return { success: false as const, error: 'This invoice is already on Square — the fee can no longer be changed here' }
+  }
+  if (existing.status === 'paid') {
+    return { success: false as const, error: 'This invoice is already paid' }
+  }
+
+  const { error } = await supabase
+    .from('invoices')
+    .update({ apply_square_fee: apply, updated_at: new Date().toISOString() })
+    .eq('id', invoiceId)
+
+  const err = handleSupabaseError(error)
+  if (err) return err
+
+  revalidateInvoicePaths(invoiceId)
+
+  return { success: true as const }
+}
+
 export async function updateInvoiceStatus(
   invoiceId: string,
   status: 'pending' | 'sent' | 'paid'
