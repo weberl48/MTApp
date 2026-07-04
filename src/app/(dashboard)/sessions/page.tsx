@@ -403,7 +403,7 @@ export default function SessionsPage() {
                   />
                 </div>
                 <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                  <SelectTrigger className="w-[160px]">
+                  <SelectTrigger className="w-[190px]">
                     <ArrowUpDown className="w-4 h-4 mr-2 shrink-0" />
                     <SelectValue />
                   </SelectTrigger>
@@ -608,7 +608,7 @@ export default function SessionsPage() {
           </CardHeader>
           <CardContent>
             {paginatedSessions.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {paginatedSessions.map((session) => {
                   const totalCost = session.total_amount
                     ?? session.attendees?.reduce(
@@ -623,7 +623,7 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className={`p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <div className={`p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
                         <div className="flex items-start gap-3">
                           {isAdmin && session.status === 'submitted' && (
                             <div className="shrink-0 pt-0.5" onClick={(e) => e.preventDefault()}>
@@ -637,7 +637,7 @@ export default function SessionsPage() {
                                     return next
                                   })
                                 }}
-                                aria-label={`Select session`}
+                                aria-label={`Select ${session.service_type?.name || 'session'} on ${parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                               />
                             </div>
                           )}
@@ -688,23 +688,28 @@ export default function SessionsPage() {
                             {/* Row 4: Action buttons (mobile-friendly) */}
                             {isAdmin && session.status === 'submitted' && (
                               <div className="flex gap-2 mt-2" onClick={(e) => e.preventDefault()}>
+                                {/* Quiet row actions — bulk Approve (N) above the list is the
+                                    primary action, matching the dashboard approvals card. */}
                                 <Button
                                   size="sm"
-                                  variant="default"
-                                  className="h-7 px-3 text-xs"
+                                  variant="outline"
+                                  className="h-7 px-3 text-xs text-green-700 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-950"
                                   disabled={approvingId === session.id}
                                   onClick={(e) => handleInlineApprove(e, session.id)}
                                 >
                                   {approvingId === session.id ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
                                   ) : (
-                                    'Approve'
+                                    <>
+                                      <CheckCircle className="w-3 h-3 mr-1" />
+                                      Approve
+                                    </>
                                   )}
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-7 px-3 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                                  className="h-7 px-3 text-xs text-amber-700 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-amber-950"
                                   onClick={(e) => handleInlineReject(e, session.id)}
                                 >
                                   Revise

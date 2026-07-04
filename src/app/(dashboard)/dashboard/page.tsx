@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Calendar, Users, FileText, DollarSign, Plus, CheckCircle } from 'lucide-react'
+import { Calendar, Users, FileText, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { useOrganization } from '@/contexts/organization-context'
@@ -200,9 +200,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid - Clickable */}
-      <div data-tour="dashboard-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="dashboard-stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Link href="/sessions/">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Sessions This Month
@@ -216,7 +216,7 @@ export default function DashboardPage() {
         </Link>
 
         <Link href="/clients/">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Clients
@@ -230,7 +230,7 @@ export default function DashboardPage() {
         </Link>
 
         <Link href="/sessions/">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Recently Approved
@@ -245,49 +245,37 @@ export default function DashboardPage() {
         </Link>
 
         {stats?.isAdmin && (
-          <>
-            <Link href="/invoices/">
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Pending Invoices
-                  </CardTitle>
-                  <FileText className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.pendingInvoicesCount}</div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/invoices/">
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Pending Amount
-                  </CardTitle>
-                  <DollarSign className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
-                </CardContent>
-              </Card>
-            </Link>
-          </>
+          <Link href="/invoices/">
+            <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Pending Invoices
+                </CardTitle>
+                <FileText className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.pendingInvoicesCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  {formatCurrency(stats.pendingAmount)} outstanding
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         )}
       </div>
 
       {/* Analytics Summary - Admin Only */}
       {stats?.isAdmin && <AnalyticsSummary />}
 
-      {/* Action Center - Admin Only */}
+      {/* Action Center - Admin Only. Ordered by urgency: money past due first,
+          then approval/billing queues, then configuration warnings. */}
       {stats?.isAdmin && (
         <div data-tour="dashboard-action-center" className="space-y-4">
-          <MissingRates />
-          <PendingApprovals />
-          <UnbilledSessions organizationId={stats.organizationId || ''} />
-          <UnsentInvoices />
           <OverdueInvoices />
+          <PendingApprovals />
+          <UnsentInvoices />
+          <UnbilledSessions organizationId={stats.organizationId || ''} />
+          <MissingRates />
         </div>
       )}
 

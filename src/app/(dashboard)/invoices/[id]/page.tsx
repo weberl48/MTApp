@@ -33,7 +33,7 @@ import {
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole, InvoiceItem } from '@/types/database'
-import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
+import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels } from '@/lib/constants/display'
 import { format } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
 import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
@@ -253,7 +253,7 @@ export default function InvoiceDetailPage() {
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end gap-1">
             <Badge className={isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : invoiceStatusColors[invoice.status]}>
-              {isOverdue ? 'Overdue' : invoice.status}
+              {isOverdue ? 'Overdue' : invoiceStatusLabels[invoice.status] || invoice.status}
             </Badge>
             {isOverdue && (
               <span className="text-xs text-red-600">{daysOverdue} days late</span>

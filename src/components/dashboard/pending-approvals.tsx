@@ -4,7 +4,6 @@ import { useEffect, useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CheckCircle, Loader2, Clock } from 'lucide-react'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
@@ -143,20 +142,20 @@ export function PendingApprovals() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-2">
-            {/* Select All */}
-            <div className="flex items-center gap-2 px-3 py-1">
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={(checked) => {
-                  if (checked) setSelectedIds(new Set(sessions.map((s) => s.id)))
-                  else setSelectedIds(new Set())
-                }}
-                aria-label="Select all"
-              />
-              <span className="text-xs text-gray-500">Select all</span>
-            </div>
+          {/* Select All */}
+          <div className="flex items-center gap-2 px-3 py-1">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(checked) => {
+                if (checked) setSelectedIds(new Set(sessions.map((s) => s.id)))
+                else setSelectedIds(new Set())
+              }}
+              aria-label="Select all"
+            />
+            <span className="text-xs text-gray-500">Select all</span>
+          </div>
 
+          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
             {sessions.map((session) => {
               const clientNames = session.attendees
                 ?.slice(0, 2)
@@ -179,7 +178,7 @@ export function PendingApprovals() {
                       className="mt-0.5 shrink-0"
                       checked={selectedIds.has(session.id)}
                       onCheckedChange={(checked) => toggleSelect(session.id, !!checked)}
-                      aria-label={`Select session`}
+                      aria-label={`Select ${session.service_type?.name || 'session'} on ${parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                     />
                     <Link href={`/sessions/${session.id}/`} className="flex-1 min-w-0">
                       <span className="font-medium text-sm">
@@ -202,22 +201,28 @@ export function PendingApprovals() {
                   </div>
                   {canApprove && (
                     <div className="flex gap-2 mt-2 ml-8">
+                      {/* Row actions stay quiet (outline) — the filled primary style is
+                          reserved for the bulk Approve (N) in the card header. */}
                       <Button
                         size="sm"
-                        className="h-7 px-3 text-xs"
+                        variant="outline"
+                        className="h-7 px-3 text-xs text-green-700 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-950"
                         disabled={approvingId === session.id}
                         onClick={(e) => handleApprove(e, session.id)}
                       >
                         {approvingId === session.id ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
                         ) : (
-                          'Approve'
+                          <>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Approve
+                          </>
                         )}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 px-3 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+                        className="h-7 px-3 text-xs text-amber-700 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-amber-950"
                         onClick={(e) => handleReject(e, session.id)}
                       >
                         Revise

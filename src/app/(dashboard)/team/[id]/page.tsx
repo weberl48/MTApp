@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
 import { updateUserRole } from '@/app/actions/team'
-import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors } from '@/lib/constants/display'
+import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
 import { Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -476,7 +476,7 @@ export default function TeamMemberPage() {
                         </TableCell>
                         <TableCell>
                           <Badge className={invoiceStatusColors[invoice.status]}>
-                            {invoice.status}
+                            {invoiceStatusLabels[invoice.status] || invoice.status}
                           </Badge>
                         </TableCell>
                       </TableRow>

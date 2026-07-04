@@ -89,7 +89,7 @@ export function UnbilledSessions({ organizationId }: Props) {
           <CardTitle>Unbilled Scholarship Sessions</CardTitle>
         </div>
         <CardDescription>
-          {totalSessions} session{totalSessions !== 1 ? 's' : ''} across {groups.length} client{groups.length !== 1 ? 's' : ''}/month{groups.length !== 1 ? 's' : ''}
+          {totalSessions} session{totalSessions !== 1 ? 's' : ''} ready to invoice &middot; {groups.length} invoice{groups.length !== 1 ? 's' : ''} to generate
         </CardDescription>
         <div className="flex items-center gap-2 pt-1">
           {canBulkAction && (
@@ -112,7 +112,7 @@ export function UnbilledSessions({ organizationId }: Props) {
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
           {groups.map((group) => {
             const key = `${group.clientId}::${group.month}`
             const monthLabel = parseLocalDate(group.month + '-01').toLocaleDateString('en-US', {

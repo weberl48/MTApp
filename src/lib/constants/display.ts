@@ -27,6 +27,13 @@ export const invoiceStatusColors: Record<string, string> = {
   overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
+export const invoiceStatusLabels: Record<string, string> = {
+  pending: 'Pending',
+  sent: 'Sent',
+  paid: 'Paid',
+  overdue: 'Overdue',
+}
+
 // --- Payment methods ---
 
 export const paymentMethodLabels: Record<string, string> = {

@@ -157,6 +157,7 @@ export function Header({ user }: HeaderProps) {
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 px-2 sm:px-3 min-w-0"
+                  aria-label={`Switch organization (current: ${organization?.name || 'none'})`}
                 >
                   <Building2 className="w-4 h-4" />
                   <span className="hidden sm:inline max-w-[150px] truncate">
@@ -195,6 +196,13 @@ export function Header({ user }: HeaderProps) {
                   variant={viewAsRole || viewAsContractor ? 'default' : 'outline'}
                   size="sm"
                   className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole || viewAsContractor ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
+                  aria-label={
+                    viewAsContractor
+                      ? `Viewing as ${viewAsContractor.name} — change role view`
+                      : viewAsRole
+                        ? `Viewing as ${roleLabels[viewAsRole]} — change role view`
+                        : 'View app as another role'
+                  }
                 >
                   <Eye className="w-4 h-4" />
                   <span className="hidden sm:inline max-w-[150px] truncate">

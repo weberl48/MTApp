@@ -27,7 +27,7 @@ import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
-import { invoiceStatusColors, paymentMethodLabels } from '@/lib/constants/display'
+import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels } from '@/lib/constants/display'
 import {
   fetchUnbilledScholarshipSessions,
   groupUnbilledByClientMonth,
@@ -188,7 +188,7 @@ function InvoiceTable({
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <Badge className={invoiceStatusColors[status]}>
-                    {isOverdue ? 'overdue' : invoice.status}
+                    {isOverdue ? 'Overdue' : invoiceStatusLabels[invoice.status] || invoice.status}
                   </Badge>
                   {isOverdue && (
                     <span className="text-xs text-red-600 dark:text-red-400">
@@ -613,7 +613,7 @@ export default function InvoicesPage() {
           <CardTitle>All Invoices</CardTitle>
           <CardDescription>
             {invoices?.length || 0} invoices total
-            {isAdmin && <span className="ml-2 text-xs">(Select invoices for bulk actions)</span>}
+            {isAdmin && <span className="ml-2 text-xs">Select rows to send or update in bulk</span>}
           </CardDescription>
         </CardHeader>
         <CardContent>

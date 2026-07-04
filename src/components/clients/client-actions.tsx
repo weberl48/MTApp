@@ -46,7 +46,12 @@ export function ClientActions({ client }: ClientActionsProps) {
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+            aria-label={`Delete ${client.name}`}
+          >
             <Trash2 className="w-4 h-4" />
           </Button>
         </AlertDialogTrigger>
