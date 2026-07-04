@@ -48,8 +48,9 @@ export function buildContractorRateMap(
 }
 
 /**
- * Fetch all scholarship sessions that haven't been invoiced yet.
- * Includes sessions for clients with payment_method='scholarship' AND
+ * Fetch all monthly-batched sessions that haven't been invoiced yet.
+ * Includes sessions for clients with payment_method='scholarship', clients
+ * with billing_frequency='monthly' (batched at normal pricing), AND
  * sessions using service types flagged as is_scholarship=true.
  * Works with both client-side and server-side Supabase clients.
  */
@@ -67,11 +68,11 @@ export async function fetchUnbilledScholarshipSessions(
   const unbilled: UnbilledScholarshipSession[] = []
   const seenSessionClient = new Set<string>() // avoid duplicates
 
-  // --- Path 1: Client-based scholarship (payment_method = 'scholarship') ---
+  // --- Path 1: Client-based batching (scholarship payment OR monthly billing) ---
   const { data: scholarshipClients } = await supabase
     .from('clients')
     .select('id, name')
-    .eq('payment_method', 'scholarship')
+    .or('payment_method.eq.scholarship,billing_frequency.eq.monthly')
 
   if (scholarshipClients && scholarshipClients.length > 0) {
     const clientIds = scholarshipClients.map((c: { id: string }) => c.id)

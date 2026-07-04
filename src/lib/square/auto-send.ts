@@ -49,7 +49,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
   // Fetch pending invoices for this session that haven't been sent via Square
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('id, amount, due_date, client:clients(id, name, contact_email, square_customer_id, billing_method)')
+    .select('id, amount, due_date, apply_square_fee, client:clients(id, name, contact_email, square_customer_id, billing_method)')
     .eq('session_id', sessionId)
     .eq('status', 'pending')
     .is('square_invoice_id', null)
@@ -86,7 +86,7 @@ export async function autoSendInvoicesViaSquare(sessionId: string): Promise<Auto
       const invoiceNumber = formatInvoiceNumber(invoice.id)
       const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
-      const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
+      const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount), invoice.apply_square_fee)
 
       const squareResult = await createSquareInvoice({
         clientName: client.name,

@@ -59,6 +59,7 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
       other: { label: 'Other', visible: true },
     },
     classrooms: [],
+    classrooms_by_client: {},
   },
   automation: {
     auto_approve_sessions: false,
@@ -99,6 +100,7 @@ export function mergeOrganizationSettings(
         ...(raw?.custom_lists?.billing_methods || {}),
       },
       classrooms: raw?.custom_lists?.classrooms ?? defaults.custom_lists.classrooms,
+      classrooms_by_client: raw?.custom_lists?.classrooms_by_client ?? defaults.custom_lists.classrooms_by_client,
     },
     automation: { ...defaults.automation, ...(raw?.automation || {}) },
   }

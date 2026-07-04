@@ -6,6 +6,7 @@ import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invo
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
 import { scholarshipBatchToasts } from '@/lib/invoices/scholarship-batch-feedback'
 import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
+import { sortInvoices, INVOICE_SORT_OPTIONS, type InvoiceSortKey } from '@/lib/invoices/sort'
 import { parseLocalDate } from '@/lib/dates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, CheckCircle, Loader2, Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
@@ -53,11 +55,14 @@ interface Invoice {
   paid_date: string | null
   square_invoice_id: string | null
   square_payment_url: string | null
+  apply_square_fee: boolean | null
   reminder_sent_days: number[]
   client: { id: string; name: string; contact_email: string | null } | null
   session: {
     id: string
     date: string
+    submitted_at: string | null
+    approved_at: string | null
     contractor: { id: string; name: string } | null
     service_type: { name: string } | null
   } | null
@@ -256,6 +261,7 @@ export default function InvoicesPage() {
   const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
   const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
   const [generatingAll, setGeneratingAll] = useState(false)
+  const [invoiceSort, setInvoiceSort] = useState<InvoiceSortKey>('created_desc')
   // Controlled so post-generate toasts can jump to the All tab; null = default tab.
   // Seeded from ?tab= so links like /invoices/?tab=scholarship (dashboard widget)
   // actually land on that tab. window is read in the initializer (not
@@ -404,6 +410,8 @@ export default function InvoicesPage() {
           session:sessions(
             id,
             date,
+            submitted_at,
+            approved_at,
             contractor_id,
             contractor:users(id, name),
             service_type:service_types(name)
@@ -460,22 +468,25 @@ export default function InvoicesPage() {
     }
   }, [refreshTrigger, contextIsAdmin, effectiveUserId, viewAsContractor])
 
+  // Sort, then group — every tab inherits the chosen order
+  const sortedInvoices = sortInvoices(invoices || [], invoiceSort)
+
   // Group invoices by status
-  const pendingInvoices = invoices?.filter((inv) => inv.status === 'pending') || []
-  const sentInvoices = invoices?.filter((inv) => inv.status === 'sent') || []
-  const paidInvoices = invoices?.filter((inv) => inv.status === 'paid') || []
+  const pendingInvoices = sortedInvoices.filter((inv) => inv.status === 'pending')
+  const sentInvoices = sortedInvoices.filter((inv) => inv.status === 'sent')
+  const paidInvoices = sortedInvoices.filter((inv) => inv.status === 'paid')
   const overdueInvoices = sentInvoices.filter((inv) => getInvoiceStatus(inv).isOverdue)
 
   // Group by payment method (unpaid only - most useful for follow-up)
-  const selfDirectedUnpaid = invoices?.filter(
+  const selfDirectedUnpaid = sortedInvoices.filter(
     (inv) => inv.payment_method === 'self_directed' && inv.status !== 'paid'
-  ) || []
-  const groupHomeUnpaid = invoices?.filter(
+  )
+  const groupHomeUnpaid = sortedInvoices.filter(
     (inv) => inv.payment_method === 'group_home' && inv.status !== 'paid'
-  ) || []
-  const scholarshipUnpaid = invoices?.filter(
+  )
+  const scholarshipUnpaid = sortedInvoices.filter(
     (inv) => inv.payment_method === 'scholarship' && inv.status !== 'paid'
-  ) || []
+  )
 
   // Group unbilled scholarship sessions by client and month
   const unbilledByClientMonth = useMemo(
@@ -619,11 +630,27 @@ export default function InvoicesPage() {
       {/* Invoice Tabs */}
       <Card data-tour="invoices-card">
         <CardHeader>
-          <CardTitle>All Invoices</CardTitle>
-          <CardDescription>
-            {invoices?.length || 0} invoices total
-            {isAdmin && <span className="ml-2 text-xs">Select rows to send or update in bulk</span>}
-          </CardDescription>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>All Invoices</CardTitle>
+              <CardDescription>
+                {invoices?.length || 0} invoices total
+                {isAdmin && <span className="ml-2 text-xs">Select rows to send or update in bulk</span>}
+              </CardDescription>
+            </div>
+            <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
+              <SelectTrigger className="w-full sm:w-60" aria-label="Sort invoices">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                {INVOICE_SORT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs
@@ -679,7 +706,7 @@ export default function InvoicesPage() {
               <InvoiceTable invoices={paidInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="all">
-              <InvoiceTable invoices={invoices || []} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              <InvoiceTable invoices={sortedInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             {selfDirectedUnpaid.length > 0 && (
               <TabsContent value="self-directed">
@@ -696,14 +723,14 @@ export default function InvoicesPage() {
                 {!hasScholarshipContent ? (
                   <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No scholarship sessions logged yet</p>
-                    <p className="text-sm mt-1">Sessions for clients with a scholarship payment method or scholarship service types will appear here for batch invoicing.</p>
+                    <p>No scholarship or monthly-billed sessions logged yet</p>
+                    <p className="text-sm mt-1">Sessions for scholarship clients, scholarship service types, or clients set to monthly batch invoicing will appear here.</p>
                   </div>
                 ) : (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Scholarship sessions are billed monthly. Generate a batch invoice for each client per month.
+                      Scholarship and monthly-billed clients are invoiced once per month. Generate a batch invoice for each client per month.
                     </p>
                     {isAdmin && unbilledByClientMonth.length > 0 && (
                       <Button

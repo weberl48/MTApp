@@ -12,6 +12,7 @@ export type SessionStatus = 'draft' | 'submitted' | 'approved' | 'no_show' | 'ca
 export type InvoiceStatus = 'pending' | 'sent' | 'paid'
 export type PaymentMethod = 'private_pay' | 'self_directed' | 'group_home' | 'scholarship' | 'venmo'
 export type BillingMethod = 'square' | 'check' | 'email' | 'other'
+export type BillingFrequency = 'per_session' | 'monthly'
 export type GoalStatus = 'active' | 'met' | 'not_met'
 export type LocationType = 'in_home' | 'matts_music' | 'other'
 export type ServiceCategory = 'music_individual' | 'music_group' | 'art_individual' | 'art_group'
@@ -70,6 +71,10 @@ export interface OrganizationSettings {
     payment_methods: Record<string, { label: string; visible: boolean }>
     billing_methods: Record<string, { label: string; visible: boolean }>
     classrooms: string[]
+    /** Per-agency classroom/program lists keyed by the billed client's id.
+        When the session's Bill To client has a list here, it wins over the
+        global `classrooms` list and shows for any payment type. */
+    classrooms_by_client: Record<string, string[]>
   }
   automation: {
     auto_approve_sessions: boolean
@@ -309,6 +314,8 @@ export interface Database {
           contact_phone: string | null
           payment_method: PaymentMethod
           billing_method: BillingMethod
+          billing_frequency: BillingFrequency
+          square_fee_enabled: boolean
           notes: string | null
           square_customer_id: string | null
           organization_id: string
@@ -322,6 +329,8 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           billing_method?: BillingMethod
+          billing_frequency?: BillingFrequency
+          square_fee_enabled?: boolean
           notes?: string | null
           square_customer_id?: string | null
           organization_id: string
@@ -334,6 +343,8 @@ export interface Database {
           contact_phone?: string | null
           payment_method?: PaymentMethod
           billing_method?: BillingMethod
+          billing_frequency?: BillingFrequency
+          square_fee_enabled?: boolean
           notes?: string | null
           square_customer_id?: string | null
           organization_id?: string
@@ -435,6 +446,8 @@ export interface Database {
           total_amount: number | null
           contractor_pay: number | null
           mca_cut: number | null
+          submitted_at: string | null
+          approved_at: string | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -458,6 +471,8 @@ export interface Database {
           total_amount?: number | null
           contractor_pay?: number | null
           mca_cut?: number | null
+          submitted_at?: string | null
+          approved_at?: string | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -480,6 +495,8 @@ export interface Database {
           total_amount?: number | null
           contractor_pay?: number | null
           mca_cut?: number | null
+          submitted_at?: string | null
+          approved_at?: string | null
           organization_id?: string
           updated_at?: string
         }
@@ -521,6 +538,8 @@ export interface Database {
           invoice_type: string
           billing_period: string | null
           reminder_sent_days: number[]
+          /** Square processing fee: null = follow org setting; true/false = per-invoice override. */
+          apply_square_fee: boolean | null
           organization_id: string
           created_at: string
           updated_at: string
@@ -540,6 +559,7 @@ export interface Database {
           invoice_type?: string
           billing_period?: string | null
           reminder_sent_days?: number[]
+          apply_square_fee?: boolean | null
           organization_id: string
           created_at?: string
           updated_at?: string
@@ -558,6 +578,7 @@ export interface Database {
           invoice_type?: string
           billing_period?: string | null
           reminder_sent_days?: number[]
+          apply_square_fee?: boolean | null
           organization_id?: string
           updated_at?: string
         }

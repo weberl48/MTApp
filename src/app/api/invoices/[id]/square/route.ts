@@ -204,7 +204,11 @@ export async function POST(
       .single()
 
     const pricingSettings = (org?.settings as OrganizationSettings)?.pricing
-    const serviceCharge = buildSquareProcessingFee(pricingSettings, Number(invoice.amount))
+    const serviceCharge = buildSquareProcessingFee(
+      pricingSettings,
+      Number(invoice.amount),
+      (invoice as { apply_square_fee?: boolean | null }).apply_square_fee
+    )
 
     // Create Square invoice. The deterministic idempotency key (the local invoice id) means a
     // retry after a timeout, or two concurrent sends, reuse the same Square invoice.

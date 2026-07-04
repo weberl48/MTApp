@@ -96,18 +96,21 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     group_pay: initGroupPay(),
   })
 
-  // Fetch contractors for restriction selector
+  // Fetch contractors for restriction selector. Must be org-scoped explicitly:
+  // RLS alone isn't enough because developer accounts can read users across
+  // ALL organizations, which would leak other tenants' staff into this list.
   const [contractors, setContractors] = useState<{ id: string; name: string }[]>([])
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen || !organization?.id) return
     const supabase = createClient()
     supabase
       .from('users')
       .select('id, name')
+      .eq('organization_id', organization.id)
       .in('role', ['contractor', 'admin', 'owner'])
       .order('name')
       .then(({ data }) => setContractors(data || []))
-  }, [isOpen])
+  }, [isOpen, organization?.id])
 
   const isEditing = !!serviceType
 

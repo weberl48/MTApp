@@ -90,12 +90,14 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
       throw attendeesError
     }
 
-    // If submitted, create invoices for each non-scholarship client
-    // Skip all per-session invoices for scholarship service types (they use batch invoicing)
+    // If submitted, create invoices for each per-session-billed client.
+    // Skipped entirely for scholarship service types, and per-client for
+    // scholarship payment or monthly billing frequency — those sessions are
+    // held for the monthly batch flow instead.
     if (!isScholarshipService && (status === 'submitted' || status === 'approved')) {
       const { data: clientData } = await supabase
         .from('clients')
-        .select('id, payment_method')
+        .select('id, payment_method, billing_frequency, square_fee_enabled')
         .in('id', clientIds)
 
       const dueDate = dueDays != null
@@ -103,7 +105,7 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
         : undefined
 
       const nonScholarshipClients = (clientData || [])
-        .filter((client) => client.payment_method !== 'scholarship')
+        .filter((client) => client.payment_method !== 'scholarship' && client.billing_frequency !== 'monthly')
       const invoiceCount = nonScholarshipClients.length
 
       // Remainder-aware split so the per-client mca_cut / contractor_pay / rent shares sum
@@ -123,6 +125,8 @@ export async function createNewSession(params: CreateSessionParams): Promise<Cre
           rent_amount: rentShares[i],
           payment_method: client.payment_method,
           status: 'pending' as const,
+          // Snapshot the client's Square-fee opt-in; null = follow org setting.
+          apply_square_fee: client.square_fee_enabled ? true : null,
           organization_id: organizationId,
           ...(dueDate && { due_date: dueDate }),
         }))
