@@ -793,7 +793,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             )}
             {selectedServiceType && showFinancialDetails && (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {getPricingDescription(selectedServiceType)}
+                Rate: {getPricingDescription(selectedServiceType)}
               </p>
             )}
           </div>

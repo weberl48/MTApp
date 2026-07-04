@@ -14,7 +14,7 @@ interface ClientDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-import { paymentMethodLabels, billingMethodLabels, sessionStatusColors, invoiceStatusColors } from '@/lib/constants/display'
+import { paymentMethodLabels, billingMethodLabels, sessionStatusColors, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params
@@ -263,7 +263,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                             {formatCurrency(invoice.amount)}
                           </span>
                           <span className={`px-2 py-0.5 text-xs rounded-full ${invoiceStatusColors[invoice.status] || invoiceStatusColors.pending}`}>
-                            {invoice.status}
+                            {invoiceStatusLabels[invoice.status] || invoice.status}
                           </span>
                           <Badge variant="outline" className="text-xs">
                             {paymentMethodLabels[invoice.payment_method] || invoice.payment_method}

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MCA App is a multi-tenant practice management system for May Creative Arts, handling session tracking, invoicing, and contractor payments for music/art therapy practices.
 
+`README.md` contains the initial owner/organization SQL setup flow, but its tech-stack section is stale (says Next.js 15 + Capacitor; the app is Next.js 16 + PWA) — this file is authoritative.
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router) with React 19
@@ -46,7 +48,7 @@ Note: Native app builds (Capacitor) are shelved in `feature/capacitor-mobile` br
 ### Health Checks
 ```bash
 npm run health         # Check localhost:3000
-npm run health:prod    # Check production
+npm run health:prod    # Check production (NOTE: script has a placeholder URL — run `npx tsx scripts/health-check.ts <prod-url>` instead)
 ```
 
 ## Architecture
@@ -108,13 +110,13 @@ Business rules are stored in `organization.settings` (JSONB) rather than hardcod
 | `session` | `default_duration`, `duration_options`, `require_notes`, `auto_submit`, `reminder_hours`, `send_reminders` | 30 min, [30,45,60,90] |
 | `notification` | `email_on_session_submit`, `email_on_invoice_paid`, `admin_email` | Both enabled |
 | `security` | `session_timeout_minutes`, `require_mfa`, `max_login_attempts`, `lockout_duration_minutes` | 30 min, 5 attempts, 15 min lockout |
-| `pricing` | `no_show_fee`, `duration_base_minutes` | $60, 30 min |
+| `pricing` | `no_show_fee`, `duration_base_minutes`, `square_processing_fee_enabled`, `square_processing_fee_type` (`'fixed'\|'percentage'`), `square_processing_fee_amount`, `square_processing_fee_percentage`, `square_processing_fee_fixed_cents` | $60, 30 min, fee disabled |
 | `portal` | `token_expiry_days` | 90 days |
 | `features` | `client_portal` | Enabled (fail-open: missing flags default to `true`) |
-| `custom_lists` | `payment_methods`, `billing_methods` | All methods visible with default labels |
+| `custom_lists` | `payment_methods`, `billing_methods`, `classrooms` (string[] for the session form's classroom dropdown) | All methods visible with default labels; no classrooms |
 | `automation` | `auto_approve_sessions`, `auto_send_invoice_on_approve`, `auto_send_invoice_method`, `auto_generate_scholarship_invoices`, `scholarship_invoice_day` | All off, method `'none'`, day 1 |
 
-Defaults are applied via deep merge in `OrganizationContext` — organizations without new fields automatically get default values.
+Defaults live in `DEFAULT_SETTINGS` and are applied via `mergeOrganizationSettings()` in `src/lib/organization/settings.ts` (called from `OrganizationContext`) — organizations without new fields automatically get default values. The merge is pure and memoized at the call site: settings forms mirror the value into local state, so an unstable identity would wipe unsaved edits on re-render.
 
 ### User Roles & Permissions
 
@@ -193,7 +195,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
 | `/api/invoices/[id]/send` | POST | Email invoice |
 | `/api/invoices/[id]/square` | POST | Create Square invoice |
-| `/api/portal/*` | Various | Client portal endpoints (sessions, goals, resources, session-requests) |
+| `/api/portal/*` | Various | Client portal endpoints (validate, sessions, goals, resources, session-requests, request-link) |
 | `/api/session-requests/[id]/approve` | POST | Approve a session request |
 | `/api/session-requests/[id]/decline` | POST | Decline a session request |
 | `/api/sessions/export` | GET | Export sessions data |
@@ -239,6 +241,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 ## Key Components
 
 - `SessionForm` - Main session entry with pricing preview
+- `QuickLogDrawer` (+ `QuickSessionFAB`) - Fast mobile session logging; shares `createNewSession()` with `SessionForm`
 - `InvoiceActions` - Invoice status and payment actions
 - `InvoicePDF` - React-PDF template
 - `PayrollHubTable` - Contractor payment tracking
@@ -265,6 +268,20 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/health/detail-auth.ts` — `isHealthDetailAuthorized()`: gates `/api/health` per-check detail behind `CRON_SECRET` in production
 - `src/app/actions/session-requests.ts` — `getPendingSessionRequests()`: staff read of pending session requests with the client-submitted notes decrypted
 - Atomic payroll mark-paid: `markSessionsPaid()` in `src/app/actions/sessions.ts` → the `mark_sessions_paid(uuid[], date)` Postgres function (one statement, only touches not-yet-paid rows, snapshots each session's `contractor_pay`)
+- `src/lib/organization/settings.ts` — `DEFAULT_SETTINGS` + `mergeOrganizationSettings()` (see Configurable Organization Settings above)
+- `src/lib/payroll/constants.ts` — `UNPAID_PAYROLL_STATUSES` (`submitted`, `approved`, `no_show`): the single source for "unpaid contractor work" — Payroll Hub (`/payments`) and contractor Earnings (`/earnings`) MUST both use it or approved sessions silently vanish from payroll
+- `src/lib/earnings/buckets.ts` — `monthBoundaries()`: local-calendar month/year date ranges (UTC conversion made evening sessions count in two months)
+- `src/lib/invoices/overdue.ts` — `isInvoiceOverdue()`/`invoiceDaysOverdue()`: local-date string comparison (avoids the UTC-parse off-by-one)
+- `src/lib/invoices/auto-send-policy.ts` — `resolveAutoSendMethod()`: the gate for auto-sending invoices on approve — BOTH single- and bulk-approve paths must go through it
+- `src/lib/invoices/pdf-notes.ts` — `clientInvoiceNotes()`: only `client_notes` may appear on client-facing invoice PDFs; internal `session.notes` are staff-only PHI
+- `src/lib/invoices/scholarship-batch-feedback.ts` — `scholarshipBatchToasts()`: always returns at least one toast for "Generate All" scholarship batches (including error/nothing-to-do)
+- `src/lib/portal/decrypt-notes.ts` — `decryptClientNotesForPortal()`: decrypts `client_notes` for portal display, tolerating legacy plaintext rows
+- `src/lib/auth/invite-scope.ts` — `canTargetOrgForInvite()`: admins may only invite into their OWN org (developer/owner are intentionally cross-org); guards against cross-tenant invite minting
+- `src/lib/actions/session-invoice-cleanup.ts` — `deletePendingSessionInvoices()`/`hasBilledSessionInvoice()`: reject/cancel/delete flows may only remove PENDING invoices; sent/paid invoices are financial records and must never be deleted
+- `src/lib/session-form/create-session.ts` — `createNewSession()`: session + attendees + per-client invoice creation, shared by `SessionForm` and `QuickLogDrawer`
+- `src/lib/square/invoices.ts` — Square invoice creation with deterministic idempotency keys (based on local invoice id) and optional processing-fee service charge; sandbox sends to `SQUARE_DEV_EMAIL`
+- `src/lib/square/auto-send.ts` — `autoSendInvoicesViaSquare()`: post-approval Square auto-send (never throws; returns a summary)
+- `src/lib/square/webhook-status.ts` — `resolveSquareWebhookStatus()`: FORWARD-ONLY status mapping — out-of-order/retried Square webhooks must never un-pay a paid invoice
 
 ## Testing
 
@@ -276,17 +293,7 @@ npm run test -- src/lib/pricing/index.test.ts  # Single file
 npm run test -- --run                     # CI mode (no watch)
 ```
 
-Unit tests cover:
-- Pricing calculations (`src/lib/pricing/index.test.ts`)
-- Session form defaults (`src/lib/session-form/defaults.test.ts`)
-- Client multi-select component (`src/components/forms/client-multi-select.test.tsx`)
-- Owner onboarding steps (`src/components/onboarding/owner-onboarding-steps.test.ts`)
-- Account lockout logic (`src/lib/auth/lockout.test.ts`)
-- Password validation (`src/lib/auth/password.test.ts`)
-- Permissions system (`src/lib/auth/permissions.test.ts`)
-- Encryption utilities (`src/lib/crypto/index.test.ts`)
-- PHI field helpers (`src/lib/crypto/phi.test.ts`)
-- Validation schemas (`src/lib/validation/schemas.test.ts`)
+Unit tests are colocated `*.test.ts(x)` files next to the module they cover — nearly every module under `src/lib/` has one (pricing, permissions, lockout, crypto/PHI, validation schemas, invoice helpers, Square helpers, etc.), plus a few component tests under `src/components/`. When you add or change a `src/lib/` module, add/update its colocated test.
 
 ### E2E Tests (Playwright)
 ```bash
@@ -301,19 +308,26 @@ E2E tests are in `tests/e2e/` and cover auth, sessions, invoices, settings, and 
 
 ## Environment Variables
 
-Required in `.env.local`:
+`validateEnv()` (`src/lib/env.ts`) hard-requires the first four in production and warns on missing recommended vars:
+
 ```
+# Required (validateEnv fails production boot without these)
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-RESEND_API_KEY=
-SQUARE_ACCESS_TOKEN=
-SQUARE_ENVIRONMENT=sandbox|production
-
-# PHI Encryption (HIPAA compliance)
-# Generate with: openssl rand -hex 32
+# PHI Encryption (HIPAA compliance). Generate with: openssl rand -hex 32
 # IMPORTANT: Never use NEXT_PUBLIC_ prefix — this key must stay server-side only
 ENCRYPTION_KEY=64-hex-character-key-here
+
+# Recommended (warned if missing)
+NEXT_PUBLIC_APP_URL=
+RESEND_API_KEY=
+EMAIL_FROM_DOMAIN=
+
+# Square integration
+SQUARE_ACCESS_TOKEN=
+SQUARE_ENVIRONMENT=sandbox|production
+SQUARE_DEV_EMAIL=          # sandbox invoice recipient override (prevents emailing real clients)
 
 # Rate Limiting (optional — gracefully disabled if not set)
 UPSTASH_REDIS_REST_URL=

@@ -162,23 +162,23 @@ export function UnsentInvoices() {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-2">
-          {/* Select All */}
-          <div className="flex items-center gap-2 px-3 py-1">
-            <Checkbox
-              checked={allSelected}
-              onCheckedChange={(checked) => {
-                if (checked) setSelectedIds(new Set(invoices.map((inv) => inv.id)))
-                else setSelectedIds(new Set())
-              }}
-              aria-label="Select all"
-            />
-            <span className="text-xs text-gray-500">
-              Select all
-              {selectedIds.size > 0 && ` (${formatCurrency(selectedTotal)} selected)`}
-            </span>
-          </div>
+        {/* Select All */}
+        <div className="flex items-center gap-2 px-3 py-1">
+          <Checkbox
+            checked={allSelected}
+            onCheckedChange={(checked) => {
+              if (checked) setSelectedIds(new Set(invoices.map((inv) => inv.id)))
+              else setSelectedIds(new Set())
+            }}
+            aria-label="Select all"
+          />
+          <span className="text-xs text-gray-500">
+            Select all
+            {selectedIds.size > 0 && ` (${formatCurrency(selectedTotal)} selected)`}
+          </span>
+        </div>
 
+        <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
           {invoices.map((invoice) => (
             <div
               key={invoice.id}

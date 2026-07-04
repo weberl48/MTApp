@@ -86,7 +86,7 @@ export function OverdueInvoices() {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
           {invoices.map((invoice) => {
             const clientData = invoice.client as { name: string } | { name: string }[] | null
             const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name

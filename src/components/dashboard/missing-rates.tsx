@@ -96,7 +96,7 @@ export function MissingRates() {
             <CardTitle>Missing Contractor Rates</CardTitle>
           </div>
           <Link href="/team/">
-            <Button variant="outline" size="sm">Team &gt; Rates</Button>
+            <Button variant="outline" size="sm">Set Rates</Button>
           </Link>
         </div>
         <CardDescription>
