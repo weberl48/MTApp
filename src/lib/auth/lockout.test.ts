@@ -10,21 +10,40 @@ vi.mock('@/lib/supabase/service', () => ({
   }),
 }))
 
+/**
+ * Chainable query mock: every builder method returns the same object; the
+ * terminal methods resolve with the configured results. checkLockout issues
+ * up to three queries, in order:
+ *   1. last-success lookup   → terminal .maybeSingle()
+ *   2. failure count         → terminal .gte()
+ *   3. latest failed attempt → terminal .single() (only when locked)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function chain(results: { gte?: any; maybeSingle?: any; single?: any } = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const obj: any = {}
+  for (const m of ['select', 'eq', 'order', 'limit']) {
+    obj[m] = vi.fn().mockReturnValue(obj)
+  }
+  obj.gte = vi.fn().mockResolvedValue(results.gte ?? { count: 0 })
+  obj.maybeSingle = vi.fn().mockResolvedValue(results.maybeSingle ?? { data: null })
+  obj.single = vi.fn().mockResolvedValue(results.single ?? { data: null })
+  return obj
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mockQueries(...chains: any[]) {
+  let call = 0
+  mockFrom.mockImplementation(() => chains[Math.min(call++, chains.length - 1)])
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
 describe('checkLockout', () => {
   it('returns not locked when attempt count is below threshold', async () => {
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            gte: vi.fn().mockResolvedValue({ count: 2 }),
-          }),
-        }),
-      }),
-    })
+    mockQueries(chain(), chain({ gte: { count: 2 } }))
 
     const result = await checkLockout('user@test.com')
 
@@ -36,38 +55,11 @@ describe('checkLockout', () => {
 
   it('returns locked when attempts reach max (5 default)', async () => {
     const now = Date.now()
-    // First call: count query
-    // Second call: latest attempt query
-    let callCount = 0
-    mockFrom.mockImplementation(() => {
-      callCount++
-      if (callCount === 1) {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                gte: vi.fn().mockResolvedValue({ count: 5 }),
-              }),
-            }),
-          }),
-        }
-      }
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockReturnValue({
-                  single: vi.fn().mockResolvedValue({
-                    data: { attempted_at: new Date(now - 60000).toISOString() }, // 1 min ago
-                  }),
-                }),
-              }),
-            }),
-          }),
-        }),
-      }
-    })
+    mockQueries(
+      chain(),
+      chain({ gte: { count: 5 } }),
+      chain({ single: { data: { attempted_at: new Date(now - 60000).toISOString() } } })
+    )
 
     const result = await checkLockout('user@test.com')
 
@@ -79,37 +71,14 @@ describe('checkLockout', () => {
 
   it('returns not locked when lockout window has expired', async () => {
     const now = Date.now()
-    let callCount = 0
-    mockFrom.mockImplementation(() => {
-      callCount++
-      if (callCount === 1) {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                gte: vi.fn().mockResolvedValue({ count: 5 }),
-              }),
-            }),
-          }),
-        }
-      }
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockReturnValue({
-                  single: vi.fn().mockResolvedValue({
-                    // 20 minutes ago — beyond 15 min default lockout
-                    data: { attempted_at: new Date(now - 20 * 60 * 1000).toISOString() },
-                  }),
-                }),
-              }),
-            }),
-          }),
-        }),
-      }
-    })
+    mockQueries(
+      chain(),
+      chain({ gte: { count: 5 } }),
+      chain({
+        // 20 minutes ago — beyond 15 min default lockout
+        single: { data: { attempted_at: new Date(now - 20 * 60 * 1000).toISOString() } },
+      })
+    )
 
     const result = await checkLockout('user@test.com')
 
@@ -117,15 +86,7 @@ describe('checkLockout', () => {
   })
 
   it('uses custom maxAttempts and lockoutMinutes', async () => {
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            gte: vi.fn().mockResolvedValue({ count: 2 }),
-          }),
-        }),
-      }),
-    })
+    mockQueries(chain(), chain({ gte: { count: 2 } }))
 
     const result = await checkLockout('user@test.com', null, {
       maxAttempts: 3,
@@ -138,57 +99,66 @@ describe('checkLockout', () => {
   })
 
   it('scopes the lockout count to the requesting IP (regression for #2 — lockout DoS)', async () => {
-    // With an IP, the query must filter on ip_address so an attacker spamming a victim's
-    // email from a different IP cannot lock the victim out from their own (clean) IP.
-    const ipEq = vi.fn().mockReturnValue({
-      gte: vi.fn().mockResolvedValue({ count: 1 }),
-    })
-    const successEq = vi.fn().mockReturnValue({ eq: ipEq })
-    const emailEq = vi.fn().mockReturnValue({ eq: successEq })
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({ eq: emailEq }),
-    })
+    // With an IP, the count query must filter on ip_address so an attacker spamming a
+    // victim's email from a different IP cannot lock the victim out from their own IP.
+    const successChain = chain()
+    const countChain = chain({ gte: { count: 1 } })
+    mockQueries(successChain, countChain)
 
     const result = await checkLockout('victim@test.com', '203.0.113.9')
 
-    expect(emailEq).toHaveBeenCalledWith('email', 'victim@test.com')
-    expect(ipEq).toHaveBeenCalledWith('ip_address', '203.0.113.9')
+    expect(countChain.eq).toHaveBeenCalledWith('email', 'victim@test.com')
+    expect(countChain.eq).toHaveBeenCalledWith('ip_address', '203.0.113.9')
+    expect(successChain.eq).toHaveBeenCalledWith('ip_address', '203.0.113.9')
     expect(result.attempts).toBe(1)
     expect(result.locked).toBe(false)
   })
 
   it('lowercases the email for queries', async () => {
-    const eqMock = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        gte: vi.fn().mockResolvedValue({ count: 0 }),
-      }),
-    })
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: eqMock,
-      }),
-    })
+    const successChain = chain()
+    const countChain = chain({ gte: { count: 0 } })
+    mockQueries(successChain, countChain)
 
     await checkLockout('USER@TEST.COM')
 
-    expect(eqMock).toHaveBeenCalledWith('email', 'user@test.com')
+    expect(countChain.eq).toHaveBeenCalledWith('email', 'user@test.com')
   })
 
   it('treats null count as 0 attempts', async () => {
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            gte: vi.fn().mockResolvedValue({ count: null }),
-          }),
-        }),
-      }),
-    })
+    mockQueries(chain(), chain({ gte: { count: null } }))
 
     const result = await checkLockout('user@test.com')
 
     expect(result.locked).toBe(false)
     expect(result.attempts).toBe(0)
+  })
+
+  it('a successful login resets the failure window (4 typos + success + 1 typo ≠ locked)', async () => {
+    // Success 2 minutes ago, inside the 15-min window: only failures AFTER it
+    // may count, so the count query's .gte must use the success timestamp,
+    // not the window start.
+    const successAt = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+    const countChain = chain({ gte: { count: 1 } })
+    mockQueries(chain({ maybeSingle: { data: { attempted_at: successAt } } }), countChain)
+
+    const result = await checkLockout('user@test.com')
+
+    expect(countChain.gte).toHaveBeenCalledWith('attempted_at', successAt)
+    expect(result.locked).toBe(false)
+    expect(result.attempts).toBe(1)
+  })
+
+  it('ignores successes older than the lockout window', async () => {
+    // Success 30 minutes ago is outside the 15-min window — the window start
+    // (a more recent bound) must win.
+    const staleSuccess = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    const countChain = chain({ gte: { count: 3 } })
+    mockQueries(chain({ maybeSingle: { data: { attempted_at: staleSuccess } } }), countChain)
+
+    await checkLockout('user@test.com')
+
+    const gteArg = countChain.gte.mock.calls[0][1] as string
+    expect(gteArg > staleSuccess).toBe(true)
   })
 })
 

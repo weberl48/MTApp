@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Clock, User, FileText, Plus, Send } from 'lucide-react'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 
 interface SessionRequest {
   id: string
@@ -86,7 +86,7 @@ export default function PortalSessionsPage() {
     return `${hour12}:${minutes} ${ampm}`
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayLocal()
   const upcomingSessions = sessions
     .filter((s) => s.date >= today)
     .sort((a, b) => a.date.localeCompare(b.date))

@@ -405,7 +405,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                       )}
                       {invoice.status === 'paid' && invoice.paid_date && (
                         <span className="text-xs text-gray-500">
-                          {format(new Date(invoice.paid_date), 'MMM d')}
+                          {format(parseLocalDate(invoice.paid_date), 'MMM d')}
                         </span>
                       )}
                     </TableCell>

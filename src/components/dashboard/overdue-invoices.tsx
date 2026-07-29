@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { AlertTriangle, Loader2, CheckCircle } from 'lucide-react'
 import { updateInvoiceStatus } from '@/app/actions/invoices'
 import { formatCurrency } from '@/lib/pricing'
+import { invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -90,9 +91,7 @@ export function OverdueInvoices() {
           {invoices.map((invoice) => {
             const clientData = invoice.client as { name: string } | { name: string }[] | null
             const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name
-            const daysOverdue = Math.floor(
-              (new Date().getTime() - new Date(invoice.due_date).getTime()) / (1000 * 60 * 60 * 24)
-            )
+            const daysOverdue = invoiceDaysOverdue(invoice.due_date)
 
             return (
               <div
