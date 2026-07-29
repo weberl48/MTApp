@@ -98,7 +98,7 @@ Clients must be added before sessions can be logged for them. Only admins and ow
    - **Phone** - Optional contact number.
    - **Payment Method** - How this client's sessions are billed. See below.
    - **Billing Method** - How invoices are delivered and collected.
-   - **Invoicing** - **Per session** (default) creates an invoice each time a session is approved. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
+   - **Invoicing** - **Per session** (default) creates an invoice when a session is submitted. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
    - **Add Square processing fee to invoices** - Check this for clients who pay online; their Square invoices automatically include the processing fee configured in Settings > Business Rules > Invoices. You can still remove the fee from an individual invoice before sending it.
    - **Notes** - Internal notes visible only to your team (encrypted for HIPAA compliance).
    - **Send portal invite** - If the Client Portal feature is enabled and you entered an email, you can check this box to email the client a portal access link right away. This is currently the only way to send a portal invite — see **Client Portal** for details.

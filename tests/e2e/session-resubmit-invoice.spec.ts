@@ -115,15 +115,35 @@ test.describe('P0 regression: draft submitted later still gets an invoice', () =
 
     // Save as DRAFT
     await setSessionStatus(page, 'draft')
-    await page.locator('[data-tour="session-form-submit"]').click()
+
+    // Capture the created session's id straight off the Supabase insert response — the
+    // form's success screen never surfaces it. Matching the sessions-list row on this exact
+    // id (rather than "first row tagged draft") means the click below can ONLY ever land on
+    // the draft this test just created, never an unrelated real draft: an owner sees every
+    // draft in the org sorted by date desc, and .env.local points at prod Supabase, so a
+    // position-based pick risks opening (and later submitting) someone else's real session.
+    const [sessionInsertResponse] = await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/rest/v1/sessions') && res.request().method() === 'POST'),
+      page.locator('[data-tour="session-form-submit"]').click(),
+    ])
+    const createdSession = await sessionInsertResponse.json().catch(() => null)
+    const sessionId: string | undefined = createdSession?.id
+    if (!sessionId) {
+      throw new Error(
+        'session-resubmit-invoice: could not read the created session id from the Supabase ' +
+        'insert response. Refusing to fall back to "first draft in the list" — that could ' +
+        'open and mutate an unrelated real draft.'
+      )
+    }
     await expect(page.getByText('Session Logged!')).toBeVisible({ timeout: 15000 })
 
-    // Open the newest draft from the sessions list (today's date sorts first)
+    // Open the draft we just created, matched by its exact id (from the row's href) — never
+    // by position or a "looks like a draft" text heuristic.
     await page.goto('/sessions/')
-    const draftRow = page.locator('a[href*="/sessions/"]').filter({ hasText: /draft/i }).first()
+    const draftRow = page.locator(`a[href="/sessions/${sessionId}/"]`)
     await draftRow.waitFor({ timeout: 10000 })
     await draftRow.click()
-    await page.waitForURL(/\/sessions\/[0-9a-f-]+\//, { timeout: 10000 })
+    await page.waitForURL(`**/sessions/${sessionId}/`, { timeout: 10000 })
 
     // Edit → switch to Submit for approval → save
     await page.getByRole('link', { name: /edit/i }).or(page.getByRole('button', { name: /edit/i })).first().click()

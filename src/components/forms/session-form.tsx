@@ -590,7 +590,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         } else if (linkedInvoices.length > 0) {
           toast.success('Session updated. Invoice was not regenerated.')
         } else if (ensured?.invoiceError) {
-          toast.error('Session updated, but the invoice could not be created. Use "Create Invoice" on the session page to retry.')
+          toast.error('Session updated, but the invoice could not be created. An admin can create it from the session page.')
         } else if (ensured && ensured.created > 0) {
           toast.success(ensured.created > 1 ? 'Session updated and invoices created.' : 'Session updated and invoice created.')
         } else {
