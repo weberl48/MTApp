@@ -66,7 +66,7 @@ export default function SessionDetailPage() {
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
   const [decryptedClientNotes, setDecryptedClientNotes] = useState<string | null>(null)
   const [hasInvoice, setHasInvoice] = useState(true)
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
   const currentUserId = effectiveUserId || user?.id || null
@@ -338,7 +338,7 @@ export default function SessionDetailPage() {
             </Button>
           )}
           {canCreateInvoice && (
-            <Button onClick={handleCreateInvoice} variant="outline" className="w-full sm:w-auto">
+            <Button onClick={handleCreateInvoice} variant="outline" className="w-full sm:w-auto" disabled={isPending}>
               <FileText className="w-4 h-4 mr-2" />
               Create Invoice
             </Button>
