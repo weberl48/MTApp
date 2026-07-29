@@ -41,6 +41,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# dev portal local data (error feed + health history)
+/tools/dev-portal/data/
+
+# generated dev-seed SQL (reproducible via scripts/dev-seed/generate.mjs)
+/scripts/dev-seed/dev-seed.sql
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

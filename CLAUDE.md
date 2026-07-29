@@ -32,6 +32,8 @@ npm run lint         # Run ESLint (flat config in eslint.config.mjs — script i
 npx tsc --noEmit     # Type check (used in CI)
 npm run test         # Run Vitest tests
 npm run test -- --watch  # Run tests in watch mode
+npm run portal       # Local dev portal (http://localhost:4321): env health, endpoint sweep, error feed — see tools/dev-portal/README.md
+node scripts/dev-seed/apply.mjs  # Reseed MCA-Dev with the full scenario dataset (idempotent, dev-only) — see scripts/dev-seed/README.md
 ```
 
 ### PWA (Mobile)
@@ -194,7 +196,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
 | `/api/health/restore` | POST | Restore a paused Supabase project via Management API (requires `SUPABASE_ACCESS_TOKEN`) |
-| `/api/invites/user` | GET | Get pending invites for user |
+| `/api/invites/user` | POST | Create a team invite (token + email) |
 | `/api/invites/validate` | GET | Validate an invite token |
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
 | `/api/invoices/[id]/send` | POST | Email invoice |

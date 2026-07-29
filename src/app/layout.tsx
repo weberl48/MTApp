@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
 import { PWAInstallPrompt } from "@/components/pwa/install-prompt";
+import { DevErrorReporter } from "@/components/dev/dev-error-reporter";
 import { ThemeProvider } from "next-themes";
 import { validateEnv } from "@/lib/env";
 
@@ -59,6 +60,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ServiceWorkerProvider />
           <PWAInstallPrompt />
+          {process.env.NODE_ENV === "development" ? <DevErrorReporter /> : null}
           {children}
         </ThemeProvider>
       </body>
