@@ -20,6 +20,7 @@ import {
   markSessionNoShow,
   cancelSession,
   deleteSession,
+  createSessionInvoices,
 } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -50,7 +51,7 @@ interface SessionDetails {
   mca_cut: number | null
   created_at: string
   updated_at: string
-  service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number } | null
+  service_type: { id: string; name: string; base_rate: number; per_person_rate: number; mca_percentage: number; is_scholarship: boolean | null } | null
   contractor: { id: string; name: string; email: string } | null
   attendees: SessionAttendee[]
 }
@@ -64,7 +65,8 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [decryptedNotes, setDecryptedNotes] = useState<string | null>(null)
   const [decryptedClientNotes, setDecryptedClientNotes] = useState<string | null>(null)
-  const [, startTransition] = useTransition()
+  const [hasInvoice, setHasInvoice] = useState(true)
+  const [isPending, startTransition] = useTransition()
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
   const currentUserId = effectiveUserId || user?.id || null
@@ -100,7 +102,7 @@ export default function SessionDetailPage() {
           mca_cut,
           created_at,
           updated_at,
-          service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage),
+          service_type:service_types(id, name, base_rate, per_person_rate, mca_percentage, is_scholarship),
           contractor:users(id, name, email),
           attendees:session_attendees(
             id,
@@ -120,6 +122,15 @@ export default function SessionDetailPage() {
       const sessionData = data as unknown as SessionDetails
 
       setSession(sessionData)
+
+      // Existence check for the "Create Invoice" recovery button: a per-session invoice
+      // (any status) or a batch line item means this session is billed.
+      const [{ data: linkedInvoice }, { data: batchItem }] = await Promise.all([
+        supabase.from('invoices').select('id').eq('session_id', sessionId).limit(1).maybeSingle(),
+        supabase.from('invoice_items').select('id').eq('session_id', sessionId).limit(1).maybeSingle(),
+      ])
+      setHasInvoice(!!linkedInvoice || !!batchItem)
+
       setLoading(false)
     }
 
@@ -149,6 +160,26 @@ export default function SessionDetailPage() {
         toast.success('Session approved')
       } else {
         toast.error(result.error || 'Failed to approve session')
+      }
+    })
+  }
+
+  const handleCreateInvoice = () => {
+    if (!session) return
+    startTransition(async () => {
+      const result = await createSessionInvoices(session.id)
+      if ('error' in result && result.error) {
+        toast.error(result.error)
+        return
+      }
+      if (result.success && result.created > 0) {
+        toast.success(result.created > 1 ? `${result.created} invoices created` : 'Invoice created')
+        setHasInvoice(true)
+      } else if ('alreadyInvoiced' in result && result.alreadyInvoiced) {
+        toast.info('This session is already invoiced.')
+        setHasInvoice(true)
+      } else {
+        toast.info('No per-session invoice needed — the attending clients are billed monthly or by scholarship batch.')
       }
     })
   }
@@ -252,6 +283,12 @@ export default function SessionDetailPage() {
   const canApprove = can('session:approve') && session.status === 'submitted'
   const canMarkNoShow = can('session:mark-no-show') && isActiveSession && session.status !== 'draft'
   const canCancel = isActiveSession && (can('session:cancel') || isOwnDraft)
+  const canCreateInvoice =
+    can('session:approve') &&
+    ['submitted', 'approved'].includes(session.status) &&
+    !hasInvoice &&
+    !session.service_type?.is_scholarship &&
+    (session.attendees?.length ?? 0) > 0
 
   return (
     <div className="space-y-6">
@@ -298,6 +335,12 @@ export default function SessionDetailPage() {
               className="w-full sm:w-auto text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
             >
               Request Revision
+            </Button>
+          )}
+          {canCreateInvoice && (
+            <Button onClick={handleCreateInvoice} variant="outline" className="w-full sm:w-auto" disabled={isPending}>
+              <FileText className="w-4 h-4 mr-2" />
+              Create Invoice
             </Button>
           )}
           {canMarkNoShow && (

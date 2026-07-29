@@ -1,6 +1,6 @@
 # P0: Sessions submitted from `draft` are never invoiced
 
-**Status:** Open — confirmed in production
+**Status:** Fixed in code (2026-07-29) — fix options A + C implemented (`ensureSessionInvoices` on edit-submit + approval backstop + manual "Create Invoice" recovery). Production backfill of session `2f95f41a` pending deploy.
 **Found:** 2026-07-29 (hardening audit)
 **Severity:** P0 — unbilled work with no in-app recovery path
 **Area:** session form (edit path) · invoice creation
@@ -158,3 +158,10 @@ correctly invoice-less — they wait for the monthly batch — but they have bee
 the scholarship-cron gaps recorded in `MCA-Hardening-Audit-2026-07-29.md` (finding #8: the cron
 misses `billing_frequency='monthly'` clients and omits `due_date`). Worth a look at the invoices
 page → Scholarship tab, where they should be listed as unbilled and awaiting "Generate".
+
+## Resolution (2026-07-29)
+
+- `src/lib/invoices/ensure-session-invoices.ts` — shared idempotent invoice creation (ANY-status invoice or batch line item = already billed; fails safe on check errors).
+- Callers: `createNewSession` (unchanged behavior), session-form edit branch (status !== draft), `approveSession`/`bulkApproveSessions` backstop, `createSessionInvoices` server action behind the session-detail **Create Invoice** button (admins, submitted/approved, no invoice).
+- The delete-invoice dialog's "re-invoice them later" promise is now true via the Create Invoice button.
+- Backfill: after deploy, open the stranded session's detail page and click **Create Invoice**; verify with the detection query (expect 0 rows).
