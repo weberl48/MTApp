@@ -8,7 +8,8 @@ export type WalkthroughStep = {
    * renders centered instead of highlighting a hidden element.
    */
   element?: string
-  popoverSide?: 'top' | 'right' | 'bottom' | 'left' | 'over'
+  // driver.js 1.6 dropped 'over' from its Side type; no walkthrough ever used it.
+  popoverSide?: 'top' | 'right' | 'bottom' | 'left'
   ctaLabel: string
   href: string
   /**
