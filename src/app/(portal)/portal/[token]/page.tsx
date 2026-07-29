@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, FileText, Target, ChevronRight, Clock, CheckCircle2 } from 'lucide-react'
-import { parseLocalDate } from '@/lib/dates'
+import { parseLocalDate, todayLocal } from '@/lib/dates'
 
 interface Session {
   id: string
@@ -55,7 +55,7 @@ export default function PortalDashboard() {
         if (sessionsRes.ok) {
           const sessionsData = await sessionsRes.json()
           // Filter to upcoming sessions and take first 3
-          const today = new Date().toISOString().split('T')[0]
+          const today = todayLocal()
           const upcoming = (sessionsData.sessions || [])
             .filter((s: Session) => s.date >= today)
             .sort((a: Session, b: Session) => a.date.localeCompare(b.date))
