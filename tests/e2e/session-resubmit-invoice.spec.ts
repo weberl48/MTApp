@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect, Page, Locator } from '@playwright/test'
 
 // Test credentials - use environment variables in CI
 const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
@@ -45,6 +45,53 @@ async function selectFirstClient(page: Page) {
   await firstClient.click()
 }
 
+/** Resolves true/false without throwing, waiting briefly for the element to appear. */
+async function isVisibleWithin(locator: Locator, timeout: number): Promise<boolean> {
+  return locator.waitFor({ state: 'visible', timeout }).then(() => true).catch(() => false)
+}
+
+/**
+ * Helper: Set the session form's draft/submitted status, tolerating both UIs the form
+ * can render for it.
+ *
+ * `input[name="status"]` radios only render for roles with `financial:view-details`
+ * (developer/owner). Other roles (admin/contractor) see a text-link toggle instead —
+ * "Saving as draft (not submitted)" + "Submit instead", or "Save as draft instead?"
+ * (session-form.tsx ~1160-1201). Try the radio first; fall back to the text toggle;
+ * if neither control is present, fail loudly instead of a raw locator timeout.
+ */
+async function setSessionStatus(page: Page, target: 'draft' | 'submitted') {
+  const radio = page.locator(`input[name="status"][value="${target}"]`)
+  if (await isVisibleWithin(radio, 1500)) {
+    await radio.check()
+    return
+  }
+
+  // Text-toggle fallback. The banner only renders when the current status is 'draft'.
+  const draftBanner = page.getByText('Saving as draft (not submitted)')
+  const submitInsteadLink = page.getByRole('button', { name: /submit instead/i })
+  const draftInsteadLink = page.getByRole('button', { name: /save as draft instead/i })
+
+  const bannerVisible = await isVisibleWithin(draftBanner, 1000)
+  const submitLinkVisible = await isVisibleWithin(submitInsteadLink, 500)
+  const draftLinkVisible = await isVisibleWithin(draftInsteadLink, 500)
+
+  if (!bannerVisible && !submitLinkVisible && !draftLinkVisible) {
+    throw new Error(
+      `setSessionStatus("${target}"): no status control found on the form — neither the ` +
+      `"status" radio inputs nor the draft/submit text-link toggle are visible.`
+    )
+  }
+
+  const isCurrentlyDraft = bannerVisible
+  if (target === 'draft' && !isCurrentlyDraft) {
+    await draftInsteadLink.click()
+  } else if (target === 'submitted' && isCurrentlyDraft) {
+    await submitInsteadLink.click()
+  }
+  // else: already at the target status — nothing to click.
+}
+
 test.describe('P0 regression: draft submitted later still gets an invoice', () => {
   test.beforeEach(async () => {
     if (!TEST_PASSWORD) {
@@ -67,7 +114,7 @@ test.describe('P0 regression: draft submitted later still gets an invoice', () =
     await page.waitForTimeout(500)
 
     // Save as DRAFT
-    await page.locator('input[name="status"][value="draft"]').check()
+    await setSessionStatus(page, 'draft')
     await page.locator('[data-tour="session-form-submit"]').click()
     await expect(page.getByText('Session Logged!')).toBeVisible({ timeout: 15000 })
 
@@ -81,14 +128,21 @@ test.describe('P0 regression: draft submitted later still gets an invoice', () =
     // Edit → switch to Submit for approval → save
     await page.getByRole('link', { name: /edit/i }).or(page.getByRole('button', { name: /edit/i })).first().click()
     await page.waitForSelector('[data-tour="session-form-service-type"]', { timeout: 10000 })
-    await page.locator('input[name="status"][value="submitted"]').check()
+    await setSessionStatus(page, 'submitted')
     await page.locator('[data-tour="session-form-submit"]').click()
 
     // The fix's direct signal: the edit path reports invoice creation
     await expect(page.getByText(/session updated and invoice(s)? created/i)).toBeVisible({ timeout: 15000 })
 
-    // Second signal: back on the detail page, no "Create Invoice" recovery button
+    // Second signal: back on the detail page, no "Create Invoice" recovery button.
+    // The detail page fetches session data client-side (useEffect) and renders only a
+    // spinner until it resolves — the Create Invoice button is absent during that load
+    // for the wrong reason, which would make the assertion below pass vacuously. Wait
+    // for the status badge (present once session data has loaded; 'approved' is included
+    // because auto_approve_sessions can flip a submit straight to approved) before
+    // asserting anything is NOT visible.
     await page.waitForURL(/\/sessions\/[0-9a-f-]+\//, { timeout: 10000 })
+    await expect(page.getByText(/submitted|approved/i).first()).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('button', { name: /create invoice/i })).not.toBeVisible()
   })
 })
