@@ -189,13 +189,21 @@ export function AnnualEarningsPDF({
             <Text style={[styles.colSessions, styles.tableHeaderText]}>Sessions</Text>
             <Text style={[styles.colAmount, styles.tableHeaderText]}>Amount</Text>
           </View>
-          {summary.monthly.map((month) => (
-            <View key={month.month} style={styles.tableRow}>
-              <Text style={styles.colName}>{month.label}</Text>
-              <Text style={styles.colSessions}>{month.sessions}</Text>
-              <Text style={styles.colAmount}>{formatCurrency(month.amount)}</Text>
+          {summary.monthly.length === 0 ? (
+            <View style={styles.tableRow}>
+              <Text style={[styles.colName, { color: '#6b7280' }]}>
+                No sessions paid in {summary.year}
+              </Text>
             </View>
-          ))}
+          ) : (
+            summary.monthly.map((month) => (
+              <View key={month.month} style={styles.tableRow}>
+                <Text style={styles.colName}>{month.label}</Text>
+                <Text style={styles.colSessions}>{month.sessions}</Text>
+                <Text style={styles.colAmount}>{formatCurrency(month.amount)}</Text>
+              </View>
+            ))
+          )}
           <View style={styles.totalLine}>
             <Text style={styles.totalLineName}>Total</Text>
             <Text style={styles.totalLineSessions}>{summary.sessionCount}</Text>
