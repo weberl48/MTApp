@@ -13,6 +13,7 @@ import { monthBoundaries, formatMonthlyBreakdown } from '@/lib/earnings/buckets'
 import { useRouter } from 'next/navigation'
 import { EarningsChart } from '@/components/charts/earnings-chart'
 import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
+import { AnnualSummaryCard } from '@/components/earnings/annual-summary-card'
 
 interface EarningsSummary {
   ytdEarnings: number
@@ -318,6 +319,11 @@ export default function EarningsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Annual Summary (tax) */}
+      {contractorId && organization && (
+        <AnnualSummaryCard contractorId={contractorId} organizationId={organization.id} />
+      )}
     </div>
   )
 }
