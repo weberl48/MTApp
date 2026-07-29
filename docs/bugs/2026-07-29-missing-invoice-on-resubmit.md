@@ -1,6 +1,6 @@
 # P0: Sessions submitted from `draft` are never invoiced
 
-**Status:** Fixed in code (2026-07-29) — fix options A + C implemented (`ensureSessionInvoices` on edit-submit + approval backstop + manual "Create Invoice" recovery). Production backfill of session `2f95f41a` pending deploy.
+**Status:** FIXED & VERIFIED IN PRODUCTION (2026-07-29) — PR #120 merged and deployed; fix options A + C implemented (`ensureSessionInvoices` on edit-submit + approval backstop + manual "Create Invoice" recovery). Backfill complete: invoice `f3041ee8` ($90, pending, due 2026-03-11) created for session `2f95f41a` via the new Create Invoice button; detection query returns 0 rows.
 **Found:** 2026-07-29 (hardening audit)
 **Severity:** P0 — unbilled work with no in-app recovery path
 **Area:** session form (edit path) · invoice creation
