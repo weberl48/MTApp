@@ -139,7 +139,7 @@ test.describe('Responsive Design', () => {
 
     // Login page should still work on mobile
     await expect(page.getByLabel('Email')).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
+    await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible()
   })
 
   test('tablet viewport works', async ({ page }) => {

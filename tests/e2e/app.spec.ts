@@ -5,7 +5,9 @@ test.describe('Authentication', () => {
     await page.goto('/login')
     await expect(page.getByText('Welcome back')).toBeVisible()
     await expect(page.getByLabel(/email/i)).toBeVisible()
-    await expect(page.getByLabel(/password/i)).toBeVisible()
+    // Role-scoped: getByLabel(/password/i) strict-matches BOTH the input and
+    // the "Show password" toggle button's aria-label.
+    await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible()
   })
 
   test('signup page loads', async ({ page }) => {
@@ -21,7 +23,7 @@ test.describe('Authentication', () => {
   test('login with invalid credentials shows error', async ({ page }) => {
     await page.goto('/login')
     await page.getByLabel(/email/i).fill('invalid@test.com')
-    await page.getByLabel(/password/i).fill('wrongpassword')
+    await page.getByRole('textbox', { name: 'Password' }).fill('wrongpassword')
     await page.getByRole('button', { name: /sign in/i }).click()
 
     // Should show error message
