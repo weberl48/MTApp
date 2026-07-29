@@ -335,6 +335,8 @@ SQUARE_ENVIRONMENT=sandbox|production
 SQUARE_DEV_EMAIL=          # sandbox invoice recipient override (prevents emailing real clients)
 
 # Rate Limiting (optional — gracefully disabled if not set)
+# The Vercel Marketplace "Upstash for Redis" integration injects KV_REST_API_URL /
+# KV_REST_API_TOKEN instead; src/lib/rate-limit.ts accepts either pair (UPSTASH_* wins).
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 
