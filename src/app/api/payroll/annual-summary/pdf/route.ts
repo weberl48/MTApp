@@ -81,44 +81,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    const { data: organization } = await supabase
+    const { data: organization, error: orgError } = await supabase
       .from('organizations')
       .select('name')
       .eq('id', contractor.organization_id)
       .single<{ name: string }>()
 
-    const { start, end } = taxYearRange(year)
-    const { data: sessions, error } = await supabase
-      .from('sessions')
-      .select(`
-        contractor_paid_date,
-        contractor_paid_amount,
-        contractor_pay,
-        service_type:service_types(name)
-      `)
-      .eq('contractor_id', contractor.id)
-      .eq('organization_id', contractor.organization_id)
-      .gte('contractor_paid_date', start)
-      .lte('contractor_paid_date', end)
-
-    if (error) {
-      console.error('[MCA] Annual summary PDF query failed')
-      return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
+    if (orgError) {
+      console.error('[MCA] Annual summary PDF: org lookup failed')
     }
 
-    const inputs: PaidSessionInput[] = ((sessions as unknown as PaidSessionRow[]) || []).map(
-      (session) => {
-        const serviceType = Array.isArray(session.service_type)
-          ? session.service_type[0]
-          : session.service_type
-        return {
-          contractor_paid_date: session.contractor_paid_date,
-          contractor_paid_amount: session.contractor_paid_amount,
-          contractor_pay: session.contractor_pay,
-          service_type_name: serviceType?.name ?? null,
-        }
+    const { start, end } = taxYearRange(year)
+    // PostgREST caps a single response at the project's max-rows setting (default
+    // 1000). A year of paid sessions can exceed that, and a silently truncated
+    // tax export under-reports totals — page through explicitly. The .order('id')
+    // gives stable page boundaries (no dup/missed rows between pages).
+    const PAGE_SIZE = 1000
+    const rows: PaidSessionRow[] = []
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select(`
+          contractor_paid_date,
+          contractor_paid_amount,
+          contractor_pay,
+          service_type:service_types(name)
+        `)
+        .eq('contractor_id', contractor.id)
+        .eq('organization_id', contractor.organization_id)
+        .gte('contractor_paid_date', start)
+        .lte('contractor_paid_date', end)
+        .order('id', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1)
+
+      if (error) {
+        console.error('[MCA] Annual summary PDF query failed')
+        return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
       }
-    )
+      const page = (data as unknown as PaidSessionRow[]) || []
+      rows.push(...page)
+      if (page.length < PAGE_SIZE) break
+    }
+
+    const inputs: PaidSessionInput[] = rows.map((session) => {
+      const serviceType = Array.isArray(session.service_type)
+        ? session.service_type[0]
+        : session.service_type
+      return {
+        contractor_paid_date: session.contractor_paid_date,
+        contractor_paid_amount: session.contractor_paid_amount,
+        contractor_pay: session.contractor_pay,
+        service_type_name: serviceType?.name ?? null,
+      }
+    })
 
     // A zero-activity year still renders — a "$0 paid" record is legitimate.
     const summary = summarizeContractorYear(inputs, year)
