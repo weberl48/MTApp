@@ -157,6 +157,8 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
    - **Client Notes** - Notes that may be shared with the client through the portal.
 3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
 
+Drafts are not billed — the invoice is created automatically when the session is submitted for approval (whether you submit right away or open the draft later and submit it then).
+
 ### Service Types and Restrictions
 
 Service types are configured by your organization. Some types are restricted to specific contractors, so you may not see all available service types. Admin-only work types (such as administrative tasks) may not require a client.
@@ -281,6 +283,10 @@ If you edit a session in a way that changes its price and it already has an invo
 ### Automation
 
 You can configure the app to send invoices automatically when a session is approved, rather than waiting for manual action. See Settings > Customize and Automate > Automation tab.
+
+## Missing an invoice?
+
+If a submitted or approved session has no invoice (for example, after an invoice was deleted), open the session's detail page — admins and owners will see a **Create Invoice** button. Clicking it creates the pending invoice(s) from the session's recorded amounts. Sessions for monthly-billed or scholarship clients don't get per-session invoices — they are billed through the monthly batch instead.
     `,
   },
   {
@@ -741,7 +747,7 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 ### Available Actions
 
 - **Approve** - Confirms the session. An invoice is automatically created for the client (unless the client is on a scholarship payment method).
-- **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit.
+- **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit. Any pending invoice for the session is removed at this point and recreated automatically when the contractor resubmits.
 - **Mark No-Show** - Used when a client did not attend. A flat no-show fee is charged to the client, and the contractor still receives their normal session pay.
 - **Cancel** - Removes the session from billing entirely. No invoice is created.
 - **Delete** - Permanently removes the session. Use only when the session was logged in error.
@@ -758,7 +764,7 @@ This is useful at the end of a pay period when all submissions are ready to proc
 
 ### After Requesting a Revision
 
-Sessions sent back for revision return to draft status and appear in the contractor's Sessions list with a **Needs Revision** badge and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue.
+Sessions sent back for revision return to draft status and appear in the contractor's Sessions list with a **Needs Revision** badge and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue. Resubmitting also recreates the session's invoice automatically, so nothing goes unbilled.
 
 ### After Approval
 
