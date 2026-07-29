@@ -7,6 +7,7 @@ import {
   resourcePatchSchema,
   sessionRequestSchema,
   parseBearer,
+  taxYearSchema,
 } from './schemas'
 
 describe('uuidSchema', () => {
@@ -246,5 +247,24 @@ describe('parseBearer', () => {
 
   it('handles tokens with special characters', () => {
     expect(parseBearer('Bearer eyJhbGciOiJIUzI1NiJ9.test.sig')).toBe('eyJhbGciOiJIUzI1NiJ9.test.sig')
+  })
+})
+
+describe('taxYearSchema', () => {
+  it('coerces a query-string year', () => {
+    expect(taxYearSchema.parse('2025')).toBe(2025)
+  })
+
+  it('accepts the boundary years', () => {
+    expect(taxYearSchema.parse('2000')).toBe(2000)
+    expect(taxYearSchema.parse('2100')).toBe(2100)
+  })
+
+  it('rejects out-of-range and junk values', () => {
+    expect(taxYearSchema.safeParse('1999').success).toBe(false)
+    expect(taxYearSchema.safeParse('2101').success).toBe(false)
+    expect(taxYearSchema.safeParse('abc').success).toBe(false)
+    expect(taxYearSchema.safeParse(null).success).toBe(false)
+    expect(taxYearSchema.safeParse('2025.5').success).toBe(false)
   })
 })

@@ -913,6 +913,17 @@ The Invoice Reconciliation tab tracks Square payment activity. It shows Square i
 ### Connecting to Analytics
 
 For a broader view of revenue and earnings trends, see the Analytics page. Payroll focuses on operational payment tracking, while Analytics focuses on financial reporting and charts.
+
+### Tax Summaries
+
+The **Tax Summaries** tab shows cash-basis annual totals per contractor — everything paid out during a calendar year, grouped by the date the payment was recorded (not the session date). This matches how 1099-NEC amounts are reported.
+
+- Pick a tax year from the dropdown to see each contractor's paid session count and total.
+- **Summary CSV** downloads one row per contractor — hand this to your bookkeeper for 1099 preparation.
+- **Detail CSV** downloads one row per paid session (paid date, session date, service type, duration, amount) for your records.
+- Contractors can download their own annual summary PDF from **My Earnings** — you don't need to send them anything manually.
+
+These exports are informal records to support tax preparation — they are not official tax documents.
     `,
   },
   {
@@ -1077,6 +1088,12 @@ Below the chart, each month is listed with the total number of sessions and your
 ### How Pay Is Calculated
 
 Your earnings are calculated from the service type pricing, your custom pay rate (if one has been set), and the session duration. If you have questions about how a specific amount was calculated, ask your admin to check the pricing breakdown on the session detail page.
+
+### Annual Summary
+
+The **Annual Summary** card shows your total payments received per calendar year — useful at tax time. Pick a year and download a PDF summary of what you were paid, broken down by month and service type.
+
+The summary is cash-basis: a session counts toward the year its payment was recorded, not the year the session happened. It's an informal record, not an official tax document (not a 1099) — your 1099, if applicable, comes from the practice owner.
     `,
   },
   {

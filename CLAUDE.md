@@ -197,6 +197,8 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
 | `/api/invoices/[id]/send` | POST | Email invoice |
 | `/api/invoices/[id]/square` | POST | Create Square invoice |
+| `/api/payroll/annual-summary/pdf` | GET | Contractor annual earnings summary PDF (contractor: own; owner: any in org via `contractorId`) |
+| `/api/payroll/tax-summary` | GET | Cash-basis annual contractor totals CSV (`?year=`, `&detail=1` for per-session rows) |
 | `/api/portal/*` | Various | Client portal endpoints (validate, sessions, goals, resources, session-requests, request-link) |
 | `/api/session-requests/[id]/approve` | POST | Approve a session request |
 | `/api/session-requests/[id]/decline` | POST | Decline a session request |
@@ -272,6 +274,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - Atomic payroll mark-paid: `markSessionsPaid()` in `src/app/actions/sessions.ts` → the `mark_sessions_paid(uuid[], date)` Postgres function (one statement, only touches not-yet-paid rows, snapshots each session's `contractor_pay`)
 - `src/lib/organization/settings.ts` — `DEFAULT_SETTINGS` + `mergeOrganizationSettings()` (see Configurable Organization Settings above)
 - `src/lib/payroll/constants.ts` — `UNPAID_PAYROLL_STATUSES` (`submitted`, `approved`, `no_show`): the single source for "unpaid contractor work" — Payroll Hub (`/payments`) and contractor Earnings (`/earnings`) MUST both use it or approved sessions silently vanish from payroll
+- `src/lib/payroll/annual-summary.ts` — cash-basis annual contractor earnings (tax summaries): `isPaidInYear()` (date-string compare on `contractor_paid_date`), `paidAmountForSession()` (`contractor_paid_amount ?? contractor_pay ?? 0`), `summarizeContractorYear()`/`summarizeByContractor()` (rounded at the aggregation boundary), CSV builders. Zero PHI by design — consumed by the Tax Summaries tab, the Earnings annual card, and both `/api/payroll/*` routes; any fetch feeding it must paginate (PostgREST max-rows silently truncates)
 - `src/lib/earnings/buckets.ts` — `monthBoundaries()`: local-calendar month/year date ranges (UTC conversion made evening sessions count in two months)
 - `src/lib/invoices/overdue.ts` — `isInvoiceOverdue()`/`invoiceDaysOverdue()`: local-date string comparison (avoids the UTC-parse off-by-one)
 - `src/lib/invoices/auto-send-policy.ts` — `resolveAutoSendMethod()`: the gate for auto-sending invoices on approve — BOTH single- and bulk-approve paths must go through it
