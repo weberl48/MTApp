@@ -38,6 +38,9 @@ export const sessionRequestSchema = z.object({
   notes: z.string().optional().nullable(),
 })
 
+/** Tax year for payroll annual summaries (coerced from a query-string value) */
+export const taxYearSchema = z.coerce.number().int().min(2000).max(2100)
+
 /**
  * Extract bearer token from Authorization header.
  * Returns null if header is missing or malformed.
