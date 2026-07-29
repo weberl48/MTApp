@@ -54,7 +54,7 @@ As a contractor, your workspace is focused on logging your work and tracking you
 
 You have access to everything contractors see, plus:
 
-- **Clients** - Add, edit, and manage your full client list. Send portal invites and view session/invoice history per client.
+- **Clients** - Add, edit, and manage your full client list. Send a portal invite when adding a new client, and view session/invoice history per client.
 - **Invoices** - Review, send, and track payment status for all invoices. Bulk-mark as sent or paid.
 - **Payroll** - Track which contractors have unpaid sessions and record payments.
 - **Team** - View and manage team members, invite new contractors or admins, and configure pay rates.
@@ -101,6 +101,7 @@ Clients must be added before sessions can be logged for them. Only admins and ow
    - **Invoicing** - **Per session** (default) creates an invoice each time a session is approved. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
    - **Add Square processing fee to invoices** - Check this for clients who pay online; their Square invoices automatically include the processing fee configured in Settings > Business Rules > Invoices. You can still remove the fee from an individual invoice before sending it.
    - **Notes** - Internal notes visible only to your team (encrypted for HIPAA compliance).
+   - **Send portal invite** - If the Client Portal feature is enabled and you entered an email, you can check this box to email the client a portal access link right away. This is currently the only way to send a portal invite — see **Client Portal** for details.
 4. Click **Save** to create the client.
 
 ### Monthly Batch Invoicing
@@ -126,7 +127,6 @@ Set **Invoicing** to **Monthly batch** for clients or agencies who prefer one in
 
 Once a client is created, you can:
 
-- Send them a **Client Portal invite** so they can view their sessions and goals online.
 - Attach **resources** such as homework sheets, links, or files.
 - Review their complete **session and invoice history** from the client detail page.
     `,
@@ -171,11 +171,11 @@ On mobile devices, contractors see a floating action button that opens a simplif
 
 ### Pricing Preview
 
-After selecting a service type and client, a pricing summary appears below the form. Contractors see their expected earnings. Admins and owners see the full financial breakdown including total, MCA cut, contractor pay, and any rent.
+After selecting a service type and client, a pricing summary appears below the form. Contractors and admins see their expected earnings ("Your Earnings"). Only owners see the full financial breakdown including total, MCA cut, contractor pay, and any rent.
 
 ### After Submitting
 
-Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If it is rejected, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
+Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If a revision is requested, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
 
 If you want to log another session right away, click the **Log Another** button that appears on the success screen. The form resets the date, service type, clients, and notes, but keeps your time and duration from the previous entry.
     `,
@@ -382,9 +382,11 @@ The Team page shows all active team members with their name, role, total session
 
 From a team member's detail page, you can view their stats, see their recent sessions and invoices, and manage their custom pay rates per service type.
 
-### Deactivating a Team Member
+### Removing a Team Member
 
-When someone leaves, deactivate their account rather than deleting it. Deactivated users cannot log in, but all of their historical session and payment records are preserved. This is important for accurate financial records.
+When someone leaves, you can remove them from a team member's detail menu using **Remove Member**. This is a permanent action — it deletes the person's account and login, and cannot be undone. Only owners (and developers) can remove any member; admins can only remove contractors.
+
+Removal is blocked if the member has ever logged a session — you'll see a message like "Cannot remove: has N session(s)." This protects their historical session and payment records, which must be preserved for accurate financial reporting. In that case, simply stop assigning them new work instead of trying to remove them.
     `,
   },
   {
@@ -723,14 +725,14 @@ If you remove a custom rate, the system falls back to calculating contractor pay
     slug: 'approving-sessions',
     title: 'Approving and Managing Sessions',
     category: 'sessions',
-    description: 'How to review, approve, reject, and manage submitted sessions.',
+    description: 'How to review, approve, request revisions on, and manage submitted sessions.',
     walkthrough: 'approve-sessions',
     adminOnly: true,
     relatedArticles: ['logging-a-session', 'generating-invoices'],
     content: `
 ## Approving and Managing Sessions
 
-After a contractor submits a session, it enters a review queue. As an admin or owner, you decide whether to approve, reject, or otherwise handle each session.
+After a contractor submits a session, it enters a review queue. As an admin or owner, you decide whether to approve, request a revision, or otherwise handle each session.
 
 ### Where to Find Submitted Sessions
 
@@ -739,7 +741,7 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 ### Available Actions
 
 - **Approve** - Confirms the session. An invoice is automatically created for the client (unless the client is on a scholarship payment method).
-- **Reject** - Returns the session to draft status with a reason. The contractor can see your note, make changes, and resubmit.
+- **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit.
 - **Mark No-Show** - Used when a client did not attend. A flat no-show fee is charged to the client, and the contractor still receives their normal session pay.
 - **Cancel** - Removes the session from billing entirely. No invoice is created.
 - **Delete** - Permanently removes the session. Use only when the session was logged in error.
@@ -754,9 +756,9 @@ To approve multiple sessions at once:
 
 This is useful at the end of a pay period when all submissions are ready to process at once.
 
-### After Rejection
+### After Requesting a Revision
 
-Rejected sessions return to draft status and appear in the contractor's Sessions list with a rejection indicator and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue.
+Sessions sent back for revision return to draft status and appear in the contractor's Sessions list with a **Needs Revision** badge and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue.
 
 ### After Approval
 
@@ -944,24 +946,27 @@ The Client Portal must be turned on at the organization level before it can be u
 
 ### Inviting a Client
 
-Once the feature is enabled, you can invite individual clients:
+Once the feature is enabled, the only way to invite a client today is while **adding** them:
 
-1. Go to **Clients** and open the client's detail page.
-2. Click **Send Portal Invite**.
-3. The client receives an email with a secure access link.
+1. Go to **Clients** and click **Add Client**.
+2. Enter the client's email address.
+3. Check **Send portal invite** (this option only appears if an email is entered).
+4. Save the client. They receive an email with a secure access link.
 
 The link is token-based, meaning no password is required. The client clicks the link and is taken directly to their portal. Links expire after a configurable number of days (set in Settings).
+
+There is currently no way to send or re-send a portal invite for a client that already exists — the invite checkbox only appears on the Add Client form.
 
 ### What Clients See
 
 - **Dashboard** - A summary of upcoming sessions, active goals, and pending to-do items.
 - **Sessions** - A list of past and upcoming sessions. Clients can submit a session request with preferred dates.
-- **Goals** - Therapy goals with progress tracking. Your team manages the goal entries; clients can view progress notes.
+- **Goals** - Therapy goals with progress tracking, shown read-only. There is currently no in-app screen for staff to create or edit goals — a developer or support contact would need to add them directly.
 - **Resources** - Homework assignments, links, and files your team has shared with them.
 
 ### Session Requests
 
-Clients can request a new session from the portal by submitting preferred dates and times. The request appears in your MCA Manager account for review. You can approve or decline and schedule accordingly.
+Clients can request a new session from the portal by submitting preferred dates and times. The request is recorded in MCA Manager, but there is currently no dashboard screen that lists these requests for staff to review — check with the practice owner or administrator directly if a client mentions they've submitted one. A staff-facing review screen for session requests is planned for a future update.
 
 ### Token Expiry
 
@@ -1130,14 +1135,14 @@ To set up MFA:
 2. In the MFA Setup section, follow the prompts to link an authenticator app (such as Google Authenticator or Authy).
 3. Scan the QR code with your app and enter the verification code to confirm.
 
-Once enabled, you will be asked for a code each time you log in. If your organization has enforced MFA, you will be required to set it up before you can use the app.
+Once enabled, you will be asked for a code each time you log in. If your organization has enforced MFA, admins and owners will be required to set it up before they can use the rest of the app (contractors are not blocked by this setting, though everyone can still set up MFA voluntarily).
 
 ### Security Policies (Owner Only)
 
 Owners can configure organization-wide security settings:
 
 - **Session Timeout** - How many minutes of inactivity before a user is automatically logged out (5 to 120 minutes, default 30).
-- **Require Two-Factor Authentication** - When enabled, all users in the organization must set up MFA.
+- **Require Two-Factor Authentication** - When enabled, admin, owner, and developer accounts must set up MFA before they can use the app. Contractor accounts are not blocked by this setting.
 - **Max Login Attempts** - How many failed login attempts before an account is temporarily locked (3 to 10, default 5).
 - **Lockout Duration** - How long a locked account stays locked, in minutes (5 to 60, default 15).
     `,
@@ -1272,7 +1277,12 @@ The downloaded file includes columns for client name, service type, date, paymen
 
 ### Exporting Sessions
 
-Session data can be exported through the API at \`/api/sessions/export\`. Admins see all sessions; contractors see only their own. The export supports optional date range and client filters.
+1. Go to the **Sessions** page.
+2. Click the **Export Sessions** button.
+3. In the dialog, optionally pick a client and a start/end date range.
+4. Click **Export CSV** to download the file.
+
+Admins see all clients in the picker and export all matching sessions; contractors only see clients they've had sessions with and only export their own sessions. A dedicated API endpoint (\`/api/sessions/export\`) powers the download behind the scenes.
 
 The CSV includes date, time, duration, status, service type, contractor, clients, group headcount, and session notes (automatically decrypted).
 
