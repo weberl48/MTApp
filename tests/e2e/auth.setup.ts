@@ -30,7 +30,7 @@ setup('authenticate', async ({ page }) => {
 
   await page.goto('/login')
   await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(password)
+  await page.getByRole('textbox', { name: 'Password' }).fill(password)
   await page.getByRole('button', { name: /sign in/i }).click()
 
   // Wait for successful login

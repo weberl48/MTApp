@@ -20,7 +20,7 @@ async function selectOption(page: Page, containerSelector: string, optionText: s
 async function loginAndGoToNewSession(page: Page) {
   await page.goto('/login/')
   await page.getByLabel('Email').fill(TEST_EMAIL)
-  await page.getByLabel('Password').fill(TEST_PASSWORD)
+  await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
   await page.getByRole('button', { name: /sign in/i }).click()
   await page.waitForURL(/\/(dashboard|sessions)/, { timeout: 15000 })
   await page.goto('/sessions/new/')
@@ -94,12 +94,23 @@ async function selectGroupServiceType(page: Page): Promise<string | null> {
  * Helper: Select the first available client from the ClientMultiSelect.
  */
 async function selectFirstClient(page: Page) {
-  const searchInput = page.getByPlaceholder('Search clients...')
-  await searchInput.click()
-  // Wait for dropdown to appear and click the first client
-  const firstClient = page.locator('[role="button"]').filter({ has: page.locator('.truncate') }).first()
+  // The client picker is a dialog behind the "Select clients..." button; rows are
+  // buttons named "Select <client name>". Scope to the dialog — the trigger's own
+  // accessible name ("Select clients...") also matches /^Select /.
+  await page.getByRole('button', { name: /select clients/i }).click()
+  const firstClient = page.getByRole('dialog').getByRole('button', { name: /^Select / }).first()
   await firstClient.waitFor({ timeout: 5000 })
   await firstClient.click()
+  await page.keyboard.press('Escape')
+}
+
+/**
+ * Helper: Fill both note fields — required at submit time when the org's
+ * require_notes setting is on (it is for this org).
+ */
+async function fillRequiredNotes(page: Page) {
+  await page.getByPlaceholder('Internal notes (not visible to client)...').fill('e2e session-creation - internal')
+  await page.getByPlaceholder('Notes visible to client in their portal...').fill('e2e session-creation - client note')
 }
 
 test.describe('Session Creation E2E', () => {
@@ -146,6 +157,7 @@ test.describe('Session Creation E2E', () => {
     }
 
     // Submit the session
+    await fillRequiredNotes(page)
     await page.locator('[data-tour="session-form-submit"]').click()
 
     // Wait for success screen
@@ -185,6 +197,10 @@ test.describe('Session Creation E2E', () => {
     // Enter headcount
     await page.fill('#groupHeadcount', '4')
 
+    // Select the agency to bill (required for group sessions)
+    await page.locator('#groupBillingClient').click()
+    await page.getByRole('option').first().click()
+
     // Wait for pricing to calculate
     await page.waitForTimeout(500)
 
@@ -194,6 +210,7 @@ test.describe('Session Creation E2E', () => {
     expect(hasPricingBreakdown || hasEarnings).toBe(true)
 
     // Submit the session
+    await fillRequiredNotes(page)
     await page.locator('[data-tour="session-form-submit"]').click()
 
     // Wait for success
@@ -215,22 +232,23 @@ test.describe('Session Creation E2E', () => {
     // Select a client
     await selectFirstClient(page)
 
+    // The pricing figure lives in the row labeled "Total Amount:" (owner view) or
+    // next to "Your Earnings" (contractor view) — read the row, not styling classes.
+    const pricingRow = () =>
+      page.getByText(/total amount:|your earnings/i).first().locator('..')
+
     // Select 30 min duration
     await selectOption(page, '[data-tour="session-form-duration"]', /30 minutes/)
     await page.waitForTimeout(500)
-
-    // Capture pricing text at 30 min
-    const pricingContainer = page.locator('[data-tour="session-form-duration"]').locator('..')
-    const pricingSection30 = await page.locator('.bg-blue-50, .bg-green-50').first().textContent() || ''
+    const pricingSection30 = (await pricingRow().textContent()) || ''
 
     // Change to 60 min
     await selectOption(page, '[data-tour="session-form-duration"]', /60 minutes/)
     await page.waitForTimeout(500)
-
-    // Capture pricing text at 60 min
-    const pricingSection60 = await page.locator('.bg-blue-50, .bg-green-50').first().textContent() || ''
+    const pricingSection60 = (await pricingRow().textContent()) || ''
 
     // Pricing should have changed
+    expect(pricingSection30).toBeTruthy()
     expect(pricingSection60).not.toBe(pricingSection30)
   })
 
@@ -293,6 +311,7 @@ test.describe('Session Creation E2E', () => {
     await page.waitForTimeout(500)
 
     // Submit
+    await fillRequiredNotes(page)
     await page.locator('[data-tour="session-form-submit"]').click()
     await expect(page.getByText('Session Logged!')).toBeVisible({ timeout: 15000 })
 

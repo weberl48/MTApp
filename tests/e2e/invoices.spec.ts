@@ -12,7 +12,7 @@ test.describe('Invoices Page', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
@@ -21,14 +21,16 @@ test.describe('Invoices Page', () => {
     await page.goto('/invoices')
     await expect(page.getByText(/invoices/i)).toBeVisible()
 
-    // Should show summary cards
-    await expect(page.getByText(/pending|awaiting/i)).toBeVisible()
+    // Should show summary cards ("Pending Review" / "Awaiting Payment")
+    await expect(page.getByText('Pending Review')).toBeVisible()
+    await expect(page.getByText('Awaiting Payment')).toBeVisible()
   })
 
   test('invoices page has status tabs', async ({ page }) => {
     await page.goto('/invoices')
 
-    // Should have tabs for filtering by status
+    // Tabs render after the client-side data load — wait for one, then count
+    await expect(page.getByRole('tab', { name: /pending/i })).toBeVisible({ timeout: 10000 })
     expect(await page.getByRole('tab').count()).toBeGreaterThanOrEqual(2)
   })
 
@@ -53,7 +55,7 @@ test.describe('Invoice Actions', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })

@@ -53,6 +53,12 @@ The database schema is managed via SQL files in the `supabase/` directory.
 
 You can apply these using the Supabase Dashboard or CLI.
 
+> **Note (2026-07):** This deployment runs TWO Supabase projects — production and a
+> dev/sandbox clone (see CLAUDE.md "Database Schema" for refs and workflow). The dev
+> project was created by dumping the LIVE production schema (`pg_dump --schema-only`),
+> which is the source of truth; the SQL files here may lag behind hand-applied changes.
+> Apply migrations to dev first, then production.
+
 ## Initial Owner Setup (May Creative Arts)
 
 After deploying the app and setting up the database, follow these steps to set up the owner account:
