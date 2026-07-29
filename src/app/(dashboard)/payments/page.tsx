@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
 import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
-import { DollarSign, Users, Calendar, Loader2, AlertCircle, Receipt, Filter } from 'lucide-react'
+import { DollarSign, Users, Calendar, Loader2, AlertCircle, Receipt, Filter, FileText } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { ContractorPaymentsTable } from '@/components/tables/contractor-payments-table'
 import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/tables/payroll-hub-table'
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
+import { TaxSummariesCard } from '@/components/payroll/tax-summaries-card'
 import { AdminGuard } from '@/components/guards/admin-guard'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
@@ -339,6 +340,10 @@ export default function PaymentsPage() {
             <Receipt className="w-4 h-4" />
             Invoice Reconciliation
           </TabsTrigger>
+          <TabsTrigger value="tax" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Tax Summaries
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="payroll" className="mt-4">
@@ -440,6 +445,10 @@ export default function PaymentsPage() {
               <PaymentReconciliationTable onRefresh={loadPayments} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="tax" className="mt-4">
+          <TaxSummariesCard />
         </TabsContent>
       </Tabs>
     </div>
