@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest'
-import { ensureSessionInvoices } from './ensure-session-invoices'
+import { ensureSessionInvoices, ensureInvoicesForSessionId } from './ensure-session-invoices'
 
 const PRICING = { totalAmount: 90, perPersonCost: 90, mcaCut: 27, contractorPay: 63, rentAmount: 0 }
 
@@ -184,6 +184,116 @@ describe('ensureSessionInvoices', () => {
     const { supabase, inserted } = makeSupabase({})
     const result = await ensureSessionInvoices({ ...baseParams(supabase), clientIds: [] })
     expect(result).toEqual({ created: 0, alreadyInvoiced: false, invoiceError: false })
+    expect(inserted).toHaveLength(0)
+  })
+})
+
+interface WrapperOpts extends MockOpts {
+  session?: any
+  orgSettings?: any
+}
+
+function makeWrapperSupabase(opts: WrapperOpts) {
+  const base = makeSupabase(opts)
+  const inner = base.supabase.from.bind(base.supabase)
+  base.supabase.from = (table: string) => {
+    if (table === 'sessions') {
+      return {
+        select: () => ({
+          eq: () => ({
+            single: async () => opts.session
+              ? { data: opts.session, error: null }
+              : { data: null, error: { message: 'not found' } },
+          }),
+        }),
+      }
+    }
+    if (table === 'organizations') {
+      return {
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: { settings: opts.orgSettings ?? {} }, error: null }),
+          }),
+        }),
+      }
+    }
+    return inner(table)
+  }
+  return base
+}
+
+const STORED_SESSION = {
+  id: 's1',
+  date: '2026-02-09',
+  status: 'submitted',
+  organization_id: 'o1',
+  total_amount: 90,
+  mca_cut: 27,
+  contractor_pay: 63,
+  group_headcount: null,
+  service_type: { is_scholarship: false },
+  attendees: [{ client_id: 'c1', individual_cost: 90 }],
+}
+
+describe('ensureInvoicesForSessionId', () => {
+  it('creates the invoice from the stored session amounts', async () => {
+    const { supabase, inserted } = makeWrapperSupabase({
+      session: STORED_SESSION,
+      clients: [PER_SESSION_CLIENT],
+      orgSettings: { invoice: { due_days: 30 } },
+    })
+    const result = await ensureInvoicesForSessionId(supabase, 's1')
+    expect(result.created).toBe(1)
+    expect(result.error).toBeUndefined()
+    expect(inserted[0]).toMatchObject({
+      session_id: 's1',
+      amount: 90,
+      mca_cut: 27,
+      contractor_pay: 63,
+      rent_amount: 0,
+      due_date: '2026-03-11',
+    })
+  })
+
+  it('refuses sessions that are not submitted/approved', async () => {
+    const { supabase, inserted } = makeWrapperSupabase({
+      session: { ...STORED_SESSION, status: 'draft' },
+      clients: [PER_SESSION_CLIENT],
+    })
+    const result = await ensureInvoicesForSessionId(supabase, 's1')
+    expect(result.error).toBe('Only submitted or approved sessions can be invoiced')
+    expect(inserted).toHaveLength(0)
+  })
+
+  it('returns an error for a missing session', async () => {
+    const { supabase } = makeWrapperSupabase({})
+    const result = await ensureInvoicesForSessionId(supabase, 'nope')
+    expect(result.error).toBe('Session not found')
+  })
+
+  it('invoices the full total for group sessions', async () => {
+    const { supabase, inserted } = makeWrapperSupabase({
+      session: {
+        ...STORED_SESSION,
+        group_headcount: 4,
+        total_amount: 240,
+        contractor_pay: 240,
+        mca_cut: 0,
+        attendees: [{ client_id: 'agency', individual_cost: 240 }],
+      },
+      clients: [{ id: 'agency', payment_method: 'group_home', billing_frequency: 'per_session', square_fee_enabled: null }],
+    })
+    await ensureInvoicesForSessionId(supabase, 's1')
+    expect(inserted[0].amount).toBe(240)
+  })
+
+  it('creates nothing for scholarship service types', async () => {
+    const { supabase, inserted } = makeWrapperSupabase({
+      session: { ...STORED_SESSION, service_type: { is_scholarship: true } },
+      clients: [PER_SESSION_CLIENT],
+    })
+    const result = await ensureInvoicesForSessionId(supabase, 's1')
+    expect(result.created).toBe(0)
     expect(inserted).toHaveLength(0)
   })
 })
