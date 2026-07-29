@@ -255,6 +255,11 @@ describe('taxYearSchema', () => {
     expect(taxYearSchema.parse('2025')).toBe(2025)
   })
 
+  it('accepts the boundary years', () => {
+    expect(taxYearSchema.parse('2000')).toBe(2000)
+    expect(taxYearSchema.parse('2100')).toBe(2100)
+  })
+
   it('rejects out-of-range and junk values', () => {
     expect(taxYearSchema.safeParse('1999').success).toBe(false)
     expect(taxYearSchema.safeParse('2101').success).toBe(false)
