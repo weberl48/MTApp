@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Resend } from 'resend'
 import { parseLocalDate } from '@/lib/dates'
+import { decryptField, isEncrypted } from '@/lib/crypto'
+import { escape as escapeHtml } from 'he'
 
 // Lazy initialize Resend client to avoid build-time errors
 let resend: Resend | null = null
@@ -139,23 +141,31 @@ export async function GET(request: NextRequest) {
           day: 'numeric',
         })
 
+        // Notes are stored encrypted (enc:<base64>) — without decryption the
+        // email literally printed ciphertext. Decrypt server-side like every
+        // other notes consumer; tolerate legacy plaintext rows.
+        let sessionNotes = session.notes as string | null
+        if (sessionNotes && isEncrypted(sessionNotes)) {
+          sessionNotes = await decryptField(sessionNotes)
+        }
+
         // Build email content
         const subject = `Session Reminder: ${session.service_type?.name || 'Session'} on ${formattedDate}`
 
         const htmlContent = `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #3b82f6;">Session Reminder</h2>
-            <p>Hi ${reminder.recipient_name || 'there'},</p>
+            <p>Hi ${escapeHtml(reminder.recipient_name || 'there')},</p>
             <p>This is a reminder about your upcoming session:</p>
 
             <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
               <p style="margin: 4px 0;"><strong>Date:</strong> ${formattedDate}</p>
-              <p style="margin: 4px 0;"><strong>Service:</strong> ${session.service_type?.name || 'N/A'}</p>
+              <p style="margin: 4px 0;"><strong>Service:</strong> ${escapeHtml(session.service_type?.name || 'N/A')}</p>
               <p style="margin: 4px 0;"><strong>Duration:</strong> ${session.duration_minutes} minutes</p>
-              <p style="margin: 4px 0;"><strong>Clients:</strong> ${clients}</p>
+              <p style="margin: 4px 0;"><strong>Clients:</strong> ${escapeHtml(clients)}</p>
             </div>
 
-            ${session.notes ? `<p><strong>Notes:</strong> ${session.notes}</p>` : ''}
+            ${sessionNotes ? `<p><strong>Notes:</strong> ${escapeHtml(sessionNotes)}</p>` : ''}
 
             <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
               - ${org?.name || 'Your Practice'}

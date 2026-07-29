@@ -26,6 +26,24 @@ export async function checkLockout(
 
   const windowStart = new Date(Date.now() - lockoutMinutes * 60 * 1000).toISOString()
 
+  // A successful login resets the failure count: only failures NEWER than the
+  // most recent success matter (4 typos + a success + 1 typo must not lock).
+  let successQuery = supabase
+    .from('login_attempts')
+    .select('attempted_at')
+    .eq('email', email.toLowerCase())
+    .eq('success', true)
+  if (ipAddress) {
+    successQuery = successQuery.eq('ip_address', ipAddress)
+  }
+  const { data: lastSuccess } = await successQuery
+    .order('attempted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const countSince =
+    lastSuccess && lastSuccess.attempted_at > windowStart ? lastSuccess.attempted_at : windowStart
+
   // Scope the lockout to the requesting IP so an attacker cannot lock out a victim's
   // account by spamming failed attempts from a different IP — the victim logging in from
   // their own (clean) IP is unaffected. Falls back to email-only when the IP is unknown
@@ -38,7 +56,7 @@ export async function checkLockout(
   if (ipAddress) {
     countQuery = countQuery.eq('ip_address', ipAddress)
   }
-  const { count } = await countQuery.gte('attempted_at', windowStart)
+  const { count } = await countQuery.gte('attempted_at', countSince)
 
   const attempts = count ?? 0
 

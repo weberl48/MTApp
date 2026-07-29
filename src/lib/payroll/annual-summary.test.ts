@@ -164,6 +164,14 @@ describe('availableTaxYears', () => {
 })
 
 describe('CSV builders', () => {
+  it('neutralizes formula-injection prefixes in text cells', () => {
+    const csv = buildSummaryCsv(
+      [{ contractorId: 'c1', contractorName: '=HYPERLINK("http://evil")', sessionCount: 1, totalPaid: 1 }],
+      2025
+    )
+    expect(csv.split('\n')[1].startsWith(`"'=HYPERLINK`)).toBe(true)
+  })
+
   it('builds the summary CSV with quoted names and 2-decimal amounts', () => {
     const csv = buildSummaryCsv(
       [{ contractorId: 'c1', contractorName: 'Amy "AJ" Jones', sessionCount: 2, totalPaid: 25.5 }],

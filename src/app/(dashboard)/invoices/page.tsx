@@ -449,8 +449,8 @@ export default function InvoicesPage() {
 
       // Fetch unbilled scholarship sessions (admin only)
       let unbilled: UnbilledScholarshipSession[] = []
-      if (admin && !viewAsContractor) {
-        unbilled = await fetchUnbilledScholarshipSessions(supabase)
+      if (admin && !viewAsContractor && organization) {
+        unbilled = await fetchUnbilledScholarshipSessions(supabase, organization.id)
       }
 
       if (!cancelled) {

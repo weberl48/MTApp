@@ -116,7 +116,9 @@ export async function removeTeamMember(memberId: string) {
     .eq('id', user.id)
     .single()
 
-  if (!can(currentUser?.role as UserRole ?? null, 'team:invite')) {
+  // Destructive delete — gate on team:manage (developer/owner), not the looser
+  // team:invite which includes admins.
+  if (!can(currentUser?.role as UserRole ?? null, 'team:manage')) {
     return { success: false, error: 'Permission denied' }
   }
 
@@ -134,6 +136,11 @@ export async function removeTeamMember(memberId: string) {
 
   if (!memberToRemove) {
     return { success: false, error: 'Team member not found' }
+  }
+
+  // Developer accounts can only be removed by another developer
+  if (memberToRemove.role === 'developer' && currentUser?.role !== 'developer') {
+    return { success: false, error: 'Developer accounts cannot be removed here' }
   }
 
   // Only developers and owners can remove owners

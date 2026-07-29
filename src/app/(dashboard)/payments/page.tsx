@@ -195,9 +195,15 @@ export default function PaymentsPage() {
       const contractor = session.contractor
       if (!contractor?.id) return
 
-      // Calculate contractor pay from invoices, falling back to session-level value (group sessions)
+      // Prefer sessions.contractor_pay — it is EXACTLY what mark_sessions_paid
+      // snapshots into contractor_paid_amount, so the figure shown in the Hub
+      // and the Mark-Paid dialog always matches what gets recorded (and what
+      // Tax Summaries / Earnings later report). Invoice sum is only a fallback
+      // for legacy rows that never stored a session-level value.
       const invoiceContractorPay = session.invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
-      const contractorPay = invoiceContractorPay > 0 ? invoiceContractorPay : Number(session.contractor_pay || 0)
+      const contractorPay = session.contractor_pay != null
+        ? Number(session.contractor_pay)
+        : invoiceContractorPay
 
       if (!unpaidByContractor[contractor.id]) {
         unpaidByContractor[contractor.id] = {

@@ -265,7 +265,7 @@ export async function generateAllUnbilledScholarshipInvoices(organizationId: str
 
   const supabase = await createClient()
 
-  const unbilled = await fetchUnbilledScholarshipSessions(supabase)
+  const unbilled = await fetchUnbilledScholarshipSessions(supabase, organizationId)
   const groups = groupUnbilledByClientMonth(unbilled)
 
   if (groups.length === 0) {

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select'
 import { ArrowLeft, Calendar, Clock, Loader2, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { todayLocal } from '@/lib/dates'
 
 export default function RequestSessionPage() {
   const { token } = usePortal()
@@ -33,7 +34,7 @@ export default function RequestSessionPage() {
   const [notes, setNotes] = useState('')
 
   // Get minimum date (today)
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayLocal()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
