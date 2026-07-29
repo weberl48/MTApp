@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger'
 import { handleSupabaseError, revalidateSessionPaths, requirePermission } from '@/lib/actions/helpers'
 import { deletePendingSessionInvoices, hasBilledSessionInvoice } from '@/lib/actions/session-invoice-cleanup'
 import { resolveAutoSendMethod } from '@/lib/invoices/auto-send-policy'
+import { ensureInvoicesForSessionId } from '@/lib/invoices/ensure-session-invoices'
 import { sumInvoiceItemTotals } from '@/lib/invoices/batch-totals'
 import { distributeAmount } from '@/lib/invoices/split'
 import { calculateNoShowPricing, type ContractorPricingOverrides } from '@/lib/pricing'
@@ -91,6 +92,15 @@ export async function approveSession(sessionId: string) {
     return { success: true as const, alreadyProcessed: true as const }
   }
 
+  // Backstop for the draft→submit gap (docs/bugs/2026-07-29-missing-invoice-on-resubmit.md):
+  // a session that reached 'submitted' by editing may have no invoice. Ensure it exists
+  // BEFORE auto-send so approval always yields a billable invoice.
+  try {
+    await ensureInvoicesForSessionId(supabase, sessionId)
+  } catch (e) {
+    logger.error('Ensure invoices on approve failed', e)
+  }
+
   // Auto-send via automation settings (email or square)
   try {
     await autoSendInvoicesOnApprove(supabase, sessionId)
@@ -124,6 +134,10 @@ export async function bulkApproveSessions(sessionIds: string[]) {
   // Only the rows that were actually 'submitted' got approved — others (already approved/
   // rejected by someone else) are skipped, so report and act on the real set.
   const approvedIds = (approved || []).map((s) => s.id)
+
+  // Backstop for the draft→submit gap (see approveSession): ensure invoices exist for the
+  // sessions actually approved here BEFORE auto-send.
+  await Promise.allSettled(approvedIds.map((id) => ensureInvoicesForSessionId(supabase, id)))
 
   // Auto-send invoices per the org's automation settings (email or square), using the SAME
   // gate as single approve, ONLY for the sessions actually approved here.
@@ -317,6 +331,25 @@ export async function rejectSession(sessionId: string, reason: string) {
   revalidateSessionPaths(sessionId)
 
   return { success: true as const }
+}
+
+/**
+ * Manual recovery: create the missing per-session invoices for a submitted/approved
+ * session. Backs the "Create Invoice" button on the session detail page and makes the
+ * delete-invoice dialog's "you can re-invoice them later" promise true.
+ */
+export async function createSessionInvoices(sessionId: string) {
+  const permErr = await requirePermission('session:approve')
+  if (permErr) return permErr
+
+  const supabase = await createClient()
+  const result = await ensureInvoicesForSessionId(supabase, sessionId)
+
+  if (result.error) return { error: result.error }
+  if (result.invoiceError) return { error: 'Failed to create invoices. Please try again.' }
+
+  revalidateSessionPaths(sessionId)
+  return { success: true as const, created: result.created, alreadyInvoiced: result.alreadyInvoiced }
 }
 
 export async function cancelSession(sessionId: string) {
