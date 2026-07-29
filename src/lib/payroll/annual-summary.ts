@@ -62,6 +62,11 @@ const MONTH_LABELS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
+/** Round to cents at the aggregation boundary (mirrors src/lib/invoices/batch-totals.ts). */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100
+}
+
 export function taxYearRange(year: number): { start: string; end: string } {
   return { start: `${year}-01-01`, end: `${year}-12-31` }
 }
@@ -104,14 +109,14 @@ export function summarizeContractorYear(
 
   return {
     year,
-    totalPaid,
+    totalPaid: round2(totalPaid),
     sessionCount: inYear.length,
     monthly: [...months.entries()]
       .sort(([a], [b]) => a - b)
-      .map(([month, v]) => ({ month, label: MONTH_LABELS[month - 1], ...v })),
+      .map(([month, v]) => ({ month, label: MONTH_LABELS[month - 1], ...v, amount: round2(v.amount) })),
     byServiceType: [...services.entries()]
       .sort(([, a], [, b]) => b.amount - a.amount)
-      .map(([name, v]) => ({ name, ...v })),
+      .map(([name, v]) => ({ name, ...v, amount: round2(v.amount) })),
   }
 }
 
@@ -132,7 +137,9 @@ export function summarizeByContractor(
     entry.totalPaid += paidAmountForSession(session)
     byId.set(session.contractor_id, entry)
   }
-  return [...byId.values()].sort((a, b) => a.contractorName.localeCompare(b.contractorName))
+  return [...byId.values()]
+    .map((entry) => ({ ...entry, totalPaid: round2(entry.totalPaid) }))
+    .sort((a, b) => a.contractorName.localeCompare(b.contractorName))
 }
 
 export function availableTaxYears(
@@ -168,11 +175,13 @@ export function buildDetailCsv(
 ): string {
   const inYear = sessions
     .filter((s) => isPaidInYear(s.contractor_paid_date, year))
-    .sort(
-      (a, b) =>
-        a.contractor_name.localeCompare(b.contractor_name) ||
-        (a.contractor_paid_date ?? '').localeCompare(b.contractor_paid_date ?? '')
-    )
+    .sort((a, b) => {
+      const byName = a.contractor_name.localeCompare(b.contractor_name)
+      if (byName !== 0) return byName
+      const aDate = a.contractor_paid_date ?? ''
+      const bDate = b.contractor_paid_date ?? ''
+      return aDate < bDate ? -1 : aDate > bDate ? 1 : 0
+    })
   return [
     ['Contractor', 'Paid Date', 'Session Date', 'Service Type', 'Duration (min)', 'Amount'].join(','),
     ...inYear.map((s) =>

@@ -119,6 +119,18 @@ describe('summarizeContractorYear', () => {
     const s = summarizeContractorYear([], 2025)
     expect(s).toEqual({ year: 2025, totalPaid: 0, sessionCount: 0, monthly: [], byServiceType: [] })
   })
+
+  it('rounds accumulated floating-point drift to the cent at the aggregation boundary', () => {
+    const amounts = [
+      38.5, 8.05, 40.1, 25.55, 33.35, 54.0, 19.15, 29.15, 12.15, 17.85, 40.1, 8.05, 25.55, 33.35,
+    ]
+    const s = summarizeContractorYear(
+      amounts.map((amount) => paid({ contractor_paid_amount: amount })),
+      2025
+    )
+    expect(s.totalPaid).toBe(384.9)
+    expect(s.monthly[0].amount).toBe(384.9)
+  })
 })
 
 describe('summarizeByContractor', () => {
