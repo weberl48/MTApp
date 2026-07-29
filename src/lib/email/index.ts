@@ -94,7 +94,7 @@ export async function sendInvoiceEmail({
           <!-- Content -->
           <tr>
             <td style="padding: 40px;">
-              <h2 style="margin: 0 0 20px; color: #111827; font-size: 20px;">Hello ${clientName},</h2>
+              <h2 style="margin: 0 0 20px; color: #111827; font-size: 20px;">Hello ${escapeHtml(clientName)},</h2>
 
               <p style="margin: 0 0 24px; color: #4b5563; font-size: 16px; line-height: 24px;">
                 Thank you for your recent session with May Creative Arts. Please find your invoice details below.
@@ -123,7 +123,7 @@ export async function sendInvoiceEmail({
                       <tr>
                         <td style="padding: 8px 0;">
                           <span style="color: #6b7280; font-size: 14px;">Service:</span>
-                          <span style="color: #111827; font-size: 14px; margin-left: 12px;">${serviceType}</span>
+                          <span style="color: #111827; font-size: 14px; margin-left: 12px;">${escapeHtml(serviceType)}</span>
                         </td>
                       </tr>
                       <tr>
