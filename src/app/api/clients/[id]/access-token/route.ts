@@ -164,9 +164,14 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get optional expiry days from body
+    // Get optional expiry days from body — clamp to a sane range (same rule as
+    // /api/invites/user): junk input previously threw an opaque 500, and a huge
+    // number minted an effectively-permanent token.
     const body = await request.json().catch(() => ({}))
-    const expiryDays = body.expiryDays || 90
+    const parsedExpiry = Number(body.expiryDays)
+    const expiryDays = Number.isFinite(parsedExpiry)
+      ? Math.min(365, Math.max(1, Math.trunc(parsedExpiry)))
+      : 90
 
     // Generate new token
     const tokenInfo = await generateAccessToken(
@@ -276,8 +281,9 @@ export async function DELETE(
         message: 'All tokens revoked',
       })
     } else if (body.tokenId) {
-      // Revoke specific token
-      await revokeAccessToken(body.tokenId)
+      // Revoke specific token — scoped to the path client so a token id from
+      // another client/org can't be revoked through this authorization check.
+      await revokeAccessToken(body.tokenId, clientId)
       return NextResponse.json({
         success: true,
         message: 'Token revoked',

@@ -36,7 +36,7 @@ export function UnbilledSessions({ organizationId }: Props) {
     async function load() {
       try {
         const supabase = createClient()
-        const unbilled = await fetchUnbilledScholarshipSessions(supabase)
+        const unbilled = await fetchUnbilledScholarshipSessions(supabase, organizationId)
         setGroups(groupUnbilledByClientMonth(unbilled))
       } catch {
         setError('Failed to load unbilled sessions')

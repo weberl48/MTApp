@@ -153,15 +153,18 @@ export async function validateAccessToken(token: string): Promise<TokenValidatio
 }
 
 /**
- * Revoke an access token
+ * Revoke an access token. `clientId` is required: the service client bypasses
+ * RLS, so the token must be proven to belong to the client the caller was
+ * authorized for — otherwise a guessed token id could revoke across tenants.
  */
-export async function revokeAccessToken(tokenId: string): Promise<void> {
+export async function revokeAccessToken(tokenId: string, clientId: string): Promise<void> {
   const supabase = createServiceClient()
 
   const { error } = await supabase
     .from('client_access_tokens')
     .update({ is_revoked: true })
     .eq('id', tokenId)
+    .eq('client_id', clientId)
 
   if (error) {
     throw new Error(`Failed to revoke token: ${error.message}`)

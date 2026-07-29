@@ -51,9 +51,14 @@ export default function EarningsPage() {
   }, [shouldRedirect, router])
 
   useEffect(() => {
+    // Cancelled-flag guard (same pattern as AnnualSummaryCard below): "View As"
+    // switches contractorId without unmounting, and a slow in-flight fetch for
+    // the previous contractor must not overwrite the new one's numbers.
+    let cancelled = false
     async function fetchEarnings() {
       if (shouldRedirect) return
       if (!contractorId || !organization) return
+      setLoading(true)
 
       const supabase = createClient()
       const { yearStart, monthStart, monthEnd, lastMonthStart, lastMonthEnd } = monthBoundaries(new Date())
@@ -87,6 +92,7 @@ export default function EarningsPage() {
         .in('status', UNPAID_PAYROLL_STATUSES)
         .order('date', { ascending: false })
 
+      if (cancelled) return
       if (error) {
         console.error('[MCA] Error fetching earnings')
         setLoading(false)
@@ -98,6 +104,8 @@ export default function EarningsPage() {
         .from('contractor_rates')
         .select('service_type_id, contractor_pay, duration_increment')
         .eq('contractor_id', contractorId)
+
+      if (cancelled) return
 
       const customRatesMap = new Map<string, { contractorPay: number; durationIncrement: number | null }>()
       for (const rate of customRates || []) {
@@ -194,6 +202,9 @@ export default function EarningsPage() {
     }
 
     fetchEarnings()
+    return () => {
+      cancelled = true
+    }
   }, [contractorId, organization, shouldRedirect])
 
   // Prepare chart data (reverse for chronological order)

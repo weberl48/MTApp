@@ -36,10 +36,12 @@ export async function proxy(request: NextRequest) {
 
   const authPaths = ['/login', '/signup', '/forgot-password', '/reset-password']
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
-  const isPortalApiPath = pathname.startsWith('/api/portal/')
   const isApiPath = pathname.startsWith('/api/')
 
-  if ((isAuthPath || isPortalApiPath) && authRateLimit) {
+  // Portal API traffic uses the normal API bucket: one portal dashboard load
+  // makes 4-6 requests, which instantly exhausted the 5/60s auth bucket and
+  // surfaced as silent empty states (each page swallows the 429).
+  if (isAuthPath && authRateLimit) {
     const { success, remaining, reset } = await authRateLimit.limit(ip)
     if (!success) {
       return NextResponse.json(

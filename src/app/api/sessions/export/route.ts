@@ -184,6 +184,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ sessions: exportData })
     }
 
+    // Quote a CSV cell; a leading =, +, -, @, tab, or CR gets an apostrophe so
+    // spreadsheet apps treat it as text, never a formula (injection hardening).
+    const csvCell = (value: string) => {
+      const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+      return `"${neutralized.replace(/"/g, '""')}"`
+    }
+
     // Generate CSV
     const headers = [
       'Date',
@@ -207,14 +214,14 @@ export async function GET(request: NextRequest) {
         row.time || '',
         row.duration,
         row.status,
-        `"${(row.serviceType || '').replace(/"/g, '""')}"`,
-        `"${(row.contractor || '').replace(/"/g, '""')}"`,
-        `"${(row.clients || '').replace(/"/g, '""')}"`,
+        csvCell(row.serviceType || ''),
+        csvCell(row.contractor || ''),
+        csvCell(row.clients || ''),
         row.groupHeadcount || '',
-        `"${(row.groupMembers || '').replace(/"/g, '""')}"`,
-        `"${(row.classroom || '').replace(/"/g, '""')}"`,
-        `"${(row.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-        `"${(row.clientNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+        csvCell(row.groupMembers || ''),
+        csvCell(row.classroom || ''),
+        csvCell((row.notes || '').replace(/\n/g, ' ')),
+        csvCell((row.clientNotes || '').replace(/\n/g, ' ')),
       ].join(','))
     ]
 

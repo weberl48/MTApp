@@ -56,7 +56,14 @@ export function buildContractorRateMap(
  */
 export async function fetchUnbilledScholarshipSessions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: SupabaseClient<any, any, any>
+  supabase: SupabaseClient<any, any, any>,
+  /**
+   * Scope results to one organization. Pass this from every caller: RLS scopes
+   * ordinary users anyway, but a developer-role session sees ALL orgs, and the
+   * "Generate All" action would then stamp other tenants' batches with the
+   * caller's organization_id.
+   */
+  organizationId?: string
 ): Promise<UnbilledScholarshipSession[]> {
   // Get session IDs already in invoice_items (shared by both paths)
   const { data: itemRows } = await supabase
@@ -69,10 +76,12 @@ export async function fetchUnbilledScholarshipSessions(
   const seenSessionClient = new Set<string>() // avoid duplicates
 
   // --- Path 1: Client-based batching (scholarship payment OR monthly billing) ---
-  const { data: scholarshipClients } = await supabase
+  let clientsQuery = supabase
     .from('clients')
     .select('id, name')
     .or('payment_method.eq.scholarship,billing_frequency.eq.monthly')
+  if (organizationId) clientsQuery = clientsQuery.eq('organization_id', organizationId)
+  const { data: scholarshipClients } = await clientsQuery
 
   if (scholarshipClients && scholarshipClients.length > 0) {
     const clientIds = scholarshipClients.map((c: { id: string }) => c.id)
@@ -126,17 +135,21 @@ export async function fetchUnbilledScholarshipSessions(
   }
 
   // --- Path 2: Service-type-based scholarship (is_scholarship = true) ---
-  const { data: scholarshipAttendeeRows } = await supabase
+  let scholarshipAttendeesQuery = supabase
     .from('session_attendees')
     .select(`
       client_id,
-      client:clients(id, name),
+      client:clients!inner(id, name, organization_id),
       session:sessions!inner(
         id, date, duration_minutes, status,
         contractor:users!sessions_contractor_id_fkey(name),
         service_type:service_types!inner(name, is_scholarship)
       )
     `)
+  if (organizationId) {
+    scholarshipAttendeesQuery = scholarshipAttendeesQuery.eq('client.organization_id', organizationId)
+  }
+  const { data: scholarshipAttendeeRows } = await scholarshipAttendeesQuery
 
   for (const row of scholarshipAttendeeRows || []) {
     const session = row.session as unknown as {

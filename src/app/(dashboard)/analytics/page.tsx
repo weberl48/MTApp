@@ -87,9 +87,9 @@ export default function AnalyticsPage() {
 
       const { data: userProfile } = await supabase
         .from('users')
-        .select('role')
+        .select('role, organization_id')
         .eq('id', user.id)
-        .single<{ role: string }>()
+        .single<{ role: string; organization_id: string }>()
 
       const role = userProfile?.role as UserRole | undefined
       if (!can(role ?? null, 'analytics:view')) {
@@ -97,9 +97,15 @@ export default function AnalyticsPage() {
         return
       }
 
+      // Explicit org scoping: RLS covers ordinary users, but a developer-role
+      // session sees every tenant — without the filter this page summed ALL
+      // organizations' revenue into one set of numbers.
+      const orgId = userProfile!.organization_id
+
       const { data: invoicesData } = await supabase
         .from('invoices')
         .select('amount, mca_cut, contractor_pay, status, created_at')
+        .eq('organization_id', orgId)
 
       const { data: sessionsData } = await supabase
         .from('sessions')
@@ -109,10 +115,12 @@ export default function AnalyticsPage() {
           service_type:service_types(category),
           attendees:session_attendees(id)
         `)
+        .eq('organization_id', orgId)
 
       const { count } = await supabase
         .from('clients')
         .select('id', { count: 'exact' })
+        .eq('organization_id', orgId)
 
       setInvoices((invoicesData as Invoice[]) || [])
       setSessions((sessionsData as unknown as Session[]) || [])

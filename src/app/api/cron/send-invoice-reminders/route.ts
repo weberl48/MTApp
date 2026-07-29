@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendInvoiceReminderEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
-import { differenceInCalendarDays, parseISO } from 'date-fns'
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import type { OrganizationSettings } from '@/types/database'
 
 function verifyCronSecret(request: NextRequest): boolean {
@@ -49,14 +49,42 @@ export async function GET(request: NextRequest) {
       const footerText = settings.invoice.footer_text || undefined
       const paymentInstructions = settings.invoice.payment_instructions || undefined
 
-      // Fetch sent invoices with due dates for this org
-      const { data: invoices, error: invoicesError } = await db
+      // Fetch only the invoices this run can act on. The old unbounded
+      // `.limit(100)` (no order, no date filter) let a backlog of stale sent
+      // invoices consume the whole budget, silently starving newer invoices of
+      // reminders. Two precise sets instead:
+      //  (a) exact-day reminders: due_date is exactly today+D for a configured D
+      //  (b) the once-ever overdue notice: past due and not yet claimed (-1
+      //      sentinel absent) — capped per run, self-draining because claimed
+      //      invoices drop out of the filter on the next run.
+      const targetDueDates = reminderDays.map((d) => format(addDays(today, d), 'yyyy-MM-dd'))
+      const todayStr = format(today, 'yyyy-MM-dd')
+
+      const { data: dueSoon, error: dueSoonError } = await db
         .from('invoices')
         .select('id, amount, due_date, client:clients(name, contact_email)')
         .eq('organization_id', org.id)
         .eq('status', 'sent')
-        .not('due_date', 'is', null)
-        .limit(100)
+        .in('due_date', targetDueDates)
+
+      let overdue: typeof dueSoon = []
+      let overdueError = null
+      if (reminderDays.includes(0)) {
+        const res = await db
+          .from('invoices')
+          .select('id, amount, due_date, client:clients(name, contact_email)')
+          .eq('organization_id', org.id)
+          .eq('status', 'sent')
+          .lt('due_date', todayStr)
+          .not('reminder_sent_days', 'cs', '[-1]')
+          .order('due_date', { ascending: true })
+          .limit(100)
+        overdue = res.data
+        overdueError = res.error
+      }
+
+      const invoicesError = dueSoonError || overdueError
+      const invoices = [...(dueSoon || []), ...(overdue || [])]
 
       if (invoicesError) {
         console.error('[MCA] Error fetching invoices for org', org.id)
