@@ -96,7 +96,16 @@ export async function approveSession(sessionId: string) {
   // a session that reached 'submitted' by editing may have no invoice. Ensure it exists
   // BEFORE auto-send so approval always yields a billable invoice.
   try {
-    await ensureInvoicesForSessionId(supabase, sessionId)
+    const ensureResult = await ensureInvoicesForSessionId(supabase, sessionId)
+    if (ensureResult.error || ensureResult.invoiceError) {
+      // ensureInvoicesForSessionId reports failure via return fields rather than throwing —
+      // without this, a failed invoice insert here would approve the session unbilled
+      // with zero log signal (the exact failure class this backstop exists to close).
+      logger.error(
+        `Ensure invoices on approve reported a failure for session ${sessionId}`,
+        ensureResult.error ?? 'invoiceError'
+      )
+    }
   } catch (e) {
     logger.error('Ensure invoices on approve failed', e)
   }
@@ -137,7 +146,20 @@ export async function bulkApproveSessions(sessionIds: string[]) {
 
   // Backstop for the draft→submit gap (see approveSession): ensure invoices exist for the
   // sessions actually approved here BEFORE auto-send.
-  await Promise.allSettled(approvedIds.map((id) => ensureInvoicesForSessionId(supabase, id)))
+  const ensureResults = await Promise.allSettled(approvedIds.map((id) => ensureInvoicesForSessionId(supabase, id)))
+  ensureResults.forEach((result, i) => {
+    const id = approvedIds[i]
+    if (result.status === 'rejected') {
+      logger.error(`Ensure invoices on bulk approve threw for session ${id}`, result.reason)
+    } else if (result.value.error || result.value.invoiceError) {
+      // Same rationale as the single-approve backstop: this is a return-value failure
+      // signal, not a throw, so it needs its own explicit check to avoid silent unbilled approvals.
+      logger.error(
+        `Ensure invoices on bulk approve reported a failure for session ${id}`,
+        result.value.error ?? 'invoiceError'
+      )
+    }
+  })
 
   // Auto-send invoices per the org's automation settings (email or square), using the SAME
   // gate as single approve, ONLY for the sessions actually approved here.
