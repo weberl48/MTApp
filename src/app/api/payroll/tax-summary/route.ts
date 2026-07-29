@@ -60,31 +60,44 @@ export async function GET(request: NextRequest) {
 
     // gte on contractor_paid_date also excludes null (never-paid) rows.
     const { start, end } = taxYearRange(year)
-    const { data: sessions, error } = await supabase
-      .from('sessions')
-      .select(`
-        date,
-        duration_minutes,
-        contractor_paid_date,
-        contractor_paid_amount,
-        contractor_pay,
-        contractor:users(id, name),
-        service_type:service_types(name)
-      `)
-      .eq('organization_id', userProfile.organization_id)
-      .gte('contractor_paid_date', start)
-      .lte('contractor_paid_date', end)
+    // PostgREST caps a single response at the project's max-rows setting (default
+    // 1000). A year of paid sessions can exceed that, and a silently truncated
+    // tax export under-reports totals — page through explicitly. The .order('id')
+    // gives stable page boundaries (no dup/missed rows between pages).
+    const PAGE_SIZE = 1000
+    const rows: PaidSessionRow[] = []
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select(`
+          date,
+          duration_minutes,
+          contractor_paid_date,
+          contractor_paid_amount,
+          contractor_pay,
+          contractor:users(id, name),
+          service_type:service_types(name)
+        `)
+        .eq('organization_id', userProfile.organization_id)
+        .gte('contractor_paid_date', start)
+        .lte('contractor_paid_date', end)
+        .order('id', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1)
 
-    if (error) {
-      console.error('[MCA] Tax summary export: query failed')
-      return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
+      if (error) {
+        console.error('[MCA] Tax summary export: query failed')
+        return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
+      }
+      const page = (data as unknown as PaidSessionRow[]) || []
+      rows.push(...page)
+      if (page.length < PAGE_SIZE) break
     }
 
     // A paid session must never be dropped from a tax export. Unresolved contractor
     // joins are believed unreachable today (sessions.contractor_id is NOT NULL with an
     // FK, and team removal is blocked while sessions exist) but if one ever occurs, it
     // must surface as "Unknown contractor" rather than silently reducing totals.
-    const inputs: ContractorPaidSessionInput[] = ((sessions as unknown as PaidSessionRow[]) || [])
+    const inputs: ContractorPaidSessionInput[] = rows
       .map((session) => {
         const contractor = Array.isArray(session.contractor)
           ? session.contractor[0]
