@@ -98,7 +98,7 @@ Clients must be added before sessions can be logged for them. Only admins and ow
    - **Phone** - Optional contact number.
    - **Payment Method** - How this client's sessions are billed. See below.
    - **Billing Method** - How invoices are delivered and collected.
-   - **Invoicing** - **Per session** (default) creates an invoice each time a session is approved. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
+   - **Invoicing** - **Per session** (default) creates an invoice when a session is submitted. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
    - **Add Square processing fee to invoices** - Check this for clients who pay online; their Square invoices automatically include the processing fee configured in Settings > Business Rules > Invoices. You can still remove the fee from an individual invoice before sending it.
    - **Notes** - Internal notes visible only to your team (encrypted for HIPAA compliance).
    - **Send portal invite** - If the Client Portal feature is enabled and you entered an email, you can check this box to email the client a portal access link right away. This is currently the only way to send a portal invite — see **Client Portal** for details.
@@ -157,6 +157,8 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
    - **Client Notes** - Notes that may be shared with the client through the portal.
 3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
 
+Drafts are not billed — the invoice is created automatically when the session is submitted for approval (whether you submit right away or open the draft later and submit it then).
+
 ### Service Types and Restrictions
 
 Service types are configured by your organization. Some types are restricted to specific contractors, so you may not see all available service types. Admin-only work types (such as administrative tasks) may not require a client.
@@ -175,7 +177,7 @@ After selecting a service type and client, a pricing summary appears below the f
 
 ### After Submitting
 
-Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If a revision is requested, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
+Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If a revision is requested, you will see the reason and can edit and resubmit.
 
 If you want to log another session right away, click the **Log Another** button that appears on the success screen. The form resets the date, service type, clients, and notes, but keeps your time and duration from the previous entry.
     `,
@@ -245,10 +247,10 @@ Invoices in MCA Manager are created automatically. You do not need to build them
 
 ### The Automatic Process
 
-1. A contractor logs a session and submits it.
-2. An admin reviews and approves the session on the Sessions page.
-3. The system immediately creates a new invoice for the client in "Pending" status.
-4. The invoice appears in the Invoices section, ready to be sent.
+1. A contractor logs a session and submits it. The system immediately creates a new invoice for the client in "Pending" status.
+2. The invoice appears in the Invoices section, ready to be sent.
+3. An admin reviews and approves the session on the Sessions page.
+4. If auto-send is enabled (Settings > Customize and Automate > Automation), approval sends the invoice to the client automatically; otherwise, send it manually when you're ready.
 
 ### What Is on an Invoice
 
@@ -281,6 +283,10 @@ If you edit a session in a way that changes its price and it already has an invo
 ### Automation
 
 You can configure the app to send invoices automatically when a session is approved, rather than waiting for manual action. See Settings > Customize and Automate > Automation tab.
+
+### Missing an invoice?
+
+If a submitted or approved session has no invoice (for example, after an invoice was deleted), open the session's detail page — admins and owners will see a **Create Invoice** button. Clicking it creates the pending invoice(s) from the session's recorded amounts. Sessions for monthly-billed or scholarship clients don't get per-session invoices — they are billed through the monthly batch instead.
     `,
   },
   {
@@ -740,8 +746,8 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 
 ### Available Actions
 
-- **Approve** - Confirms the session. An invoice is automatically created for the client (unless the client is on a scholarship payment method).
-- **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit.
+- **Approve** - Confirms the session. Its invoice was already created automatically when the contractor submitted the session (scholarship and monthly-billed clients don't get a per-session invoice).
+- **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit. Any pending invoice for the session is removed at this point and recreated automatically when the contractor resubmits.
 - **Mark No-Show** - Used when a client did not attend. A flat no-show fee is charged to the client, and the contractor still receives their normal session pay.
 - **Cancel** - Removes the session from billing entirely. No invoice is created.
 - **Delete** - Permanently removes the session. Use only when the session was logged in error.
@@ -758,11 +764,11 @@ This is useful at the end of a pay period when all submissions are ready to proc
 
 ### After Requesting a Revision
 
-Sessions sent back for revision return to draft status and appear in the contractor's Sessions list with a **Needs Revision** badge and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue.
+Sessions sent back for revision return to draft status and appear in the contractor's Sessions list with a **Needs Revision** badge and the reason you provided. The contractor edits the session and resubmits, at which point it returns to your review queue. Resubmitting also recreates the session's invoice automatically, so nothing goes unbilled.
 
 ### After Approval
 
-Once approved, the session status changes to "Approved" and an invoice is created automatically. If auto-send is enabled in Settings, the invoice is also sent to the client immediately.
+Once approved, the session status changes to "Approved". If auto-send is enabled in Settings, the invoice (already created when the session was submitted) is sent to the client immediately.
     `,
   },
   {

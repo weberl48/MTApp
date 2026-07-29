@@ -44,6 +44,7 @@ import {
   saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
+import { ensureSessionInvoices, type EnsureSessionInvoicesResult } from '@/lib/invoices/ensure-session-invoices'
 import { resolveDurationOptions } from '@/lib/settings/input'
 import { perClientInvoiceShare } from '@/lib/invoices/split'
 import { encryptPHI } from '@/lib/crypto/actions'
@@ -519,6 +520,27 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           if (attendeesError) throw attendeesError
         }
 
+        // A session can reach 'submitted' by editing a draft — or after Request Revision
+        // deleted its pending invoice — so ensure per-session invoices exist for the final
+        // status. Idempotent: no-ops when any invoice (any status) or batch line item
+        // already covers this session. NOTE: `status` is typed 'draft' | 'submitted' but
+        // can hold 'approved' at runtime when editing an approved session (cast at init),
+        // hence the !== 'draft' check.
+        let ensured: EnsureSessionInvoicesResult | null = null
+        if (status !== 'draft' && pricing && editClientIds.length > 0) {
+          ensured = await ensureSessionInvoices({
+            supabase,
+            sessionId: existingSession.id,
+            organizationId: organization!.id,
+            date,
+            clientIds: editClientIds,
+            isGroup: !!isGroupService,
+            pricing,
+            isScholarshipService: selectedServiceType?.is_scholarship ?? false,
+            dueDays: settings?.invoice?.due_days,
+          })
+        }
+
         // If the user opted to regenerate, sync the linked invoice's amount fields to
         // match the new session pricing and reset its status to 'pending' so the admin
         // can re-send through the normal invoice workflow.
@@ -567,6 +589,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           }
         } else if (linkedInvoices.length > 0) {
           toast.success('Session updated. Invoice was not regenerated.')
+        } else if (ensured?.invoiceError) {
+          toast.error('Session updated, but the invoice could not be created. An admin can create it from the session page.')
+        } else if (ensured && ensured.created > 0) {
+          toast.success(ensured.created > 1 ? 'Session updated and invoices created.' : 'Session updated and invoice created.')
         } else {
           toast.success('Session updated successfully!')
         }
