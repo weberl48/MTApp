@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCA Dev Portal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230e1420'/%3E%3Cpath d='M3 10.5 5 6l2 7 2-10 2 8 2-4.5' stroke='%232dd4bf' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">May Creative Arts · operations</p>
+      <h1>Dev Portal</h1>
+    </div>
+    <div class="topbar-right">
+      <nav class="global-links" id="global-links" aria-label="External tools"></nav>
+      <div class="refresh-cluster">
+        <span class="muted mono" id="last-refresh">–</span>
+        <button class="btn" id="refresh-now">Refresh</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="env-heading">
+      <p class="eyebrow" id="env-heading">Environments</p>
+      <div class="env-grid" id="env-grid">
+        <p class="muted">Loading…</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="sweep-heading">
+      <div class="section-head">
+        <p class="eyebrow" id="sweep-heading">Endpoint sweep</p>
+        <div class="section-actions" id="sweep-actions"></div>
+      </div>
+      <p class="section-note">Probes every API route unauthenticated — a protected route answering 401/404 passes; a 5xx or timeout fails. Routes with side effects are skipped.</p>
+      <div id="sweep-results">
+        <p class="muted empty">No sweep run yet. Pick an environment above to start one.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="errors-heading">
+      <div class="section-head">
+        <p class="eyebrow" id="errors-heading">Captured errors</p>
+        <div class="section-actions">
+          <div class="chip-row" role="group" aria-label="Filter errors by source">
+            <button class="chip is-active" data-filter="all">All</button>
+            <button class="chip" data-filter="frontend">Frontend</button>
+            <button class="chip" data-filter="backend">Backend</button>
+          </div>
+          <button class="btn" id="test-error">Send test error</button>
+          <button class="btn btn-quiet" id="clear-errors">Clear</button>
+        </div>
+      </div>
+      <p class="section-note">The local app forwards browser errors and server <span class="mono">logger.error</span> calls here while it runs in dev mode. Production errors are not captured — check Vercel logs for those.</p>
+      <div id="error-feed">
+        <p class="muted empty">No errors captured yet.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="ci-heading">
+      <div class="section-head">
+        <p class="eyebrow" id="ci-heading">CI &amp; deploy</p>
+      </div>
+      <div id="ci-panel"><p class="muted">Loading…</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="muted">Local tool — nothing here is exposed beyond this machine. Secrets stay in <span class="mono">.env.local</span>.</p>
+  </footer>
+
+  <div id="tooltip" class="tooltip" role="status" hidden></div>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

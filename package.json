@@ -11,6 +11,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "portal": "node tools/dev-portal/server.mjs",
     "health": "npx tsx scripts/health-check.ts",
     "health:prod": "npx tsx scripts/health-check.ts https://your-production-url.vercel.app"
   },

@@ -27,6 +27,7 @@ export const logger = {
     } else {
       console.error('[MCA] %s', message)
     }
+    forwardToDevPortal(message, safeError)
   },
 
   /** Log warnings safely */
@@ -40,4 +41,32 @@ export const logger = {
       console.log('[MCA:dev] %s', message, ...args)
     }
   },
+}
+
+/**
+ * Dev-only: mirror server-side errors to the local dev portal
+ * (tools/dev-portal) so they show up in its error feed. Sends the same
+ * PHI-safe name/message shape that gets logged — never full error objects.
+ */
+function forwardToDevPortal(message: string, safeError?: { name: string; message: string } | string) {
+  if (process.env.NODE_ENV !== 'development') return
+  try {
+    const portalUrl = process.env.DEV_PORTAL_URL || 'http://localhost:4321'
+    fetch(`${portalUrl}/api/errors`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        source: 'backend',
+        kind: typeof safeError === 'object' && safeError ? safeError.name : 'logger.error',
+        message: [message, typeof safeError === 'string' ? safeError : safeError?.message]
+          .filter(Boolean)
+          .join(' — '),
+      }),
+      signal: AbortSignal.timeout(1500),
+    }).catch(() => {
+      // Portal not running — drop it, never disrupt the app.
+    })
+  } catch {
+    // Same: dev telemetry must never throw.
+  }
 }
