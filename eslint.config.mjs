@@ -7,11 +7,14 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      // eslint-config-next 16.2.12 widened this rule's detection, flagging 31
-      // pre-existing sites (the documented settings-form "mirror org state into
-      // local state" pattern). Keep visible as warnings; fix sites incrementally
-      // rather than churning every settings page in a deps bump.
+      // eslint-config-next 16.2.12 widened these React Compiler rules' detection,
+      // flagging 31 pre-existing sites (settings-form "mirror org state into local
+      // state" pattern, SessionForm ref reads). Keep visible as warnings; fix sites
+      // incrementally rather than churning every settings page + the session form
+      // in a deps bump.
       "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
     },
   },
   // Override default ignores of eslint-config-next.
