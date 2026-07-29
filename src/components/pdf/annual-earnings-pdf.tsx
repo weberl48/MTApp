@@ -19,6 +19,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
+  // The two header columns must be width-constrained: with both auto-sized,
+  // a long organizationName overlaps the title and a long subtitle clips off the page edge.
+  headerLeft: {
+    maxWidth: '45%',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
   orgName: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -145,10 +154,10 @@ export function AnnualEarningsPDF({
     <Document>
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={styles.orgName}>{organizationName}</Text>
           </View>
-          <View>
+          <View style={styles.headerRight}>
             <Text style={styles.docTitle}>Annual Earnings Summary</Text>
             <Text style={styles.docSubtitle}>
               {contractorName} — Tax Year {summary.year}
@@ -201,13 +210,21 @@ export function AnnualEarningsPDF({
             <Text style={[styles.colSessions, styles.tableHeaderText]}>Sessions</Text>
             <Text style={[styles.colAmount, styles.tableHeaderText]}>Amount</Text>
           </View>
-          {summary.byServiceType.map((service) => (
-            <View key={service.name} style={styles.tableRow}>
-              <Text style={styles.colName}>{service.name}</Text>
-              <Text style={styles.colSessions}>{service.sessions}</Text>
-              <Text style={styles.colAmount}>{formatCurrency(service.amount)}</Text>
+          {summary.byServiceType.length === 0 ? (
+            <View style={styles.tableRow}>
+              <Text style={[styles.colName, { color: '#6b7280' }]}>
+                No sessions paid in {summary.year}
+              </Text>
             </View>
-          ))}
+          ) : (
+            summary.byServiceType.map((service) => (
+              <View key={service.name} style={styles.tableRow}>
+                <Text style={styles.colName}>{service.name}</Text>
+                <Text style={styles.colSessions}>{service.sessions}</Text>
+                <Text style={styles.colAmount}>{formatCurrency(service.amount)}</Text>
+              </View>
+            ))
+          )}
         </View>
 
         <Text style={styles.footer}>
