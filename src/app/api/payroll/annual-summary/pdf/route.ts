@@ -95,10 +95,12 @@ export async function GET(request: NextRequest) {
     // PostgREST caps a single response at the project's max-rows setting (default
     // 1000). A year of paid sessions can exceed that, and a silently truncated
     // tax export under-reports totals — page through explicitly. The .order('id')
-    // gives stable page boundaries (no dup/missed rows between pages).
+    // gives stable page boundaries (no dup/missed rows between pages). Advance by
+    // the rows actually returned, not PAGE_SIZE: the server clamps to max-rows,
+    // and if that setting ever drops below PAGE_SIZE a fixed stride would skip rows.
     const PAGE_SIZE = 1000
     const rows: PaidSessionRow[] = []
-    for (let from = 0; ; from += PAGE_SIZE) {
+    for (let from = 0; ; ) {
       const { data, error } = await supabase
         .from('sessions')
         .select(`
@@ -120,7 +122,8 @@ export async function GET(request: NextRequest) {
       }
       const page = (data as unknown as PaidSessionRow[]) || []
       rows.push(...page)
-      if (page.length < PAGE_SIZE) break
+      if (page.length === 0) break
+      from += page.length
     }
 
     const inputs: PaidSessionInput[] = rows.map((session) => {
