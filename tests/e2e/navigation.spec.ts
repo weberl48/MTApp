@@ -12,7 +12,7 @@ test.describe('Smoke Tests - Critical User Flows', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
@@ -47,7 +47,8 @@ test.describe('Smoke Tests - Critical User Flows', () => {
     await sessionsLink.click()
     await expect(page).toHaveURL(/\/sessions/)
 
-    // Navigate to invoices
+    // Invoices lives under the collapsible "Billing" group — expand it first
+    await page.getByRole('button', { name: /billing/i }).click()
     const invoicesLink = page.getByRole('link', { name: /invoices/i }).first()
     await invoicesLink.click()
     await expect(page).toHaveURL(/\/invoices/)
@@ -79,7 +80,7 @@ test.describe('Dashboard', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
@@ -87,8 +88,10 @@ test.describe('Dashboard', () => {
   test('dashboard shows summary statistics', async ({ page }) => {
     await page.goto('/dashboard')
 
-    // Should show some stats/cards
-    expect(await page.locator('[class*="card"]').count()).toBeGreaterThanOrEqual(1)
+    // Cards render after the client-side data load — wait for one, then count
+    const cards = page.locator('[data-slot="card"], [class*="card"]')
+    await expect(cards.first()).toBeVisible({ timeout: 10000 })
+    expect(await cards.count()).toBeGreaterThanOrEqual(1)
   })
 
   test('dashboard shows recent activity', async ({ page }) => {
@@ -108,14 +111,14 @@ test.describe('Clients Page', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
 
   test('clients page loads', async ({ page }) => {
     await page.goto('/clients')
-    await expect(page.getByText(/clients/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible()
   })
 
   test('can add new client', async ({ page }) => {

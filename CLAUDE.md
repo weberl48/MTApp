@@ -96,7 +96,9 @@ Core tables with RLS policies:
 - `session_attendees` - Many-to-many for group sessions
 - `invoices` - Generated from sessions, Square integration fields, `reminder_sent_days` JSONB tracks which reminders have been sent
 
-Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND via the Supabase SQL editor** — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
+Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND** (SQL editor or Management API query endpoint) — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
+
+**Two Supabase projects since 2026-07-29**: production `ysmwowzxkgisshaormmf` and dev/sandbox `MCA-Dev` `gzrukevymmguqxuoynqk` (local `.env.local` and Vercel Preview/Development point at dev; Vercel Production points at prod; the two use DIFFERENT `ENCRYPTION_KEY`s). **Apply migrations to the dev ref first, verify, then prod.** The dev DB was cloned from the live prod schema (pg_dump) with seeded fake data (`dev-owner@maycreativearts.test` / `dev-contractor@maycreativearts.test`, password in `.env.local` `TEST_USER_PASSWORD`; org `require_mfa` off so e2e runs). Free-tier dev project auto-pauses after ~1 week idle — unpause via dashboard or Management API.
 
 Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 

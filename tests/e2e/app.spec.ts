@@ -27,7 +27,7 @@ test.describe('Authentication', () => {
     await page.getByRole('button', { name: /sign in/i }).click()
 
     // Should show error message
-    await expect(page.getByText(/invalid|error|incorrect/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/invalid email or password/i)).toBeVisible({ timeout: 10000 })
   })
 })
 

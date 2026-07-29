@@ -12,48 +12,38 @@ test.describe('Settings Page', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
 
-  test('settings page loads with tabs', async ({ page }) => {
+  // /settings/ is a hub of link cards (Profile & Security, Practice & Branding,
+  // Business Rules, Customize & Automate, Audit Log) — not tabs.
+  test('settings hub loads with section cards', async ({ page }) => {
     await page.goto('/settings')
-    await expect(page.getByText(/settings/i)).toBeVisible()
-
-    // Should have profile tab
-    await expect(page.getByRole('tab', { name: /profile/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+    await expect(page.getByRole('link', { name: /profile & security/i })).toBeVisible()
   })
 
-  test('profile tab shows user information', async ({ page }) => {
+  test('profile section shows account details', async ({ page }) => {
     await page.goto('/settings')
-
-    // Profile tab should be default
-    await expect(page.getByLabel(/name/i)).toBeVisible()
-    await expect(page.getByLabel(/email/i)).toBeVisible()
+    await page.getByRole('link', { name: /profile & security/i }).click()
+    await expect(page).toHaveURL(/\/settings\/profile/)
+    await expect(page.getByText(/name|email/i).first()).toBeVisible()
   })
 
-  test('can navigate between settings tabs', async ({ page }) => {
+  test('can navigate between settings sections', async ({ page }) => {
     await page.goto('/settings')
-
-    // Click security tab if visible
-    const securityTab = page.getByRole('tab', { name: /security/i })
-    if (await securityTab.isVisible()) {
-      await securityTab.click()
-      await expect(page.getByText(/password|mfa|two-factor/i)).toBeVisible()
-    }
+    await page.getByRole('link', { name: /business rules/i }).click()
+    await expect(page).toHaveURL(/\/settings\/business/)
   })
 
-  test('admin tabs visible for admin users', async ({ page }) => {
+  test('admin sections visible for owner users', async ({ page }) => {
     await page.goto('/settings')
 
-    // Check for admin-only tabs (may or may not be visible depending on role)
-    // These are checked to exist but not necessarily visible depending on user role
-    void page.getByRole('tab', { name: /team/i })
-    void page.getByRole('tab', { name: /services/i })
-
-    // At least profile should always be visible
-    await expect(page.getByRole('tab', { name: /profile/i })).toBeVisible()
+    // Owner sees the org-management cards
+    await expect(page.getByRole('link', { name: /business rules/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /customize & automate/i })).toBeVisible()
   })
 })
 
@@ -66,20 +56,15 @@ test.describe('Team Management', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
 
-  test('team tab shows invite functionality', async ({ page }) => {
-    await page.goto('/settings')
-
-    const teamTab = page.getByRole('tab', { name: /team/i })
-    if (await teamTab.isVisible()) {
-      await teamTab.click()
-      // Should show invite options
-      await expect(page.getByText(/invite|team member/i)).toBeVisible()
-    }
+  test('team page shows invite functionality', async ({ page }) => {
+    // Team is a top-level page now, not a settings tab
+    await page.goto('/team')
+    await expect(page.getByText(/invite/i).first()).toBeVisible({ timeout: 10000 })
   })
 })
 
@@ -92,19 +77,15 @@ test.describe('Service Types', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
 
-  test('services tab shows service type list', async ({ page }) => {
-    await page.goto('/settings')
-
-    const servicesTab = page.getByRole('tab', { name: /services/i })
-    if (await servicesTab.isVisible()) {
-      await servicesTab.click()
-      // Should show service types
-      await expect(page.getByText(/service type/i)).toBeVisible()
-    }
+  test('business rules shows service type list', async ({ page }) => {
+    // Service types live under Settings > Business Rules (services tab is the default)
+    await page.goto('/settings/business')
+    // A seeded service type should be listed
+    await expect(page.getByText('Musical Expressions').first()).toBeVisible({ timeout: 10000 })
   })
 })

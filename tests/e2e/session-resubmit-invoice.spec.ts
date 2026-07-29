@@ -7,7 +7,7 @@ const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 async function login(page: Page) {
   await page.goto('/login/')
   await page.getByLabel('Email').fill(TEST_EMAIL)
-  await page.getByLabel('Password').fill(TEST_PASSWORD)
+  await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
   await page.getByRole('button', { name: /sign in/i }).click()
   await page.waitForURL(/\/(dashboard|sessions)/, { timeout: 15000 })
 }
@@ -38,11 +38,14 @@ async function selectIndividualServiceType(page: Page): Promise<string | null> {
 }
 
 async function selectFirstClient(page: Page) {
-  const searchInput = page.getByPlaceholder('Search clients...')
-  await searchInput.click()
-  const firstClient = page.locator('[role="button"]').filter({ has: page.locator('.truncate') }).first()
+  // The client picker is a dialog behind the "Select clients..." button; rows are
+  // buttons named "Select <client name>". Scope to the dialog — the trigger's own
+  // accessible name ("Select clients...") also matches /^Select /.
+  await page.getByRole('button', { name: /select clients/i }).click()
+  const firstClient = page.getByRole('dialog').getByRole('button', { name: /^Select / }).first()
   await firstClient.waitFor({ timeout: 5000 })
   await firstClient.click()
+  await page.keyboard.press('Escape')
 }
 
 /** Resolves true/false without throwing, waiting briefly for the element to appear. */
@@ -112,6 +115,11 @@ test.describe('P0 regression: draft submitted later still gets an invoice', () =
     }
     await selectFirstClient(page)
     await page.waitForTimeout(500)
+
+    // Notes: required at submit time when the org's require_notes setting is on
+    // (it is for this org). Fill them at creation so the later edit-submit passes.
+    await page.getByPlaceholder('Internal notes (not visible to client)...').fill('e2e resubmit regression - internal')
+    await page.getByPlaceholder('Notes visible to client in their portal...').fill('e2e resubmit regression - client note')
 
     // Save as DRAFT
     await setSessionStatus(page, 'draft')

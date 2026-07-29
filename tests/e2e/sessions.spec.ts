@@ -15,7 +15,7 @@ test.describe('Sessions Page', () => {
     // Login before each test
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
@@ -33,7 +33,7 @@ test.describe('Sessions Page', () => {
 
     // Click calendar view
     await page.getByRole('tab', { name: /calendar/i }).click()
-    await expect(page.locator('[class*="calendar"]')).toBeVisible()
+    await expect(page.locator('[class*="calendar"]').first()).toBeVisible()
 
     // Switch back to list
     await page.getByRole('tab', { name: /list/i }).click()
@@ -48,14 +48,11 @@ test.describe('Sessions Page', () => {
   test('session filters work', async ({ page }) => {
     await page.goto('/sessions')
 
-    // Open filter if collapsed
-    const filterButton = page.getByRole('button', { name: /filter/i })
-    if (await filterButton.isVisible()) {
-      await filterButton.click()
-    }
+    // Open the filters panel (button renders after the client-side load — auto-wait via click)
+    await page.getByRole('button', { name: /^filters/i }).click()
 
-    // Status filter should exist
-    await expect(page.getByText(/status/i)).toBeVisible()
+    // Status filter should exist in the expanded panel
+    await expect(page.getByText('Status', { exact: true }).first()).toBeVisible()
   })
 })
 
@@ -68,7 +65,7 @@ test.describe('Session Creation', () => {
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
     await page.waitForURL(/\/(dashboard|sessions)/)
   })
@@ -76,17 +73,19 @@ test.describe('Session Creation', () => {
   test('new session form loads with required fields', async ({ page }) => {
     await page.goto('/sessions/new')
 
-    // Check for key form elements
-    await expect(page.getByText(/service type/i)).toBeVisible()
-    await expect(page.getByText(/date/i)).toBeVisible()
-    await expect(page.getByText(/duration/i)).toBeVisible()
+    // Check for key form elements (labels can repeat in select placeholders — first match suffices)
+    await expect(page.getByText(/service type/i).first()).toBeVisible()
+    await expect(page.getByText(/date/i).first()).toBeVisible()
+    await expect(page.getByText(/duration/i).first()).toBeVisible()
   })
 
   test('session form shows pricing preview', async ({ page }) => {
     await page.goto('/sessions/new')
 
-    // Pricing section should be visible
-    await expect(page.getByText(/pricing|total|amount/i)).toBeVisible()
+    // Pricing hint appears once a service type is selected (nothing renders before that)
+    await page.locator('[data-tour="session-form-service-type"] button[role="combobox"]').click()
+    await page.getByRole('option').first().click()
+    await expect(page.getByText(/rate: \$/i).first()).toBeVisible()
   })
 
   test('cannot submit session without required fields', async ({ page }) => {
