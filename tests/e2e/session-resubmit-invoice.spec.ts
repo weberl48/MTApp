@@ -1,16 +1,7 @@
 import { test, expect, Page, Locator } from '@playwright/test'
+import { login, selectFirstClient, TEST_PASSWORD } from './helpers'
 
 // Test credentials - use environment variables in CI
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
-
-async function login(page: Page) {
-  await page.goto('/login/')
-  await page.getByLabel('Email').fill(TEST_EMAIL)
-  await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-  await page.getByRole('button', { name: /sign in/i }).click()
-  await page.waitForURL(/\/(dashboard|sessions)/, { timeout: 15000 })
-}
 
 /**
  * Helper: Pick the first available individual service type (no headcount field).
@@ -35,17 +26,6 @@ async function selectIndividualServiceType(page: Page): Promise<string | null> {
     await trigger.click()
   }
   return null
-}
-
-async function selectFirstClient(page: Page) {
-  // The client picker is a dialog behind the "Select clients..." button; rows are
-  // buttons named "Select <client name>". Scope to the dialog — the trigger's own
-  // accessible name ("Select clients...") also matches /^Select /.
-  await page.getByRole('button', { name: /select clients/i }).click()
-  const firstClient = page.getByRole('dialog').getByRole('button', { name: /^Select / }).first()
-  await firstClient.waitFor({ timeout: 5000 })
-  await firstClient.click()
-  await page.keyboard.press('Escape')
 }
 
 /** Resolves true/false without throwing, waiting briefly for the element to appear. */

@@ -1,20 +1,10 @@
 import { test, expect } from '@playwright/test'
+import { login } from './helpers'
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 
 test.describe('Settings Page', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   // /settings/ is a hub of link cards (Profile & Security, Practice & Branding,
@@ -29,13 +19,23 @@ test.describe('Settings Page', () => {
     await page.goto('/settings')
     await page.getByRole('link', { name: /profile & security/i }).click()
     await expect(page).toHaveURL(/\/settings\/profile/)
-    await expect(page.getByText(/name|email/i).first()).toBeVisible()
+    // Assert real labeled form controls, not bare page text — any stray
+    // "name"/"email" string on the page would satisfy a text-presence check.
+    await expect(page.getByLabel('Name', { exact: true })).toBeVisible()
+    await expect(page.getByLabel('Phone', { exact: true })).toBeVisible()
+  })
+
+  test('profile section renders two-factor authentication controls', async ({ page }) => {
+    await page.goto('/settings/profile')
+    await expect(page.getByText('Two-Factor Authentication').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('can navigate between settings sections', async ({ page }) => {
     await page.goto('/settings')
     await page.getByRole('link', { name: /business rules/i }).click()
     await expect(page).toHaveURL(/\/settings\/business/)
+    // Landing on the URL is not evidence the section rendered.
+    await expect(page.getByRole('tab', { name: /invoices/i }).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('admin sections visible for owner users', async ({ page }) => {
@@ -49,37 +49,25 @@ test.describe('Settings Page', () => {
 
 test.describe('Team Management', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
-  test('team page shows invite functionality', async ({ page }) => {
-    // Team is a top-level page now, not a settings tab
-    await page.goto('/team')
-    await expect(page.getByText(/invite/i).first()).toBeVisible({ timeout: 10000 })
+  test('team page is reachable from in-app navigation and shows invite action', async ({ page }) => {
+    // Navigate the way a user does — a direct goto() would still pass if the
+    // Team link were removed from the sidebar entirely.
+    await page.goto('/dashboard')
+    await page.getByRole('link', { name: 'Team', exact: true }).click()
+    await expect(page).toHaveURL(/\/team/)
+    // An actual control, not any text containing "invite".
+    await expect(
+      page.getByRole('button', { name: /invite/i }).or(page.getByRole('link', { name: /invite/i })).first()
+    ).toBeVisible({ timeout: 10000 })
   })
 })
 
 test.describe('Service Types', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('business rules shows service type list', async ({ page }) => {
