@@ -1,4 +1,21 @@
 import { defineConfig, devices } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+
+// Load .env.local so authenticated specs actually run. Without this,
+// TEST_USER_PASSWORD never reaches the test process and ~70% of the suite
+// silently skips while still reporting green. No dotenv dependency: parse the
+// two keys we need and never overwrite a value already set in the environment.
+for (const key of ['TEST_USER_EMAIL', 'TEST_USER_PASSWORD']) {
+  if (process.env[key]) continue
+  try {
+    const match = readFileSync('.env.local', 'utf8').match(
+      new RegExp(`^${key}=("?)(.+?)\\1\\s*$`, 'm')
+    )
+    if (match) process.env[key] = match[2]
+  } catch {
+    // no .env.local — specs will skip, which is the intended fallback
+  }
+}
 
 export default defineConfig({
   testDir: './tests/e2e',

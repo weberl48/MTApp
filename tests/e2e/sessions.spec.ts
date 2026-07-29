@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test'
+import { login, TEST_PASSWORD } from './helpers'
 
 // Test credentials - use environment variables in CI
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 
 test.describe('Sessions Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,11 +12,7 @@ test.describe('Sessions Page', () => {
     }
 
     // Login before each test
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('sessions page loads with list view', async ({ page }) => {
@@ -58,16 +53,7 @@ test.describe('Sessions Page', () => {
 
 test.describe('Session Creation', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('new session form loads with required fields', async ({ page }) => {
@@ -80,12 +66,22 @@ test.describe('Session Creation', () => {
   })
 
   test('session form shows pricing preview', async ({ page }) => {
-    await page.goto('/sessions/new')
+    // Trailing slash (trailingSlash: true) — '/sessions/new' 308-redirects, and
+    // clicking during that redirect raced the async service-type fetch below.
+    await page.goto('/sessions/new/')
+
+    // Wait for the form to actually finish loading its service types before
+    // opening the select; otherwise the dropdown opens empty and the click on
+    // the first option times out.
+    const trigger = page.locator('[data-tour="session-form-service-type"] button[role="combobox"]')
+    await trigger.waitFor({ state: 'visible', timeout: 10000 })
+    await trigger.click()
+    const firstOption = page.getByRole('option').first()
+    await firstOption.waitFor({ state: 'visible', timeout: 10000 })
+    await firstOption.click()
 
     // Pricing hint appears once a service type is selected (nothing renders before that)
-    await page.locator('[data-tour="session-form-service-type"] button[role="combobox"]').click()
-    await page.getByRole('option').first().click()
-    await expect(page.getByText(/rate: \$/i).first()).toBeVisible()
+    await expect(page.getByText(/rate: \$/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('cannot submit session without required fields', async ({ page }) => {

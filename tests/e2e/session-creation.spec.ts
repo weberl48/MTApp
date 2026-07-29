@@ -1,8 +1,7 @@
 import { test, expect, Page } from '@playwright/test'
+import { login, selectFirstClient, TEST_PASSWORD } from './helpers'
 
 // Test credentials - use environment variables in CI
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 
 /**
  * Helper: Select a value from a shadcn/Radix Select component.
@@ -18,11 +17,7 @@ async function selectOption(page: Page, containerSelector: string, optionText: s
  * Helper: Login and navigate to session creation page.
  */
 async function loginAndGoToNewSession(page: Page) {
-  await page.goto('/login/')
-  await page.getByLabel('Email').fill(TEST_EMAIL)
-  await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-  await page.getByRole('button', { name: /sign in/i }).click()
-  await page.waitForURL(/\/(dashboard|sessions)/, { timeout: 15000 })
+  await login(page)
   await page.goto('/sessions/new/')
   // Wait for form to load (service types fetched)
   await page.waitForSelector('[data-tour="session-form-service-type"]', { timeout: 10000 })
@@ -88,20 +83,6 @@ async function selectGroupServiceType(page: Page): Promise<string | null> {
   }
 
   return null // No group service type found
-}
-
-/**
- * Helper: Select the first available client from the ClientMultiSelect.
- */
-async function selectFirstClient(page: Page) {
-  // The client picker is a dialog behind the "Select clients..." button; rows are
-  // buttons named "Select <client name>". Scope to the dialog — the trigger's own
-  // accessible name ("Select clients...") also matches /^Select /.
-  await page.getByRole('button', { name: /select clients/i }).click()
-  const firstClient = page.getByRole('dialog').getByRole('button', { name: /^Select / }).first()
-  await firstClient.waitFor({ timeout: 5000 })
-  await firstClient.click()
-  await page.keyboard.press('Escape')
 }
 
 /**
@@ -191,8 +172,11 @@ test.describe('Session Creation E2E', () => {
     // Headcount field should be visible
     await expect(page.locator('#groupHeadcount')).toBeVisible()
 
-    // Client multi-select should NOT be visible for group sessions
-    await expect(page.getByPlaceholder('Search clients...')).not.toBeVisible()
+    // The individual-client multi-select block must be absent for group sessions.
+    // Assert on the block itself, not its search input: that input lives inside a
+    // closed popover, so it is hidden in individual mode too and the assertion
+    // would pass vacuously.
+    await expect(page.locator('[data-tour="session-form-clients"]')).toHaveCount(0)
 
     // Enter headcount
     await page.fill('#groupHeadcount', '4')

@@ -1,20 +1,10 @@
 import { test, expect } from '@playwright/test'
+import { login } from './helpers'
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 
 test.describe('Invoices Page', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('invoices page loads with summary cards', async ({ page }) => {
@@ -48,16 +38,7 @@ test.describe('Invoices Page', () => {
 
 test.describe('Invoice Actions', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('bulk selection works', async ({ page }) => {

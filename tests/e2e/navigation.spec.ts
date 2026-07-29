@@ -1,20 +1,10 @@
 import { test, expect } from '@playwright/test'
+import { login } from './helpers'
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'weberlucasdev@gmail.com'
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
 
 test.describe('Smoke Tests - Critical User Flows', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('can navigate to all main pages', async ({ page }) => {
@@ -73,16 +63,7 @@ test.describe('Smoke Tests - Critical User Flows', () => {
 
 test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('dashboard shows summary statistics', async ({ page }) => {
@@ -104,16 +85,7 @@ test.describe('Dashboard', () => {
 
 test.describe('Clients Page', () => {
   test.beforeEach(async ({ page }) => {
-    if (!TEST_PASSWORD) {
-      test.skip()
-      return
-    }
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_PASSWORD)
-    await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL(/\/(dashboard|sessions)/)
+    await login(page)
   })
 
   test('clients page loads', async ({ page }) => {
