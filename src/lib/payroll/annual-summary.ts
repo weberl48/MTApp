@@ -155,9 +155,14 @@ export function availableTaxYears(
   return [...years].sort((a, b) => b - a)
 }
 
-/** Quote a CSV cell (internal quotes doubled). */
+/**
+ * Quote a CSV cell (internal quotes doubled). Cells starting with =, +, -, @,
+ * tab, or CR additionally get a leading apostrophe so spreadsheet apps treat
+ * them as text, never as a formula (CSV/formula-injection hardening).
+ */
 function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`
+  const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+  return `"${neutralized.replace(/"/g, '""')}"`
 }
 
 export function buildSummaryCsv(totals: ContractorYearTotal[], year: number): string {

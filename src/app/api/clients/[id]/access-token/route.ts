@@ -276,8 +276,9 @@ export async function DELETE(
         message: 'All tokens revoked',
       })
     } else if (body.tokenId) {
-      // Revoke specific token
-      await revokeAccessToken(body.tokenId)
+      // Revoke specific token — scoped to the path client so a token id from
+      // another client/org can't be revoked through this authorization check.
+      await revokeAccessToken(body.tokenId, clientId)
       return NextResponse.json({
         success: true,
         message: 'Token revoked',
