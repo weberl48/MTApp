@@ -74,13 +74,16 @@ export async function GET(request: NextRequest) {
       .eq('organization_id', userProfile.organization_id)
       .gte('contractor_paid_date', start)
       .lte('contractor_paid_date', end)
-      .order('contractor_paid_date', { ascending: true })
 
     if (error) {
-      console.error('[MCA] Tax summary export failed')
+      console.error('[MCA] Tax summary export: query failed')
       return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
     }
 
+    // A paid session must never be dropped from a tax export. Unresolved contractor
+    // joins are believed unreachable today (sessions.contractor_id is NOT NULL with an
+    // FK, and team removal is blocked while sessions exist) but if one ever occurs, it
+    // must surface as "Unknown contractor" rather than silently reducing totals.
     const inputs: ContractorPaidSessionInput[] = ((sessions as unknown as PaidSessionRow[]) || [])
       .map((session) => {
         const contractor = Array.isArray(session.contractor)
@@ -95,12 +98,11 @@ export async function GET(request: NextRequest) {
           contractor_paid_date: session.contractor_paid_date,
           contractor_paid_amount: session.contractor_paid_amount,
           contractor_pay: session.contractor_pay,
-          contractor_id: contractor?.id ?? '',
-          contractor_name: contractor?.name ?? 'Unknown',
+          contractor_id: contractor?.id ?? 'unknown',
+          contractor_name: contractor?.name ?? 'Unknown contractor',
           service_type_name: serviceType?.name ?? null,
         }
       })
-      .filter((session) => session.contractor_id)
 
     const csv = detail
       ? buildDetailCsv(inputs, year)
