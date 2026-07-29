@@ -49,7 +49,17 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
   const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
+    // Guards against a stale-response race: if contractorId/organizationId change
+    // (e.g. owner switches "View As" mid-fetch) without unmounting, a slow in-flight
+    // load for the PREVIOUS contractor could otherwise setRows() after the new
+    // contractor's load already finished, showing contractor A's totals under
+    // contractor B's name. Mirrors the cancelled-flag pattern in
+    // src/app/(dashboard)/invoices/page.tsx.
+    let cancelled = false
+
     async function load() {
+      setLoading(true)
+      setRows([])
       const supabase = createClient()
 
       // PostgREST caps a single response at the project's max-rows setting
@@ -74,7 +84,10 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
           .order('id', { ascending: true })
           .range(from, from + PAGE_SIZE - 1)
 
+        if (cancelled) return
+
         if (error) {
+          toast.error('Failed to load annual summary')
           setLoading(false)
           return
         }
@@ -83,6 +96,8 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
         if (page.length === 0) break
         from += page.length
       }
+
+      if (cancelled) return
 
       const mapped = all.map((session) => {
         const serviceType = Array.isArray(session.service_type)
@@ -99,6 +114,10 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
       setLoading(false)
     }
     void load()
+
+    return () => {
+      cancelled = true
+    }
   }, [contractorId, organizationId])
 
   const years = useMemo(
@@ -109,6 +128,15 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
       ),
     [rows]
   )
+
+  // If the contractor changes and the currently-selected year has no data for
+  // them, snap back to the newest available year rather than showing a Select
+  // value with no matching item. `years` always includes the current calendar
+  // year, so years[0] is always defined.
+  useEffect(() => {
+    if (!years.includes(year)) setYear(years[0])
+  }, [years, year])
+
   const summary = useMemo(() => summarizeContractorYear(rows, year), [rows, year])
 
   const downloadPdf = async () => {
