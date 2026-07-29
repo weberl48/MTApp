@@ -177,7 +177,7 @@ After selecting a service type and client, a pricing summary appears below the f
 
 ### After Submitting
 
-Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If a revision is requested, you will see the reason and can edit and resubmit. After approval, an invoice is automatically created.
+Once submitted, a session goes to an admin for review. You can view its status on the Sessions page. If a revision is requested, you will see the reason and can edit and resubmit.
 
 If you want to log another session right away, click the **Log Another** button that appears on the success screen. The form resets the date, service type, clients, and notes, but keeps your time and duration from the previous entry.
     `,
@@ -247,10 +247,10 @@ Invoices in MCA Manager are created automatically. You do not need to build them
 
 ### The Automatic Process
 
-1. A contractor logs a session and submits it.
-2. An admin reviews and approves the session on the Sessions page.
-3. The system immediately creates a new invoice for the client in "Pending" status.
-4. The invoice appears in the Invoices section, ready to be sent.
+1. A contractor logs a session and submits it. The system immediately creates a new invoice for the client in "Pending" status.
+2. The invoice appears in the Invoices section, ready to be sent.
+3. An admin reviews and approves the session on the Sessions page.
+4. If auto-send is enabled (Settings > Customize and Automate > Automation), approval sends the invoice to the client automatically; otherwise, send it manually when you're ready.
 
 ### What Is on an Invoice
 
@@ -284,7 +284,7 @@ If you edit a session in a way that changes its price and it already has an invo
 
 You can configure the app to send invoices automatically when a session is approved, rather than waiting for manual action. See Settings > Customize and Automate > Automation tab.
 
-## Missing an invoice?
+### Missing an invoice?
 
 If a submitted or approved session has no invoice (for example, after an invoice was deleted), open the session's detail page — admins and owners will see a **Create Invoice** button. Clicking it creates the pending invoice(s) from the session's recorded amounts. Sessions for monthly-billed or scholarship clients don't get per-session invoices — they are billed through the monthly batch instead.
     `,
@@ -746,7 +746,7 @@ Go to the **Sessions** page and filter by status "Submitted." All sessions waiti
 
 ### Available Actions
 
-- **Approve** - Confirms the session. An invoice is automatically created for the client (unless the client is on a scholarship payment method).
+- **Approve** - Confirms the session. Its invoice was already created automatically when the contractor submitted the session (scholarship and monthly-billed clients don't get a per-session invoice).
 - **Request Revision** (called **Revise** on the sessions list) - Sends the session back to draft status with a reason. The session is flagged **Needs Revision**, the contractor can see your note, make changes, and resubmit. Any pending invoice for the session is removed at this point and recreated automatically when the contractor resubmits.
 - **Mark No-Show** - Used when a client did not attend. A flat no-show fee is charged to the client, and the contractor still receives their normal session pay.
 - **Cancel** - Removes the session from billing entirely. No invoice is created.
@@ -768,7 +768,7 @@ Sessions sent back for revision return to draft status and appear in the contrac
 
 ### After Approval
 
-Once approved, the session status changes to "Approved" and an invoice is created automatically. If auto-send is enabled in Settings, the invoice is also sent to the client immediately.
+Once approved, the session status changes to "Approved". If auto-send is enabled in Settings, the invoice (already created when the session was submitted) is sent to the client immediately.
     `,
   },
   {
