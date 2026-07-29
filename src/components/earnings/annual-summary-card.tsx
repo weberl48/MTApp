@@ -169,7 +169,8 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
           <div>
             <CardTitle>Annual Summary</CardTitle>
             <CardDescription>
-              Payments received per calendar year, for your tax records
+              Payments received per calendar year, by payment date (cash basis) — differs
+              from Paid Out above, which counts this year&apos;s sessions
             </CardDescription>
           </div>
           <Select value={String(year)} onValueChange={(value) => setYear(Number(value))}>
@@ -203,6 +204,11 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
                 <p className="text-2xl font-bold">{summary.sessionCount}</p>
               </div>
             </div>
+            {summary.sessionCount === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Payments appear here once your sessions are marked paid by your admin.
+              </p>
+            )}
             <Button variant="outline" size="sm" onClick={downloadPdf} disabled={downloading}>
               {downloading ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
