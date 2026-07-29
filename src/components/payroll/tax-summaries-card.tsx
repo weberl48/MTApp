@@ -63,27 +63,41 @@ export function TaxSummariesCard() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('sessions')
-        .select(`
-          date,
-          duration_minutes,
-          contractor_paid_date,
-          contractor_paid_amount,
-          contractor_pay,
-          contractor:users(id, name),
-          service_type:service_types(name)
-        `)
-        .not('contractor_paid_date', 'is', null)
-        .order('contractor_paid_date', { ascending: false })
 
-      if (error) {
-        toast.error('Failed to load tax summaries')
-        setLoading(false)
-        return
+      // PostgREST caps a single response at the project's max-rows setting (default
+      // 1000). This fetch spans ALL years, so it can exceed that — page through so
+      // the on-screen totals can't silently under-count vs the exported CSV. Advance
+      // by the rows actually returned (server may clamp below PAGE_SIZE).
+      const PAGE_SIZE = 1000
+      const all: PaidSessionRow[] = []
+      for (let from = 0; ; ) {
+        const { data, error } = await supabase
+          .from('sessions')
+          .select(`
+            date,
+            duration_minutes,
+            contractor_paid_date,
+            contractor_paid_amount,
+            contractor_pay,
+            contractor:users(id, name),
+            service_type:service_types(name)
+          `)
+          .not('contractor_paid_date', 'is', null)
+          .order('id', { ascending: true })
+          .range(from, from + PAGE_SIZE - 1)
+
+        if (error) {
+          toast.error('Failed to load tax summaries')
+          setLoading(false)
+          return
+        }
+        const page = (data as unknown as PaidSessionRow[]) || []
+        all.push(...page)
+        if (page.length === 0) break
+        from += page.length
       }
 
-      const mapped = ((data as unknown as PaidSessionRow[]) || []).map((session) => {
+      const mapped = all.map((session) => {
         const contractor = Array.isArray(session.contractor)
           ? session.contractor[0]
           : session.contractor
