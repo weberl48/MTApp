@@ -9,6 +9,7 @@ const RECOMMENDED_VARS = [
   'NEXT_PUBLIC_APP_URL',
   'RESEND_API_KEY',
   'EMAIL_FROM_DOMAIN',
+  'ANTHROPIC_API_KEY', // AI help assistant (feature hides itself when absent)
 ] as const
 
 export function validateEnv() {
