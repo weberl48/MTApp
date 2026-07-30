@@ -8,7 +8,8 @@ export const CLIENTS_ARTICLES: HelpArticle[] = [
     description: 'How to add a new client and configure their billing settings.',
     walkthrough: 'add-client',
     adminOnly: true,
-    relatedArticles: ['logging-a-session', 'client-portal', 'scholarship-billing'],
+    relatedArticles: ['logging-a-session', 'client-portal', 'scholarship-billing', 'client-billing-controls'],
+    keywords: ['add client', 'payment method', 'billing method', 'monthly batch', 'new client'],
     content: `
 ## Adding a New Client
 
@@ -51,10 +52,7 @@ Set **Invoicing** to **Monthly batch** for clients or agencies who prefer one in
 
 ### After Adding a Client
 
-Once a client is created, you can:
-
-- Attach **resources** such as homework sheets, links, or files.
-- Review their complete **session and invoice history** from the client detail page.
+Once a client is created, click their name from the Clients list to review their complete **session and invoice history** from the client detail page (see **Viewing Client Details & History**).
     `,
   },
   {
@@ -63,7 +61,8 @@ Once a client is created, you can:
     category: 'clients',
     description: 'How the client portal works and how to enable it for individual clients.',
     adminOnly: true,
-    relatedArticles: ['adding-a-client'],
+    relatedArticles: ['adding-a-client', 'session-requests'],
+    keywords: ['portal', 'client portal', 'access token', 'invite', 'portal link'],
     content: `
 ## Client Portal
 
@@ -95,11 +94,11 @@ There is currently no way to send or re-send a portal invite for a client that a
 
 ### Session Requests
 
-Clients can request a new session from the portal by submitting preferred dates and times. The request is recorded in MCA Manager, but there is currently no dashboard screen that lists these requests for staff to review — check with the practice owner or administrator directly if a client mentions they've submitted one. A staff-facing review screen for session requests is planned for a future update.
+Clients can request a new session from the portal by submitting preferred dates and times. The request is recorded in MCA Manager, but there is currently no dashboard screen that lists these requests for staff to review — check with the practice owner or administrator directly if a client mentions they've submitted one. A staff-facing review screen for session requests is planned for a future update. See **Session Requests** for what information is captured and how requests are resolved once reviewed.
 
 ### Token Expiry
 
-Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. When a link expires, the client sees a "This Link Has Expired" screen with a **Get a New Link** button where they can request a fresh link by entering their email — or you can send a new invite from the client's page.
+Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. When a link expires, the client sees a "This Link Has Expired" screen with a **Get a New Link** button where they can request a fresh link themselves by entering their email — this self-service flow is currently the only way to get a client a new link once their original invite has expired.
     `,
   },
   {
@@ -108,7 +107,8 @@ Portal links expire after a set number of days. You can configure the expiry in 
     category: 'clients',
     description: 'How to view a client\'s contact information, session history, and invoice history.',
     adminOnly: true,
-    relatedArticles: ['adding-a-client', 'client-portal'],
+    relatedArticles: ['adding-a-client', 'client-portal', 'client-billing-controls'],
+    keywords: ['client detail', 'session history', 'invoice history', 'contact info'],
     content: `
 ## Viewing Client Details & History
 
@@ -133,6 +133,53 @@ Lists all sessions for this client, showing the service type, status, date, dura
 ### Invoices Tab
 
 Lists all invoices for this client, showing the amount, status, payment method, creation date, and due date. Click any invoice to view its detail page.
+    `,
+  },
+  {
+    slug: 'client-billing-controls',
+    title: 'Client Billing Controls',
+    category: 'clients',
+    description: 'How per-client invoicing frequency and the Square processing fee opt-in work, and when each is snapshotted onto an invoice.',
+    adminOnly: true,
+    relatedArticles: ['adding-a-client', 'sending-invoices', 'scholarship-billing'],
+    keywords: ['monthly billing', 'billing frequency', 'square fee', 'batch', 'per-session invoicing'],
+    content: `
+## Client Billing Controls
+
+Two per-client settings change how and when a client gets invoiced: **Invoicing** frequency and the **Square processing fee** opt-in. Both are set when you add a client and can be changed later from **Clients > Edit Client**.
+
+### Per Session vs. Monthly Batch
+
+- **Per session** (the default) creates an invoice as soon as a session for that client is submitted.
+- **Monthly batch** holds the client's approved sessions and combines them into a single invoice at the end of the month, on the **Scholarship** tab of the Invoices page - the same place scholarship batches are generated.
+
+Monthly-batched clients are billed at **normal pricing**. Switching a client to monthly batch only changes *when* they're invoiced, not *how much* - that's the key difference from scholarship clients, who are billed at a flat scholarship rate. A client can be monthly-batched without being a scholarship client at all, for example an agency that prefers one combined invoice a month instead of one per session.
+
+If **Auto-Generate Scholarship Invoices** is turned on in Settings > Customize and Automate > Automation, monthly-batched clients are swept into that same automatic batch run alongside scholarship clients.
+
+### Square Processing Fee Opt-In
+
+Your organization can charge an automatic processing fee on Square invoices to cover the cost of accepting online payments. It can be controlled at three levels, and the client-level toggle documented here is the middle one:
+
+1. **Organization-wide** - turn the fee on for every Square invoice (Settings > Business Rules > Invoices).
+2. **Per-client** - leave the org-wide toggle off and check **Add Square processing fee to invoices** on individual clients instead, for clients who typically pay online.
+3. **Per-invoice** - override either default on a single invoice before it's sent to Square.
+
+A client's toggle is unset by default, meaning that client simply follows whatever the organization-wide setting is. Checking or unchecking it explicitly overrides the org setting for that one client.
+
+### Snapshot at Invoice Time
+
+When an invoice is created, the client's Square-fee opt-in is **snapshotted onto that invoice** rather than looked up live every time the invoice is viewed. Changing a client's opt-in later only affects invoices created *after* the change - it will not add or remove the fee from an invoice that already exists. To change the fee on an existing unpaid invoice, use the per-invoice toggle on that invoice's detail page instead.
+
+### Where to Configure
+
+- Invoicing frequency and Square fee opt-in: **Clients > Add Client** or **Clients > Edit Client**.
+- Organization-wide Square fee default and amount: **Settings > Business Rules > Invoices**.
+- Scholarship batch automation: **Settings > Customize and Automate > Automation**.
+
+### See Also
+
+For the full mechanics of the Square processing fee, including fixed vs. percentage amounts, see **Sending Invoices**. For how scholarship batches work, see **Scholarship Billing**.
     `,
   },
 ]

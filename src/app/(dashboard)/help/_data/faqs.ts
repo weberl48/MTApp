@@ -246,7 +246,7 @@ This action is atomic — it updates every one of that contractor's unpaid sessi
     question: 'What happens when a client requests a session from the portal?',
     answer: `Clients can request a new session from their portal by submitting preferred (and optional alternative) dates and times, plus notes. The request is recorded, and staff notes stay private and encrypted — but as of now there's no dashboard screen that lists these requests for staff to review. If a client mentions they've submitted one, check with the practice owner or administrator directly. A staff-facing review screen is planned for a future update.
 
-Behind the scenes, approving or declining a request (currently done directly, not through a self-service screen) sends the client a notification email confirming or turning down their requested time — it does not, by itself, create a session. Staff still log the actual session the normal way afterward.`,
+Behind the scenes, approving a request sends the client a confirmation email and — when the reviewer supplies a date, service type, and contractor — can also create the session directly in **approved** status, with its invoice, skipping the draft/submit queue. Declining sends the client a decline notice. Either way a request can only be acted on once.`,
     articleSlug: 'session-requests',
     category: 'sessions',
     adminOnly: true,

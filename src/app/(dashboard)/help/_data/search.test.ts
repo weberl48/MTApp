@@ -26,11 +26,15 @@ describe('searchArticlesRanked', () => {
     expect(top.article.category).toBe('invoices')
   })
 
-  // un-todo in plan Task 6 when my-earnings gains its keywords
-  it.todo('ranks by keywords: "pay stub" surfaces my-earnings')
+  it('ranks by keywords: "pay stub" surfaces my-earnings', () => {
+    const slugs = searchArticlesRanked('pay stub').map(r => r.article.slug)
+    expect(slugs[0]).toBe('my-earnings')
+  })
 
-  // un-todo in plan Task 5 when no-shows-and-cancellations lands
-  it.todo('handles question phrasing: "how do i change the no-show fee"')
+  it('handles question phrasing: "how do i change the no-show fee"', () => {
+    const slugs = searchArticlesRanked('how do i change the no-show fee').map(r => r.article.slug)
+    expect(slugs[0]).toBe('no-shows-and-cancellations')
+  })
 
   it('returns [] for empty and gibberish queries', () => {
     expect(searchArticlesRanked('')).toEqual([])
