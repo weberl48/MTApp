@@ -8,8 +8,14 @@ test.describe('help center', () => {
   })
 
   test('synonym search finds invoice help for "bill"', async ({ page }) => {
-    await page.getByPlaceholder('Search help articles...').fill('bill')
-    await expect(page.getByRole('link', { name: /invoice/i }).first()).toBeVisible()
+    // Retry fill+assert: on a cold page the input can be visible before React
+    // hydration attaches its onChange, silently swallowing the first fill.
+    await expect(async () => {
+      const input = page.getByPlaceholder('Search help articles...')
+      await input.fill('')
+      await input.fill('bill')
+      await expect(page.getByRole('link', { name: /invoice/i }).first()).toBeVisible({ timeout: 2000 })
+    }).toPass({ timeout: 15000 })
   })
 
   test('FAQ answer renders inline for question phrasing', async ({ page }) => {
