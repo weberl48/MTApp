@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import ReactMarkdown, { Components } from 'react-markdown'
-import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle, UserCog, BarChart2, ArrowRight } from 'lucide-react'
+import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle, UserCog, BarChart2, ArrowRight, Sparkles } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import { HelpGapsCard } from '@/components/help/help-gaps-card'
+import { AiChat, useAiHelpVisible } from '@/components/help/ai-chat'
 import { createSearchMissGate, logSearchMiss } from '@/lib/help/events'
 import {
   HELP_ARTICLES,
@@ -90,6 +91,8 @@ export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<HelpCategory | null>(null)
   const [showAllFaqs, setShowAllFaqs] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
+  const aiVisible = useAiHelpVisible()
   const { can, organization, user } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
 
@@ -161,6 +164,28 @@ export default function HelpPage() {
           Learn how to use MCA Manager with guides and tutorials
         </p>
       </div>
+
+      {/* Ask the AI helper */}
+      {aiVisible && (
+        <Card className="border-primary/30">
+          <CardContent className="py-4">
+            {!aiOpen ? (
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2"
+                onClick={() => setAiOpen(true)}
+              >
+                <Sparkles className="h-4 w-4 text-primary" />
+                Ask the AI helper — get an answer instead of searching
+              </Button>
+            ) : (
+              <div className="h-96">
+                <AiChat />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search */}
       <div className="relative max-w-lg">
