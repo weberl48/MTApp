@@ -16,9 +16,12 @@ import { certQuery, envValue } from './lib/api.mjs'
 import { assertCert } from './lib/guards.mjs'
 import { SINK_DOMAIN, TESTERS, CERT_REF } from './config.mjs'
 
-type Check = { name: string; ok: boolean; detail: string }
+// ok === null means "could not determine" (e.g. no encrypted rows to probe, or
+// the key isn't available here). It is reported as `unknown` and does not fail
+// the run — but it is deliberately distinct from a pass.
+type Check = { name: string; ok: boolean | null; detail: string }
 const checks: Check[] = []
-const add = (name: string, ok: boolean, detail: string) => checks.push({ name, ok, detail })
+const add = (name: string, ok: boolean | null, detail: string) => checks.push({ name, ok, detail })
 
 await assertCert()
 
