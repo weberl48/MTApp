@@ -13,6 +13,7 @@ import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
 import { QuickSessionFab } from '@/components/layout/quick-session-fab'
+import { AiChatBubble } from '@/components/help/ai-chat-bubble'
 import { WalkthroughProvider } from '@/components/walkthroughs/walkthrough-provider'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
@@ -95,6 +96,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
             <Toaster />
             <QuickSessionFab />
+            <AiChatBubble />
           </div>
         </WalkthroughProvider>
       </ActivityTracker>
