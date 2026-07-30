@@ -43,6 +43,39 @@ authentication are not evidence of health — only exercising the real path is.
 - Any production surface. Everything here is dev-only.
 - Coverage reporting or per-test history.
 - PHI encrypt/decrypt round-trip check — considered and explicitly declined.
+- **Scheduled alerting** — considered and declined 2026-07-30. A daily
+  `/api/cron/dependency-check` route running these same probes and emailing
+  `notification.admin_email` was specced out and rejected in favour of the
+  on-demand smoke suite. The reasoning and the accepted gap are below, because
+  this is the kind of decision that gets silently re-litigated.
+
+### Why there is no alerting (and what that costs)
+
+Anthropic publishes **no low-balance or zero-balance notification** — verified
+2026-07-30 against both the rate-limits docs and the billing support article.
+Two Console settings exist, and neither is an alert:
+
+| Console setting | Where | What it actually does |
+|---|---|---|
+| Auto-reload | Billing → auto-reload → Edit | Buys credits when the balance drops below a threshold. **Prevention**, not notification — and the right answer for the credit case. |
+| Spend limit | Settings → Limits → Spend limits | A monthly cap below the tier ceiling (Start = $500/mo). |
+
+**The spend limit is a trap worth remembering:** *"Once you reach your tier's
+spend cap, API usage pauses until the next month."* Hitting a self-set limit
+does the same. So it protects the wallet and simultaneously creates a fresh
+silent outage — `configured: true`, the panel visible to users, every request
+failing, no notification. It should only be set alongside something that
+detects the pause.
+
+Since Anthropic offers no alert, any alerting would have to be ours. The
+decision is that the smoke suite covers these dependencies **on demand**, and
+`ANTHROPIC_API_KEY` custody stays with auto-reload for prevention.
+
+**Accepted gap, stated plainly:** these checks only run when someone opens the
+portal and clicks. An overnight or weekend outage stays invisible until then.
+That is a deliberate trade — no cron, no scheduled email volume, no new
+production surface — and it is the thing to revisit first if a dependency
+failure ever reaches a user before it reaches you.
 
 ## Suites
 
