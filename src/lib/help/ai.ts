@@ -81,9 +81,9 @@ export function streamHelpAnswer(opts: {
 }) {
   const anthropic = new Anthropic({ apiKey: opts.apiKey })
   return anthropic.messages.stream({
+    // No temperature: Claude 5 models reject the deprecated parameter.
     model: process.env.HELP_AI_MODEL || 'claude-sonnet-5',
     max_tokens: 1024,
-    temperature: 0,
     system: [
       { type: 'text', text: HELP_AI_SYSTEM_RULES },
       {
