@@ -192,7 +192,15 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-lg max-h-[90vh] overflow-y-auto"
+        // During a guided tour (driver.js puts .driver-active on body) clicks
+        // on the dimmed page or the tour popover count as outside interactions
+        // — don't let them dismiss the form mid-step. Esc still closes.
+        onInteractOutside={(e) => {
+          if (document.body.classList.contains('driver-active')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Service Type' : 'Add Service Type'}</DialogTitle>
           <DialogDescription>
