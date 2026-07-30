@@ -22,6 +22,20 @@ the app actually work?". Two concrete gaps:
 
 The fix for (2) is checks that assert on **artifacts**, not on config.
 
+**Three flavors of false green, all observed in one 24-hour window** — the
+pattern is broader than any single endpoint, which is why the fix is a suite
+rather than a patch:
+
+| Signal | Reported | Reality |
+|---|---|---|
+| `RESEND_API_KEY` present | `email: pass` | every send 403 — sender domain de-verified |
+| Endpoint sweep hits a protected route | PASS on `401` | says nothing about whether the route produces anything |
+| `GET /v1/models` authenticates (200, 11 models) | key looks healthy | every completion 400 — no credit balance |
+
+The third is the instructive one: it is the *authenticated, free, obvious* probe
+for an API key, and it stays green through a total outage. Cheapness and
+authentication are not evidence of health — only exercising the real path is.
+
 ## Non-goals
 
 - Running tests in CI (GitHub Actions already does; this is a local tool).
@@ -35,7 +49,7 @@ The fix for (2) is checks that assert on **artifacts**, not on config.
 | Suite | Command / mechanism | Approx |
 |---|---|---|
 | `unit` | `npx vitest run --reporter=json` | ~17s |
-| `smoke` | `GET localhost:3000/api/dev/smoke/` + direct Resend probe | ~2s |
+| `smoke` | `GET localhost:3000/api/dev/smoke/` + direct Resend and Anthropic probes | ~3s |
 | `e2e-quick` | `npx playwright test --grep @smoke --workers=1 --reporter=json` | ~15s |
 | `e2e-full` | `npx playwright test --workers=1 --reporter=json` | ~2–4min |
 
@@ -111,6 +125,7 @@ Each check returns `{ name, status, detail, ms }` and never throws.
 | `sessions-csv` | `buildSessionsExportCsv` (see below) over real rows | header row present **and** ≥1 data row |
 | `tax-summary-csv` | `buildSummaryCsv` from `@/lib/payroll/annual-summary` | header present **and** every data row has the same field count as the header |
 | `email-sender` | `POST api.resend.com/emails`, `from` = the app's real address, `to: ['delivered@resend.dev']` | HTTP 200 (403 ⇒ sender domain unverified) |
+| `ai-help` | `POST api.anthropic.com/v1/messages`, the app's own model, `max_tokens: 1`, `thinking: {type: 'disabled'}` | HTTP 200 (400 ⇒ no credit balance) |
 
 Notes:
 
@@ -120,6 +135,41 @@ Notes:
   absent — no invoices for `invoice-pdf`, no sessions for `sessions-csv`, no paid
   sessions in the target year for `tax-summary-csv`. An empty database is not a
   broken app, and a check that cries wolf on a fresh clone gets ignored.
+- **`ai-help` must make a real inference call.** `GET /v1/models` is authenticated
+  and free, which makes it the obvious probe and the wrong one: on 2026-07-30 it
+  returned `200` with 11 models listed while every actual completion failed
+  `400 — "Your credit balance is too low to access the Anthropic API"`. A
+  models-list check would have reported healthy through the whole outage. One
+  token on the cheapest path is the smallest probe that distinguishes
+  *key is valid* from *key can do work*. Read the model from `HELP_AI_MODEL`
+  exactly as `src/lib/help/ai.ts` does, so the check follows the app rather than
+  pinning its own. Disable thinking: on `claude-sonnet-5` adaptive thinking is
+  the default and would share the 1-token cap.
+- Reports `skip` when `ANTHROPIC_API_KEY` is unset — the feature is designed to
+  hide itself in that case, so absence is a valid configuration, not a fault.
+
+### The `configured` ⇒ `works` invariant
+
+Two endpoints advertise a capability to the UI purely from the presence of an
+env var:
+
+| Endpoint | Reports | Actually checks |
+|---|---|---|
+| `/api/help/chat` (GET) | `{configured: <bool>}` | `!!process.env.ANTHROPIC_API_KEY` |
+| `/api/health` | `email: pass` | `!!process.env.RESEND_API_KEY` |
+
+A missing key is the *safe* state — the feature hides itself and nothing looks
+broken. The dangerous state is **present but unusable**: `configured: true`
+makes the Ask-the-AI panel and bubble appear to every user, and then every
+question fails. That is strictly worse than the feature being invisible, and
+neither endpoint can distinguish the two.
+
+So the smoke suite asserts the implication, not just the parts: for each such
+capability, if the presence check reports available, the corresponding real
+probe must succeed. A green presence check paired with a failing probe is
+itself the finding, and it is the specific shape of every false green this
+suite exists to catch — a revoked key, an exhausted credit balance, a
+de-verified sender domain. All three leave the env var perfectly intact.
 - `delivered@resend.dev` is Resend's simulator address. No human ever receives
   these probes, so the check is safe to run repeatedly.
 - `email-sender` reads `EMAIL_FROM_DOMAIN` exactly as `getFromAddress()` does,
@@ -203,5 +253,8 @@ e2e spec reported success while asserting nothing.
 5. Breaking PDF generation turns `smoke` red; reverting turns it green.
 6. Breaking the email sender domain turns `smoke` red — the outage that started
    this work would now be caught.
-7. Tooling failure reads as `error`, never as `fail`.
-8. Nothing in this design is reachable in production.
+7. An exhausted Anthropic credit balance turns `smoke` red while
+   `/api/help/chat` still reports `configured: true` — the `configured` ⇒ `works`
+   invariant is what catches it.
+8. Tooling failure reads as `error`, never as `fail`.
+9. Nothing in this design is reachable in production.
