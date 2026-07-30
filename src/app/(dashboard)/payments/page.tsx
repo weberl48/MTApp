@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
 import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
+import { PageHelp } from '@/components/help/page-help'
 import { DollarSign, Users, Calendar, Loader2, AlertCircle, Receipt, Filter, FileText } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -285,7 +286,10 @@ export default function PaymentsPage() {
     <AdminGuard>
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll</h1>
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll</h1>
+          <PageHelp article="payroll-and-payments" />
+        </div>
         <p className="text-gray-500 dark:text-gray-400">
           Manage contractor payouts and view payment history
         </p>

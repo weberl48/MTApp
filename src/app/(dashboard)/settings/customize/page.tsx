@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useOrganization } from '@/contexts/organization-context'
 import { ListCustomizer } from '@/components/settings/list-customizer'
+import { PageHelp } from '@/components/help/page-help'
 import { paymentMethodLabels, billingMethodLabels } from '@/lib/constants/display'
 import {
   ArrowLeft,
@@ -69,7 +70,10 @@ export default function CustomizeSettingsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customize & Automate</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customize & Automate</h1>
+            <PageHelp article="custom-lists" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">Custom labels, visibility, and workflow automation</p>
         </div>
       </div>

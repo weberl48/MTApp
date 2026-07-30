@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { AuditLogTable } from '@/components/tables/audit-log-table'
+import { PageHelp } from '@/components/help/page-help'
 import { useOrganization } from '@/contexts/organization-context'
 import Link from 'next/link'
 
@@ -36,7 +37,10 @@ export default function AuditLogPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Log</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Log</h1>
+            <PageHelp article="audit-log" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">Track all changes for compliance</p>
         </div>
       </div>

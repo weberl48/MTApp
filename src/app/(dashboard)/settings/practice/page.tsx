@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useOrganization } from '@/contexts/organization-context'
+import { PageHelp } from '@/components/help/page-help'
 import {
   ArrowLeft,
   Loader2,
@@ -144,7 +145,10 @@ export default function PracticeSettingsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Practice & Branding</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Practice & Branding</h1>
+            <PageHelp article="practice-branding" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">Organization info, logo, colors, and social media</p>
         </div>
       </div>

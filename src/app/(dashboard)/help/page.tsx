@@ -1,22 +1,59 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle, UserCog, BarChart2 } from 'lucide-react'
+import ReactMarkdown, { Components } from 'react-markdown'
+import { Search, BookOpen, Users, Calendar, FileText, Settings, ChevronRight, PlayCircle, UserCog, BarChart2, ArrowRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { HelpGapsCard } from '@/components/help/help-gaps-card'
+import { createSearchMissGate, logSearchMiss } from '@/lib/help/events'
 import {
   HELP_ARTICLES,
   HELP_CATEGORIES,
+  HELP_FAQS,
   searchArticlesRanked,
+  searchFaqs,
   getArticlesByCategory,
   type HelpCategory,
+  type HelpFaq,
   type SearchResult,
 } from './_data/help-articles'
+
+// One gate per browser session: each missed query is logged at most once.
+const searchMissGate = createSearchMissGate()
+
+const faqMarkdownComponents: Components = {
+  p: ({ children }) => <p className="text-sm text-muted-foreground leading-6 mb-2 last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+  code: ({ children }) => <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+  ul: ({ children }) => <ul className="list-disc list-outside ml-5 mb-2 space-y-1 text-sm text-muted-foreground">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal list-outside ml-5 mb-2 space-y-1 text-sm text-muted-foreground">{children}</ol>,
+  li: ({ children }) => <li className="leading-6">{children}</li>,
+}
+
+/** One FAQ rendered inside an accordion item: answer + optional deep link. */
+function FaqAnswer({ faq }: { faq: HelpFaq }) {
+  return (
+    <div className="space-y-2">
+      <ReactMarkdown components={faqMarkdownComponents}>{faq.answer.trim()}</ReactMarkdown>
+      {faq.articleSlug && (
+        <Link
+          href={`/help/${faq.articleSlug}/`}
+          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+        >
+          Read more
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
+  )
+}
 
 /** Highlight matched terms in text using <mark> tags. */
 function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
@@ -52,7 +89,8 @@ const CATEGORY_ICONS: Record<HelpCategory, React.ComponentType<{ className?: str
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<HelpCategory | null>(null)
-  const { can } = useOrganization()
+  const [showAllFaqs, setShowAllFaqs] = useState(false)
+  const { can, organization, user } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
 
   const isAdminOrAbove = can('session:view-all')
@@ -62,12 +100,33 @@ export default function HelpPage() {
     return HELP_ARTICLES.filter(article => !article.adminOnly || isAdminOrAbove)
   }, [isAdminOrAbove])
 
+  const accessibleFaqs = useMemo(() => {
+    return HELP_FAQS.filter(faq => !faq.adminOnly || isAdminOrAbove)
+  }, [isAdminOrAbove])
+
   // Get filtered articles based on search and category
   const searchResults = useMemo((): SearchResult[] | null => {
     if (!searchQuery.trim()) return null
     return searchArticlesRanked(searchQuery)
       .filter(r => accessibleArticles.includes(r.article))
   }, [searchQuery, accessibleArticles])
+
+  const faqResults = useMemo(() => {
+    if (!searchQuery.trim()) return null
+    return searchFaqs(searchQuery).filter(r => accessibleFaqs.includes(r.faq))
+  }, [searchQuery, accessibleFaqs])
+
+  // Gap detection: a query that still finds nothing 1.5s after typing stops
+  // is logged once per session. Fire-and-forget; failures are invisible.
+  useEffect(() => {
+    const q = searchQuery.trim()
+    if (q.length < 3 || !organization || !user) return
+    if ((searchResults?.length ?? 0) > 0 || (faqResults?.length ?? 0) > 0) return
+    const t = setTimeout(() => {
+      if (searchMissGate(q)) logSearchMiss(organization.id, user.id, q)
+    }, 1500)
+    return () => clearTimeout(t)
+  }, [searchQuery, searchResults, faqResults, organization, user])
 
   const filteredArticles = useMemo(() => {
     if (searchResults) return searchResults.map(r => r.article)
@@ -201,10 +260,24 @@ export default function HelpPage() {
         </div>
       )}
 
+      {/* Inline FAQ answers (search) */}
+      {searchQuery && faqResults && faqResults.length > 0 && (
+        <div className="space-y-3">
+          {faqResults.slice(0, 3).map(({ faq }) => (
+            <Card key={faq.id} className="border-primary/30">
+              <CardContent className="py-4 space-y-2">
+                <h3 className="font-medium text-foreground">{faq.question}</h3>
+                <FaqAnswer faq={faq} />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {/* Article List */}
       {(!showingAllArticles || searchQuery) && (
         <div className="space-y-3">
-          {filteredArticles.length === 0 ? (
+          {filteredArticles.length === 0 && (faqResults?.length ?? 0) === 0 ? (
             <Card>
               <CardContent className="py-8 text-center space-y-4">
                 <div>
@@ -289,47 +362,60 @@ export default function HelpPage() {
         </div>
       )}
 
-      {/* Popular Articles (when showing categories) */}
-      {showingAllArticles && !searchQuery && (
+      {/* Common Questions (when showing categories) */}
+      {showingAllArticles && !searchQuery && accessibleFaqs.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Popular Articles</h2>
-          <div className="space-y-3">
-            {accessibleArticles.slice(0, 5).map(article => (
-              <Card key={article.slug} className="hover:bg-muted/50 transition-colors">
-                <CardContent className="py-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/help/${article.slug}/`} className="group">
-                        <h3 className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                          {article.title}
-                          <ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </h3>
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                        {article.description}
-                      </p>
-                    </div>
-                    {article.walkthrough && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          startWalkthrough(article.walkthrough!)
-                        }}
-                        className="gap-1.5 shrink-0"
-                      >
-                        <PlayCircle className="h-4 w-4" />
-                        <span className="hidden sm:inline">Walkthrough</span>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Common Questions</h2>
+            <Button variant="ghost" size="sm" onClick={() => setShowAllFaqs(v => !v)}>
+              {showAllFaqs ? 'Show fewer' : 'View all questions'}
+            </Button>
           </div>
+          {!showAllFaqs ? (
+            <Accordion type="single" collapsible className="rounded-lg border px-4">
+              {accessibleFaqs.slice(0, 8).map(faq => (
+                <AccordionItem key={faq.id} value={faq.id} className="last:border-b-0">
+                  <AccordionTrigger className="text-left text-sm font-medium">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <FaqAnswer faq={faq} />
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <div className="space-y-6">
+              {HELP_CATEGORIES.map(cat => {
+                const faqs = accessibleFaqs.filter(f => f.category === cat.id)
+                if (faqs.length === 0) return null
+                return (
+                  <div key={cat.id}>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      {cat.name}
+                    </h3>
+                    <Accordion type="single" collapsible className="rounded-lg border px-4">
+                      {faqs.map(faq => (
+                        <AccordionItem key={faq.id} value={faq.id} className="last:border-b-0">
+                          <AccordionTrigger className="text-left text-sm font-medium">
+                            {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <FaqAnswer faq={faq} />
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
+
+      {/* Owner-only worklist of content gaps */}
+      <HelpGapsCard />
     </div>
   )
 }

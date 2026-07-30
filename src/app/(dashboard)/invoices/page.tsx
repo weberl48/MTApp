@@ -8,6 +8,7 @@ import { scholarshipBatchToasts } from '@/lib/invoices/scholarship-batch-feedbac
 import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { sortInvoices, INVOICE_SORT_OPTIONS, type InvoiceSortKey } from '@/lib/invoices/sort'
 import { parseLocalDate } from '@/lib/dates'
+import { PageHelp } from '@/components/help/page-help'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -513,7 +514,10 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
+          <PageHelp article="invoice-lifecycle" />
+        </div>
         <p className="text-gray-500 dark:text-gray-400">
           {isAdmin ? 'Manage and track all invoices' : 'View invoice status for your sessions'}
         </p>

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { PageHelp } from '@/components/help/page-help'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -115,7 +116,10 @@ export default async function TeamPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+            <PageHelp article="inviting-team-members" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">
             Manage contractors and view their performance
           </p>

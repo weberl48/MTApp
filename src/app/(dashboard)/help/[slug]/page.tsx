@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { ArticleFeedback } from '@/components/help/article-feedback'
 import { getArticleBySlug, getArticlesByCategory, HELP_CATEGORIES } from '../_data/help-articles'
 
 const markdownComponents: Components = {
@@ -121,6 +122,9 @@ export default function HelpArticlePage({
               {article.content.trim()}
             </ReactMarkdown>
           </article>
+          <div className="mt-6 pt-4 border-t">
+            <ArticleFeedback slug={article.slug} />
+          </div>
         </CardContent>
       </Card>
 
