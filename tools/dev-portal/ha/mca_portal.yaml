@@ -1,0 +1,83 @@
+# MCA dev-portal mirror on this Pi (docker container `mca-portal`, port 4321).
+# Canonical copy lives in the MCA repo at tools/dev-portal/ha/mca_portal.yaml —
+# edit there and re-scp to /config/packages/.
+#
+# Severity mapping: 'degraded' (warn-level checks, e.g. email key absent) does
+# NOT page the phone; only unhealthy/down/unavailable does. If the portal
+# container itself dies the sensor goes 'unavailable' and the alert fires —
+# intentional: monitoring died.
+#
+# Dashboard card — paste into any dashboard as a Manual card:
+#   type: entities
+#   title: MCA App Health
+#   entities:
+#     - entity: sensor.mca_prod_health
+#       name: Production status
+#     - entity: binary_sensor.mca_prod_healthy
+#       name: Prod OK
+#
+sensor:
+  - platform: rest
+    name: MCA Prod Health
+    unique_id: mca_prod_health
+    resource: http://192.168.1.160:4321/api/overview
+    method: GET
+    scan_interval: 60
+    timeout: 30
+    value_template: >-
+      {{ (value_json.environments | selectattr('env','eq','prod') | list | first).status }}
+    json_attributes_path: "$.environments[1]"
+    json_attributes:
+      - env
+      - checks
+      - version
+      - latencyMs
+      - checkedAt
+
+template:
+  - binary_sensor:
+      - name: MCA Prod Healthy
+        unique_id: mca_prod_healthy
+        device_class: connectivity
+        state: >-
+          {{ states('sensor.mca_prod_health') in ['healthy', 'degraded'] }}
+
+automation:
+  - id: mca_prod_unhealthy
+    alias: MCA prod unhealthy
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.mca_prod_healthy
+        to: "off"
+        for: "00:05:00"
+    action:
+      - service: notify.mobile_app_sm_s926u
+        data:
+          title: "MCA prod is DOWN"
+          message: >-
+            Status: {{ states('sensor.mca_prod_health') }}.
+            Portal: http://192.168.1.160:4321
+
+  - id: mca_prod_recovered
+    alias: MCA prod recovered
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.mca_prod_healthy
+        from: "off"
+        to: "on"
+        for: "00:02:00"
+    condition:
+      # Only announce recovery if a down-alert actually went out since the last recovery.
+      - condition: template
+        value_template: >-
+          {{ state_attr('automation.mca_prod_unhealthy','last_triggered') is not none
+             and (state_attr('automation.mca_prod_recovered','last_triggered') is none
+                  or state_attr('automation.mca_prod_unhealthy','last_triggered')
+                     > state_attr('automation.mca_prod_recovered','last_triggered')) }}
+    action:
+      - service: notify.mobile_app_sm_s926u
+        data:
+          title: "MCA prod recovered"
+          message: "Production health is back to healthy."
