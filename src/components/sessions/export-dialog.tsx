@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Download, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { downloadFromUrl } from '@/lib/download'
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 
 interface Client {
@@ -108,26 +109,14 @@ export function SessionExportDialog({ organizationId, contractorId }: ExportDial
       }
       params.set('format', 'csv')
 
-      const response = await fetch(`/api/sessions/export/?${params.toString()}`)
-
-      if (!response.ok) {
-        throw new Error('Export failed')
-      }
-
-      // Download the CSV
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `sessions-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      await downloadFromUrl(
+        `/api/sessions/export/?${params.toString()}`,
+        `sessions-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
+      )
 
       toast.success('Sessions exported successfully')
       setOpen(false)
-    } catch (error) {
+    } catch {
       console.error('[MCA] Export error')
       toast.error('Failed to export sessions')
     } finally {

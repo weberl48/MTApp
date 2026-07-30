@@ -35,6 +35,7 @@ import {
   Download,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { downloadFromUrl } from '@/lib/download'
 import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Resource {
@@ -190,22 +191,11 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
 
   async function handleDownload(resource: Resource) {
     try {
-      const response = await fetch(`/api/clients/${clientId}/resources/${resource.id}/download/`)
-
-      if (!response.ok) {
-        throw new Error('Failed to download file')
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = resource.file_name || 'download'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch (error) {
+      await downloadFromUrl(
+        `/api/clients/${clientId}/resources/${resource.id}/download/`,
+        resource.file_name || 'download'
+      )
+    } catch {
       console.error('[MCA] Error downloading file')
       toast.error('Failed to download file')
     }

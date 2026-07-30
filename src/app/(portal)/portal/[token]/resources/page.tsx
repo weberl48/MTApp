@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { downloadBlob, filenameFromResponse } from '@/lib/download'
 
 interface Resource {
   id: string
@@ -155,20 +156,11 @@ export default function PortalResourcesPage() {
         throw new Error(error.error || 'Download failed')
       }
 
-      // Get the file as a blob
+      // This route needs a bearer token, so fetch here and hand the blob to the
+      // shared helper (which defers revoking the object URL — revoking it in the
+      // same tick loses the filename and saves a bare blob UUID).
       const blob = await response.blob()
-
-      // Create download link and trigger it
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = resource.file_name || 'download'
-      document.body.appendChild(a)
-      a.click()
-
-      // Cleanup
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      downloadBlob(blob, filenameFromResponse(response, resource.file_name || 'download'))
 
       toast.success('Download started')
     } catch (error) {

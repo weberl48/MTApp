@@ -29,6 +29,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Download, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { downloadFromUrl } from '@/lib/download'
 import { formatCurrency } from '@/lib/pricing'
 import {
   availableTaxYears,
@@ -146,20 +147,12 @@ export function TaxSummariesCard() {
     setDownloading(kind)
     try {
       const detailParam = kind === 'detail' ? '&detail=1' : ''
-      const response = await fetch(`/api/payroll/tax-summary/?year=${year}${detailParam}`)
-      if (!response.ok) throw new Error('Download failed')
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download =
+      await downloadFromUrl(
+        `/api/payroll/tax-summary/?year=${year}${detailParam}`,
         kind === 'detail'
           ? `contractor-payments-detail-${year}.csv`
           : `contractor-tax-summary-${year}.csv`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
+      )
     } catch {
       toast.error('Failed to download CSV')
     } finally {

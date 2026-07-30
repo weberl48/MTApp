@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { todayLocal } from '@/lib/dates'
+import { downloadBlob } from '@/lib/download'
 import {
   useReactTable,
   getCoreRowModel,
@@ -220,12 +221,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
     // Generate and download
     const buffer = await wb.xlsx.writeBuffer()
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `contractor-payments-${todayLocal()}.xlsx`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `contractor-payments-${todayLocal()}.xlsx`)
   }
 
   return (
