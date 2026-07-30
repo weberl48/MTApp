@@ -32,3 +32,12 @@ export const authRateLimit = redis
       prefix: 'ratelimit:auth',
     })
   : null
+
+/** AI helper rate limit: 20 questions per hour per user (cost control) */
+export const aiRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, '3600 s'),
+      prefix: 'ratelimit:ai',
+    })
+  : null

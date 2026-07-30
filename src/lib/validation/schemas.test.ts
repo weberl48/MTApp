@@ -8,6 +8,7 @@ import {
   sessionRequestSchema,
   parseBearer,
   taxYearSchema,
+  helpChatSchema,
 } from './schemas'
 
 describe('uuidSchema', () => {
@@ -266,5 +267,27 @@ describe('taxYearSchema', () => {
     expect(taxYearSchema.safeParse('abc').success).toBe(false)
     expect(taxYearSchema.safeParse(null).success).toBe(false)
     expect(taxYearSchema.safeParse('2025.5').success).toBe(false)
+  })
+})
+
+describe('helpChatSchema', () => {
+  const msg = (role: 'user' | 'assistant', content = 'hello') => ({ role, content })
+
+  it('accepts a single user message', () => {
+    expect(helpChatSchema.safeParse({ messages: [msg('user')] }).success).toBe(true)
+  })
+
+  it('rejects more than 20 messages', () => {
+    const messages = Array.from({ length: 21 }, (_, i) => msg(i % 2 === 0 ? 'user' : 'assistant'))
+    expect(helpChatSchema.safeParse({ messages }).success).toBe(false)
+  })
+
+  it('rejects when the last message is from the assistant', () => {
+    expect(helpChatSchema.safeParse({ messages: [msg('user'), msg('assistant')] }).success).toBe(false)
+  })
+
+  it('rejects over-long content and empty content', () => {
+    expect(helpChatSchema.safeParse({ messages: [msg('user', 'x'.repeat(2001))] }).success).toBe(false)
+    expect(helpChatSchema.safeParse({ messages: [msg('user', '')] }).success).toBe(false)
   })
 })

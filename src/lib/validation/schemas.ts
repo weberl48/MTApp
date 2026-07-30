@@ -51,3 +51,19 @@ export function parseBearer(authHeader: string | null): string | null {
   const token = authHeader.slice(7)
   return token || null
 }
+
+/** AI help chat request: bounded conversation history ending with the user. */
+export const helpChatSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().min(1).max(2000),
+      })
+    )
+    .min(1)
+    .max(20)
+    .refine(msgs => msgs[msgs.length - 1].role === 'user', {
+      message: 'Last message must be from the user',
+    }),
+})
