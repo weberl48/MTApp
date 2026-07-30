@@ -7,6 +7,7 @@ import { ClientsTable } from '@/components/clients/clients-table'
 import type { Client, UserRole } from '@/types/database'
 import { can } from '@/lib/auth/permissions'
 import { decryptField, isEncrypted } from '@/lib/crypto'
+import { PageHelp } from '@/components/help/page-help'
 
 export default async function ClientsPage() {
   const supabase = await createClient()
@@ -47,7 +48,10 @@ export default async function ClientsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Clients</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold">Clients</h1>
+            <PageHelp article="adding-a-client" />
+          </div>
           <p className="text-muted-foreground">
             Manage your client list and contact information
           </p>

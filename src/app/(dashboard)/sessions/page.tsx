@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageHelp } from '@/components/help/page-help'
 import {
   Select,
   SelectContent,
@@ -352,7 +353,10 @@ export default function SessionsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
+            <PageHelp article="session-workflow" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">
             {isAdmin ? 'View and manage all sessions' : 'Your session history'}
           </p>

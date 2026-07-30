@@ -10,6 +10,7 @@ import { UNPAID_PAYROLL_STATUSES } from '@/lib/payroll/constants'
 import type { ServiceType } from '@/types/database'
 import { DollarSign, TrendingUp, Clock, CalendarDays } from 'lucide-react'
 import { monthBoundaries, formatMonthlyBreakdown } from '@/lib/earnings/buckets'
+import { PageHelp } from '@/components/help/page-help'
 import { useRouter } from 'next/navigation'
 import { EarningsChart } from '@/components/charts/earnings-chart'
 import { SkeletonCard, Skeleton } from '@/components/ui/skeleton'
@@ -233,7 +234,10 @@ export default function EarningsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">My Earnings</h1>
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-2xl font-bold">My Earnings</h1>
+          <PageHelp article="my-earnings" />
+        </div>
         <p className="text-muted-foreground">
           Track your earnings and payment status
         </p>

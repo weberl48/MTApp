@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/pricing'
 import { DollarSign, TrendingUp, Users, Calendar } from 'lucide-react'
+import { PageHelp } from '@/components/help/page-help'
 import { AdminGuard } from '@/components/guards/admin-guard'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
@@ -219,7 +220,10 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold">Analytics</h1>
+            <PageHelp article="analytics-and-reports" />
+          </div>
           <p className="text-muted-foreground">
             Business insights and performance metrics
           </p>

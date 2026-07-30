@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageHelp } from '@/components/help/page-help'
 import {
   Select,
   SelectContent,
@@ -144,7 +145,10 @@ export default function BusinessSettingsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Business Rules</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Business Rules</h1>
+            <PageHelp article="pricing-deep-dive" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">Services, invoicing, sessions, notifications, and features</p>
         </div>
       </div>
