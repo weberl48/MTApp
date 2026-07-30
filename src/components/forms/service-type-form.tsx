@@ -421,7 +421,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
 
           {/* Group Contractor Pay Matrix */}
           {parseFloat(formData.per_person_rate) > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-2" data-tour="group-pay-matrix">
               <Label>Group Contractor Pay by Headcount</Label>
               <p className="text-xs text-gray-500">
                 Set contractor pay based on group size and duration. The last row (6+) applies to groups of 6 or more. Leave empty to use the default pay schedule or formula.

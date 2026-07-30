@@ -297,10 +297,12 @@ export default async function TeamPage() {
             }
             ratesContent={
               users?.[0]?.organization_id ? (
-                <PayRateMatrix
-                  organizationId={users[0].organization_id}
-                  canEdit={canManage}
-                />
+                <div data-tour="pay-rate-matrix">
+                  <PayRateMatrix
+                    organizationId={users[0].organization_id}
+                    canEdit={canManage}
+                  />
+                </div>
               ) : (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   No team members found

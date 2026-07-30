@@ -271,19 +271,25 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Service Types List',
-      description: 'You\'ll see all your current service types with their pricing. Each card shows the base rate, MCA percentage, and key settings. Click any service type to edit it.',
+      description: 'Every service your practice offers lives here, with its pricing summary. Each entry shows the base rate and key settings at a glance — this list is what contractors pick from when they log a session.',
+      element: '[data-tour="service-types-list"]',
+      popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/settings/business/',
     },
     {
-      title: 'Add or Edit a Service',
-      description: 'Click "Add Service Type" to create a new one, or click an existing service to edit it. The form lets you set base rate, per-person rate (for groups), contractor cap, total cap, rent, scholarship rate, and more.',
+      title: 'Add a New Service',
+      description: 'This button creates a new service type. The form lets you set the base rate (billed per 30 minutes), per-person rate for groups, contractor pay, caps, rent, and scholarship behavior.',
+      element: '[data-tour="add-service-type"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/settings/business/',
     },
     {
-      title: 'Detailed Editing Walkthrough',
-      description: 'For a step-by-step guide through every field in the service type form, take the "Edit a Service Type" tour — you\'ll find it in the Help Center\'s Guided Tours list. It highlights each field and explains what it does.',
+      title: 'Edit an Existing Service',
+      description: 'Click any service in the list to open its edit form. For a field-by-field guide through everything in that form — pricing, contractor pay, toggles — take the "Edit a Service Type" tour from the Help Center\'s Guided Tours list.',
+      element: '[data-tour="service-type-row"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Finish',
       href: '/settings/business/',
     },
@@ -323,19 +329,28 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Inline Approve',
-      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note.',
+      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note. (These buttons only appear when a session is waiting for review.)',
+      // Present only when a submitted session is in view — the centered
+      // fallback + note explains itself when the queue is empty.
+      element: '[data-tour="session-approve-actions"]',
+      popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
     {
       title: 'Bulk Approve',
-      description: 'Use the "Select all submitted" checkbox at the top of the list (or the checkboxes on each card) to select multiple sessions. A blue bar appears with an "Approve (N)" button that approves them all at once.',
+      description: 'This "Select all submitted" checkbox (or the checkboxes on each card) selects multiple sessions at once. A blue bar appears with an "Approve (N)" button that approves them all together — handy at the end of a pay period.',
+      // Present only when a submitted session is in view.
+      element: '[data-tour="sessions-select-all"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
     {
       title: 'Other Actions',
-      description: 'From a session\'s detail page, you can also Request Revision (with a reason), Mark No-Show (charges the no-show fee), or Cancel. The session\'s invoice was already created when it was submitted — approving confirms the session so the invoice is ready to send.',
+      description: 'Click any session card to open its detail page — that\'s where you can also Request Revision (with a reason), Mark No-Show (charges the no-show fee), or Cancel. The session\'s invoice was already created when it was submitted — approving confirms the session so the invoice is ready to send.',
+      element: '[data-tour="session-card"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Finish',
       href: '/sessions/',
     },
@@ -526,11 +541,65 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   ],
 }
 
+export const CONTRACTOR_PAY_WALKTHROUGH: Walkthrough = {
+  id: 'contractor-pay',
+  name: 'How Contractor Pay Works',
+  description: 'Where contractor pay comes from and which setting wins',
+  adminOnly: true,
+  steps: [
+    {
+      title: 'Pay Is Looked Up, Not Guessed',
+      description: 'Every session\'s contractor pay comes from a priority chain of settings you control — nothing is hardcoded. The first place to look is the Rates tab here on the Team page. Press "Open the Rates Tab" and we\'ll open it for you.',
+      element: '[data-tour="team-tab-rates"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Open the Rates Tab',
+      href: '/team/',
+    },
+    {
+      title: 'Custom Rates Matrix',
+      description: 'One row per contractor, one column per service type. A filled cell is that contractor\'s personal 30-minute pay for that service — use it when someone negotiates a raise. Longer sessions add the per-15-minute increment saved with the rate. When a session is priced, a custom rate here beats everything except a group pay matrix.',
+      element: '[data-tour="pay-rate-matrix"]',
+      // The Rates panel only mounts once its tab is active.
+      preClick: '[data-tour="team-tab-rates"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/team/',
+    },
+    {
+      title: 'Pay on the Service Type',
+      description: 'Each service type carries its own pay rules. Individual services set exact contractor pay per duration ("Contractor Pay by Duration" — used when a contractor has no custom rate; the "auto" hint shows what the formula would pay). Group services instead use a pay matrix by headcount and duration, which beats every other rule.',
+      // Whichever the opened service renders: schedule (individual) or
+      // group matrix (group service).
+      element: '[data-tour="pay-schedule"], [data-tour="group-pay-matrix"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/business/?tour=edit-service',
+    },
+    {
+      title: 'Caps & the Percentage Fallback',
+      description: 'When no matrix, custom rate, or schedule applies, the formula kicks in: contractor pay = total billed minus the service\'s MCA percentage. The Contractor Cap here is a hard ceiling on pay per session no matter which rule produced it — leave it empty for no limit.',
+      element: '#contractor_cap',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/business/?tour=edit-service',
+    },
+    {
+      title: 'The Priority Chain',
+      description: 'Putting it together, the app checks in order: 1) the group pay matrix (group services), 2) the contractor\'s custom rate from Team > Rates, 3) the service\'s pay-by-duration schedule, 4) the percentage formula — then applies the Contractor Cap. The first rule that matches wins, so a personal raise only ever needs one cell in the rates matrix. One more rule: scholarship pricing never reduces contractor pay — the organization absorbs the difference.',
+      element: '[data-tour="pay-schedule"], [data-tour="group-pay-matrix"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Finish',
+      href: '/settings/business/?tour=edit-service',
+    },
+  ],
+}
+
 export const ALL_WALKTHROUGHS: Walkthrough[] = [
   APP_OVERVIEW_WALKTHROUGH,
   ADD_CLIENT_WALKTHROUGH,
   LOG_SESSION_WALKTHROUGH,
   INVITE_CONTRACTOR_WALKTHROUGH,
+  CONTRACTOR_PAY_WALKTHROUGH,
   CONFIGURE_SERVICES_WALKTHROUGH,
   EDIT_SERVICE_TYPE_WALKTHROUGH,
   APPROVE_SESSIONS_WALKTHROUGH,

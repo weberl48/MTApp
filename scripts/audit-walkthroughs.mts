@@ -29,6 +29,7 @@ const ARTICLE_FOR: Record<string, string> = {
   'add-client': 'adding-a-client',
   'log-session': 'logging-a-session',
   'invite-contractor': 'inviting-team-members',
+  'contractor-pay': 'managing-contractor-rates',
   'configure-services': 'configuring-services',
   'edit-service-type': 'editing-service-types',
   'approve-sessions': 'approving-sessions',
