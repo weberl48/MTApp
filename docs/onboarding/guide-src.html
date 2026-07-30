@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCA Manager — Admin Onboarding Guide</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         color: #1f2430; background: #f6f7f9; line-height: 1.55; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 36px 22px 64px; }
+  header.doc { border-bottom: 3px solid #1e40af; padding-bottom: 18px; margin-bottom: 10px; }
+  h1 { font-size: 1.8rem; margin: 0 0 4px; color: #1e40af; }
+  .sub { color: #5b6472; margin: 0; }
+  .toc { background: #fff; border: 1px solid #e5e8ee; border-radius: 12px; padding: 16px 22px; margin-top: 20px; }
+  .toc h4 { margin: 0 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; }
+  .toc ul { margin: 0; padding-left: 18px; columns: 2; column-gap: 28px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: #1e40af; text-decoration: none; }
+  section { background: #fff; border: 1px solid #e5e8ee; border-radius: 12px; padding: 22px 26px; margin-top: 22px;
+            break-inside: avoid-page; }
+  h2 { font-size: 1.3rem; margin: 0 0 4px; color: #111827; }
+  .blurb { color: #5b6472; margin: 0 0 6px; font-size: 0.97rem; }
+  .feature { margin-top: 18px; padding-top: 16px; border-top: 1px solid #eef1f5; break-inside: avoid; }
+  .feature:first-of-type { border-top: none; }
+  h3 { font-size: 1.05rem; margin: 0 0 6px; }
+  p { margin: 0 0 10px; }
+  img { width: 100%; height: auto; border: 1px solid #dfe3ea; border-radius: 8px; margin-top: 10px;
+        break-inside: avoid; }
+  footer { color: #8a93a3; font-size: 0.85rem; margin-top: 28px; text-align: center; }
+
+  /* Guide additions */
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 7px 10px; border: 1px solid #e5e8ee; vertical-align: top; }
+  th { background: #f3f5f9; font-size: 0.82rem; text-transform: uppercase; letter-spacing: .4px; color: #4b5563; }
+  tr { break-inside: avoid; }
+  .callout { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #1e40af; border-radius: 8px;
+             padding: 12px 16px; margin: 12px 0; break-inside: avoid; }
+  .callout b:first-child { color: #1e40af; }
+  .callout.warn { background: #fffbeb; border-color: #fde68a; border-left-color: #b45309; }
+  .callout.warn b:first-child { color: #b45309; }
+  ol.checklist { list-style: none; counter-reset: step; margin: 14px 0 0; padding: 0; }
+  ol.checklist > li { counter-increment: step; position: relative; padding: 0 0 14px 46px; break-inside: avoid; }
+  ol.checklist > li::before { content: counter(step); position: absolute; left: 0; top: 0;
+    width: 30px; height: 30px; border-radius: 999px; background: #1e40af; color: #fff;
+    font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; }
+  ol.checklist > li > b:first-child { display: block; margin-bottom: 2px; }
+  ul { margin: 0 0 10px; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  code { background: #f3f5f9; border: 1px solid #e5e8ee; border-radius: 4px; padding: 1px 5px; font-size: 0.88em; }
+  .pill { display: inline-block; border-radius: 999px; padding: 1px 10px; font-size: 0.8rem; font-weight: 600;
+          border: 1px solid transparent; white-space: nowrap; }
+  .pill.draft { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+  .pill.submitted { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .pill.approved { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+  .pill.noshow { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+  .pill.cancelled { background: #f3f4f6; color: #6b7280; border-color: #d1d5db; }
+  .flow { text-align: center; font-size: 1.0rem; margin: 12px 0; }
+  .flow .arrow { color: #9ca3af; margin: 0 8px; }
+  @media print {
+    body { background: #fff; }
+    section { border: none; padding: 12px 0; }
+    .toc { border: 1px solid #e5e8ee; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="doc">
+    <h1>MCA Manager — Admin Onboarding Guide</h1>
+    <p class="sub">Your guide to getting started as an admin · May Creative Arts · August 2026</p>
+  </header>
+
+  <nav class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#welcome">1. Welcome</a></li>
+      <li><a href="#day-one">2. Day One Checklist</a></li>
+      <li><a href="#around">3. Finding Your Way Around</a></li>
+      <li><a href="#sessions">4. Sessions — Your Daily Core</a></li>
+      <li><a href="#clients">5. Clients</a></li>
+      <li><a href="#invoices">6. Invoices</a></li>
+      <li><a href="#team">7. Team</a></li>
+      <li><a href="#portal">8. The Client Portal</a></li>
+      <li><a href="#help">9. Learn More &amp; Getting Help</a></li>
+      <li><a href="#owner-only">10. What's Owner-Only</a></li>
+      <li><a href="#reference">11. Quick Reference</a></li>
+    </ul>
+  </nav>
+
+  <section id="welcome">
+    <h2>1. Welcome</h2>
+    <p class="blurb">What MCA Manager is, and what your part in it looks like.</p>
+    <div class="feature">
+      <p><b>MCA Manager</b> is May Creative Arts' practice management app. It's where therapy sessions get
+        logged, clients get managed, invoices get created and sent, and contractors get tracked — all in one
+        place, on your computer or your phone.</p>
+      <p>As an <b>admin</b>, you're the hub of the daily workflow. Contractors log their sessions; you review
+        and approve them; the app turns approved work into invoices; you send those invoices and record
+        payments. This guide walks you through each of those pieces in the order you'll meet them.</p>
+      <p><b>How to use this guide:</b> read sections 1–4 before your first day if you can — they cover
+        everything you'll touch in a normal day. Sections 5–8 are there when you need them. Section 11 is a
+        one-page cheat sheet worth printing.</p>
+      <div class="callout">
+        <b>The app teaches too.</b> MCA Manager has built-in interactive walkthroughs that highlight each
+        button on the real screens as you click through. This guide tells you which ones to take and when —
+        see <a href="#help">Section 9</a>.
+      </div>
+    </div>
+  </section>
+
+  <section id="day-one">
+    <h2>2. Day One Checklist</h2>
+    <p class="blurb">Six steps, about 20 minutes, and you're fully set up.</p>
+    <ol class="checklist">
+      <li>
+        <b>Accept your invite.</b>
+        You'll receive an email invitation to join May Creative Arts on MCA Manager. Click the link and
+        create your account with a strong password. The app lives at
+        <code>https://maycreativearts.vercel.app</code> — bookmark it.
+      </li>
+      <li>
+        <b>Log in and look around.</b>
+        After logging in you land on the Dashboard. Nothing you click while browsing will send anything to a
+        client — invoices only go out when you explicitly send them.
+      </li>
+      <li>
+        <b>Set up two-factor authentication (if prompted).</b>
+        Because the app holds client health information, your account may require an authenticator app
+        (Google Authenticator, Authy, etc.). Follow the prompt, or set it up any time under
+        <b>Settings &gt; Profile &amp; Security</b>.
+      </li>
+      <li>
+        <b>Install the app on your phone.</b>
+        There's no app store download — you install it straight from the browser.
+        On <b>iPhone</b>: open the site in Safari → Share button → <b>Add to Home Screen</b>.
+        On <b>Android</b>: open it in Chrome → tap the <b>Install</b> banner (or menu → Add to Home Screen).
+        On <b>desktop</b>: look for the install icon in Chrome/Edge's address bar.
+      </li>
+      <li>
+        <b>Take the "App Overview" walkthrough.</b>
+        Open <b>Help</b> from the sidebar and start the <b>App Overview</b> walkthrough. It points out each
+        area of the app on the live screens — the fastest way to get oriented.
+      </li>
+      <li>
+        <b>Meet the AI helper.</b>
+        The round sparkle button in the bottom-right corner answers questions in plain English — "how do
+        scholarship invoices work?", "what's our no-show fee?". One rule: never type client names or health
+        details into it (it doesn't need them and can't see client data anyway).
+      </li>
+    </ol>
+  </section>
+
+  <section id="around">
+    <h2>3. Finding Your Way Around</h2>
+    <p class="blurb">The Dashboard is your morning coffee screen — it surfaces everything that needs you.</p>
+    <div class="feature">
+      <h3>The Dashboard</h3>
+      <p>The stats across the top give you the pulse: sessions this month, total clients, recently approved
+        sessions, and pending invoices with the dollars outstanding. Below that, the <b>Action Center</b>
+        lists what actually needs doing, most urgent first — overdue invoices, sessions waiting for approval,
+        unsent invoices, unbilled scholarship sessions. Each card has a jump-in link, and cards only appear
+        when there's something to act on. An empty Action Center means you're caught up.</p>
+      <img src="{{SS}}/tour-01-dashboard.png" alt="Dashboard with stats and action center" />
+    </div>
+    <div class="feature">
+      <h3>The sidebar — your map</h3>
+      <table>
+        <tr><th>Menu item</th><th>What it's for</th></tr>
+        <tr><td><b>Dashboard</b></td><td>Today's overview and the Action Center.</td></tr>
+        <tr><td><b>Sessions</b></td><td>Every logged session — review, approve, filter, search. Your most-visited page.</td></tr>
+        <tr><td><b>Clients</b></td><td>The client list: contact info, payment setup, session history, portal invites.</td></tr>
+        <tr><td><b>Billing &gt; Invoices</b></td><td>All invoices — pending, sent, paid, overdue — plus the Scholarship tab for monthly batches.</td></tr>
+        <tr><td><b>Team</b></td><td>Who's on the team, and where you invite new contractors or admins.</td></tr>
+        <tr><td><b>Settings</b></td><td>For you, mostly <b>Profile &amp; Security</b> (password, two-factor). Organization-wide settings are managed by the owner.</td></tr>
+        <tr><td><b>Help</b></td><td>The Help Center: searchable articles, FAQs, interactive walkthroughs, and the AI helper.</td></tr>
+      </table>
+      <p>If you've seen screenshots with <b>Payroll</b> or <b>Analytics</b> menu items and don't have them —
+        that's normal. Those are owner-only (see <a href="#owner-only">Section 10</a>).</p>
+    </div>
+  </section>
+
+  <section id="sessions">
+    <h2>4. Sessions — Your Daily Core</h2>
+    <p class="blurb">Sessions are the heartbeat of the app. Everything else — invoices, pay, reports — flows from them.</p>
+
+    <div class="feature">
+      <h3>How a session moves through the app</h3>
+      <p class="flow">
+        <span class="pill draft">Draft</span><span class="arrow">→</span>
+        <span class="pill submitted">Submitted</span><span class="arrow">→</span>
+        <span class="pill approved">Approved</span>
+      </p>
+      <p>A contractor logs a session and <b>submits</b> it. Submitting is the moment the money side starts:
+        the app immediately creates a <b>pending invoice</b> for each attending client (scholarship and
+        monthly-billed clients are the exception — their sessions accumulate for a monthly batch instead).
+        The session then waits in your review queue until you <b>approve</b> it.</p>
+      <p>Two side paths: a session can be marked <span class="pill noshow">No-Show</span> (client didn't
+        attend — a flat no-show fee is charged, and the contractor still gets their normal session pay) or
+        <span class="pill cancelled">Cancelled</span> (removed from billing entirely — no invoice).</p>
+    </div>
+
+    <div class="feature">
+      <h3>The Sessions page</h3>
+      <p>Each card shows the date, service type, client, contractor, duration, and a status badge. Use the
+        search bar (client, contractor, or service name) and the filters (status, date range, contractor) to
+        find anything. Sessions with a <b>Submitted</b> badge are waiting on you.</p>
+      <img src="{{SS}}/tour-02-sessions-list.png" alt="Sessions list with status badges and filters" />
+    </div>
+
+    <div class="feature">
+      <h3>Reviewing and approving</h3>
+      <p>Submitted sessions show <b>Approve</b> and <b>Revise</b> buttons right on the card. Before
+        approving, give it a quick sanity check: right client, right service type, right duration, notes
+        present if required. Then:</p>
+      <ul>
+        <li><b>Approve</b> — confirms the session. Its invoice already exists (created at submission) and is
+          now ready to send whenever you're ready.</li>
+        <li><b>Revise</b> — sends it back to the contractor with a note explaining what to fix. The pending
+          invoice is removed automatically, and recreated when they resubmit — nothing goes unbilled and
+          nothing gets double-billed.</li>
+        <li><b>Mark No-Show / Cancel / Delete</b> — available from the session's detail page.</li>
+      </ul>
+      <p><b>Bulk approve:</b> when several sessions are ready at once (say, end of the week), use the
+        checkboxes — or "Select all submitted" — and hit <b>Approve (N)</b> in the bar that appears. It runs
+        the same checks as approving one at a time.</p>
+      <img src="{{SS}}/tour-04-session-detail.png" alt="Session detail with pricing and actions" />
+    </div>
+
+    <div class="feature">
+      <h3>Logging a session yourself</h3>
+      <p>Mostly contractors log their own sessions, but you can log one for anyone. Click <b>New Session</b>
+        on the Sessions page (on mobile, the floating <b>+</b> button). The form asks for date and time,
+        duration, service type, client(s), and notes. The service type drives all the pricing automatically —
+        you never calculate anything by hand.</p>
+      <p>Two kinds of notes, and the difference matters: <b>Internal Notes</b> are visible only to staff.
+        <b>Client Notes</b> appear in the client's portal. Both are encrypted for HIPAA compliance.</p>
+      <img src="{{SS}}/tour-03-new-session.png" alt="New session form" />
+      <div class="callout">
+        <b>Tip:</b> the form remembers your last-used time, duration, and service type, and a <b>Log
+        Another</b> button appears after each submission — logging a full day of sessions takes a couple of
+        minutes.
+      </div>
+    </div>
+  </section>
+
+  <section id="clients">
+    <h2>5. Clients</h2>
+    <p class="blurb">Every client's contact info, billing setup, and history in one place.</p>
+
+    <div class="feature">
+      <h3>The client list</h3>
+      <p>The Clients page shows everyone with their contact info and payment method. The stats at the top
+        flag clients missing contact details. Click any row to open the client's full record: session
+        history, invoices, goals, and shared resources.</p>
+      <img src="{{SS}}/tour-05-clients-list.png" alt="Clients list" />
+    </div>
+
+    <div class="feature">
+      <h3>Adding a client — the two settings that matter</h3>
+      <p>Click <b>Add Client</b>, enter their name and contact info, and set two fields that drive everything
+        billing-related later:</p>
+      <table>
+        <tr><th></th><th>Question it answers</th><th>Options</th></tr>
+        <tr>
+          <td><b>Payment Method</b></td>
+          <td><i>Who pays, and how is the session classified?</i> Determines how much is billed — scholarship
+            clients get the flat scholarship rate and monthly batching.</td>
+          <td>Private Pay · Self-Directed · Group Home · Scholarship · Venmo</td>
+        </tr>
+        <tr>
+          <td><b>Billing Method</b></td>
+          <td><i>How does their invoice get delivered?</i> Determines whether you send a Square payment link,
+            an emailed PDF, or track a check by hand.</td>
+          <td>Square · Email · Check · Other</td>
+        </tr>
+      </table>
+      <img src="{{SS}}/tour-06-add-client-dialog.png" alt="Add client dialog" />
+      <div class="callout warn">
+        <b>Worth double-checking:</b> a client's payment method is the single most consequential setting in
+        the app — it decides whether they're invoiced per-session or batched monthly. If a new client's
+        billing looks wrong later, this is the first place to look.
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>The client portal invite</h3>
+      <p>From a client's page you can send a <b>portal invite</b> — a secure link where the client (or their
+        family) sees their session history, notes you've shared, goals, and resources. More in
+        <a href="#portal">Section 8</a>.</p>
+    </div>
+  </section>
+
+  <section id="invoices">
+    <h2>6. Invoices</h2>
+    <p class="blurb">The app writes the invoices; you decide when they go out.</p>
+
+    <div class="feature">
+      <h3>Where invoices come from</h3>
+      <p>You almost never create an invoice by hand. When a session is submitted, the app generates one
+        pending invoice per attending client, priced from the service type. Pending invoices are drafts —
+        <b>nothing reaches a client until you send it</b>.</p>
+    </div>
+
+    <div class="feature">
+      <h3>The Invoices page</h3>
+      <p>Summary cards up top show pending, awaiting-payment, and overdue totals. The tabs split invoices by
+        status — <b>Pending</b>, <b>Sent</b>, <b>Paid</b>, <b>Overdue</b> — plus filters for Self-Directed
+        and Group Home clients, and the purple <b>Scholarship</b> tab.</p>
+      <img src="{{SS}}/tour-08-invoices-list.png" alt="Invoices list with tabs and summary cards" />
+    </div>
+
+    <div class="feature">
+      <h3>Sending an invoice</h3>
+      <p>Open the <b>…</b> menu on any invoice:</p>
+      <ul>
+        <li><b>Send via Email</b> — generates a PDF and emails it to the client.</li>
+        <li><b>Send via Square</b> — creates a Square invoice with an online payment link. When the client
+          pays online, the invoice marks itself <b>Paid</b> automatically. This is the lowest-effort path for
+          clients who pay by card.</li>
+      </ul>
+      <p>For invoices handled outside the app (checks, Venmo), use the quick <b>Send</b> and <b>Paid</b>
+        buttons to record the status yourself. Checkboxes + the action bar let you <b>Mark Sent</b> /
+        <b>Mark Paid</b> in bulk.</p>
+      <img src="{{SS}}/tour-09-invoice-detail.png" alt="Invoice detail" />
+      <div class="callout">
+        <b>Reminders are automatic.</b> Unpaid sent invoices get email reminders before their due date (by
+        default 7 days and 1 day before, each sent once). You don't chase these by hand.
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>The Scholarship tab — once a month</h3>
+      <p>Scholarship and monthly-billed clients don't get per-session invoices. Their sessions pile up here,
+        grouped by client and month. At month end, click <b>Generate Invoice</b> on a group — or
+        <b>Generate All</b> — and the app creates one batch invoice per client listing every session as a
+        line item. Batches are created as Pending, so you review before sending like any other invoice.</p>
+      <img src="{{SS}}/tour-10-scholarship-monthly.png" alt="Scholarship tab with monthly groups" />
+    </div>
+  </section>
+
+  <section id="team">
+    <h2>7. Team</h2>
+    <p class="blurb">See the whole team, and bring new people on board.</p>
+    <div class="feature">
+      <p>The Team page lists every member with their role and session counts. As an admin you can view the
+        team and <b>invite new members</b>: click <b>Invite Team Member</b>, pick the role (Contractor or
+        Admin), and either email the invite or copy a link to share directly. They set up their own account
+        from the link — the same flow you went through on day one.</p>
+      <p>Changing roles, pay rates, and removing members is handled by the owner.</p>
+      <img src="{{SS}}/tour-13-team.png" alt="Team page" />
+    </div>
+  </section>
+
+  <section id="portal">
+    <h2>8. The Client Portal</h2>
+    <p class="blurb">What clients see when you send them a portal invite.</p>
+    <div class="feature">
+      <p>The portal is a simplified, secure view for clients and families — no account or password needed,
+        just the tokenized link from their invite. They can see their session history with any
+        <b>Client Notes</b> you or contractors shared, their goals and progress, and resources (files) shared
+        with them. If enabled, they can also request a session, which comes to staff for approval.</p>
+      <p>Portal links expire after a while (90 days by default) — if a client says their link stopped
+        working, just send a fresh invite from their client page.</p>
+      <img src="{{SS}}/tour-27-portal-home.png" alt="Client portal home" />
+      <div class="callout warn">
+        <b>Remember the notes rule:</b> anything typed into <b>Client Notes</b> is visible in the portal.
+        Anything for staff eyes only belongs in <b>Internal Notes</b>.
+      </div>
+    </div>
+  </section>
+
+  <section id="help">
+    <h2>9. Learn More &amp; Getting Help</h2>
+    <p class="blurb">The Help Center is built into the app — articles, FAQs, walkthroughs, and an AI helper.</p>
+
+    <div class="feature">
+      <h3>Interactive walkthroughs — take them in this order</h3>
+      <table>
+        <tr><th>#</th><th>Walkthrough</th><th>When</th></tr>
+        <tr><td>1</td><td><b>App Overview</b></td><td>Day one — your orientation tour.</td></tr>
+        <tr><td>2</td><td><b>Approve Sessions</b></td><td>Before your first review — the core of your job.</td></tr>
+        <tr><td>3</td><td><b>Log a Session</b></td><td>First week — so you can help contractors and fill gaps.</td></tr>
+        <tr><td>4</td><td><b>Add Your First Client</b></td><td>Before you add a real client.</td></tr>
+        <tr><td>5</td><td><b>Scholarship Billing</b></td><td>Before your first month-end batch.</td></tr>
+        <tr><td>6</td><td><b>Invite a Contractor</b></td><td>Whenever someone new joins.</td></tr>
+      </table>
+      <p>Find them all in <b>Help</b> — each one highlights the actual buttons on the actual screens.
+        (You may also see service-type configuration walkthroughs; those cover owner-managed settings.)</p>
+      <img src="{{SS}}/tour-24-help-center.png" alt="Help Center" />
+    </div>
+
+    <div class="feature">
+      <h3>When you're stuck</h3>
+      <ul>
+        <li><b>Search the Help Center</b> — articles cover every page and workflow in the app.</li>
+        <li><b>Ask the AI helper</b> (sparkle button, bottom-right) — plain-English questions about how
+          things work, including <i>your</i> organization's actual rates and settings. It cannot see client,
+          session, or invoice data — so keep client names out of your questions, and check the relevant
+          screen directly for "why does this specific invoice look wrong" questions.</li>
+        <li><b>Ask Lucas or Amara</b> — for anything owner-level: pricing changes, new service types,
+          automation, payroll.</li>
+      </ul>
+      <p>Small comfort feature: the sun/moon icon in the header switches light/dark mode.</p>
+    </div>
+  </section>
+
+  <section id="owner-only">
+    <h2>10. What's Owner-Only</h2>
+    <p class="blurb">Things you'll hear about but won't see in your menus — by design, not by accident.</p>
+    <div class="feature">
+      <table>
+        <tr><th>Area</th><th>What it is</th></tr>
+        <tr><td><b>Payroll</b></td><td>Tracking and recording contractor payments.</td></tr>
+        <tr><td><b>Analytics</b></td><td>Revenue charts, session volume, payment status summaries.</td></tr>
+        <tr><td><b>Organization settings</b></td><td>Service types &amp; pricing, automation rules, branding, custom lists, business rules.</td></tr>
+        <tr><td><b>Financial breakdowns</b></td><td>The internal split of each session's price (MCA share vs. contractor pay). You see billing totals; the split is owner-level.</td></tr>
+        <tr><td><b>Team management</b></td><td>Changing roles and pay rates, removing members (you <i>can</i> view the team and send invites).</td></tr>
+      </table>
+      <p>If a task needs one of these, flag it to the owner — don't work around it.</p>
+    </div>
+  </section>
+
+  <section id="reference">
+    <h2>11. Quick Reference</h2>
+    <p class="blurb">Print this page.</p>
+
+    <div class="feature">
+      <h3>Your rhythm</h3>
+      <table>
+        <tr><th>Cadence</th><th>What to do</th></tr>
+        <tr><td><b>Daily</b></td><td>Open the Dashboard → work the Action Center. Review and approve submitted sessions.</td></tr>
+        <tr><td><b>Weekly</b></td><td>Invoices page → send anything sitting in Pending; glance at Overdue and follow up.</td></tr>
+        <tr><td><b>Monthly</b></td><td>Invoices → Scholarship tab → Generate All → review the batches → send.</td></tr>
+      </table>
+    </div>
+
+    <div class="feature">
+      <h3>How do I…?</h3>
+      <table>
+        <tr><th>Task</th><th>Where</th></tr>
+        <tr><td>Approve a session</td><td>Sessions → <b>Approve</b> on the card (or checkboxes → bulk approve)</td></tr>
+        <tr><td>Send a session back for fixes</td><td>Sessions → <b>Revise</b> → add a note</td></tr>
+        <tr><td>Record a no-show</td><td>Open the session → <b>Mark No-Show</b></td></tr>
+        <tr><td>Log a session for someone</td><td>Sessions → <b>New Session</b></td></tr>
+        <tr><td>Add a client</td><td>Clients → <b>Add Client</b> (set payment + billing method carefully)</td></tr>
+        <tr><td>Send an invoice</td><td>Invoices → <b>…</b> menu → Send via Email / Send via Square</td></tr>
+        <tr><td>Record a check/Venmo payment</td><td>Invoices → <b>Paid</b> button on the invoice</td></tr>
+        <tr><td>Run monthly scholarship billing</td><td>Invoices → Scholarship tab → <b>Generate All</b></td></tr>
+        <tr><td>Give a client portal access</td><td>Clients → open client → send portal invite</td></tr>
+        <tr><td>Invite a new team member</td><td>Team → <b>Invite Team Member</b></td></tr>
+        <tr><td>Change my password / 2FA</td><td>Settings → Profile &amp; Security</td></tr>
+        <tr><td>Answer "how does X work?"</td><td>Help Center, or the AI helper (no client names!)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    MCA Manager Admin Onboarding Guide · prepared July 2026 ·
+    app: maycreativearts.vercel.app · companion reference: <i>MCA App Guide — Pricing, Invoicing &amp; Configuration</i>
+  </footer>
+</div>
+</body>
+</html>
