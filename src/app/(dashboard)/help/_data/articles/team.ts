@@ -50,14 +50,26 @@ Removal is blocked if the member has ever logged a session — you'll see a mess
     slug: 'managing-contractor-rates',
     title: 'Managing Contractor Pay Rates',
     category: 'team',
-    description: 'How to set custom per-contractor pay rates per service type.',
+    description: 'How contractor pay is calculated — the priority chain — and how to set custom per-contractor rates.',
     adminOnly: true,
+    walkthrough: 'contractor-pay',
     relatedArticles: ['inviting-team-members', 'configuring-services'],
-    keywords: ['pay rate', 'custom rate', 'rate matrix', 'raise', 'contractor pay'],
+    keywords: ['pay rate', 'custom rate', 'rate matrix', 'raise', 'contractor pay', 'pay priority', 'pay calculation'],
     content: `
 ## Managing Contractor Pay Rates
 
 MCA Manager supports custom pay rates per contractor per service type. This lets you give individual contractors different base pay, such as when a raise has been negotiated.
+
+### How Pay Is Decided: The Priority Chain
+
+When a session is priced, contractor pay comes from the first rule that applies, checked in this order:
+
+1. **Group pay matrix** — group service types can define exact pay by headcount and duration ("Group Contractor Pay by Headcount" on the service type). When a cell matches, it wins outright.
+2. **Custom contractor rate** — the per-contractor, per-service rate from the Team > Rates matrix (this article), plus its per-15-minute increment for longer sessions.
+3. **Service pay schedule** — "Contractor Pay by Duration" amounts set directly on an individual service type.
+4. **Percentage formula** — when nothing above applies: pay = total billed minus the service's MCA percentage.
+
+Whatever rule produced the number, the service type's **Contractor Cap** (if set) is applied last as a hard ceiling. Scholarship pricing never reduces contractor pay — the organization absorbs the difference.
 
 ### Where to Find It
 

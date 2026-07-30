@@ -187,16 +187,17 @@ export default function BusinessSettingsPage() {
                 <CardTitle>Service Types</CardTitle>
                 <CardDescription>Configure pricing rules for each service type</CardDescription>
               </div>
-              <Button onClick={() => { setEditingServiceType(null); setIsServiceTypeFormOpen(true) }} className="w-full sm:w-auto">
+              <Button onClick={() => { setEditingServiceType(null); setIsServiceTypeFormOpen(true) }} className="w-full sm:w-auto" data-tour="add-service-type">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Service Type
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-3" data-tour="service-types-list">
                 {serviceTypes.map((st) => (
                   <div
                     key={st.id}
+                    data-tour="service-type-row"
                     className={`flex items-center justify-between p-4 rounded-lg border ${
                       st.is_active ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800 opacity-60'
                     }`}

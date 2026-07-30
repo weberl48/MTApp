@@ -22,6 +22,7 @@ export const RECOMMENDED_WALKTHROUGH_ORDER = [
   'add-client',
   'scholarship-billing',
   'invite-contractor',
+  'contractor-pay',
   'configure-services',
   'edit-service-type',
 ] as const

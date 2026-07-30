@@ -591,7 +591,7 @@ export default function SessionsPage() {
                 </CardDescription>
               </div>
               {isAdmin && submittedInView.length > 0 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" data-tour="sessions-select-all">
                   <Checkbox
                     checked={allSubmittedSelected}
                     onCheckedChange={(checked) => {
@@ -626,6 +626,7 @@ export default function SessionsPage() {
                       key={session.id}
                       href={`/sessions/${session.id}/`}
                       className="block"
+                      data-tour="session-card"
                     >
                       <div className={`p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
                         <div className="flex items-start gap-3">
@@ -691,7 +692,7 @@ export default function SessionsPage() {
                             )}
                             {/* Row 4: Action buttons (mobile-friendly) */}
                             {isAdmin && session.status === 'submitted' && (
-                              <div className="flex gap-2 mt-2" onClick={(e) => e.preventDefault()}>
+                              <div className="flex gap-2 mt-2" data-tour="session-approve-actions" onClick={(e) => e.preventDefault()}>
                                 {/* Quiet row actions — bulk Approve (N) above the list is the
                                     primary action, matching the dashboard approvals card. */}
                                 <Button
