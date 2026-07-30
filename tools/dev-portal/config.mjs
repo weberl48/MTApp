@@ -19,13 +19,27 @@ export const ENVIRONMENTS = [
   {
     key: 'local',
     name: 'Local Dev',
-    subtitle: 'Sandbox — MCA-Dev Supabase',
+    subtitle: 'Runs against the cert database — REAL PHI',
     baseUrl: LOCAL_APP_URL,
     supabaseRef: 'gzrukevymmguqxuoynqk',
-    supabaseName: 'MCA-Dev',
+    supabaseName: 'Cert',
     links: [
       { label: 'Open app', url: `${LOCAL_APP_URL}/dashboard/` },
       { label: 'Supabase', url: 'https://supabase.com/dashboard/project/gzrukevymmguqxuoynqk' },
+    ],
+  },
+  {
+    key: 'cert',
+    name: 'Cert',
+    subtitle: 'Vercel Preview — faithful copy of prod',
+    // Preview URLs are per-deployment; the portal links to the deployment list.
+    baseUrl: process.env.CERT_APP_URL || '',
+    supabaseRef: 'gzrukevymmguqxuoynqk',
+    supabaseName: 'Cert',
+    links: [
+      { label: 'Preview deployments', url: 'https://vercel.com/lucas-projects-eee2f5e6/maycreativearts/deployments' },
+      { label: 'Supabase', url: 'https://supabase.com/dashboard/project/gzrukevymmguqxuoynqk' },
+      { label: 'Refresh runbook', url: `https://github.com/${GITHUB_REPO}/blob/main/scripts/cert-refresh/README.md` },
     ],
   },
   {
