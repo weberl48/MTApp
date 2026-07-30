@@ -33,6 +33,7 @@ const STATUS_LABEL = {
   unhealthy: 'Unhealthy',
   down: 'Down',
   'not-probed': 'Not probed',
+  protected: 'Protected',
 }
 
 function fmtTime(iso) {
@@ -75,7 +76,7 @@ function envCardHtml(env, health, supabase) {
   const points = state.history[env.key] || []
   // An unprobed environment has no uptime to report. Showing "100% up" for one
   // nobody is checking is worse than showing nothing.
-  const upPct = status !== 'not-probed' && points.length
+  const upPct = !['not-probed','protected'].includes(status) && points.length
     ? Math.round((points.filter(p => p.status !== 'down').length / points.length) * 1000) / 10
     : null
 
@@ -98,6 +99,9 @@ function envCardHtml(env, health, supabase) {
       .join('')}</ul>`
   } else if (health && health.detailHidden && status !== 'down') {
     checks = `<p class="lock-note">Per-check detail is locked. Add <span class="mono">CRON_SECRET</span> to <span class="mono">.env.local</span> (matching the Vercel value) to unlock it, then restart the portal.</p>`
+  } else if (status === 'protected') {
+    // Vercel SSO is doing its job — cert serves real PHI. Not an outage.
+    checks = `<p class="lock-note">${esc(health.note || 'Behind Vercel Deployment Protection.')}</p>`
   } else if (status === 'not-probed') {
     // Cert: Preview URLs are per-deployment, so there is nothing stable to probe.
     // Say so in the card rather than leaving a blank panel that reads as broken.
@@ -147,6 +151,8 @@ function envCardHtml(env, health, supabase) {
 
 function probeHtml(name, probe) {
   if (!probe) return ''
+  // ok === null: behind Deployment Protection — neither pass nor fail.
+  if (probe.ok === null) return `<span class="probe"><b>–</b> ${name}</span>`
   const ok = probe.ok
   return `<span class="probe ${ok ? 'ok' : 'bad'}"><b>${ok ? '✓' : '✗'}</b> ${name}${probe.ms != null ? ` ${probe.ms}ms` : ''}</span>`
 }
@@ -161,7 +167,7 @@ function buildPulseStrip(envKey) {
     // Unprobed environments are never sampled, so "collecting history" would be
     // a promise the portal has no intention of keeping.
     const health = state.overview?.environments.find(e => e.env === envKey)
-    if (health?.status === 'not-probed') {
+    if (['not-probed','protected'].includes(health?.status)) {
       host.innerHTML = ''
       return
     }

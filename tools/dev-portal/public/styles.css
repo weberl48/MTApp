@@ -141,9 +141,9 @@ h2 { font-size: 15px; font-weight: 600; margin: 0; }
 .status-degraded .status-dot { background: var(--warn); }
 .status-unhealthy { color: var(--bad); }
 .status-unhealthy .status-dot { background: var(--bad); }
-/* Cert has no pinned URL to probe — neutral, not alarming. */
-.status-not-probed { color: var(--muted); }
-.status-not-probed .status-dot { background: var(--muted); }
+/* Cert: not probed / behind Vercel SSO — neutral, not alarming. */
+.status-not-probed, .status-protected { color: var(--ink-3); }
+.status-not-probed .status-dot, .status-protected .status-dot { background: var(--ink-3); }
 .status-down { color: var(--down); }
 .status-down .status-dot { background: var(--down); }
 

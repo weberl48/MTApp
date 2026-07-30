@@ -22,6 +22,26 @@ const LOCAL_APP_URL = process.env.LOCAL_APP_URL || 'http://localhost:3000'
 export const CERT_REF = 'gzrukevymmguqxuoynqk'
 export const CERT_SINK_DOMAIN = process.env.CERT_SINK_DOMAIN || 'cert.mca.invalid'
 
+// Stable alias pinned to the cert Preview deployment:
+//   vercel deploy && vercel alias set <deployment> mca-cert.vercel.app
+export const CERT_APP_URL = process.env.CERT_APP_URL || 'https://mca-cert.vercel.app'
+
+/**
+ * Vercel Deployment Protection bypass.
+ *
+ * Preview deployments sit behind Vercel SSO — which is exactly right, because
+ * this one serves real PHI. That also means the portal gets a 302 to the SSO
+ * login instead of the app, so HTTP checks are meaningless without a bypass.
+ *
+ * Enable it once in the dashboard (Project > Settings > Deployment Protection >
+ * Protection Bypass for Automation), then put the generated secret in
+ * .env.local as CERT_BYPASS_SECRET. There is no REST API for creating it.
+ *
+ * Until then the portal detects the SSO redirect and reports `protected`
+ * rather than pretending cert is down.
+ */
+export const CERT_BYPASS_SECRET = process.env.CERT_BYPASS_SECRET || null
+
 export const ENVIRONMENTS = [
   {
     key: 'local',
@@ -39,15 +59,14 @@ export const ENVIRONMENTS = [
     key: 'cert',
     name: 'Cert',
     subtitle: 'Vercel Preview — faithful copy of prod',
-    // Vercel Preview URLs are per-deployment, so there is no stable host to probe
-    // unless one is pinned. Without CERT_APP_URL the HTTP liveness checks and the
-    // endpoint sweep are skipped for this environment — the Cert panel below
-    // reports on the cert DATABASE instead, which is the part that is stable and
-    // the part that actually matters.
-    baseUrl: process.env.CERT_APP_URL || null,
+    // Preview URLs are per-deployment, so this is a pinned alias rather than a
+    // deployment URL. It sits behind Vercel SSO — see CERT_BYPASS_SECRET.
+    baseUrl: CERT_APP_URL,
+    bypassSecret: CERT_BYPASS_SECRET,
     supabaseRef: CERT_REF,
     supabaseName: 'Cert',
     links: [
+      { label: 'Open cert', url: CERT_APP_URL },
       { label: 'Preview deployments', url: 'https://vercel.com/lucas-projects-eee2f5e6/maycreativearts/deployments' },
       { label: 'Supabase', url: `https://supabase.com/dashboard/project/${CERT_REF}` },
       { label: 'Refresh runbook', url: `https://github.com/${GITHUB_REPO}/blob/main/scripts/cert-refresh/README.md` },
