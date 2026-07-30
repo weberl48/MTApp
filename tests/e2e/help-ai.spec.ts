@@ -16,9 +16,11 @@ test.describe('AI help chat', () => {
   // Costs real API credits — opt in explicitly with HELP_AI_E2E=1.
   test('answers a scholarship question with sources', async ({ page }) => {
     test.skip(process.env.HELP_AI_E2E !== '1', 'HELP_AI_E2E not enabled (needs API credits)')
+    test.setTimeout(120000) // streamed answer can take a while on a cold prompt cache
     await login(page)
     await page.goto('/help/')
-    await page.getByRole('button', { name: /ask the ai helper/i }).click()
+    // The floating bubble is also named "Ask the AI helper" — target the panel teaser uniquely.
+    await page.getByRole('button', { name: /get an answer instead of searching/i }).click()
     await page.getByPlaceholder('Ask how something works…').fill('How do scholarship invoices work?')
     await page.getByRole('button', { name: 'Send question' }).click()
     const answer = page.locator('.mr-4').last()
