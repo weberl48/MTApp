@@ -21,6 +21,24 @@ async function timedFetch(url, options = {}, timeoutMs = 15000) {
  * us — always in local dev, only with CRON_SECRET against production).
  */
 export async function checkEnvironmentHealth(env, cronSecret) {
+  // Environments with no pinned URL (cert, whose Preview host is per-deployment)
+  // have nothing to probe. Report that honestly rather than as a failure — a
+  // permanently-red card teaches people to ignore the dashboard.
+  if (!env.baseUrl) {
+    return {
+      env: env.key,
+      checkedAt: new Date().toISOString(),
+      status: 'not-probed',
+      live: null,
+      ready: null,
+      latencyMs: null,
+      version: null,
+      checks: null,
+      detailHidden: false,
+      note: 'No fixed URL — see the Cert panel for database health.',
+    }
+  }
+
   const headers = cronSecret ? { authorization: `Bearer ${cronSecret}` } : {}
 
   const [live, ready, health] = await Promise.all([
@@ -69,6 +87,16 @@ function probeSummary(probe) {
  * 401/404 is exactly what we want to see; 5xx or a network error is a failure.
  */
 export async function sweepEndpoints(env) {
+  if (!env.baseUrl) {
+    return {
+      env: env.key,
+      ranAt: new Date().toISOString(),
+      summary: { pass: 0, warn: 0, fail: 0, skip: ENDPOINTS.length },
+      note: `${env.name} has no fixed URL to sweep. Set CERT_APP_URL to pin one.`,
+      results: ENDPOINTS.map(ep => ({ ...ep, result: 'skip', note: 'no base URL' })),
+    }
+  }
+
   const queue = [...ENDPOINTS]
   const results = []
 

@@ -5,8 +5,9 @@ import { fileURLToPath } from 'node:url'
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
 /**
- * Minimal .env.local parser — the portal only needs SUPABASE_ACCESS_TOKEN
- * (Management API) and, if present, CRON_SECRET (unlocks prod health detail).
+ * Minimal .env.local parser — the portal needs SUPABASE_ACCESS_TOKEN
+ * (Management API), and if present CRON_SECRET (unlocks prod health detail) and
+ * CERT_ENCRYPTION_KEY (lets the Cert panel prove PHI decrypts).
  * Values are never sent to the browser.
  */
 export function loadRepoEnv() {
@@ -30,7 +31,10 @@ export function loadRepoEnv() {
     env[key] = value
   }
   // Real environment variables win (the container has no .env.local).
-  for (const key of ['SUPABASE_ACCESS_TOKEN', 'CRON_SECRET']) {
+  // CERT_ENCRYPTION_KEY lets the Cert panel prove PHI still decrypts. It is used
+  // server-side only and never sent to the browser. Absent on the Pi container,
+  // where that one check degrades to "unknown" rather than failing.
+  for (const key of ['SUPABASE_ACCESS_TOKEN', 'CRON_SECRET', 'CERT_ENCRYPTION_KEY']) {
     if (process.env[key]) env[key] = process.env[key]
   }
   return env

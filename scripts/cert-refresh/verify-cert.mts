@@ -14,7 +14,7 @@
 import './lib/run.mjs'
 import { certQuery, envValue } from './lib/api.mjs'
 import { assertCert } from './lib/guards.mjs'
-import { SINK_DOMAIN, TESTERS } from './config.mjs'
+import { SINK_DOMAIN, TESTERS, CERT_REF } from './config.mjs'
 
 type Check = { name: string; ok: boolean; detail: string }
 const checks: Check[] = []
@@ -68,6 +68,36 @@ const [{ orphans }] = await certQuery(`
   where not exists (select 1 from auth.users a where a.id = u.id)
 `)
 add('every profile has an auth row', orphans === 0, `${orphans} orphaned`)
+
+// 5b ------------------------------------------------- GoTrue can read auth.users
+// Every DB-level check can pass while auth is completely broken. GoTrue scans
+// auth.users into a Go struct with non-nullable strings, so a single NULL token
+// column makes admin/users 500 with "Database error finding users" — and the
+// app's own /api/health auth check goes red while everything else looks fine.
+const [tokenNulls] = await certQuery(`
+  select count(*)::int as bad from auth.users
+  where confirmation_token is null or recovery_token is null
+     or email_change_token_new is null or email_change is null
+     or email_change_token_current is null or phone_change is null
+     or phone_change_token is null or reauthentication_token is null
+`)
+add('no NULL auth token columns', tokenNulls.bad === 0, `${tokenNulls.bad} row(s) would break GoTrue`)
+
+const supabaseUrl = envValue('NEXT_PUBLIC_SUPABASE_URL')
+const serviceKey = envValue('SUPABASE_SERVICE_ROLE_KEY')
+if (supabaseUrl?.includes(CERT_REF) && serviceKey) {
+  try {
+    const r = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=&per_page=1`, {
+      headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}` },
+      signal: AbortSignal.timeout(15000),
+    })
+    add('GoTrue lists users', r.status === 200, `HTTP ${r.status}`)
+  } catch (e) {
+    add('GoTrue lists users', false, String((e as Error).message).slice(0, 60))
+  }
+} else {
+  add('GoTrue lists users', null, '.env.local does not point at cert')
+}
 
 // 6/7 ------------------------------------------------- PAIRED decrypt probes
 const certKey = envValue('CERT_ENCRYPTION_KEY') || process.env.ENCRYPTION_KEY

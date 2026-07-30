@@ -15,6 +15,7 @@ import { loadRepoEnv } from './lib/env.mjs'
 import { addError, listErrors, clearErrors, addHistoryPoint, getHistory } from './lib/store.mjs'
 import { checkEnvironmentHealth, sweepEndpoints } from './lib/checks.mjs'
 import { supabaseProjectStatuses, restoreSupabaseProject, ciStatus } from './lib/external.mjs'
+import { certStatus } from './lib/cert.mjs'
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), 'public')
 const repoEnv = loadRepoEnv()
@@ -97,6 +98,10 @@ async function handleApi(req, res, url) {
         return
       }
       json(res, 200, await sweepEndpoints(env))
+      return
+    }
+    case 'GET /api/cert': {
+      json(res, 200, await certStatus(repoEnv))
       return
     }
     case 'GET /api/errors': {
@@ -183,6 +188,9 @@ const server = createServer(async (req, res) => {
 
 async function samplePoint() {
   for (const env of ENVIRONMENTS) {
+    // Nothing to sample for an environment with no pinned URL — recording
+    // points would draw a sparkline out of measurements never taken.
+    if (!env.baseUrl) continue
     try {
       const health = await checkEnvironmentHealth(env, repoEnv.CRON_SECRET)
       addHistoryPoint(env.key, health.status, health.status === 'down' ? null : health.latencyMs)
@@ -194,7 +202,9 @@ async function samplePoint() {
 
 server.listen(PORT, () => {
   console.log(`\n  MCA Dev Portal → http://localhost:${PORT}\n`)
-  console.log(`  Watching: ${ENVIRONMENTS.map(e => `${e.name} (${e.baseUrl})`).join(', ')}`)
+  console.log(
+    `  Watching: ${ENVIRONMENTS.map(e => `${e.name} (${e.baseUrl || 'database only'})`).join(', ')}`
+  )
   console.log(`  Supabase Management API: ${repoEnv.SUPABASE_ACCESS_TOKEN ? 'connected' : 'no token found'}`)
   console.log(`  Prod health detail: ${repoEnv.CRON_SECRET ? 'unlocked via CRON_SECRET' : 'status-only (add CRON_SECRET to .env.local to unlock)'}\n`)
   samplePoint()
