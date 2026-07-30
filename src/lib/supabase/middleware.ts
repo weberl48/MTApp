@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { shouldDevAutoLogin, DEV_AUTO_LOGIN_EMAIL } from '@/lib/auth/dev-auto-login'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -28,9 +29,34 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session if expired - required for Server Components
-  const {
+  let {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // Local convenience: sign in as the seeded developer automatically.
+  // Triple-gated (dev build + DEV_AUTO_LOGIN=1 + MCA-Dev Supabase project);
+  // auth pages are exempt so manual login, sign-out, and e2e stay untouched.
+  if (
+    shouldDevAutoLogin({
+      nodeEnv: process.env.NODE_ENV,
+      flag: process.env.DEV_AUTO_LOGIN,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      password: process.env.TEST_USER_PASSWORD,
+      pathname: request.nextUrl.pathname,
+      hasUser: !!user,
+    })
+  ) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: DEV_AUTO_LOGIN_EMAIL,
+      password: process.env.TEST_USER_PASSWORD!,
+    })
+    if (error) {
+      // Dev DB paused or wrong password — fall through to the login redirect.
+      console.warn('[MCA] dev auto-login failed:', error.message)
+    } else {
+      user = data.user
+    }
+  }
 
   // Protected routes - redirect to login if not authenticated
   const protectedPaths = ['/dashboard', '/sessions', '/clients', '/invoices', '/settings', '/team', '/payments', '/analytics', '/earnings']
