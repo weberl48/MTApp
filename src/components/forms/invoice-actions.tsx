@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { downloadFromUrl } from '@/lib/download'
 import type { Invoice } from '@/types/database'
 
 interface InvoiceActionsProps {
@@ -44,21 +45,13 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
   async function downloadPdf() {
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoice.id}/pdf/`)
-      if (!response.ok) throw new Error('Failed to generate PDF')
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `invoice-${invoice.id.slice(0, 8)}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      await downloadFromUrl(
+        `/api/invoices/${invoice.id}/pdf/`,
+        `invoice-${invoice.id.slice(0, 8)}.pdf`
+      )
 
       toast.success('PDF downloaded successfully')
-    } catch (error) {
+    } catch {
       console.error('[MCA] Error downloading PDF')
       toast.error('Failed to download PDF')
     } finally {

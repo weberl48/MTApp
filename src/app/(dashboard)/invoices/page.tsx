@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback, useTransition } from
 import { createClient } from '@/lib/supabase/client'
 import { bulkUpdateInvoiceStatus, updateInvoiceStatus } from '@/app/actions/invoices'
 import { generateScholarshipBatchInvoice, generateAllUnbilledScholarshipInvoices } from '@/app/actions/scholarship-invoices'
+import { downloadBlob } from '@/lib/download'
 import { scholarshipBatchToasts } from '@/lib/invoices/scholarship-batch-feedback'
 import { isInvoiceOverdue, invoiceDaysOverdue } from '@/lib/invoices/overdue'
 import { sortInvoices, INVOICE_SORT_OPTIONS, type InvoiceSortKey } from '@/lib/invoices/sort'
@@ -365,16 +366,10 @@ export default function InvoicesPage() {
 
     const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n')
 
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    downloadBlob(
+      new Blob([csv], { type: 'text/csv' }),
+      `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+    )
 
     toast.success(`Exported ${selectedIds.size} invoice(s)`)
   }

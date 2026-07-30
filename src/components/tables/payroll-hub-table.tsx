@@ -38,6 +38,7 @@ import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
 import { parseLocalDate, todayLocal } from '@/lib/dates'
+import { downloadBlob } from '@/lib/download'
 
 export interface UnpaidSession {
   id: string
@@ -190,12 +191,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     // Generate and download
     const buffer = await wb.xlsx.writeBuffer()
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `unpaid-payroll-${todayLocal()}.xlsx`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `unpaid-payroll-${todayLocal()}.xlsx`)
   }
 
   const totalUnpaid = contractors.reduce((sum, c) => sum + c.totalPending, 0)

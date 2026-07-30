@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Download, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { downloadFromUrl } from '@/lib/download'
 import { formatCurrency } from '@/lib/pricing'
 import {
   availableTaxYears,
@@ -142,19 +143,10 @@ export function AnnualSummaryCard({ contractorId, organizationId }: AnnualSummar
   const downloadPdf = async () => {
     setDownloading(true)
     try {
-      const response = await fetch(
-        `/api/payroll/annual-summary/pdf/?year=${year}&contractorId=${contractorId}`
+      await downloadFromUrl(
+        `/api/payroll/annual-summary/pdf/?year=${year}&contractorId=${contractorId}`,
+        `earnings-summary-${year}.pdf`
       )
-      if (!response.ok) throw new Error('Download failed')
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `earnings-summary-${year}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
     } catch {
       toast.error('Failed to download PDF')
     } finally {
