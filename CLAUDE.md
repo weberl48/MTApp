@@ -118,7 +118,7 @@ Business rules are stored in `organization.settings` (JSONB) rather than hardcod
 | `security` | `session_timeout_minutes`, `require_mfa`, `max_login_attempts`, `lockout_duration_minutes` | 30 min, 5 attempts, 15 min lockout |
 | `pricing` | `no_show_fee`, `duration_base_minutes`, `square_processing_fee_enabled`, `square_processing_fee_type` (`'fixed'\|'percentage'`), `square_processing_fee_amount`, `square_processing_fee_percentage`, `square_processing_fee_fixed_cents` | $60, 30 min, fee disabled |
 | `portal` | `token_expiry_days` | 90 days |
-| `features` | `client_portal` | Enabled (fail-open: missing flags default to `true`) |
+| `features` | `client_portal`, `ai_help` | Enabled (fail-open: missing flags default to `true`) |
 | `custom_lists` | `payment_methods`, `billing_methods`, `classrooms` (string[] for the session form's classroom dropdown), `classrooms_by_client` (Record<clientId, string[]> — per-agency lists that win over the global list and show for any payment type) | All methods visible with default labels; no classrooms |
 | `automation` | `auto_approve_sessions`, `auto_send_invoice_on_approve`, `auto_send_invoice_method`, `auto_generate_scholarship_invoices`, `scholarship_invoice_day` | All off, method `'none'`, day 1 |
 
@@ -196,6 +196,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/health/live` | GET | Liveness probe (app running) |
 | `/api/health/ready` | GET | Readiness probe (DB connected) |
 | `/api/health/restore` | POST | Restore a paused Supabase project via Management API (requires `SUPABASE_ACCESS_TOKEN`) |
+| `/api/help/chat` | GET/POST | AI help assistant (config probe / streaming answers via Claude) |
 | `/api/invites/user` | POST | Create a team invite (token + email) |
 | `/api/invites/validate` | GET | Validate an invite token |
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
@@ -291,6 +292,8 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/square/invoices.ts` — Square invoice creation with deterministic idempotency keys (based on local invoice id) and optional processing-fee service charge; sandbox sends to `SQUARE_DEV_EMAIL`
 - `src/lib/square/auto-send.ts` — `autoSendInvoicesViaSquare()`: post-approval Square auto-send (never throws; returns a summary)
 - `src/lib/square/webhook-status.ts` — `resolveSquareWebhookStatus()`: FORWARD-ONLY status mapping — out-of-order/retried Square webhooks must never un-pay a paid invoice
+- `src/lib/help/ai.ts` — AI help assistant: `buildHelpCorpus()` (role-filtered articles+FAQs for the system prompt) and `buildOrgContext()` (WHITELISTED non-PHI org config — never add client/session/invoice/team data; that is the compliance boundary), `streamHelpAnswer()` (Claude streaming with prompt caching)
+- `src/lib/help/citations.ts` — `extractSources()`: splits an AI answer into display text + cited article slugs (`[[slug]]` markers)
 
 ## Testing
 
@@ -343,6 +346,10 @@ SQUARE_DEV_EMAIL=          # sandbox invoice recipient override (prevents emaili
 # KV_REST_API_TOKEN instead; src/lib/rate-limit.ts accepts either pair (UPSTASH_* wins).
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+
+# AI help assistant (recommended — the chat hides itself when the key is absent)
+ANTHROPIC_API_KEY=
+HELP_AI_MODEL=            # optional model override; defaults to claude-sonnet-5
 
 # Cron job authentication
 CRON_SECRET=secret-for-vercel-cron-jobs

@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AiChat, useAiHelpVisible } from '@/components/help/ai-chat'
 
-/** Floating "Ask the AI helper" bubble. bottom-24 on mobile clears the
- *  QuickSessionFab at bottom-6; on lg the FAB is hidden so we drop to bottom-6. */
+/** Floating "Ask the AI helper" bubble. The bottom-right corner is shared with
+ *  the QuickSessionFab (mobile, bottom-6) and the owner-onboarding prompt
+ *  (bottom-20, lg:bottom-6, z-50) — these offsets keep the bubble clear of
+ *  both so it stays clickable even while onboarding is showing. */
 export function AiChatBubble() {
   const visible = useAiHelpVisible()
   const [open, setOpen] = useState(false)
@@ -20,7 +22,7 @@ export function AiChatBubble() {
         <Button
           size="icon"
           aria-label="Ask the AI helper"
-          className="fixed bottom-24 right-6 lg:bottom-6 z-40 h-12 w-12 rounded-full shadow-lg hover:shadow-xl"
+          className="fixed bottom-32 right-6 lg:bottom-20 z-40 h-12 w-12 rounded-full shadow-lg hover:shadow-xl"
         >
           <Sparkles className="h-5 w-5" />
         </Button>
