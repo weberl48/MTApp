@@ -24,6 +24,7 @@ export type ResourceType = 'homework' | 'file' | 'link'
 // Feature flags for toggling major features per organization
 export interface FeatureFlags {
   client_portal: boolean
+  ai_help: boolean
 }
 
 // Organization settings structure

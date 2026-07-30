@@ -27,4 +27,8 @@ export const FEATURE_DEFINITIONS: Record<keyof FeatureFlags, {
     label: 'Client Portal',
     description: 'Allow clients to view their sessions, goals, and resources via a secure portal link.',
   },
+  ai_help: {
+    label: 'AI help assistant',
+    description: 'Chat assistant on the Help page and dashboard that answers questions about how the app works. Uses the Claude API; disable to turn it off for this organization.',
+  },
 }

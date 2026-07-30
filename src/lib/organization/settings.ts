@@ -43,6 +43,7 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
   },
   features: {
     client_portal: true,
+    ai_help: true,
   },
   custom_lists: {
     payment_methods: {
