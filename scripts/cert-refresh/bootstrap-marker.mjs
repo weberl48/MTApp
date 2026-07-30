@@ -8,6 +8,7 @@
  *
  * Usage:  node scripts/cert-refresh/bootstrap-marker.mjs
  */
+import './lib/run.mjs'
 import { createInterface } from 'readline/promises'
 import { certQuery, projectInfo } from './lib/api.mjs'
 import { CERT_REF, PROD_REF } from './config.mjs'
