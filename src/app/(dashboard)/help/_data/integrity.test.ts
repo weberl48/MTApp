@@ -33,6 +33,7 @@ const COVERAGE_MATRIX: Record<string, string[]> = {
   '/settings/audit': ['audit-log'],
   'portal-admin': ['client-portal', 'session-requests'],
   'pwa': ['installing-the-app'],
+  'ai-chat': ['ai-helper'],
 }
 
 describe('help content integrity', () => {

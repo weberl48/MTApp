@@ -163,4 +163,42 @@ No manual update step is required. The next time you open the installed app with
 Uninstalling works the same as any other app on your device — long-press the icon on iPhone or Android and remove it, or uninstall it from your desktop's app list. This only removes the shortcut and cached pages; your account and data live on the server and are unaffected.
     `,
   },
+  {
+    slug: 'ai-helper',
+    title: 'The AI Helper',
+    category: 'getting-started',
+    description: 'What the AI help assistant can answer, where it lives, and what it can and cannot see.',
+    adminOnly: false,
+    relatedArticles: ['getting-started'],
+    keywords: ['ai', 'assistant', 'chatbot', 'ask', 'chat', 'helper', 'bot'],
+    content: `
+## The AI Helper
+
+The AI helper is a chat assistant that answers questions about how MCA Manager works. Instead of searching the Help Center and reading through articles, you can ask in your own words — "how do scholarship invoices work?", "where do I change the no-show fee?" — and get a short, practical answer.
+
+You'll find it in two places:
+
+- On the **Help Center** page, as the **Ask the AI helper** panel at the top.
+- On every other page, as the round sparkle button in the bottom-right corner, which opens the chat in a side panel.
+
+### What it knows
+
+The helper answers from two sources only:
+
+- **The Help Center documentation** — the same articles and FAQs you can read yourself. Every answer ends with links to the articles it relied on, so you can read the full details.
+- **Your organization's configuration** — things like your no-show fee, invoice due days, service types and rates, and which features are turned on. That means it can answer "what is *our* no-show fee?" rather than just quoting defaults.
+
+### What it can't see
+
+The helper has **no access to client, session, invoice, or team data**. It cannot tell you why a specific client's invoice looks wrong or what happened in yesterday's session — for those, check the relevant screen directly. This is a deliberate privacy boundary: nothing about your clients ever leaves the app.
+
+For the same reason, **don't include client names or health details in your questions**. The helper doesn't need them, and questions should stay free of private information.
+
+### Limits and settings
+
+- Each person can ask up to 20 questions per hour.
+- Answers come from the documentation — if something isn't documented, the helper says so rather than guessing.
+- Owners can turn the helper off for the whole organization at **Settings > Business Rules > Features** with the **AI help assistant** toggle.
+    `,
+  },
 ]

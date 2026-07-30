@@ -261,4 +261,12 @@ Click **Back to Owner** in the header to exit and return to your normal view. Th
     category: 'getting-started',
     adminOnly: true,
   },
+  {
+    id: 'ask-the-ai',
+    question: 'What can the AI helper answer?',
+    answer: `The AI helper answers questions about how MCA Manager works — pricing, invoicing, payroll, settings — using the Help Center documentation and your organization's own configuration, and it links to the articles it relied on. It has no access to client, session, or team data, so keep client names and health details out of your questions.`,
+    articleSlug: 'ai-helper',
+    category: 'getting-started',
+    adminOnly: false,
+  },
 ]
