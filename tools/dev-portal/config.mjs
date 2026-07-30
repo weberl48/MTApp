@@ -15,6 +15,13 @@ export const GITHUB_REPO = 'weberl48/MTApp'
 // Overridable for the Pi mirror, where "local" means this PC's dev server.
 const LOCAL_APP_URL = process.env.LOCAL_APP_URL || 'http://localhost:3000'
 
+// Cert environment. Canonical home for these is scripts/cert-refresh/config.mjs —
+// mirrored here because the Pi container only ships tools/dev-portal (see
+// Dockerfile's `COPY . .`), so a cross-tree import would break there.
+// If you change them there, change them here.
+export const CERT_REF = 'gzrukevymmguqxuoynqk'
+export const CERT_SINK_DOMAIN = process.env.CERT_SINK_DOMAIN || 'cert.mca.invalid'
+
 export const ENVIRONMENTS = [
   {
     key: 'local',
@@ -32,13 +39,17 @@ export const ENVIRONMENTS = [
     key: 'cert',
     name: 'Cert',
     subtitle: 'Vercel Preview — faithful copy of prod',
-    // Preview URLs are per-deployment; the portal links to the deployment list.
-    baseUrl: process.env.CERT_APP_URL || '',
-    supabaseRef: 'gzrukevymmguqxuoynqk',
+    // Vercel Preview URLs are per-deployment, so there is no stable host to probe
+    // unless one is pinned. Without CERT_APP_URL the HTTP liveness checks and the
+    // endpoint sweep are skipped for this environment — the Cert panel below
+    // reports on the cert DATABASE instead, which is the part that is stable and
+    // the part that actually matters.
+    baseUrl: process.env.CERT_APP_URL || null,
+    supabaseRef: CERT_REF,
     supabaseName: 'Cert',
     links: [
       { label: 'Preview deployments', url: 'https://vercel.com/lucas-projects-eee2f5e6/maycreativearts/deployments' },
-      { label: 'Supabase', url: 'https://supabase.com/dashboard/project/gzrukevymmguqxuoynqk' },
+      { label: 'Supabase', url: `https://supabase.com/dashboard/project/${CERT_REF}` },
       { label: 'Refresh runbook', url: `https://github.com/${GITHUB_REPO}/blob/main/scripts/cert-refresh/README.md` },
     ],
   },

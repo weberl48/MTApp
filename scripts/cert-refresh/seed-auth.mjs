@@ -94,19 +94,27 @@ const q = (s) => String(s ?? '').replace(/'/g, "''")
       insert into auth.users (
         instance_id, id, aud, role, email, encrypted_password,
         email_confirmed_at, created_at, updated_at,
-        raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous
+        raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous,
+        -- GoTrue scans these into non-nullable Go strings. Leaving them NULL
+        -- makes /auth/v1/admin/users fail with "Database error finding users",
+        -- which surfaces as a healthy-looking app whose auth check is red.
+        confirmation_token, recovery_token, email_change_token_new, email_change,
+        email_change_token_current, phone_change, phone_change_token, reauthentication_token
       ) values (
         '00000000-0000-0000-0000-000000000000', '${q(p.id)}', 'authenticated', 'authenticated',
         '${q(p.email)}', extensions.crypt('${q(pw)}', extensions.gen_salt('bf')),
         now(), coalesce('${q(p.created_at)}'::timestamptz, now()), now(),
         '{"provider":"email","providers":["email"]}'::jsonb,
         jsonb_build_object('name', '${q(p.name)}'),
-        false, false
+        false, false,
+        '', '', '', '', '', '', '', ''
       )
       on conflict (id) do update set
         email = excluded.email,
         encrypted_password = excluded.encrypted_password,
         email_confirmed_at = coalesce(auth.users.email_confirmed_at, now()),
+        confirmation_token = '', recovery_token = '',
+        email_change_token_new = '', email_change = '',
         updated_at = now();
 
       insert into auth.identities (
@@ -128,7 +136,44 @@ const q = (s) => String(s ?? '').replace(/'/g, "''")
   console.log(`  upserted ${profiles.length} auth users + identities (triggers suppressed)`)
 }
 
+// -------------------------------------------- keep emails consistent with certify
+// Emails here come from the backup, i.e. the ORIGINAL prod addresses. During a
+// full refresh that is fine — certify.mjs runs afterwards and sinks them. But
+// this script is also run standalone (rotating tester passwords, --reset-mfa),
+// and doing so after a completed refresh would silently un-sink auth.users and
+// put 8 real staff addresses back. If public.users is already populated, its
+// emails are the source of truth, so mirror them.
+const [{ populated }] = await certQuery(`select count(*)::int as populated from public.users`)
+if (populated > 0) {
+  await certQuery(`
+    update auth.users a
+    set email = u.email
+    from public.users u
+    where a.id = u.id and a.email is distinct from u.email;
+
+    update auth.identities i
+    set identity_data = jsonb_set(i.identity_data, '{email}', to_jsonb(u.email))
+    from public.users u
+    where i.user_id = u.id and i.provider = 'email'
+      and i.identity_data->>'email' is distinct from u.email;
+  `)
+  console.log(`  synced auth emails to public.users (${populated} profiles)`)
+}
+
 // ------------------------------------------------------------------ assertions
+// GoTrue reads auth.users through a Go struct with non-nullable string fields.
+// Any NULL token column makes the whole admin/users listing 500, so prove it.
+const [nulls] = await certQuery(`
+  select count(*)::int as bad from auth.users
+  where confirmation_token is null or recovery_token is null
+     or email_change_token_new is null or email_change is null
+     or email_change_token_current is null or phone_change is null
+     or phone_change_token is null or reauthentication_token is null
+`)
+if (nulls.bad > 0) {
+  throw new Error(`${nulls.bad} auth.users row(s) have NULL token columns — GoTrue would fail with "Database error finding users".`)
+}
+
 const [{ enabled }] = await certQuery(`
   select (t.tgenabled <> 'D') as enabled from pg_trigger t
   join pg_class c on c.oid = t.tgrelid
