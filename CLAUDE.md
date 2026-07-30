@@ -440,10 +440,16 @@ Existing: Button, Card, Dialog, Select, Table, Tabs, Badge, etc.
 
 ### Help Articles
 
-When making user-facing changes (new features, changed behavior, new settings, UI changes), **always update the relevant help articles** in `src/app/(dashboard)/help/_data/help-articles.ts`. This includes:
+When making user-facing changes (new features, changed behavior, new settings, UI changes), **always update the relevant help articles**. This includes:
 
 - Adding documentation for new features to existing articles or creating new articles
 - Updating articles when existing behavior changes (e.g., form fields added/removed, defaults changed)
 - Updating settings documentation when new configuration options are added
 
-Help articles are defined as TypeScript objects in the `HELP_ARTICLES` array with `slug`, `title`, `category`, `description`, `content` (markdown), and optional `relatedArticles`, `walkthrough`, and `adminOnly` fields. Categories: `getting-started`, `clients`, `sessions`, `invoices`, `team`, `analytics`, `settings`.
+Help content lives in `src/app/(dashboard)/help/_data/` (the old import path `help-articles.ts` is a barrel over it):
+
+- **Articles** in `articles/<category>.ts` — TypeScript objects with `slug`, `title`, `category`, `description`, `content` (markdown in a template literal — escape backticks), `keywords` (**required in practice: ≥3 lowercase entries**, matched with high weight by search), and optional `relatedArticles`, `walkthrough`, `adminOnly`. Categories: `getting-started`, `clients`, `sessions`, `invoices`, `team`, `analytics`, `settings`.
+- **FAQs** in `faqs.ts` — `HelpFaq` entries (stable `id`, question in user phrasing, 1–2 paragraph markdown `answer`, optional `articleSlug` deep link). Rendered as the Common Questions accordion and inline in search results.
+- **Search** in `search.ts` — synonym map (`SYNONYMS`), question-stopword stripping, keyword/title/description/content scoring. Add synonyms when users' words differ from the app's vocabulary.
+- **Coverage guard**: `integrity.test.ts` enforces a route→article coverage matrix, slug/FAQ referential integrity, and the keywords rule — **when you add a dashboard route or settings tab, add its row to `COVERAGE_MATRIX`** there.
+- **Gap detection**: the `help_events` table records zero-result searches and 👎 article votes (owner-visible "Help gaps" card on `/help/`) — review it when deciding what to document next. Contextual `<PageHelp article="slug" />` "?" buttons link pages to their articles.
