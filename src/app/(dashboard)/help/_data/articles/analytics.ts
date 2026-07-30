@@ -8,6 +8,7 @@ export const ANALYTICS_ARTICLES: HelpArticle[] = [
     description: 'How to use the Analytics section to review revenue, sessions, and payment status.',
     adminOnly: true,
     relatedArticles: ['payroll-and-payments'],
+    keywords: ['revenue', 'charts', 'date range', 'summary cards', 'invoice status'],
     content: `
 ## Analytics and Reports
 
@@ -52,7 +53,8 @@ Next to the invoice status chart, the Payment Summary card totals what has been 
     category: 'analytics',
     description: 'How to track contractor pay, record payments, and reconcile Square invoices.',
     adminOnly: true,
-    relatedArticles: ['analytics-and-reports', 'managing-contractor-rates'],
+    relatedArticles: ['analytics-and-reports', 'managing-contractor-rates', 'tax-summaries'],
+    keywords: ['payroll hub', 'mark paid', 'unpaid sessions', 'payment history', 'square reconciliation', 'tax summaries'],
     content: `
 ## Payroll and Payments
 
@@ -101,7 +103,8 @@ These exports are informal records to support tax preparation — they are not o
     title: 'My Earnings',
     category: 'analytics',
     description: 'How to track your earnings, view payment history, and understand your pay breakdown.',
-    relatedArticles: ['logging-a-session', 'payroll-and-payments'],
+    relatedArticles: ['logging-a-session', 'payroll-and-payments', 'tax-summaries'],
+    keywords: ['pay stub', 'paycheck', 'earnings', 'pay', 'ytd', 'annual summary'],
     content: `
 ## My Earnings
 
@@ -146,6 +149,7 @@ The summary is cash-basis: a session counts toward the year its payment was reco
     description: 'How to export sessions and invoices as CSV files for your records.',
     adminOnly: true,
     relatedArticles: ['analytics-and-reports', 'payroll-and-payments'],
+    keywords: ['csv export', 'download sessions', 'download invoices', 'accounting', 'spreadsheet'],
     content: `
 ## Exporting Data
 
@@ -175,6 +179,50 @@ The CSV includes date, time, duration, status, service type, contractor, clients
 
 - Use invoice export at the end of each month to reconcile with your accounting records.
 - Filter by date range or client before exporting to narrow down the data you need.
+    `,
+  },
+  {
+    slug: 'tax-summaries',
+    title: 'Tax Summaries: Cash-Basis Contractor Totals',
+    category: 'analytics',
+    description: 'How annual contractor tax summaries work, the cash-basis rule behind them, and how to download the PDF and CSV exports.',
+    adminOnly: false,
+    relatedArticles: ['payroll-and-payments', 'my-earnings', 'exporting-data'],
+    keywords: ['taxes', '1099', 'tax year', 'annual summary', 'csv', 'cash basis'],
+    content: `
+## Tax Summaries: Cash-Basis Contractor Totals
+
+Tax Summaries give contractors and owners a year-by-year record of contractor pay, built on the same cash-basis rule accountants use for 1099-NEC reporting.
+
+### The Cash-Basis Rule
+
+A paid session counts toward a tax year based on **when the contractor was paid**, not when the session happened. If a session took place on December 28th but the contractor wasn't marked paid until January 3rd, it counts toward the following year's total — not the year the session occurred.
+
+Concretely, a session is included in tax year Y if its payment date falls between January 1 and December 31 of that year. Sessions that have never been marked paid don't appear in any tax year.
+
+Amounts use the exact dollar figure recorded at the time of payment (the snapshot taken when a contractor's sessions were marked paid), so later changes to a service type's pricing never retroactively change a past year's totals.
+
+### Two Views
+
+- **Owners and developers**: **Payments > Payroll Hub > Tax Summaries** tab shows every contractor's paid session count and total for a selected year, with **Summary CSV** (one row per contractor) and **Detail CSV** (one row per paid session, including paid date, session date, service type, duration, and amount) downloads. Hand the Summary CSV to your bookkeeper for 1099 preparation.
+- **Contractors**: the **Annual Summary** card on the **My Earnings** page lets you pick a year and download your own annual summary as a PDF, broken down by month and service type. You don't need to ask an owner for this — it's self-service.
+
+Owners can also download any contractor's annual summary PDF (not just their own) from the Payroll section by specifying the contractor.
+
+### What's Included (and What Isn't)
+
+These exports are built for tax preparation, so they intentionally include zero PHI: no client names, no session notes, and no medical or identifying information. You'll only see dates, service type, duration, and dollar amounts.
+
+They are informal records to support tax preparation, not official tax documents — they are not a substitute for a 1099-NEC. If your practice issues 1099s, that's still a separate step your bookkeeper or accountant handles using these totals as source data.
+
+### Why It Might Look Empty
+
+If a contractor has approved or submitted sessions but no tax summary activity shows up for the current year, check whether those sessions have actually been marked paid yet. Sessions sitting in "approved" or "submitted" status haven't been paid, so they won't appear in any tax year until an owner processes payment through the Payroll Hub.
+
+### Where to Find It
+
+- Owners/developers: **Payments > Payroll Hub > Tax Summaries** tab.
+- Contractors: **Earnings > Annual Summary** card.
     `,
   },
 ]

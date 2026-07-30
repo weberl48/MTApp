@@ -39,6 +39,9 @@ describe('searchArticlesRanked', () => {
 })
 
 describe('searchFaqs', () => {
-  // un-todo in plan Task 3 when HELP_FAQS is seeded
-  it.todo('matches FAQ question phrasing: why-no-invoice')
+  it('matches FAQ question phrasing: why-no-invoice', () => {
+    const results = searchFaqs('why didnt this client get an invoice')
+    expect(results.length).toBeGreaterThan(0)
+    expect(results[0].faq.id).toBe('why-no-invoice')
+  })
 })

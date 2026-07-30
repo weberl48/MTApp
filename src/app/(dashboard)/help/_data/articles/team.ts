@@ -9,6 +9,7 @@ export const TEAM_ARTICLES: HelpArticle[] = [
     walkthrough: 'invite-contractor',
     adminOnly: true,
     relatedArticles: ['managing-contractor-rates', 'configuring-services'],
+    keywords: ['invite', 'invite link', 'roles', 'contractor', 'admin', 'remove member'],
     content: `
 ## Inviting Team Members
 
@@ -52,6 +53,7 @@ Removal is blocked if the member has ever logged a session — you'll see a mess
     description: 'How to set custom per-contractor pay rates per service type.',
     adminOnly: true,
     relatedArticles: ['inviting-team-members', 'configuring-services'],
+    keywords: ['pay rate', 'custom rate', 'rate matrix', 'raise', 'contractor pay'],
     content: `
 ## Managing Contractor Pay Rates
 
