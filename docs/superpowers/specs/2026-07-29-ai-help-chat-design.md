@@ -52,7 +52,7 @@ alter table help_events add constraint help_events_shape check (
 
 - `FeatureFlags` (src/types/database.ts) gains `ai_help: boolean`; `DEFAULT_SETTINGS.features.ai_help = true` (fail-open, consistent with `client_portal`).
 - Settings > Features tab gets an "AI help assistant" toggle (same pattern as the client-portal toggle).
-- UI visibility = flag AND server-configured: the dashboard layout (server component) computes `aiHelpConfigured = !!process.env.ANTHROPIC_API_KEY` and passes it down; when false the bubble and panel render nothing.
+- UI visibility = flag AND server-configured. The dashboard layout is a client component, so key presence is exposed via `GET /api/help/chat` → `{ configured: boolean }` (no auth — it reveals only that a key exists). The chat UI probes once (module-cached) and renders nothing when unconfigured; the flag check happens client-side via `isFeatureEnabled(settings, 'ai_help')` from `useOrganization()`.
 
 ## 3. UI pieces
 
