@@ -14,10 +14,6 @@ import { fileURLToPath } from 'node:url'
 const DEV_REF = 'gzrukevymmguqxuoynqk' // MCA-Dev. NEVER the prod ref.
 const HERE = dirname(fileURLToPath(import.meta.url))
 
-// dev-seed.sql is generated output (not committed) — always regenerate so the
-// applied SQL matches the checked-in generator.
-execFileSync(process.execPath, [join(HERE, 'generate.mjs')], { stdio: 'inherit' })
-
 const env = Object.fromEntries(
   readFileSync(join(HERE, '..', '..', '.env.local'), 'utf8')
     .split(/\r?\n/)
@@ -33,6 +29,35 @@ if (env.NEXT_PUBLIC_SUPABASE_URL?.includes('ysmwowzxkgisshaormmf')) {
   console.error('.env.local points at PRODUCTION — refusing to seed. Repoint it at MCA-Dev first.')
   process.exit(1)
 }
+
+// DEV_REF used to be a throwaway sandbox. It is now the CERT environment and
+// holds a full copy of production data, including PHI — injecting synthetic
+// rows into it would corrupt the very dataset cert exists to provide.
+// The marker lives in a non-public schema, so it survives cert rebuilds.
+{
+  const res = await fetch(`https://api.supabase.com/v1/projects/${DEV_REF}/database/query`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.SUPABASE_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query: "select to_regclass('mca_cert.marker') is not null as is_cert;" }),
+  })
+  const rows = res.ok ? await res.json() : null
+  if (rows?.[0]?.is_cert) {
+    console.error(
+      `Target ${DEV_REF} is the CERT environment (mca_cert.marker present).\n` +
+        'It holds real production data — refusing to seed synthetic rows into it.\n' +
+        'See scripts/cert-refresh/README.md.'
+    )
+    process.exit(1)
+  }
+}
+
+// dev-seed.sql is generated output (not committed) — always regenerate so the
+// applied SQL matches the checked-in generator. Runs after the guards so a
+// refusal costs nothing.
+execFileSync(process.execPath, [join(HERE, 'generate.mjs')], { stdio: 'inherit' })
 
 const sql = readFileSync(join(HERE, 'dev-seed.sql'), 'utf8')
 // The generator marks chunk boundaries so each Management API call stays small.

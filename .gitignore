@@ -37,6 +37,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but the template must be committable — README.md tells you to copy it,
+# and the blanket rule above is why it never existed.
+!.env.example
 
 # vercel
 .vercel
