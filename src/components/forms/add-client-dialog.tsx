@@ -172,7 +172,15 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       <DialogTrigger asChild>
         {trigger || defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        // During a guided tour (driver.js puts .driver-active on body) clicks
+        // on the dimmed page or the tour popover count as outside interactions
+        // — don't let them dismiss the form mid-step. Esc still closes.
+        onInteractOutside={(e) => {
+          if (document.body.classList.contains('driver-active')) e.preventDefault()
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{isEditMode ? 'Edit Client' : 'Add New Client'}</DialogTitle>

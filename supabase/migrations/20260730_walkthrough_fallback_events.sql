@@ -3,10 +3,12 @@
 -- (article_slug = walkthrough id, query = step title) so broken tours surface
 -- on the Help gaps card instead of failing silently.
 --
--- NOTE: the live constraints also carry 'ai_question' (added outside the
--- migrations folder by the AI-help work) — preserved here.
+-- ORDERING: apply AFTER 20260730_help_events_ai_question.sql (this file
+-- rewrites the same two constraints and carries its 'ai_question' forward,
+-- superseding it). Never re-apply that file after this one — it would strip
+-- 'walkthrough_fallback' and telemetry inserts would silently fail the CHECK.
 --
--- Apply by hand: dev (gzrukevymmguqxuoynqk) first, verify, then prod.
+-- Apply by hand: cert (gzrukevymmguqxuoynqk) first, verify, then prod.
 
 alter table help_events drop constraint help_events_event_type_check;
 alter table help_events add constraint help_events_event_type_check

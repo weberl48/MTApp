@@ -29,15 +29,28 @@ export function HelpGapsCard() {
   useEffect(() => {
     if (!allowed || !orgId) return
     let cancelled = false
-    createClient()
-      .from('help_events')
-      .select('event_type, query, article_slug, helpful, created_at')
-      .eq('organization_id', orgId)
-      .order('created_at', { ascending: false })
-      .limit(50)
-      .then(({ data, error }) => {
-        if (!cancelled && !error && data) setRows(data as HelpEventRow[])
-      })
+    // One windowed query per event type. A single shared window would let a
+    // high-volume type crowd out the others: walkthrough_fallback rows are
+    // machine-generated (one per broken-step run) and ai_question rows (not
+    // shown here) are chatty, while search misses and votes are rare,
+    // deliberate user actions that must never be evicted by them.
+    const supabase = createClient()
+    const windowFor = (eventType: HelpEventRow['event_type'], limit: number) =>
+      supabase
+        .from('help_events')
+        .select('event_type, query, article_slug, helpful, created_at')
+        .eq('organization_id', orgId)
+        .eq('event_type', eventType)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+    Promise.all([
+      windowFor('search_miss', 25),
+      windowFor('article_feedback', 15),
+      windowFor('walkthrough_fallback', 15),
+    ]).then((results) => {
+      if (cancelled || results.some(r => r.error)) return
+      setRows(results.flatMap(r => (r.data ?? []) as HelpEventRow[]))
+    })
     return () => {
       cancelled = true
     }

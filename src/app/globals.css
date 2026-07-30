@@ -202,3 +202,11 @@ html {
   background: #451a03;
   color: #fbbf24;
 }
+
+/* The add-client / invite tours end with their Radix dialog intentionally
+   open, and Radix modals set body{pointer-events:none} — without this the
+   completion toast (and its "Start next tour" action) is unclickable. Same
+   trick driver.css uses for its own popover. */
+[data-sonner-toaster] {
+  pointer-events: auto;
+}

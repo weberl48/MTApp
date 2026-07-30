@@ -1,9 +1,18 @@
-// Audit every in-app walkthrough against a running dev server (localhost:3000,
-// DEV_AUTO_LOGIN). For each tour: start it from its help article, step through
-// all steps, and verify the popover shows the right step and the highlight
-// lands on the element the definition asks for (or is intentionally centered).
+// Audit every in-app walkthrough against a running dev server. For each tour:
+// start it from its help article, step through all steps, and verify the
+// popover shows the right step and the highlight lands on the element the
+// definition asks for (or is intentionally centered).
 //
-//   npx tsx scripts/audit-walkthroughs.mts [outDir]
+//   npx tsx scripts/audit-walkthroughs.mts [outDir]                 # desktop
+//   VIEWPORT=mobile npx tsx scripts/audit-walkthroughs.mts [outDir] # phone
+//
+// ONE viewport per invocation — run BOTH commands for full coverage (mobile
+// exercises the drawer nav and FAB paths the desktop run never touches).
+// Other knobs: ONLY=id1,id2 audits a subset; APP_URL overrides the server.
+//
+// Requires an authenticated ADMIN/OWNER browser context (e.g. DEV_AUTO_LOGIN
+// against a sandbox with test accounts): tours launch from Help articles, and
+// contractor runs drop admin-only steps, which would desync the step count.
 //
 // Writes walkthrough-results.json + per-step screenshots to outDir (default
 // .walkthrough-audit/). Exits 1 if any step fails.
@@ -71,6 +80,14 @@ function popoverState(page: Page): Promise<PopoverState> {
   })()`) as Promise<PopoverState>
 }
 
+// Fail fast, by name, if a tour has no launch-article mapping — otherwise the
+// script would navigate to /help/undefined/ and die on an anonymous timeout.
+const unmapped = ALL_WALKTHROUGHS.filter((w) => !ARTICLE_FOR[w.id]).map((w) => w.id)
+if (unmapped.length) {
+  console.error(`ARTICLE_FOR is missing entries for: ${unmapped.join(', ')} — add them to this script.`)
+  process.exit(1)
+}
+
 mkdirSync(OUT, { recursive: true })
 // VIEWPORT=mobile audits the phone layout (off-canvas nav drawer, FAB).
 const isMobile = process.env.VIEWPORT === 'mobile'
@@ -97,6 +114,10 @@ for (const w of ALL_WALKTHROUGHS) {
   const steps: StepResult[] = []
   let endedCleanly = false
   console.log(`\n=== ${w.id} (${w.steps.length} steps) ===`)
+
+  // One tour blowing up (dead selector, navigation hang) must not lose the
+  // results of the tours already audited — record it and move on.
+  try {
 
   await page.goto(`${BASE}/help/${article}/`, { waitUntil: 'networkidle' })
   const startBtn = page.getByRole('button', { name: 'Start Interactive Walkthrough' })
@@ -168,6 +189,16 @@ for (const w of ALL_WALKTHROUGHS) {
   } catch {
     console.log('  FAIL popover still open after final step')
     await page.evaluate(`document.querySelector('.driver-popover-close-btn')?.click()`)
+  }
+
+  } catch (e) {
+    console.log(`  ABORTED ${w.id}: ${(e as Error).message.split('\n')[0]}`)
+    steps.push({
+      index: steps.length + 1, title: '(tour aborted)', expectedElement: null,
+      status: 'fail', problems: [`aborted: ${(e as Error).message.split('\n')[0]}`],
+      highlighted: null, progressText: null, msToReady: 0, screenshot: '',
+    })
+    await page.evaluate(`document.querySelector('.driver-popover-close-btn')?.click()`).catch(() => {})
   }
   results.push({ id: w.id, steps, endedCleanly })
 }

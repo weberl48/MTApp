@@ -83,6 +83,16 @@ describe('help content integrity', () => {
     }
   })
 
+  it('RECOMMENDED_WALKTHROUGH_ORDER covers exactly the registered walkthroughs', async () => {
+    // A tour missing from the order silently vanishes from the Guided Tours
+    // card and next-tour chaining; a stale id in the order is dead weight.
+    const { ALL_WALKTHROUGHS } = await import('@/components/walkthroughs/walkthroughs')
+    const { RECOMMENDED_WALKTHROUGH_ORDER } = await import('@/lib/walkthroughs/completion')
+    const registered = ALL_WALKTHROUGHS.map(w => w.id).sort()
+    const ordered = [...RECOMMENDED_WALKTHROUGH_ORDER].sort()
+    expect(ordered).toEqual(registered)
+  })
+
   it('relatedArticles and FAQ links resolve; FAQ ids unique', () => {
     for (const a of HELP_ARTICLES) {
       for (const rel of a.relatedArticles ?? []) {

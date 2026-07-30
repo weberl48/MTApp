@@ -17,6 +17,8 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       title: 'Action Center',
       description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on — an empty Action Center means you\'re caught up.',
       element: '[data-tour="dashboard-action-center"]',
+      // The Action Center only renders for admins — skip for contractors.
+      adminOnly: true,
       popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -42,6 +44,8 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       title: 'Clients',
       description: 'Manage your client list, contact info, and payment methods. Each client\'s payment method determines how their invoices are generated.',
       element: 'nav a[href="/clients/"]',
+      // The Clients nav item is admin-only — skip for contractors.
+      adminOnly: true,
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -51,6 +55,8 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       title: 'Invoices',
       description: 'Invoices live under the Billing menu. Track pending, sent, paid, and overdue invoices. Scholarship billing has its own tab for monthly batch invoicing.',
       element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
+      // The Billing menu is admin-only — skip for contractors.
+      adminOnly: true,
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -101,11 +107,14 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Payment & Billing Setup',
-      description: 'These three fields drive all billing. Payment Method is who pays and how the session is classified (Scholarship clients are batch-invoiced monthly at the scholarship rate). Billing Method is how their invoice is delivered — Square payment link, emailed PDF, or a check you track by hand. Invoicing switches a client from per-session invoices to one monthly batch. Fill in the name and contact info and click "Add Client" to save — or press Esc to close without saving.',
+      description: 'These three fields drive all billing. Payment Method is who pays and how the session is classified (Scholarship clients are batch-invoiced monthly at the scholarship rate). Billing Method is how their invoice is delivered — Square payment link, emailed PDF, or a check you track by hand. Invoicing switches a client from per-session invoices to one monthly batch. Press Finish and the form stays open — fill in the client\'s details and click "Add Client", or press Esc to close it.',
       element: '[data-tour="client-billing-fields"]',
       // The fields live inside the Add Client dialog — open it for users who
       // pressed the button above (no-op if they already clicked it).
       preClick: '[data-tour="clients-add-button"] button',
+      // Showcase only: interacting comes after Finish (a highlighted Select
+      // would open its dropdown underneath driver's overlay).
+      disableInteraction: true,
       popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/clients/',
@@ -122,7 +131,10 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
       title: 'Start a New Session',
       description: 'Click "New Session" on the Sessions page to open the session form. Press "Go to the Form" below and we\'ll take you straight there.',
       mobileDescription: 'On your phone, the floating + button opens quick session logging from any page. Press "Go to the Form" below and we\'ll take you to the full form.',
-      element: '[data-tour="sessions-new-button"], [data-tour="quick-session-fab"]',
+      // FAB first: below lg BOTH controls can be visible (tablet widths), and
+      // the mobileDescription above describes the FAB — keep copy & highlight
+      // pointing at the same control.
+      element: '[data-tour="quick-session-fab"], [data-tour="sessions-new-button"]',
       popoverSide: 'bottom',
       ctaLabel: 'Go to the Form',
       href: '/sessions/',
@@ -227,11 +239,14 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Choose a Role & Send',
-      description: 'Contractors can log their own sessions and see their earnings. Admins can additionally review sessions, manage clients, and handle invoicing. Enter their email to send the invite, or generate a link to share directly — they\'ll create their own account from it. Press Esc when you\'re done to close the form.',
+      description: 'Contractors can log their own sessions and see their earnings. Admins can additionally review sessions, manage clients, and handle invoicing. Press Finish and the form stays open — choose the role, then enter their email to send the invite (or generate a link to share; they\'ll create their own account from it), or press Esc to close it.',
       element: '#invite_role',
       // The role selector lives inside the invite dialog — open it for users
       // who pressed the button above (no-op if they already clicked it).
       preClick: '[data-tour="team-invite-button"] button',
+      // Showcase only: interacting comes after Finish (a highlighted Select
+      // would open its dropdown underneath driver's overlay).
+      disableInteraction: true,
       popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/team/',
@@ -308,7 +323,7 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Inline Approve',
-      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note. You can try it right now — the tour will stay with you.',
+      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note.',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
