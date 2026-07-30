@@ -12,14 +12,36 @@
  */
 import { CERT_REF, CERT_SINK_DOMAIN as SINK_DOMAIN } from '../config.mjs'
 
-async function query(accessToken, sql) {
+/**
+ * One Management API call, retried once on a 5xx.
+ *
+ * The panel refreshes every 5 minutes and the API is occasionally flaky; a
+ * single transient 502 rendering the whole cert panel red is how a dashboard
+ * trains people to ignore it. Keep the call count low (see certStatus: two
+ * round trips, not seven) and forgive one blip.
+ */
+async function query(accessToken, sql, attempt = 0) {
   const res = await fetch(`https://api.supabase.com/v1/projects/${CERT_REF}/database/query`, {
     method: 'POST',
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
     body: JSON.stringify({ query: sql }),
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(20000),
   })
-  if (!res.ok) throw new Error(`Management API ${res.status}`)
+  if (!res.ok) {
+    if (res.status >= 500 && attempt === 0) {
+      await new Promise(r => setTimeout(r, 1200))
+      return query(accessToken, sql, 1)
+    }
+    // Include the body: a bare status hid a real SQL error behind what looked
+    // like an upstream outage. 4xx here is almost always our own bad SQL.
+    let detail = ''
+    try {
+      const body = await res.text()
+      const m = body.match(/"message"\s*:\s*"([^"]{0,180})"/)
+      detail = m ? ` — ${m[1]}` : ''
+    } catch { /* body unreadable */ }
+    throw new Error(`Management API ${res.status}${detail}`)
+  }
   return res.json()
 }
 
@@ -50,20 +72,57 @@ export async function certStatus(repoEnv) {
   const out = { ref: CERT_REF, checkedAt: new Date().toISOString(), checks: [] }
   const add = (name, ok, detail) => out.checks.push({ name, ok, detail })
 
-  // ---- marker -------------------------------------------------------------
-  let marker
+  // ---- one round trip for everything scalar --------------------------------
+  // Deliberately a single query. Seven separate Management API calls per refresh
+  // made the panel flap red on transient 502s.
+  let row
   try {
     const rows = await query(token, `
-      select project_ref, label, source_snapshot, overlay, prewipe_overlay,
-             last_refreshed_at, bootstrapped_at
-      from mca_cert.marker
+      select
+        (select to_jsonb(m) from mca_cert.marker m) as marker,
+        (select count(*) from public.clients)::int  as clients,
+        (select count(*) from public.sessions)::int as sessions,
+        (select count(*) from public.invoices)::int as invoices,
+        (select count(*) from auth.users)::int      as auth_users,
+        (select count(*) from public.organizations)::int as orgs,
+        -- Presence only, never a count. service_rates exists solely while the
+        -- pay-config overlay is applied, and Postgres parses the ENTIRE
+        -- statement before executing it — so a static reference to the table
+        -- errors at parse time even inside a CASE guarded by to_regclass.
+        (to_regclass('public.service_rates') is not null) as has_service_rates,
+        (select count(*) from pg_proc
+          where proname in ('get_phi_fields','hash_for_audit','sanitize_phi_jsonb'))::int as helpers,
+        (select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid
+          where not t.tgisinternal and c.oid='auth.users'::regclass
+            and t.tgname='on_auth_user_created')::int as auth_trigger,
+        (select count(*) from pg_policies where schemaname='storage')::int as storage_policies,
+        (select count(*) from pg_trigger t
+           join pg_class c on c.oid=t.tgrelid
+           join pg_namespace n on n.oid=c.relnamespace
+          where n.nspname='public' and not t.tgisinternal and t.tgenabled='D')::int as disabled_triggers,
+        (select count(*) from public.users u
+          where not exists (select 1 from auth.users a where a.id = u.id))::int as orphans,
+        (select count(*) from auth.users
+          where confirmation_token is null or recovery_token is null
+             or email_change_token_new is null or email_change is null
+             or email_change_token_current is null or phone_change is null
+             or phone_change_token is null or reauthentication_token is null)::int as null_tokens,
+        (select count(*) from public.clients
+          where contact_email is not null and contact_email not like '%@${SINK_DOMAIN}')::int as leak_clients,
+        (select count(*) from public.session_reminders
+          where recipient_email not like '%@${SINK_DOMAIN}')::int as leak_reminders,
+        (select count(*) from public.user_invites
+          where invited_email not like '%@${SINK_DOMAIN}')::int as leak_invites,
+        (select settings->'security'->>'require_mfa' from public.organizations limit 1) as mfa,
+        (select count(*) from public.organizations where name like '[CERT]%')::int as marked
     `)
-    marker = rows?.[0]
+    row = rows?.[0]
   } catch (err) {
-    // The single most likely cause is the free-tier project having auto-paused.
+    // Most likely the free-tier project auto-paused after a week idle.
     return { ...out, error: `cert unreachable: ${err.message}` }
   }
 
+  const marker = row?.marker
   if (!marker) return { ...out, error: 'mca_cert.marker missing — cert is not bootstrapped' }
 
   out.snapshot = marker.source_snapshot
@@ -73,51 +132,51 @@ export async function certStatus(repoEnv) {
   out.ageHours = marker.last_refreshed_at
     ? (Date.now() - new Date(marker.last_refreshed_at).getTime()) / 3_600_000
     : null
-
-  // ---- volume -------------------------------------------------------------
-  try {
-    const [counts] = await query(token, `
-      select
-        (select count(*) from public.clients)         as clients,
-        (select count(*) from public.sessions)        as sessions,
-        (select count(*) from public.invoices)        as invoices,
-        (select count(*) from public.service_rates)   as service_rates,
-        (select count(*) from auth.users)             as auth_users,
-        (select count(*) from public.organizations)   as orgs
-    `).catch(async () => {
-      // service_rates only exists while the pay-config overlay is applied.
-      return query(token, `
-        select
-          (select count(*) from public.clients)       as clients,
-          (select count(*) from public.sessions)      as sessions,
-          (select count(*) from public.invoices)      as invoices,
-          null                                        as service_rates,
-          (select count(*) from auth.users)           as auth_users,
-          (select count(*) from public.organizations) as orgs
-      `)
-    })
-    out.counts = counts
-  } catch {
-    out.counts = null
+  out.counts = {
+    clients: row.clients,
+    sessions: row.sessions,
+    invoices: row.invoices,
+    auth_users: row.auth_users,
+    orgs: row.orgs,
+    service_rates: null,
   }
+
+  // Only safe to reference once we know it exists — see the note in the query.
+  if (row.has_service_rates) {
+    try {
+      const [sr] = await query(token, `select count(*)::int as n from public.service_rates`)
+      out.counts.service_rates = sr.n
+    } catch { /* non-essential */ }
+  }
+
+  // ---- schema integrity ---------------------------------------------------
+  // on_auth_user_created and the storage policies live OUTSIDE the public schema,
+  // so `DROP SCHEMA public CASCADE` destroys them and a --schema=public restore
+  // does not bring them back. Without them signup silently orphans profiles.
+  add('PHI helper functions', row.helpers >= 3, `${row.helpers}/3 present`)
+  add('on_auth_user_created', row.auth_trigger === 1,
+    row.auth_trigger ? 'attached to auth.users' : 'MISSING — signup would orphan profiles')
+  add('storage policies', row.storage_policies > 0, `${row.storage_policies} on storage.objects`)
+  add('no disabled triggers', row.disabled_triggers === 0,
+    row.disabled_triggers === 0 ? 'auditing active' : `${row.disabled_triggers} left disabled`)
+  add('every profile signable', row.orphans === 0,
+    row.orphans === 0 ? 'no orphaned profiles' : `${row.orphans} without an auth row`)
+
+  // ---- auth is actually usable -------------------------------------------
+  // Every other check can pass while sign-in is completely broken: GoTrue scans
+  // auth.users into non-nullable Go strings, so one NULL token column makes the
+  // admin API 500 and nobody can log in to cert at all.
+  add('auth rows well-formed', row.null_tokens === 0,
+    row.null_tokens === 0 ? 'no NULL token columns' : `${row.null_tokens} row(s) would break GoTrue sign-in`)
 
   // ---- safety: no real addresses -----------------------------------------
-  try {
-    const [leak] = await query(token, `
-      select
-        (select count(*) from public.clients
-           where contact_email is not null and contact_email not like '%@${SINK_DOMAIN}') as clients,
-        (select count(*) from public.session_reminders
-           where recipient_email not like '%@${SINK_DOMAIN}')                              as reminders,
-        (select count(*) from public.user_invites
-           where invited_email not like '%@${SINK_DOMAIN}')                                as invites
-    `)
-    const total = Number(leak.clients) + Number(leak.reminders) + Number(leak.invites)
-    add('no real addresses', total === 0,
-      total === 0 ? `all sunk to @${SINK_DOMAIN}` : `${total} real address(es) present`)
-  } catch (err) {
-    add('no real addresses', false, `check failed: ${err.message}`)
-  }
+  const leaked = row.leak_clients + row.leak_reminders + row.leak_invites
+  add('no real addresses', leaked === 0,
+    leaked === 0 ? `all sunk to @${SINK_DOMAIN}` : `${leaked} real address(es) present`)
+
+  // ---- fixed decisions ----------------------------------------------------
+  add('require_mfa on', row.mfa === 'true', String(row.mfa))
+  add('org marked [CERT]', row.marked > 0, row.marked > 0 ? 'yes' : 'NOT marked')
 
   // ---- safety: PHI still decrypts ----------------------------------------
   // The reason this is on the dashboard at all: a wrong ENCRYPTION_KEY fails
@@ -142,41 +201,18 @@ export async function certStatus(repoEnv) {
           } catch { /* counted as failure */ }
         }
         add('PHI decrypts', ok === rows.length, `${ok}/${rows.length} sampled`)
+
+        // Negative control. Without it the positive probe cannot distinguish
+        // "decryption works" from "this value was never encrypted".
+        let refused = 0
+        for (const r of rows) {
+          try { await decrypt(r.notes, 'f'.repeat(64)) } catch { refused++ }
+        }
+        add('wrong key refused', refused === rows.length, `${refused}/${rows.length} (control)`)
       }
     } catch (err) {
       add('PHI decrypts', false, `probe failed: ${err.message}`)
     }
-  }
-
-  // ---- auth is actually usable -------------------------------------------
-  // Every other check here can pass while sign-in is completely broken: GoTrue
-  // scans auth.users into non-nullable Go strings, so one NULL token column
-  // makes the admin API 500 and nobody can log in to cert at all.
-  try {
-    const [bad] = await query(token, `
-      select count(*)::int as n from auth.users
-      where confirmation_token is null or recovery_token is null
-         or email_change_token_new is null or email_change is null
-         or email_change_token_current is null or phone_change is null
-         or phone_change_token is null or reauthentication_token is null
-    `)
-    add('auth rows well-formed', bad.n === 0,
-      bad.n === 0 ? 'no NULL token columns' : `${bad.n} row(s) would break GoTrue sign-in`)
-  } catch (err) {
-    add('auth rows well-formed', false, `check failed: ${err.message}`)
-  }
-
-  // ---- safety: MFA + cert marking ----------------------------------------
-  try {
-    const [org] = await query(token, `
-      select settings->'security'->>'require_mfa' as mfa,
-             (name like '[CERT]%') as marked
-      from public.organizations limit 1
-    `)
-    add('require_mfa on', org?.mfa === 'true', String(org?.mfa))
-    add('org marked [CERT]', !!org?.marked, org?.marked ? 'yes' : 'NOT marked')
-  } catch (err) {
-    add('require_mfa on', false, `check failed: ${err.message}`)
   }
 
   // ---- staleness ----------------------------------------------------------

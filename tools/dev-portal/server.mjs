@@ -73,6 +73,7 @@ async function handleApi(req, res, url) {
     case 'GET /api/meta': {
       // Config for the frontend — no secrets, only shape/links.
       json(res, 200, {
+        // Explicit allowlist — note `bypassSecret` is deliberately NOT included.
         environments: ENVIRONMENTS.map(({ key, name, subtitle, baseUrl, supabaseRef, supabaseName, links }) => ({
           key, name, subtitle, baseUrl, supabaseRef, supabaseName, links,
         })),
@@ -191,6 +192,8 @@ async function samplePoint() {
     // Nothing to sample for an environment with no pinned URL — recording
     // points would draw a sparkline out of measurements never taken.
     if (!env.baseUrl) continue
+    // Skip sampling an environment we cannot actually reach past its SSO wall.
+    if (env.bypassSecret === null && env.key === 'cert') continue
     try {
       const health = await checkEnvironmentHealth(env, repoEnv.CRON_SECRET)
       addHistoryPoint(env.key, health.status, health.status === 'down' ? null : health.latencyMs)
