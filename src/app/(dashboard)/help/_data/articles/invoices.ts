@@ -7,7 +7,8 @@ export const INVOICES_ARTICLES: HelpArticle[] = [
     category: 'invoices',
     description: 'Understanding how invoices are automatically created from approved sessions.',
     adminOnly: true,
-    relatedArticles: ['sending-invoices', 'scholarship-billing'],
+    relatedArticles: ['sending-invoices', 'scholarship-billing', 'invoice-lifecycle', 'billing-and-pay-rules'],
+    keywords: ['bill', 'per client', 'automatic', 'generate invoice', 'pending', 'create invoice'],
     content: `
 ## How Invoices Are Generated
 
@@ -63,7 +64,8 @@ If a submitted or approved session has no invoice (for example, after an invoice
     category: 'invoices',
     description: 'How to send invoices individually or in bulk via email or Square.',
     adminOnly: true,
-    relatedArticles: ['generating-invoices', 'automation-settings'],
+    relatedArticles: ['generating-invoices', 'automation-settings', 'square-integration'],
+    keywords: ['send invoice', 'email invoice', 'square', 'bulk actions', 'processing fee', 'pdf'],
     content: `
 ## Sending Invoices
 
@@ -126,7 +128,8 @@ If you would prefer invoices to be sent immediately when sessions are approved, 
     description: 'How scholarship sessions are tracked and batch-invoiced on a monthly basis.',
     walkthrough: 'scholarship-billing',
     adminOnly: true,
-    relatedArticles: ['generating-invoices', 'automation-settings', 'configuring-services', 'adding-a-client'],
+    relatedArticles: ['generating-invoices', 'automation-settings', 'configuring-services', 'adding-a-client', 'billing-and-pay-rules'],
+    keywords: ['scholarship', 'monthly batch', 'batch invoice', 'flat rate', 'classroom'],
     content: `
 ## Scholarship Billing
 
@@ -185,6 +188,137 @@ For scholarship group sessions, contractors select a **Classroom** from a dropdo
 3. **(Optional) Configure classrooms** - Go to Settings > Business Rules > Sessions and add classroom names so contractors can select a room when logging scholarship group sessions.
 4. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
 5. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
+    `,
+  },
+  {
+    slug: 'billing-and-pay-rules',
+    title: 'Billing & Pay Rules',
+    category: 'invoices',
+    description: 'The full money path from a logged session to what the client owes and what the contractor earns.',
+    adminOnly: true,
+    relatedArticles: ['invoice-lifecycle', 'square-integration', 'pricing-deep-dive', 'scholarship-billing', 'client-billing-controls'],
+    keywords: ['money', 'billing rules', 'mca cut', 'who pays', 'payment method', 'contractor pay', 'no-show fee'],
+    content: `
+## Billing & Pay Rules
+
+Every dollar in MCA Manager follows the same basic path: a contractor completes a session, the app calculates what the client owes and what the contractor earns, an invoice goes out, and the contractor gets paid. This article walks through that path end to end. For the exact pricing formulas (duration multipliers, group math, contractor pay priority), see **Pricing Deep Dive**.
+
+### Three Numbers, Set at Session Creation
+
+When a session is submitted, three numbers are calculated and stored on the session:
+
+- **Total Amount** - what the client (or their agency, or the scholarship fund) owes.
+- **Contractor Pay** - what the contractor earns for the session.
+- **MCA Cut** - what the organization keeps (Total minus Contractor Pay).
+
+These numbers are locked in at that point — later invoices are built from the session's stored amounts, not recalculated from the current service type configuration. If you change a service type's rates afterward, past sessions and their invoices keep their original numbers.
+
+Group sessions split billing per attendee: each client who attended gets their own invoice, so a 4-person group session produces 4 separate invoices (unless the client is billed to an agency as a single group, in which case the full group total goes on one invoice — see **Group Sessions**).
+
+### How Payment Method Determines Billing
+
+Every client has a **Payment Method**, and it controls how much they're billed:
+
+- **Private Pay** - billed the standard formula (base rate scaled by duration, plus per-person rate for groups).
+- **Self-Directed** - same formula as Private Pay; the difference is who ultimately pays (a third party reimburses the client).
+- **Group Home** - same formula, billed to the facility/agency instead of an individual.
+- **Scholarship** - billed a flat scholarship rate regardless of duration, and batched monthly instead of per session (see **Scholarship & Monthly Exceptions** below).
+- **Venmo** - same formula as Private Pay; the difference is how payment is collected.
+
+This is a separate concept from **Billing Method** (Square, Email, Check, Other), which controls *how the invoice is delivered*, not how much is billed. A client can be Private Pay + Square, Group Home + Check, or any other combination.
+
+### No-Shows
+
+When a client no-shows, they're charged a flat fee ($60 by default) instead of the normal session price. The contractor still gets their normal 30-minute session pay — a no-show doesn't reduce their earnings. The fee amount is configurable; see **No-Shows & Cancellations**.
+
+### Contractor Pay Priority
+
+Contractor pay is determined by a priority chain — the most specific rule that applies wins: a group pay matrix (exact pay by headcount and duration), then a contractor's custom rate, then the service type's duration-based pay schedule, and finally a percentage-of-total formula as the fallback. **Pricing Deep Dive** covers each of these with worked examples. **Where to configure:** contractor custom rates live under **Team > Rates**; pay schedules and the MCA percentage live on each service type (**Settings > Services**).
+
+### Scholarship & Monthly Exceptions
+
+Two kinds of clients skip the normal one-invoice-per-session flow entirely:
+
+- **Scholarship clients** (Payment Method = Scholarship, or a service type marked as a Scholarship Service) are billed a flat rate that doesn't change with duration. The contractor is still paid using the normal priority chain above — if the scholarship rate is lower than what the contractor would normally earn, MCA absorbs the difference. Contractor pay is never reduced by a client being on scholarship.
+- **Monthly-batched clients** (Invoicing = Monthly batch, set per client) are billed at normal pricing, but their sessions accumulate and are combined into one invoice per month instead of one invoice per session.
+
+Both groups are held and invoiced together from the **Scholarship** tab on the Invoices page — see **Scholarship Billing** and **Client Billing Controls** for the full walkthrough.
+    `,
+  },
+  {
+    slug: 'invoice-lifecycle',
+    title: 'The Invoice Lifecycle',
+    category: 'invoices',
+    description: 'What each invoice status means, how overdue and reminders are calculated, and what can and cannot be deleted.',
+    adminOnly: true,
+    relatedArticles: ['generating-invoices', 'sending-invoices', 'square-integration', 'billing-and-pay-rules'],
+    keywords: ['overdue', 'delete invoice', 'resend', 'paid date', 'reminders', 'status'],
+    content: `
+## The Invoice Lifecycle
+
+Every invoice moves through a small set of statuses. This article covers what each one means, when the app moves an invoice between them automatically, and what you can and can't undo.
+
+### Pending → Sent → Paid
+
+- **Pending** - created automatically when a session is submitted (see **How Invoices Are Generated**). Not yet delivered to the client.
+- **Sent** - delivered by email or Square, or manually marked as sent from the actions menu if you handled it outside the app.
+- **Paid** - payment has been recorded, either automatically (a Square payment webhook, see **Square Integration**) or manually via **Mark as Paid**.
+
+Moving an invoice *off* Paid — using **Mark as Unpaid**, or a bulk action that touches a paid invoice — always clears its recorded paid date rather than leaving a stale one behind. If you re-mark it Paid later, you'll need to set the date again.
+
+### Overdue Is Computed, Not a Status
+
+There's no separate "Overdue" status. A **Sent** invoice is shown with an Overdue badge and a day count whenever its due date has passed, based on your local calendar date — the badge disappears the moment it's marked Paid. The due date itself is set when the invoice is created: the session date plus your organization's **Default Due Days** (30 days by default). **Where to configure:** Settings > Business Rules > Invoices.
+
+### Reminder Emails
+
+Unpaid, sent invoices get automatic reminder emails before (and once after) their due date. By default, reminders go out 7 and 1 days before the due date; you can change which days and turn reminders off entirely. Each reminder day is tracked per invoice so it's only ever sent once, even if the daily reminder job runs more than once. **Where to configure:** Settings > Business Rules > Invoices ("Send Reminders" and "Reminder Days Before Due").
+
+### Resubmitting a Session Recreates Its Invoice
+
+If a session's invoice goes missing — most commonly because an admin sent it back for revision (**Request Revision** deletes the session's pending invoice and returns it to draft) — resubmitting or re-approving the session automatically creates a fresh pending invoice for it. You don't need to build one by hand, and it won't double-bill: if any invoice already exists for the session, nothing new is created. As a manual backstop, admins and owners can also open the session's detail page and click **Create Invoice** if one is ever missing.
+
+This is different from editing an *already-invoiced* session in a way that changes its price — that flow asks whether to leave the invoice alone, regenerate its amounts, or regenerate and resend (see **How Invoices Are Generated**).
+
+### Deleting Invoices
+
+Only **Pending** invoices can be deleted. Once an invoice has been **Sent** or **Paid**, it's a financial record, and no flow in the app — deleting it directly, rejecting the session, or cancelling the session — will remove it. This is intentional: it guarantees that anything already delivered to (or paid by) a client stays in the record. If a sent or paid invoice needs correcting, use the actions menu (Mark as Unpaid, re-send, etc.) rather than trying to delete it.
+    `,
+  },
+  {
+    slug: 'square-integration',
+    title: 'Square Integration',
+    category: 'invoices',
+    description: 'How sending invoices through Square works, including processing fees and automatic payment updates.',
+    adminOnly: true,
+    relatedArticles: ['sending-invoices', 'invoice-lifecycle', 'billing-and-pay-rules', 'client-billing-controls'],
+    keywords: ['square', 'credit card', 'processing fee', 'webhook', 'online payment'],
+    content: `
+## Square Integration
+
+MCA Manager can send invoices through your connected Square account so clients can pay online by card, bank transfer, or Cash App Pay.
+
+### Sending an Invoice via Square
+
+Choosing **Send via Square** from an invoice's actions menu creates an order and invoice in your Square account and publishes it, which sends the client an email from Square with a payment link. See **Sending Invoices** for the step-by-step. If a send is retried after a timeout, or you click the button twice, Square recognizes it as the same request rather than creating a duplicate invoice.
+
+### Processing Fee
+
+You can pass along Square's card processing cost to the client as a separate "Online Processing Fee" line item. It never affects contractor pay — only the total the client is billed. There are three layers, from broadest to narrowest:
+
+- **Organization-wide** - Settings > Business Rules > Invoices > Square Processing Fee, as a fixed dollar amount or a percentage (optionally plus a flat amount, to mirror Square's own 2.9% + $0.30 style pricing).
+- **Per-client** - leave the org-wide toggle off and check **Add Square processing fee to invoices** on individual clients (Clients > Edit Client) for clients who always pay online.
+- **Per-invoice** - any unpaid invoice that hasn't been sent to Square yet shows its own Square Processing Fee switch, letting you turn the fee on or off for that one invoice. Once the Square invoice has been created, the fee can no longer be changed from there.
+
+### Payments Are Marked Paid Automatically
+
+When a client pays a Square invoice, Square sends MCA Manager a webhook notification and the invoice is marked **Paid** with no manual action needed. Because Square doesn't guarantee webhook delivery order and can retry events, this update is forward-only: once an invoice is Paid, a later or out-of-order webhook can never move it back to Sent or Pending, even if it reports an unpaid/canceled status. A paid invoice only changes if you change it yourself (for example, **Mark as Unpaid**).
+
+Square invoices also carry their own built-in reminder emails around the due date — separate from, and in addition to, MCA Manager's own invoice reminders (see **The Invoice Lifecycle**), which are sent regardless of how an invoice was delivered.
+
+### Sandbox vs. Production
+
+Your Square connection runs in either **sandbox** or **production** mode. In sandbox, every invoice email is redirected to a developer test address instead of the real client (with the client's name prefixed "[TEST]"), so you can safely test the integration without emailing anyone. Production mode sends real invoices to real clients. You can check your current connection status from **Settings** or the Square status endpoint.
     `,
   },
 ]

@@ -7,7 +7,8 @@ export const GETTING_STARTED_ARTICLES: HelpArticle[] = [
     category: 'getting-started',
     description: 'An overview of the app and how to navigate its main features.',
     walkthrough: 'app-overview',
-    relatedArticles: ['logging-a-session', 'view-as-mode'],
+    relatedArticles: ['logging-a-session', 'view-as-mode', 'installing-the-app'],
+    keywords: ['overview', 'navigation', 'dashboard', 'roles', 'mobile', 'help center'],
     content: `
 ## Welcome to MCA Manager
 
@@ -54,6 +55,7 @@ You can reach the Help Center at any time by clicking your avatar in the top-rig
     description: 'How to simulate another role or contractor view to verify permissions and data.',
     adminOnly: true,
     relatedArticles: ['getting-started'],
+    keywords: ['simulate role', 'impersonate', 'debugging permissions', 'amber banner', 'back to owner'],
     content: `
 ## View As Mode
 
@@ -94,6 +96,7 @@ Click the **Back to Owner** button shown in the header or in the View As menu to
     category: 'getting-started',
     description: 'How to switch between light mode, dark mode, and system theme.',
     relatedArticles: ['getting-started'],
+    keywords: ['theme', 'light mode', 'dark mode', 'system theme'],
     content: `
 ## Appearance & Dark Mode
 
@@ -108,6 +111,56 @@ Click the **sun or moon icon** in the top-right corner of the header (next to yo
 - **System** - Automatically match your device's theme setting. If your phone or computer switches to dark mode at night, MCA Manager follows along.
 
 The active theme is labeled "Active" in the dropdown. Your preference is saved and persists across sessions.
+    `,
+  },
+  {
+    slug: 'installing-the-app',
+    title: 'Installing the App on Your Phone or Desktop',
+    category: 'getting-started',
+    description: 'How to add MCA Manager to your home screen on iPhone, Android, or desktop, and what works offline.',
+    adminOnly: false,
+    relatedArticles: ['getting-started', 'view-as-mode'],
+    keywords: ['install', 'phone', 'mobile', 'iphone', 'android', 'home screen', 'app store'],
+    content: `
+## Installing the App on Your Phone or Desktop
+
+MCA Manager is a Progressive Web App (PWA). That means you install it directly from your browser — there's no App Store or Play Store listing, no separate download, and no update to approve. It's the same web app you already use, just launched from an icon instead of a browser tab.
+
+### Installing on iPhone (Safari)
+
+1. Open the site in **Safari** (installing from Chrome or another browser on iOS does not offer this option — it must be Safari).
+2. Tap the **Share** button (the square with an arrow pointing up), usually at the bottom of the screen.
+3. Scroll down and tap **Add to Home Screen**.
+4. Confirm the name and tap **Add** in the top-right corner.
+
+An MCA icon now appears on your home screen like any other app.
+
+### Installing on Android (Chrome)
+
+1. Open the site in **Chrome**.
+2. You may see an **Install** banner appear automatically at the bottom of the screen — tap it.
+3. If you don't see the banner, tap the **three-dot menu** in the top-right corner and choose **Add to Home Screen** or **Install App**.
+4. Confirm the prompt.
+
+### Installing on Desktop
+
+Most desktop browsers (Chrome, Edge) show an install icon in the address bar when you visit the site — look for a small monitor-with-arrow icon. Click it, then click **Install**. The app opens in its own window, separate from your regular browser tabs.
+
+### What Happens After You Install
+
+Once installed, the app opens in **standalone mode** — no browser address bar or tabs, just the app itself, exactly like a native app. It uses the same login and the same data as visiting the site in a browser; installing doesn't create a separate account or a separate copy of anything.
+
+### Offline Behavior
+
+A service worker caches pages you've already visited, so pages you've recently viewed can still open without a live internet connection. This is meant for brief connectivity gaps (like a spotty connection at a client's home), not for extended offline use — actions that need to reach the server, like submitting a new session or loading data you haven't viewed before, still require an internet connection.
+
+### Do I Need to Update It?
+
+No manual update step is required. The next time you open the installed app with an internet connection, it automatically loads the latest version. There's nothing to download from a store and nothing to approve.
+
+### Uninstalling
+
+Uninstalling works the same as any other app on your device — long-press the icon on iPhone or Android and remove it, or uninstall it from your desktop's app list. This only removes the shortcut and cached pages; your account and data live on the server and are unaffected.
     `,
   },
 ]

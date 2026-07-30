@@ -9,6 +9,7 @@ export const SETTINGS_ARTICLES: HelpArticle[] = [
     walkthrough: 'configure-services',
     adminOnly: true,
     relatedArticles: ['editing-service-types', 'group-sessions', 'managing-contractor-rates', 'scholarship-billing'],
+    keywords: ['service type', 'pricing', 'base rate', 'mca percentage', 'contractor cap', 'rent percentage'],
     content: `
 ## Configuring Service Types
 
@@ -52,6 +53,7 @@ For a detailed walkthrough of how to use each field to customize your practice, 
     walkthrough: 'edit-service-type',
     adminOnly: true,
     relatedArticles: ['configuring-services', 'managing-contractor-rates', 'group-sessions', 'scholarship-billing'],
+    keywords: ['service type', 'pricing formula', 'contractor pay', 'duration', 'scholarship rate', 'group pay matrix'],
     content: `
 ## Editing Service Types: A Complete Guide
 
@@ -297,7 +299,8 @@ Result: When logging a session, the form asks "Who did this work?" instead of as
     category: 'settings',
     description: 'How to configure automatic session approval, invoice sending, and scholarship billing.',
     adminOnly: true,
-    relatedArticles: ['generating-invoices', 'scholarship-billing', 'configuring-services'],
+    relatedArticles: ['generating-invoices', 'scholarship-billing', 'configuring-services', 'custom-lists'],
+    keywords: ['auto-approve', 'auto-send invoice', 'scholarship batch', 'automation', 'custom lists'],
     content: `
 ## Automation Settings
 
@@ -342,6 +345,7 @@ This keeps the interface clean and avoids confusion from options that are not re
     description: 'How to update your profile, set up two-factor authentication, and configure security policies.',
     adminOnly: false,
     relatedArticles: ['getting-started'],
+    keywords: ['mfa', 'two-factor authentication', 'password', 'security', 'lockout', 'session timeout'],
     content: `
 ## Profile & Security Settings
 
@@ -388,6 +392,7 @@ Owners can configure organization-wide security settings:
     description: 'How to customize your logo, brand colors, business details, and regional settings.',
     adminOnly: true,
     relatedArticles: ['getting-started', 'automation-settings'],
+    keywords: ['logo', 'brand colors', 'timezone', 'currency', 'invoice header', 'tax id'],
     content: `
 ## Practice & Branding
 
@@ -440,6 +445,7 @@ Optionally link your Facebook, Instagram, LinkedIn, YouTube, Twitter/X, and TikT
     description: 'How to use the audit log to track all data changes for compliance.',
     adminOnly: true,
     relatedArticles: ['profile-and-security'],
+    keywords: ['audit trail', 'compliance', 'hipaa', 'change history', 'who changed what'],
     content: `
 ## Audit Log
 
@@ -474,6 +480,178 @@ Click the **eye icon** on any log entry to open a detail view showing:
 ### Pagination
 
 The log shows 20 entries per page. Use the Previous and Next buttons to navigate through the history.
+    `,
+  },
+  {
+    slug: 'pricing-deep-dive',
+    title: 'Pricing Deep Dive: How Session Amounts Are Calculated',
+    category: 'settings',
+    description: 'A full walkthrough of the pricing formula — duration scaling, group pricing, caps, and the contractor pay priority chain.',
+    adminOnly: true,
+    relatedArticles: ['configuring-services', 'editing-service-types', 'managing-contractor-rates', 'scholarship-billing', 'group-sessions'],
+    keywords: ['price', 'rate', 'duration', 'multiplier', 'group price', 'contractor pay', 'formula'],
+    content: `
+## Pricing Deep Dive: How Session Amounts Are Calculated
+
+Every dollar amount you see on a session, invoice, or paycheck comes from a small set of rules applied in a fixed order. This article walks through the full formula so you can predict exactly what a session will bill and pay before you save a service type.
+
+### Step 1: The Base Amount
+
+Every service type has a **Base Rate**, defined for a 30-minute session. For group services, a **Per-Person Rate** is added for each attendee.
+
+> **Total (before duration scaling) = Base Rate + (Per-Person Rate x Attendees)**
+
+**Solo exception:** if only 1 person attends a group service, the per-person charge is skipped entirely — they're billed just the base rate, the same as an individual session.
+
+With a $60 base rate and $20 per-person rate:
+
+| Attendees | Calculation | Total |
+|-----------|-------------|-------|
+| 1 | $60 (solo exception, per-person waived) | $60 |
+| 3 | $60 + ($20 x 3) | $120 |
+| 6 | $60 + ($20 x 6) | $180 |
+
+### Step 2: Duration Scaling
+
+The base amount is defined for a 30-minute session (configurable via **Duration Base**) and scales by a multiplier for other durations:
+
+| Duration | Multiplier | Example ($80 base) |
+|----------|-----------|---------------------|
+| 30 min | 1x | $80 |
+| 45 min | 1.5x | $120 |
+| 60 min | 2x | $160 |
+| 90 min | 3x | $240 |
+
+Group totals scale the same way — the per-person portion is included before the multiplier is applied.
+
+### Step 3: Total Cap
+
+A service type can set an optional **Total Cap** — a ceiling on the billed amount no matter how many people attend. If the formula produces more than the cap, the client is billed the cap instead.
+
+Example: base rate $50, per-person rate $20, total cap $150. With 8 attendees the formula gives $50 + ($20 x 8) = $210, but the client is billed **$150**.
+
+### Contractor Pay: The Priority Chain
+
+Contractor pay is calculated separately from the client bill, using the most specific rule that applies. The system checks these in order and stops at the first match:
+
+1. **Group Contractor Pay Matrix** *(group services only)* — an exact dollar grid by headcount and duration, set on the service type. If headcount exceeds the largest defined row (e.g. "6+"), that row's amount is used.
+2. **Custom Contractor Rate** — a per-contractor 30-minute base rate set in Team > Rates. For other durations it's combined with either an explicit per-15-minute increment (if one is set for that contractor) or the service type's pay schedule offset for that duration.
+3. **Contractor Pay Schedule** — a duration-to-pay mapping set directly on the service type (e.g. 30 min = $38.50, 60 min = $65.00), used when the contractor has no custom rate.
+4. **Percentage Formula** — the fallback: **Contractor Pay = Total Billed - (Total x MCA%)**. If a **Contractor Cap** is set, pay is capped there and the excess goes to MCA instead.
+
+Whichever rule wins, the leftover after contractor pay (and rent, if the location has a rent percentage) stays with the organization as MCA's cut.
+
+### Scholarship Pricing
+
+Scholarship services (or scholarship-payment-method clients) are billed a **flat Scholarship Rate** per session regardless of duration — contractor pay is still calculated normally from the chain above, and MCA absorbs the difference between what the contractor earns and the flat rate charged. Scholarship pricing never reduces what a contractor takes home.
+
+### Where Each Knob Lives
+
+- Base rate, per-person rate, total cap, MCA percentage, contractor cap, rent percentage, pay schedule, group pay matrix, scholarship rate → **Settings > Business Rules > Services tab > Edit a service type**
+- Duration base minutes and no-show fee → **Settings > Business Rules > Sessions tab**
+- Per-contractor custom rates and increments → **Team > Rates tab** or a contractor's own **Rates** sub-tab
+
+See **Editing Service Types: A Complete Guide** for a field-by-field walkthrough with more worked examples.
+    `,
+  },
+  {
+    slug: 'custom-lists',
+    title: 'Custom Lists: Payment Methods, Billing Methods & Classrooms',
+    category: 'settings',
+    description: 'How to rename or hide payment and billing methods, and manage global and per-client classroom lists.',
+    adminOnly: true,
+    relatedArticles: ['configuring-services', 'automation-settings', 'client-billing-controls', 'client-details'],
+    keywords: ['payment methods', 'billing methods', 'classroom', 'dropdown', 'rename', 'hide'],
+    content: `
+## Custom Lists: Payment Methods, Billing Methods & Classrooms
+
+MCA Manager ships with a default set of payment methods, billing methods, and classroom lists, but every organization uses different terminology. Custom Lists let you rename, hide, and extend these lists without any code changes.
+
+### Payment Methods and Billing Methods
+
+**Payment methods** describe how a client's care is funded: Private Pay, Self-Directed, Group Home, Scholarship, and Venmo by default. **Billing methods** describe how you invoice a client: Square, Check, Email, and Other by default.
+
+For each entry in both lists, you can:
+
+- **Rename** it to match your organization's language (for example, renaming "Group Home" to "Facility Billing").
+- **Show or hide** it from the client creation and edit forms. Hiding an option doesn't affect existing clients already using it — it only removes it from the picker for new selections.
+
+> **Where to find it:** Navigate to **Settings > Customize and Automate > Custom Lists** tab. Payment methods and billing methods each have their own editable list, with a **Save Custom Lists** button to apply changes.
+
+### Classrooms
+
+The **Classrooms** list powers a dropdown on the session form, most commonly used for scholarship or group-home clients attending sessions at a facility with multiple rooms.
+
+There are two layers to the classroom list:
+
+- **Global classroom list** — a single comma-separated list of room names (e.g., "Room A, Room B, Music Hall") shown for any client when no per-client list applies.
+- **Per-agency overrides** (\`classrooms_by_client\`) — a classroom list scoped to a specific client. When a client has their own list configured, it replaces the global list on the session form for that client, regardless of their payment method. This is useful for group-home or facility clients whose room names differ from your general list.
+
+> **Where to find it:** Navigate to **Settings > Business Rules > Sessions** tab. The **Classrooms** section has the global comma-separated list, plus a per-client editor for setting overrides on individual clients.
+
+### Why This Matters
+
+Keeping these lists accurate avoids confusion on the session and client forms — contractors only see options that are relevant to your practice, in language your team already uses. If you rename "Self-Directed" to something your organization actually calls it, that label appears everywhere the payment method is shown: the client form, session form, invoices, and reports.
+
+### Tips
+
+- Hiding an option is safer than deleting data — existing clients keep their assigned payment or billing method even if it's hidden from new selections.
+- If a classroom dropdown looks empty for a specific client, check whether that client has a per-client classroom override configured — it silently replaces the global list.
+- Changes save immediately across the organization; there's no per-user override.
+    `,
+  },
+  {
+    slug: 'notifications-and-reminders',
+    title: 'Notifications and Reminders',
+    category: 'settings',
+    description: 'How to configure admin email alerts, invoice payment reminders, and session reminder emails.',
+    adminOnly: true,
+    relatedArticles: ['automation-settings', 'generating-invoices', 'sending-invoices', 'session-workflow', 'client-details'],
+    keywords: ['email', 'reminder', 'notification', "didn't get email", 'admin email'],
+    content: `
+## Notifications and Reminders
+
+MCA Manager sends three kinds of automatic emails: an admin alert when something happens, a nudge to clients with unpaid invoices, and a heads-up to clients before their upcoming session. Each is independently configurable.
+
+### Admin Notification Emails
+
+Two toggles control emails sent to your practice's admin inbox:
+
+- **Session Submitted** — sends an email when a contractor submits a session for approval.
+- **Invoice Paid** — sends an email when an invoice is marked as paid.
+
+Both go to the **Admin Notification Email** address you set on the same page — this can be different from any individual user's login email, so you can route notifications to a shared inbox.
+
+> **Where to find it:** Navigate to **Settings > Business Rules > Notifications** tab.
+
+### Invoice Payment Reminders
+
+For unpaid invoices, the system can automatically email clients before the invoice due date. Configure:
+
+- **Send Payment Reminders** — toggle the feature on or off.
+- **Reminder Days Before Due** — a comma-separated list of how many days before the due date to send a reminder (default: 7 and 1 day before due).
+
+A daily cron job checks all sent, unpaid invoices and sends any reminders that are due. Each reminder day is only sent once per invoice — the invoice's \`reminder_sent_days\` record tracks which reminders have already gone out, so clients won't get duplicate emails if the cron runs more than once.
+
+> **Where to find it:** Navigate to **Settings > Business Rules > Invoices** tab.
+
+### Session Reminders
+
+Contractors' upcoming sessions can trigger a reminder email to the client before the session happens:
+
+- **Session Reminders** toggle — turn the feature on or off.
+- **Reminder Lead Time (hours)** — how many hours before the scheduled session the reminder should go out (1 to 72 hours, default 24).
+
+Session reminders require the client to have an email address on file — if a client has no email, no reminder is scheduled for their sessions.
+
+> **Where to find it:** Navigate to **Settings > Business Rules > Sessions** tab.
+
+### Troubleshooting: "I didn't get an email"
+
+- Check that the relevant toggle is turned on in Settings.
+- Confirm the client (for session or invoice reminders) or the admin notification address has a valid email on file.
+- Reminders are sent by a scheduled job, not instantly — invoice reminders run once daily, so there can be up to a day's delay from when the threshold is crossed.
+- Ask an owner to check the **Audit Log** or server logs if an email should have gone out but didn't — emails require the practice's email service to be configured.
     `,
   },
 ]
