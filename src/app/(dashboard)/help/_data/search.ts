@@ -1,11 +1,50 @@
-import type { HelpArticle } from './types'
+import type { HelpArticle, HelpFaq } from './types'
 import { HELP_ARTICLES } from './articles'
+import { HELP_FAQS } from './faqs'
 
 export type SearchResult = {
   article: HelpArticle
   score: number
   excerpt: string
   matchTerms: string[]
+}
+
+export type FaqSearchResult = {
+  faq: HelpFaq
+  score: number
+}
+
+/** Owner-phrasing → help-vocabulary bridges. Keys and values are lowercase. */
+export const SYNONYMS: Record<string, string[]> = {
+  bill: ['invoice'], billing: ['invoice'], bills: ['invoice'],
+  pay: ['earnings', 'payroll'], paycheck: ['earnings'], paystub: ['earnings'], stub: ['earnings'],
+  price: ['pricing', 'rate'], cost: ['pricing', 'rate'], charge: ['pricing', 'rate', 'fee'],
+  '2fa': ['mfa'], 'two-factor': ['mfa'], authenticator: ['mfa'],
+  cancel: ['cancellation', 'cancelled'], cancelling: ['cancellation'],
+  therapist: ['contractor'], staff: ['contractor', 'team'],
+  customer: ['client'], patient: ['client'], student: ['client'], kid: ['client'],
+  money: ['earnings', 'payroll'], paid: ['payment', 'payroll'],
+  reminder: ['reminders'], overdue: ['due'],
+  login: ['sign in', 'password'], phone: ['mobile', 'install'],
+}
+
+/** Words that carry question structure but no search meaning. */
+export const QUESTION_STOPWORDS = new Set([
+  'how', 'do', 'does', 'did', 'i', 'we', 'you', 'a', 'an', 'the', 'is', 'are',
+  'was', 'were', 'my', 'to', 'can', 'cant', "can't", 'where', 'why', 'what',
+  'when', 'who', 'which', 'if', 'of', 'for', 'in', 'on', 'at', 'it', 'this',
+  'that', 'be', 'get', 'gets', 'didnt', "didn't", 'wont', "won't", 'not', 'me',
+])
+
+/** Tokenize, drop question stopwords, expand synonyms.
+ *  Returns one group per surviving term: [term, ...synonyms]. */
+export function expandTerms(query: string): string[][] {
+  const raw = query.toLowerCase().split(/\s+/).filter(t => t.length > 0)
+  if (raw.length === 0) return []
+  const terms = raw.filter(t => !QUESTION_STOPWORDS.has(t))
+  // pure-stopword queries ("how do i") carry no searchable meaning
+  if (terms.length === 0) return []
+  return terms.map(t => [t, ...(SYNONYMS[t] ?? [])])
 }
 
 /** Strip markdown formatting for plain-text search and excerpts. */
@@ -49,10 +88,10 @@ function buildExcerpt(content: string, terms: string[]): string {
   return excerpt
 }
 
-/** Ranked search with scoring, fuzzy partial matching, and excerpts. */
+/** Ranked search: keyword/synonym/question-phrasing aware, with excerpts. */
 export function searchArticlesRanked(query: string): SearchResult[] {
-  const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0)
-  if (terms.length === 0) return []
+  const groups = expandTerms(query)
+  if (groups.length === 0) return []
 
   const results: SearchResult[] = []
 
@@ -60,38 +99,46 @@ export function searchArticlesRanked(query: string): SearchResult[] {
     const titleLower = article.title.toLowerCase()
     const descLower = article.description.toLowerCase()
     const contentLower = article.content.toLowerCase()
+    const keywordsLower = (article.keywords ?? []).map(k => k.toLowerCase())
 
     let score = 0
+    let matchedGroups = 0
     const matchedTerms: string[] = []
 
-    for (const term of terms) {
-      let termMatched = false
+    for (const group of groups) {
+      let groupMatched = false
 
-      // Title scoring
-      if (titleLower.includes(term)) {
-        score += titleLower === term ? 10 : 5
-        termMatched = true
+      for (const variant of group) {
+        let variantMatched = false
+
+        if (keywordsLower.some(k => k.includes(variant))) {
+          score += 6
+          variantMatched = true
+        }
+        if (titleLower.includes(variant)) {
+          score += titleLower === variant ? 10 : 5
+          variantMatched = true
+        }
+        if (descLower.includes(variant)) {
+          score += 3
+          variantMatched = true
+        }
+        if (contentLower.includes(variant)) {
+          score += 1
+          variantMatched = true
+        }
+
+        if (variantMatched) {
+          matchedTerms.push(variant)
+          groupMatched = true
+        }
       }
 
-      // Description scoring
-      if (descLower.includes(term)) {
-        score += 3
-        termMatched = true
-      }
-
-      // Content scoring
-      if (contentLower.includes(term)) {
-        score += 1
-        termMatched = true
-      }
-
-      if (termMatched) {
-        matchedTerms.push(term)
-      }
+      if (groupMatched) matchedGroups++
     }
 
-    // Bonus: all query terms matched
-    if (matchedTerms.length === terms.length && terms.length > 1) {
+    // Bonus: every meaning-carrying term matched (directly or via synonym)
+    if (matchedGroups === groups.length && groups.length > 1) {
       score += 3
     }
 
@@ -105,6 +152,27 @@ export function searchArticlesRanked(query: string): SearchResult[] {
     }
   }
 
+  return results.sort((a, b) => b.score - a.score)
+}
+
+/** Rank FAQs for a query; question text weighs more than the answer. */
+export function searchFaqs(query: string): FaqSearchResult[] {
+  const groups = expandTerms(query)
+  if (groups.length === 0) return []
+
+  const results: FaqSearchResult[] = []
+  for (const faq of HELP_FAQS) {
+    const q = faq.question.toLowerCase()
+    const a = faq.answer.toLowerCase()
+    let score = 0
+    for (const group of groups) {
+      for (const variant of group) {
+        if (q.includes(variant)) score += 5
+        else if (a.includes(variant)) score += 2
+      }
+    }
+    if (score > 0) results.push({ faq, score })
+  }
   return results.sort((a, b) => b.score - a.score)
 }
 
