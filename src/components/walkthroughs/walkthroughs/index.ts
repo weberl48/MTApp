@@ -299,7 +299,7 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Other Actions',
-      description: 'From a session\'s detail page, you can also Reject (with a reason), Mark No-Show (charges the no-show fee), or Cancel. Approving auto-generates an invoice for the session.',
+      description: 'From a session\'s detail page, you can also Request Revision (with a reason), Mark No-Show (charges the no-show fee), or Cancel. The session\'s invoice was already created when it was submitted — approving confirms the session so the invoice is ready to send.',
       ctaLabel: 'Finish',
       href: '/sessions/',
     },
