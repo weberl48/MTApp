@@ -4,7 +4,7 @@
 // self-dedupes so it backs up at most once per day. Safe to run manually:
 //   node scripts/backup-prod.mjs
 //
-// Output: C:\Users\lwebe\Personal\MusicTherapy-backups\daily\YYYY-MM-DD\<table>.json
+// Output: E:\mtmdbback\daily\YYYY-MM-DD\<table>.json  (BACKUP_ROOT below)
 // Retention: daily folders older than KEEP_DAYS are pruned (the one-off pre-wipe
 // backup folders outside daily\ are never touched).
 //
@@ -23,7 +23,10 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PROJECT_REF = 'ysmwowzxkgisshaormmf'
-const BACKUP_ROOT = 'C:\\Users\\lwebe\\Personal\\MusicTherapy-backups'
+// Separate physical drive, deliberately not inside the user profile: this tree
+// holds plaintext client names/emails/addresses and must stay out of git and any
+// cloud-synced folder (OneDrive/Dropbox). Override with MCA_BACKUP_ROOT.
+const BACKUP_ROOT = process.env.MCA_BACKUP_ROOT || 'E:\\mtmdbback'
 const KEEP_DAYS = 30
 const PAGE_SIZE = 5000
 
@@ -49,13 +52,32 @@ const outDir = join(dailyRoot, today)
 const marker = join(outDir, '_complete')
 const logFile = join(BACKUP_ROOT, 'backup.log')
 
-// Create the root before anything can log — log() itself used to throw ENOENT
-// here, turning an early failure into a silent crash.
-mkdirSync(BACKUP_ROOT, { recursive: true })
+// BACKUP_ROOT lives on a separate drive, so "drive missing" is a real scenario
+// (unplugged, offline, renamed). Never let that throw at module scope — it would
+// crash before any logging exists, which is the silent-failure mode this script
+// is specifically built to avoid. Fall back to a log beside the repo so an
+// unavailable drive is still discoverable.
+const fallbackLog = join(repoRoot, 'backup-failures.log')
+let rootReady = true
+try {
+  mkdirSync(BACKUP_ROOT, { recursive: true })
+} catch (err) {
+  rootReady = false
+  try {
+    appendFileSync(
+      fallbackLog,
+      `${new Date().toISOString()} FAIL backup root unavailable (${BACKUP_ROOT}): ${err.message}\n`
+    )
+  } catch {
+    // nothing left to do but surface it on stdout
+  }
+  console.error(`[backup] backup root unavailable: ${BACKUP_ROOT} — ${err.message}`)
+}
 
 function log(msg) {
+  const target = rootReady ? logFile : fallbackLog
   try {
-    appendFileSync(logFile, `${new Date().toISOString()} ${msg}\n`)
+    appendFileSync(target, `${new Date().toISOString()} ${msg}\n`)
   } catch (err) {
     console.error(`[backup] could not write log: ${err.message}`)
   }
@@ -95,6 +117,12 @@ async function fetchAllRows(token, table) {
 }
 
 async function main() {
+  // Without a writable root there is nowhere to put a backup; bail loudly rather
+  // than querying production and discarding the result.
+  if (!rootReady) {
+    log(`FAIL ${today}: backup root unavailable, nothing written`)
+    return 1
+  }
   if (existsSync(marker)) return 0 // already backed up today
 
   let token
