@@ -8,7 +8,7 @@ export const GETTING_STARTED_ARTICLES: HelpArticle[] = [
     description: 'An overview of the app and how to navigate its main features.',
     walkthrough: 'app-overview',
     relatedArticles: ['logging-a-session', 'view-as-mode', 'installing-the-app'],
-    keywords: ['overview', 'navigation', 'dashboard', 'roles', 'mobile', 'help center'],
+    keywords: ['overview', 'navigation', 'dashboard', 'roles', 'mobile', 'help center', 'walkthrough', 'guided tour'],
     content: `
 ## Welcome to MCA Manager
 
@@ -42,6 +42,10 @@ On iPhone: open the site in Safari, tap the Share button, then tap "Add to Home 
 On Android: open the site in Chrome, tap the menu (three dots), then tap "Add to Home Screen."
 
 Once installed, it behaves like a native app with an icon on your home screen.
+
+### Guided Tours
+
+The Help Center includes interactive **guided tours** that walk you through real screens step by step, highlighting each button as you go. The **Guided tours** card on the Help Center home page lists them in the recommended order for new team members and tracks which ones you've finished (checkmarks are per-device). When you complete a tour, the app suggests the next one in the sequence. You can retake any tour at any time.
 
 ### Getting Help
 

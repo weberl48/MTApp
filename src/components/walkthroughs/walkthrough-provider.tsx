@@ -3,9 +3,13 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { driver, type Driver } from 'driver.js'
+import { toast } from 'sonner'
 import 'driver.js/dist/driver.css'
 import type { Walkthrough, WalkthroughStep } from './walkthrough-types'
 import { getWalkthroughById } from './walkthroughs'
+import { markWalkthroughCompleted, nextRecommendedWalkthrough } from '@/lib/walkthroughs/completion'
+import { logWalkthroughFallback } from '@/lib/help/events'
+import { useOrganization } from '@/contexts/organization-context'
 
 type WalkthroughContextValue = {
   activeWalkthrough: Walkthrough | null
@@ -37,16 +41,17 @@ function isMobileViewport(): boolean {
 
 /**
  * A step target is highlightable if it has layout and isn't parked off-canvas.
- * Elements below/right of the viewport still count — they can be scrolled into
- * view — but the mobile drawer sitting at -translate-x-full (right edge <= 0)
- * cannot, so it's treated as hidden until the drawer opens.
+ * Elements outside the viewport still count — above/below can be scrolled back
+ * into view (a previous step may have scrolled them out) — but the mobile
+ * drawer sitting at -translate-x-full (right edge <= 0) cannot, so it's
+ * treated as hidden until the drawer opens.
  */
 function isElementVisible(el: Element): boolean {
   const rect = el.getBoundingClientRect()
   if (rect.width <= 0 || rect.height <= 0) return false
   const style = window.getComputedStyle(el)
   if (style.display === 'none' || style.visibility === 'hidden') return false
-  if (rect.right <= 0 || rect.bottom <= 0) return false
+  if (rect.right <= 0) return false
   return true
 }
 
@@ -136,10 +141,22 @@ function scrollElementIntoView(el: Element) {
 export function WalkthroughProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { organization, user, can } = useOrganization()
   const [activeWalkthrough, setActiveWalkthrough] = useState<Walkthrough | null>(null)
   const [stepIndex, setStepIndex] = useState(0)
   const driverRef = useRef<Driver | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Fresh values for callbacks created inside startWalkthrough (which only
+  // re-creates on route change): telemetry identity, role gating for the
+  // next-tour suggestion, and a self-reference for the completion toast.
+  const contextRef = useRef({ orgId: null as string | null, userId: null as string | null, isAdmin: false })
+  contextRef.current = {
+    orgId: organization?.id ?? null,
+    userId: user?.id ?? null,
+    isAdmin: can('session:view-all'),
+  }
+  const startWalkthroughRef = useRef<(id: string) => void>(() => {})
 
   const startWalkthrough = useCallback((id: string) => {
     const walkthrough = getWalkthroughById(id)
@@ -163,12 +180,28 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
      */
     function waitForStepReady(step: WalkthroughStep, done: () => void) {
       const startedAt = Date.now()
+      let preClicked = false
       const tick = () => {
         const pathReady = !step.href || window.location.pathname.startsWith(hrefPathname(step.href))
         const elementReady = !step.element || !!resolveStepElement(step.element)
         if ((pathReady && elementReady) || Date.now() - startedAt > 2500) {
           done()
           return
+        }
+        // The step's target only exists after activating a control (e.g. a tab
+        // panel, a dialog trigger) — click it for the user instead of stalling
+        // to the centered fallback. Fired at most once per wait: dialog
+        // triggers TOGGLE, so a repeat click would close what we just opened.
+        // Radix triggers select on mousedown (button 0), which
+        // HTMLElement.click() never fires, so dispatch the full press sequence.
+        if (pathReady && step.preClick && !preClicked) {
+          const trigger = resolveStepElement(step.preClick)
+          if (trigger) {
+            preClicked = true
+            for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'] as const) {
+              trigger.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true }))
+            }
+          }
         }
         timeoutRef.current = setTimeout(tick, 100)
       }
@@ -193,6 +226,20 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
       const nextIndex = current + direction
       if (nextIndex < 0) return
       if (nextIndex >= walkthrough!.steps.length) {
+        // Finished the whole tour (not an early X-close): remember it and
+        // suggest the next tour in the recommended onboarding order.
+        markWalkthroughCompleted(walkthrough!.id)
+        const { isAdmin } = contextRef.current
+        const nextId = nextRecommendedWalkthrough(walkthrough!.id, undefined, (id) => {
+          const next = getWalkthroughById(id)
+          return !!next && (!next.adminOnly || isAdmin)
+        })
+        const next = nextId ? getWalkthroughById(nextId) : undefined
+        toast.success(`${walkthrough!.name} — complete!`, {
+          description: next ? `Next up: ${next.name}.` : 'That was the last recommended tour — you know your way around.',
+          action: next ? { label: 'Start', onClick: () => startWalkthroughRef.current(next.id) } : undefined,
+          duration: 10000,
+        })
         driverInstance.destroy()
         return
       }
@@ -206,6 +253,10 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         else driverInstance.movePrevious()
       })
     }
+
+    // Log each broken step at most once per run — a user pressing Previous
+    // and Next again shouldn't double-count the same gap.
+    const fallbackLogged = new Set<number>()
 
     // Small delay to let navigation kick off, then wait for the first target
     timeoutRef.current = setTimeout(() => {
@@ -232,10 +283,14 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
               : undefined,
             popover: {
               title: step.title,
-              description: step.description,
+              description: (isMobileViewport() && step.mobileDescription) || step.description,
               side: step.popoverSide || ('bottom' as const),
               align: 'center' as const,
               showButtons: ['next', 'previous', 'close'] as const,
+              // The button says what pressing it does ("Go to Clients",
+              // "Open the Form") instead of a generic Next/Done.
+              nextBtnText: step.ctaLabel,
+              doneBtnText: step.ctaLabel,
             },
             onHighlightStarted: () => {
               setStepIndex(i)
@@ -245,6 +300,28 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
                   const el = resolveStepElement(step.element!)
                   if (el) scrollElementIntoView(el)
                 })
+              }
+            },
+            onHighlighted: (element) => {
+              // This step wanted an element but nothing was visible (driver
+              // highlighted its invisible dummy instead): tell the user why the
+              // popover is floating, and record the gap so broken tours show up
+              // on the Help gaps card.
+              const fellBack = !!step.element &&
+                (!element || (element as HTMLElement).id === 'driver-dummy-element')
+              if (!fellBack) return
+              const desc = document.querySelector('.driver-popover-description')
+              if (desc && !desc.querySelector('.mca-walkthrough-fallback-note')) {
+                const note = document.createElement('p')
+                note.className = 'mca-walkthrough-fallback-note'
+                note.textContent =
+                  "Can't see a highlight? The item this step describes isn't visible on your screen right now — it may be empty, or your role may not have access to it."
+                desc.appendChild(note)
+              }
+              if (!fallbackLogged.has(i)) {
+                fallbackLogged.add(i)
+                const { orgId, userId } = contextRef.current
+                if (orgId && userId) logWalkthroughFallback(orgId, userId, walkthrough!.id, step.title)
               }
             },
           })),
@@ -261,6 +338,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
       })
     }, 150)
   }, [pathname, router])
+  startWalkthroughRef.current = startWalkthrough
 
   const stopWalkthrough = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)

@@ -65,6 +65,24 @@ describe('help content integrity', () => {
     }
   })
 
+  it('article walkthrough refs resolve and adminOnly stays in sync both ways', async () => {
+    const { ALL_WALKTHROUGHS, getWalkthroughById } = await import('@/components/walkthroughs/walkthroughs')
+    for (const a of HELP_ARTICLES) {
+      if (!a.walkthrough) continue
+      const w = getWalkthroughById(a.walkthrough)
+      expect(w, `${a.slug} → missing walkthrough ${a.walkthrough}`).toBeDefined()
+      // A contractor-visible article must not launch an admin tour (and vice
+      // versa) — the Guided Tours card and next-tour chaining rely on the flag.
+      expect(!!w!.adminOnly, `${a.slug} adminOnly (${!!a.adminOnly}) != walkthrough ${w!.id} adminOnly (${!!w!.adminOnly})`).toBe(!!a.adminOnly)
+    }
+    for (const w of ALL_WALKTHROUGHS) {
+      expect(
+        HELP_ARTICLES.some(a => a.walkthrough === w.id),
+        `walkthrough ${w.id} has no launching article`
+      ).toBe(true)
+    }
+  })
+
   it('relatedArticles and FAQ links resolve; FAQ ids unique', () => {
     for (const a of HELP_ARTICLES) {
       for (const rel of a.relatedArticles ?? []) {

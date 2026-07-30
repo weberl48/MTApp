@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import { HelpGapsCard } from '@/components/help/help-gaps-card'
+import { GuidedToursCard } from '@/components/help/guided-tours-card'
 import { AiChat, useAiHelpVisible } from '@/components/help/ai-chat'
 import { createSearchMissGate, logSearchMiss } from '@/lib/help/events'
 import {
@@ -284,6 +285,9 @@ export default function HelpPage() {
           })}
         </div>
       )}
+
+      {/* Guided tours (when showing all) */}
+      {showingAllArticles && <GuidedToursCard />}
 
       {/* Inline FAQ answers (search) */}
       {searchQuery && faqResults && faqResults.length > 0 && (

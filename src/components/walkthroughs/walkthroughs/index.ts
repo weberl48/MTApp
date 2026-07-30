@@ -15,7 +15,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Action Center',
-      description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on.',
+      description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on — an empty Action Center means you\'re caught up.',
       element: '[data-tour="dashboard-action-center"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
@@ -58,7 +58,7 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Settings',
-      description: 'Configure service types, pricing, team invites, branding, automation, and more. This is where you customize how your practice works.',
+      description: 'Configure service types, pricing, team invites, branding, automation, and more. This is where you customize how your practice works. That\'s the tour! You\'ll find more guided tours any time under Help.',
       element: 'nav a[href="/settings/"]',
       popoverSide: 'right',
       ctaLabel: 'Finish',
@@ -72,13 +72,14 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
   id: 'add-client',
   name: 'Add Your First Client',
   description: 'Learn how to add a client to your practice',
+  adminOnly: true,
   steps: [
     {
       title: 'Navigate to Clients',
       description: 'The Clients page shows all your clients. The stats at the top give you a quick count and flag any clients missing contact info.',
       element: 'nav a[href="/clients/"]',
       popoverSide: 'right',
-      ctaLabel: 'Go to Clients',
+      ctaLabel: 'Next',
       href: '/clients/',
       mobileNav: true,
     },
@@ -92,15 +93,20 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Click Add Client',
-      description: 'Click the "Add Client" button to open the form. Fill in the client\'s name, email (optional), phone, and payment method.',
+      description: 'This button opens the new-client form. Click it yourself, or press "Open the Form" below and we\'ll open it for you.',
       element: '[data-tour="clients-add-button"]',
       popoverSide: 'bottom',
-      ctaLabel: 'Next',
+      ctaLabel: 'Open the Form',
       href: '/clients/',
     },
     {
-      title: 'Choose Payment and Billing Methods',
-      description: 'Select how this client pays (Private Pay, Self-Directed, Group Home, Scholarship, or Venmo) and how you bill them (Square, Check, Email, or Other). This affects how invoices are generated and tracked.',
+      title: 'Payment & Billing Setup',
+      description: 'These three fields drive all billing. Payment Method is who pays and how the session is classified (Scholarship clients are batch-invoiced monthly at the scholarship rate). Billing Method is how their invoice is delivered — Square payment link, emailed PDF, or a check you track by hand. Invoicing switches a client from per-session invoices to one monthly batch. Fill in the name and contact info and click "Add Client" to save — or press Esc to close without saving.',
+      element: '[data-tour="client-billing-fields"]',
+      // The fields live inside the Add Client dialog — open it for users who
+      // pressed the button above (no-op if they already clicked it).
+      preClick: '[data-tour="clients-add-button"] button',
+      popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/clients/',
     },
@@ -114,10 +120,11 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
   steps: [
     {
       title: 'Start a New Session',
-      description: 'Navigate to Sessions and click "New Session" to begin. On mobile, use the floating + button at the bottom of the screen.',
+      description: 'Click "New Session" on the Sessions page to open the session form. Press "Go to the Form" below and we\'ll take you straight there.',
+      mobileDescription: 'On your phone, the floating + button opens quick session logging from any page. Press "Go to the Form" below and we\'ll take you to the full form.',
       element: '[data-tour="sessions-new-button"], [data-tour="quick-session-fab"]',
       popoverSide: 'bottom',
-      ctaLabel: 'Go to New Session',
+      ctaLabel: 'Go to the Form',
       href: '/sessions/',
     },
     {
@@ -162,7 +169,7 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Submit or Save Draft',
-      description: 'Choose "Submit for approval" to send the session for admin review, or "Save as draft" to finish later. After submitting, you can quickly "Log Another" session.',
+      description: 'Choose "Submit for approval" to send the session for admin review, or "Save as draft" to finish later. After submitting, you can quickly "Log Another" session. You\'re ready — log a session any time.',
       element: '[data-tour="session-form-submit"]',
       popoverSide: 'top',
       ctaLabel: 'Finish',
@@ -175,13 +182,14 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
   id: 'invite-contractor',
   name: 'Invite a Contractor',
   description: 'Learn how to invite team members',
+  adminOnly: true,
   steps: [
     {
       title: 'Go to Team',
       description: 'Team management is in the Team section of the sidebar.',
       element: 'nav a[href="/team/"]',
       popoverSide: 'right',
-      ctaLabel: 'Go to Team',
+      ctaLabel: 'Next',
       href: '/team/',
       mobileNav: true,
     },
@@ -211,9 +219,20 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Send an Invite',
-      description: 'Click "Invite Team Member" and select their role (Contractor or Admin). Enter their email to send the invite, or generate a link to share directly. They\'ll get a link to create their account.',
+      description: 'This button opens the invite form. Click it yourself, or press "Open the Invite Form" below and we\'ll open it for you.',
       element: '[data-tour="team-invite-button"]',
       popoverSide: 'bottom',
+      ctaLabel: 'Open the Invite Form',
+      href: '/team/',
+    },
+    {
+      title: 'Choose a Role & Send',
+      description: 'Contractors can log their own sessions and see their earnings. Admins can additionally review sessions, manage clients, and handle invoicing. Enter their email to send the invite, or generate a link to share directly — they\'ll create their own account from it. Press Esc when you\'re done to close the form.',
+      element: '#invite_role',
+      // The role selector lives inside the invite dialog — open it for users
+      // who pressed the button above (no-op if they already clicked it).
+      preClick: '[data-tour="team-invite-button"] button',
+      popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/team/',
     },
@@ -224,13 +243,14 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
   id: 'configure-services',
   name: 'Configure Services',
   description: 'Learn how to set up service types and pricing',
+  adminOnly: true,
   steps: [
     {
       title: 'Go to Settings',
       description: 'Service type configuration is in Settings > Business Rules.',
       element: 'nav a[href="/settings/"]',
       popoverSide: 'right',
-      ctaLabel: 'Go to Settings',
+      ctaLabel: 'Next',
       href: '/settings/business/',
       mobileNav: true,
     },
@@ -248,7 +268,7 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Detailed Editing Walkthrough',
-      description: 'For a step-by-step guide through every field in the service type form, check the "Edit a Service Type" walkthrough in the Help section. It highlights each field and explains what it does.',
+      description: 'For a step-by-step guide through every field in the service type form, take the "Edit a Service Type" tour — you\'ll find it in the Help Center\'s Guided Tours list. It highlights each field and explains what it does.',
       ctaLabel: 'Finish',
       href: '/settings/business/',
     },
@@ -259,13 +279,14 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
   id: 'approve-sessions',
   name: 'Approve Sessions',
   description: 'Learn how to review and approve submitted sessions',
+  adminOnly: true,
   steps: [
     {
       title: 'Sessions Page',
       description: 'Go to the Sessions page. Submitted sessions appear with a "Submitted" badge and are waiting for your review.',
       element: 'nav a[href="/sessions/"]',
       popoverSide: 'right',
-      ctaLabel: 'Go to Sessions',
+      ctaLabel: 'Next',
       href: '/sessions/',
       mobileNav: true,
     },
@@ -287,7 +308,7 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Inline Approve',
-      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note.',
+      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note. You can try it right now — the tour will stay with you.',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
@@ -310,13 +331,14 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
   id: 'scholarship-billing',
   name: 'Scholarship Billing',
   description: 'Learn how to generate monthly scholarship invoices',
+  adminOnly: true,
   steps: [
     {
       title: 'Go to Invoices',
       description: 'Navigate to Invoices from the sidebar — it lives under the Billing menu.',
       element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
       popoverSide: 'right',
-      ctaLabel: 'Go to Invoices',
+      ctaLabel: 'Next',
       href: '/invoices/',
       mobileNav: true,
     },
@@ -338,16 +360,19 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Open the Scholarship Tab',
-      description: 'Click the purple "Scholarship" tab to see unbilled scholarship sessions grouped by client and month. This tab only appears for admins.',
+      description: 'The purple "Scholarship" tab shows unbilled scholarship sessions grouped by client and month. Click it now — or press "Open the Tab" below and we\'ll switch for you. This tab only appears for admins.',
       element: '[data-tour="invoices-tab-scholarship"]',
       popoverSide: 'bottom',
-      ctaLabel: 'Next',
+      ctaLabel: 'Open the Tab',
       href: '/invoices/',
     },
     {
       title: 'Scholarship Content',
       description: 'The Scholarship tab shows unbilled sessions grouped by client and month, existing batch invoices, and unpaid scholarship invoices. Each group has a "Generate Invoice" button.',
       element: '[data-tour="invoices-scholarship-content"]',
+      // The panel only mounts once the tab is active — open it for users who
+      // pressed Next without clicking the tab themselves.
+      preClick: '[data-tour="invoices-tab-scholarship"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/invoices/',
@@ -365,19 +390,20 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   id: 'edit-service-type',
   name: 'Edit a Service Type',
   description: 'Learn how to customize service type pricing, pay, and special behaviors',
+  adminOnly: true,
   steps: [
     {
       title: 'Go to Settings',
-      description: 'Service types are configured under Settings > Business Rules.',
+      description: 'Service types are configured under Settings > Business Rules. This tour walks through every field in the service type form — it takes about 3 minutes.',
       element: 'nav a[href="/settings/"]',
-      ctaLabel: 'Go to Settings',
+      ctaLabel: 'Open a Service Type',
       href: '/settings/business/',
       mobileNav: true,
     },
     {
       title: 'Open a Service Type',
-      description: 'We\'ll open the first service type so you can see all the fields. The edit form will appear automatically.',
-      ctaLabel: 'Open Form',
+      description: 'We\'ve opened your first service type so you can see all the fields. We\'ll go through them one by one.',
+      ctaLabel: 'Next',
       href: '/settings/business/?tour=edit-service',
     },
     {

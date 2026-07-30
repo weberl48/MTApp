@@ -26,6 +26,7 @@ export const SYNONYMS: Record<string, string[]> = {
   money: ['earnings', 'payroll'], paid: ['payment', 'payroll'],
   reminder: ['reminders'], overdue: ['due'],
   login: ['sign in', 'password'], phone: ['mobile', 'install'],
+  tour: ['walkthrough'], tours: ['walkthrough'], tutorial: ['walkthrough', 'guided tour'],
 }
 
 /** Words that carry question structure but no search meaning. */

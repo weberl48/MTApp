@@ -295,6 +295,7 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/square/webhook-status.ts` — `resolveSquareWebhookStatus()`: FORWARD-ONLY status mapping — out-of-order/retried Square webhooks must never un-pay a paid invoice
 - `src/lib/help/ai.ts` — AI help assistant: `buildHelpCorpus()` (role-filtered articles+FAQs for the system prompt) and `buildOrgContext()` (WHITELISTED non-PHI org config — never add client/session/invoice/team data; that is the compliance boundary), `streamHelpAnswer()` (Claude streaming with prompt caching)
 - `src/lib/help/citations.ts` — `extractSources()`: splits an AI answer into display text + cited article slugs (`[[slug]]` markers)
+- `src/lib/walkthroughs/completion.ts` — completed guided-tour tracking (localStorage, per-browser) + `RECOMMENDED_WALKTHROUGH_ORDER` + `nextRecommendedWalkthrough()`; consumed by the walkthrough provider (completion toast chaining) and the Help Center Guided Tours card. Walkthrough `adminOnly` flags must match the launching article's `adminOnly` (enforced by `integrity.test.ts`). `scripts/audit-walkthroughs.mts` (`npx tsx`, dev server running) steps every tour desktop+mobile and asserts each step's highlight — run it after changing tours or the pages they visit
 
 ## Testing
 
