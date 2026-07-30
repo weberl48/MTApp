@@ -51,21 +51,27 @@ export const logger = {
 function forwardToDevPortal(message: string, safeError?: { name: string; message: string } | string) {
   if (process.env.NODE_ENV !== 'development') return
   try {
-    const portalUrl = process.env.DEV_PORTAL_URL || 'http://localhost:4321'
-    fetch(`${portalUrl}/api/errors`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        source: 'backend',
-        kind: typeof safeError === 'object' && safeError ? safeError.name : 'logger.error',
-        message: [message, typeof safeError === 'string' ? safeError : safeError?.message]
-          .filter(Boolean)
-          .join(' — '),
-      }),
-      signal: AbortSignal.timeout(1500),
-    }).catch(() => {
-      // Portal not running — drop it, never disrupt the app.
+    // Comma-separated list: the PC portal and (optionally) the Pi mirror.
+    const targets = (process.env.DEV_PORTAL_URL || 'http://localhost:4321').split(',')
+    const payload = JSON.stringify({
+      source: 'backend',
+      kind: typeof safeError === 'object' && safeError ? safeError.name : 'logger.error',
+      message: [message, typeof safeError === 'string' ? safeError : safeError?.message]
+        .filter(Boolean)
+        .join(' — '),
     })
+    for (const target of targets) {
+      const url = target.trim()
+      if (!url) continue
+      fetch(`${url}/api/errors`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: payload,
+        signal: AbortSignal.timeout(1500),
+      }).catch(() => {
+        // Portal not running — drop it, never disrupt the app.
+      })
+    }
   } catch {
     // Same: dev telemetry must never throw.
   }

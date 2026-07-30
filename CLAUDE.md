@@ -33,6 +33,7 @@ npx tsc --noEmit     # Type check (used in CI)
 npm run test         # Run Vitest tests
 npm run test -- --watch  # Run tests in watch mode
 npm run portal       # Local dev portal (http://localhost:4321): env health, endpoint sweep, error feed — see tools/dev-portal/README.md
+                     # 24/7 mirror runs on the HA Pi at http://192.168.1.160:4321 (docker `mca-portal`, deploy notes in the README)
 node scripts/dev-seed/apply.mjs  # Reseed MCA-Dev with the full scenario dataset (idempotent, dev-only) — see scripts/dev-seed/README.md
 ```
 

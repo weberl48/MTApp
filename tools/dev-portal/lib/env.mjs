@@ -11,11 +11,11 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..'
  */
 export function loadRepoEnv() {
   const env = {}
-  let raw
+  let raw = ''
   try {
     raw = readFileSync(join(REPO_ROOT, '.env.local'), 'utf8')
   } catch {
-    return env
+    // No repo .env.local (e.g. running in the Pi container) — env vars only.
   }
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim()
@@ -28,6 +28,10 @@ export function loadRepoEnv() {
       value = value.slice(1, -1)
     }
     env[key] = value
+  }
+  // Real environment variables win (the container has no .env.local).
+  for (const key of ['SUPABASE_ACCESS_TOKEN', 'CRON_SECRET']) {
+    if (process.env[key]) env[key] = process.env[key]
   }
   return env
 }
