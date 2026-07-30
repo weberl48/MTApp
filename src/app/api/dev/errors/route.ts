@@ -31,15 +31,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'invalid JSON' }, { status: 400 })
   }
 
-  const portalUrl = process.env.DEV_PORTAL_URL || 'http://localhost:4321'
-  await fetch(`${portalUrl}/api/errors`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body,
-    signal: AbortSignal.timeout(2000),
-  }).catch(() => {
-    // Portal not running — drop the report.
-  })
+  // Comma-separated list: the PC portal and (optionally) the Pi mirror.
+  const targets = (process.env.DEV_PORTAL_URL || 'http://localhost:4321').split(',')
+  await Promise.allSettled(
+    targets
+      .map(t => t.trim())
+      .filter(Boolean)
+      .map(url =>
+        fetch(`${url}/api/errors`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body,
+          signal: AbortSignal.timeout(2000),
+        })
+      )
+  )
 
   return NextResponse.json({ ok: true })
 }

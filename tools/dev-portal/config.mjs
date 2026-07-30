@@ -12,16 +12,19 @@ export const PORT = Number(process.env.PORT) || 4321
 
 export const GITHUB_REPO = 'weberl48/MTApp'
 
+// Overridable for the Pi mirror, where "local" means this PC's dev server.
+const LOCAL_APP_URL = process.env.LOCAL_APP_URL || 'http://localhost:3000'
+
 export const ENVIRONMENTS = [
   {
     key: 'local',
     name: 'Local Dev',
     subtitle: 'Sandbox — MCA-Dev Supabase',
-    baseUrl: 'http://localhost:3000',
+    baseUrl: LOCAL_APP_URL,
     supabaseRef: 'gzrukevymmguqxuoynqk',
     supabaseName: 'MCA-Dev',
     links: [
-      { label: 'Open app', url: 'http://localhost:3000/dashboard/' },
+      { label: 'Open app', url: `${LOCAL_APP_URL}/dashboard/` },
       { label: 'Supabase', url: 'https://supabase.com/dashboard/project/gzrukevymmguqxuoynqk' },
     ],
   },

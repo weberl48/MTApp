@@ -40,3 +40,17 @@ Everything is optional — the portal degrades gracefully:
 | `PORT` (portal env) | Portal port (default 4321) |
 
 Environments, links, and the endpoint catalog live in `config.mjs` — add new API routes there so the sweep covers them.
+
+## Raspberry Pi deployment (24/7 mirror)
+
+The portal also runs as a Docker container on the Home Assistant Pi (`speakeasy` SSH alias, `192.168.1.160`) — same code, always on, with an HA sensor + phone alert on prod unhealthy (`ha/mca_portal.yaml` → `/config/packages/`).
+
+```bash
+ssh speakeasy "mkdir -p /root/mca-portal/src /root/mca-portal/data"
+scp -r server.mjs config.mjs Dockerfile lib public speakeasy:/root/mca-portal/src/
+# /root/mca-portal/.env (chmod 600): SUPABASE_ACCESS_TOKEN, CRON_SECRET, LOCAL_APP_URL=http://<pc-ip>:3000
+ssh speakeasy "cd /root/mca-portal/src && docker build -t mca-portal ."
+ssh speakeasy "docker rm -f mca-portal 2>/dev/null; docker run -d --name mca-portal --restart unless-stopped -p 4321:4321 --env-file /root/mca-portal/.env -v /root/mca-portal/data:/app/data mca-portal"
+```
+
+Pi-specific env vars: `LOCAL_APP_URL` points the "local" card at the PC's dev server; secrets come from the env file (real env vars override `.env.local`). The CI panel needs `gh` and stays "unavailable" in the container. To mirror dev errors to the Pi, set `DEV_PORTAL_URL=http://localhost:4321,http://192.168.1.160:4321` in the app's `.env.local` (comma-separated fan-out).
