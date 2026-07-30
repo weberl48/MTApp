@@ -17,6 +17,7 @@
  *
  * Usage:  node scripts/cert-refresh/capture-prod.mjs [--out <dir>]
  */
+import './lib/run.mjs'
 import { mkdirSync, writeFileSync, readFileSync, existsSync, statSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { createHash } from 'crypto'
@@ -41,7 +42,11 @@ const schemaFile = `${outDir}/prod-public-schema.sql`
 console.log('  pg_dump --schema-only ...')
 execFileSync(
   `${PATHS.pgBin}/pg_dump.exe`,
-  ['--schema-only', '--schema=public', '--no-owner', '--file', schemaFile, conn],
+  // --no-privileges is required, not cosmetic: the pooler connects as `postgres`,
+  // which on Supabase is not superuser and cannot execute the dump's
+  // `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin ...` lines. Grants are
+  // re-applied explicitly by rebuild-schema.mjs instead.
+  ['--schema-only', '--schema=public', '--no-owner', '--no-privileges', '--file', schemaFile, conn],
   { env: { ...process.env, PGPASSWORD: pw }, stdio: ['ignore', 'inherit', 'inherit'], timeout: 300_000 }
 )
 
