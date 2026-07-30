@@ -53,7 +53,11 @@ ssh speakeasy "mkdir -p /root/mca-portal/src /root/mca-portal/data"
 scp -r server.mjs config.mjs Dockerfile lib public speakeasy:/root/mca-portal/src/
 # /root/mca-portal/.env (chmod 600): SUPABASE_ACCESS_TOKEN, CRON_SECRET, LOCAL_APP_URL=http://<pc-ip>:3000
 ssh speakeasy "cd /root/mca-portal/src && docker build -t mca-portal ."
-ssh speakeasy "docker rm -f mca-portal 2>/dev/null; docker run -d --name mca-portal --restart unless-stopped -p 4321:4321 --env-file /root/mca-portal/.env -v /root/mca-portal/data:/app/data mca-portal"
+ssh speakeasy "docker rm -f mca-portal 2>/dev/null; docker run -d --name mca-portal --restart unless-stopped -p 4321:4321 --env-file /root/mca-portal/.env -v mca-portal-data:/app/data mca-portal"
 ```
+
+**Use the named volume `mca-portal-data`, not a bind mount.** The SSH addon's `/root` is not the host's `/root`, and Docker resolves bind mounts against the host — where the path does not exist and `/` is read-only. The old `-v /root/mca-portal/data:/app/data` silently never worked (the directory stayed empty and history/errors were lost on every restart); with the named volume they actually persist.
+
+**Linking from Home Assistant:** see the header of `ha/mca_portal.yaml`. Do not add `panel_iframe` — it has been removed from HA core, and a failed integration aborts the whole package, taking the prod health sensor and phone alerts with it.
 
 Pi-specific env vars: `LOCAL_APP_URL` points the "local" card at the PC's dev server; secrets come from the env file (real env vars override `.env.local`). The CI panel needs `gh` and stays "unavailable" in the container. To mirror dev errors to the Pi, set `DEV_PORTAL_URL=http://localhost:4321,http://192.168.1.160:4321` in the app's `.env.local` (comma-separated fan-out).

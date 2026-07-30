@@ -7,7 +7,12 @@
 # container itself dies the sensor goes 'unavailable' and the alert fires —
 # intentional: monitoring died.
 #
-# Dashboard card — paste into any dashboard as a Manual card:
+# ---------------------------------------------------------------------------
+# LINKING TO THE PORTAL  (http://192.168.1.160:4321)
+#
+# Dashboard card — paste into any dashboard as a Manual card. The link row opens
+# the portal in a new tab, which works regardless of how you reached HA:
+#
 #   type: entities
 #   title: MCA App Health
 #   entities:
@@ -15,6 +20,35 @@
 #       name: Production status
 #     - entity: binary_sensor.mca_prod_healthy
 #       name: Prod OK
+#     - type: weblink
+#       url: http://192.168.1.160:4321
+#       name: Open Dev Portal
+#       icon: mdi:monitor-dashboard
+#
+# Or as a standalone button card:
+#
+#   type: button
+#   name: MCA Dev Portal
+#   icon: mdi:monitor-dashboard
+#   tap_action:
+#     action: url
+#     url_path: http://192.168.1.160:4321
+#
+# SIDEBAR ENTRY: do NOT add `panel_iframe:` here. It was removed from HA core and
+# now fails with "Integration 'panel_iframe' not found" — which aborts setup of
+# this ENTIRE package, taking the prod health sensor and phone alerts down with
+# it (verified the hard way on 2026-07-30).
+# For a permanent sidebar entry use the UI instead — it is stored in
+# .storage/lovelace_dashboards, not YAML, so this file cannot manage it:
+#   Settings > Dashboards > Add Dashboard > Webpage
+#   URL: http://192.168.1.160:4321   (tick "Show in sidebar")
+#
+# Note the URL is plain HTTP. A Webpage dashboard embeds it, so if you open HA
+# over HTTPS (Nabu Casa remote, TLS reverse proxy) the browser blocks it as
+# mixed content and the panel renders blank. On the LAN over
+# http://<ha-host>:8123 it works. The card options above open a new tab instead,
+# so they are unaffected either way — prefer them if you use remote access.
+# ---------------------------------------------------------------------------
 #
 sensor:
   - platform: rest
