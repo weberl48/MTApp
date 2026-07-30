@@ -16,6 +16,7 @@
     "health:prod": "npx tsx scripts/health-check.ts https://your-production-url.vercel.app"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@hookform/resolvers": "^5.5.7",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.11",
