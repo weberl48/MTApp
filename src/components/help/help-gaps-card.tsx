@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { SearchX, ThumbsDown } from 'lucide-react'
+import { Route, SearchX, ThumbsDown } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useOrganization } from '@/contexts/organization-context'
 import { createClient } from '@/lib/supabase/client'
 import { getArticleBySlug } from '@/app/(dashboard)/help/_data/help-articles'
+import { getWalkthroughById } from '@/components/walkthroughs/walkthroughs'
 
 type HelpEventRow = {
-  event_type: 'search_miss' | 'article_feedback'
+  event_type: 'search_miss' | 'article_feedback' | 'walkthrough_fallback'
   query: string | null
   article_slug: string | null
   helpful: boolean | null
@@ -54,7 +55,17 @@ export function HelpGapsCard() {
     .filter(r => r.event_type === 'article_feedback' && r.helpful === false && r.article_slug)
     .slice(0, 5)
 
-  if (misses.length === 0 && unhelpful.length === 0) return null
+  // Walkthrough steps whose target element wasn't found, deduped per step —
+  // a tour that drifted out of sync with the UI (or is hidden by role).
+  const brokenSteps: { walkthroughId: string; stepTitle: string }[] = []
+  for (const row of rows) {
+    if (row.event_type !== 'walkthrough_fallback' || !row.article_slug || !row.query) continue
+    if (!brokenSteps.some(b => b.walkthroughId === row.article_slug && b.stepTitle === row.query)) {
+      brokenSteps.push({ walkthroughId: row.article_slug, stepTitle: row.query })
+    }
+  }
+
+  if (misses.length === 0 && unhelpful.length === 0 && brokenSteps.length === 0) return null
 
   return (
     <Card>
@@ -74,6 +85,21 @@ export function HelpGapsCard() {
             <ul className="text-sm text-muted-foreground space-y-1">
               {misses.slice(0, 10).map(q => (
                 <li key={q}>&ldquo;{q}&rdquo;</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {brokenSteps.length > 0 && (
+          <div>
+            <p className="text-sm font-medium flex items-center gap-1.5 mb-1.5">
+              <Route className="h-4 w-4 text-muted-foreground" />
+              Guided tour steps that lost their target
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              {brokenSteps.slice(0, 5).map(b => (
+                <li key={`${b.walkthroughId}-${b.stepTitle}`}>
+                  {getWalkthroughById(b.walkthroughId)?.name ?? b.walkthroughId} — &ldquo;{b.stepTitle}&rdquo;
+                </li>
               ))}
             </ul>
           </div>

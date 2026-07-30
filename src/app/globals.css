@@ -185,3 +185,20 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* Injected by the walkthrough provider when a step's target element cannot be
+   found and the popover falls back to centered — explains the missing
+   highlight instead of pointing at nothing. */
+.mca-walkthrough-popover .mca-walkthrough-fallback-note {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  background: #fef3c7;
+  color: #92400e;
+}
+.dark .mca-walkthrough-popover .mca-walkthrough-fallback-note {
+  background: #451a03;
+  color: #fbbf24;
+}

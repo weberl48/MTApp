@@ -213,6 +213,8 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                 onChange={(e) => setPhone(e.target.value)}
               />
             </div>
+            {/* Wrapper is the "Payment & Billing Setup" walkthrough target */}
+            <div className="space-y-4" data-tour="client-billing-fields">
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">Payment Method</Label>
               <Select
@@ -269,6 +271,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                   Scholarship &amp; Monthly tab on the Invoices page (or automatically, if enabled in Settings).
                 </p>
               )}
+            </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
