@@ -355,6 +355,11 @@ HELP_AI_MODEL=            # optional model override; defaults to claude-sonnet-5
 # Cron job authentication
 CRON_SECRET=secret-for-vercel-cron-jobs
 
+# Local-only auto-login (never set in Vercel): middleware signs unauthenticated requests
+# in as dev-owner@maycreativearts.test using TEST_USER_PASSWORD. Requires dev build AND
+# the MCA-Dev Supabase project (gate in src/lib/auth/dev-auto-login.ts); auth pages exempt.
+DEV_AUTO_LOGIN=1
+
 # Supabase Management API (optional — enables auto-restore of paused projects from the login page)
 SUPABASE_ACCESS_TOKEN=
 ```
