@@ -10,10 +10,11 @@ Run it next to `npm run dev`. It works standalone too (production checks don't n
 
 ## What it shows
 
-- **Environment health** — Local Dev (sandbox, MCA-Dev Supabase) and Production side by side: liveness/readiness probes, the `/api/health` aggregate with per-check detail (database, auth, encryption, Square, email), latency, and quick links to the app, Supabase dashboard, and Vercel.
+- **Environment health** — Local Dev, Cert and Production side by side: liveness/readiness probes, the `/api/health` aggregate with per-check detail (database, auth, encryption, Square, email), latency, and quick links to the app, Supabase dashboard, and Vercel.
 - **Pulse strip** — health/latency history per environment (bar height = latency, color = status), sampled every 5 minutes while the portal runs. Persisted in `data/history.json`.
 - **Endpoint sweep** — on-demand smoke test of every API route against either environment, unauthenticated. A protected route answering 401/404 is a PASS; 5xx or a timeout is a FAIL. Side-effect routes (e.g. `/api/health/restore`) are skipped.
 - **Captured errors** — while the app runs in dev mode it forwards browser errors (window errors, unhandled rejections, `console.error`) and server-side `logger.error` calls here. Filter by source, expand for stack traces, clear at will. Persisted in `data/errors.json` (gitignored — stack traces stay local). Production errors are *not* captured; use Vercel logs.
+- **Cert environment** — a dedicated panel for the cert database. Cert is a faithful copy of production *including real PHI*, refreshed with `scripts/cert-refresh`. Vercel Preview URLs are per-deployment, so there is no stable host to probe — the panel reports on the database instead: staleness, the active branch overlay, row volumes, and the safety invariants (PHI still decrypts, no real address has crept back in, auth rows are well-formed, `require_mfa` on). It mirrors `scripts/cert-refresh/verify-cert.mts` — that script is the gate, this is the always-on view; keep the two in step.
 - **Supabase project status** — live status of both Supabase projects via the Management API, with a one-click **Restore** button when the free-tier dev project has auto-paused.
 - **CI & deploy** — latest GitHub Actions runs on `main` plus the Vercel deploy state of the latest commit (needs the `gh` CLI authenticated as `weberl48`).
 
@@ -35,6 +36,8 @@ Everything is optional — the portal degrades gracefully:
 |---|---|
 | `.env.local` `SUPABASE_ACCESS_TOKEN` | Supabase project status + restore button |
 | `.env.local` `CRON_SECRET` (matching Vercel's value) | Per-check health detail for production |
+| `.env.local` `CERT_ENCRYPTION_KEY` | The Cert panel's "PHI decrypts" probe (server-side only, never sent to the browser) |
+| `CERT_APP_URL` (portal env) | Pins a Preview URL so cert also gets HTTP probes and endpoint sweeps. Without it cert shows `Not probed`, which is expected |
 | `gh` CLI authenticated | CI & deploy panel |
 | `DEV_PORTAL_URL` (app env) | Override the portal address the app forwards errors to (default `http://localhost:4321`) |
 | `PORT` (portal env) | Portal port (default 4321) |

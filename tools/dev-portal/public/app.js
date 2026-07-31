@@ -6,6 +6,7 @@ const state = {
   history: {},
   supabase: null,
   ci: null,
+  cert: null,
   errors: [],
   errorFilter: 'all',
   sweeping: false,
@@ -26,7 +27,14 @@ function esc(text) {
   return div.innerHTML
 }
 
-const STATUS_LABEL = { healthy: 'Healthy', degraded: 'Degraded', unhealthy: 'Unhealthy', down: 'Down' }
+const STATUS_LABEL = {
+  healthy: 'Healthy',
+  degraded: 'Degraded',
+  unhealthy: 'Unhealthy',
+  down: 'Down',
+  'not-probed': 'Not probed',
+  protected: 'Protected',
+}
 
 function fmtTime(iso) {
   const d = new Date(iso)
@@ -66,7 +74,9 @@ function renderEnvCards() {
 function envCardHtml(env, health, supabase) {
   const status = health?.status || 'down'
   const points = state.history[env.key] || []
-  const upPct = points.length
+  // An unprobed environment has no uptime to report. Showing "100% up" for one
+  // nobody is checking is worse than showing nothing.
+  const upPct = !['not-probed','protected'].includes(status) && points.length
     ? Math.round((points.filter(p => p.status !== 'down').length / points.length) * 1000) / 10
     : null
 
@@ -89,6 +99,13 @@ function envCardHtml(env, health, supabase) {
       .join('')}</ul>`
   } else if (health && health.detailHidden && status !== 'down') {
     checks = `<p class="lock-note">Per-check detail is locked. Add <span class="mono">CRON_SECRET</span> to <span class="mono">.env.local</span> (matching the Vercel value) to unlock it, then restart the portal.</p>`
+  } else if (status === 'protected') {
+    // Vercel SSO is doing its job — cert serves real PHI. Not an outage.
+    checks = `<p class="lock-note">${esc(health.note || 'Behind Vercel Deployment Protection.')}</p>`
+  } else if (status === 'not-probed') {
+    // Cert: Preview URLs are per-deployment, so there is nothing stable to probe.
+    // Say so in the card rather than leaving a blank panel that reads as broken.
+    checks = `<p class="lock-note">${esc(health.note || 'No fixed URL to probe.')} Set <span class="mono">CERT_APP_URL</span> to pin a Preview URL and enable HTTP checks.</p>`
   } else if (status === 'down' && env.key === 'local') {
     checks = `<p class="lock-note">Dev server isn't responding — start it with <span class="mono">npm run dev</span>.</p>`
   } else if (status === 'down') {
@@ -134,6 +151,8 @@ function envCardHtml(env, health, supabase) {
 
 function probeHtml(name, probe) {
   if (!probe) return ''
+  // ok === null: behind Deployment Protection — neither pass nor fail.
+  if (probe.ok === null) return `<span class="probe"><b>–</b> ${name}</span>`
   const ok = probe.ok
   return `<span class="probe ${ok ? 'ok' : 'bad'}"><b>${ok ? '✓' : '✗'}</b> ${name}${probe.ms != null ? ` ${probe.ms}ms` : ''}</span>`
 }
@@ -145,6 +164,13 @@ function buildPulseStrip(envKey) {
   if (!host) return
   const all = state.history[envKey] || []
   if (!all.length) {
+    // Unprobed environments are never sampled, so "collecting history" would be
+    // a promise the portal has no intention of keeping.
+    const health = state.overview?.environments.find(e => e.env === envKey)
+    if (['not-probed','protected'].includes(health?.status)) {
+      host.innerHTML = ''
+      return
+    }
     host.innerHTML = `<p class="muted" style="font-size:12px;margin:0">Collecting history — samples land every ${Math.round((state.meta?.pollIntervalMs || 300000) / 60000)} min while the portal runs.</p>`
     return
   }
@@ -367,6 +393,70 @@ function renderCi() {
     </div>`
 }
 
+function renderCert() {
+  const panel = $('#cert-panel')
+  const c = state.cert
+  if (!c) return
+
+  if (c.error) {
+    // Most often the free-tier project auto-paused after a week idle.
+    panel.innerHTML = `<p class="muted empty">${esc(c.error)}</p>`
+    return
+  }
+
+  const age = c.ageHours == null
+    ? '—'
+    : c.ageHours < 24
+      ? `${c.ageHours.toFixed(1)}h ago`
+      : `${(c.ageHours / 24).toFixed(1)} days ago`
+
+  const counts = c.counts || {}
+  const failing = c.checks.filter(x => x.ok === false).length
+
+  panel.innerHTML = `
+    <div class="ci-grid">
+      <div class="deploy-line">
+        <span class="label">cert · ${esc(c.ref)}</span>
+        <span class="ci-conclusion ${failing ? 'ci-failure' : 'ci-success'}">
+          ${failing ? `${failing} failing` : 'healthy'}
+        </span>
+        <span class="muted">snapshot ${esc(c.snapshot || '—')} · refreshed ${esc(age)}</span>
+        ${c.overlay
+          ? `<span class="ci-conclusion ci-pending">overlay: ${esc(c.overlay)}</span>`
+          : ''}
+        ${c.prewipeOverlay
+          ? `<span class="ci-conclusion ci-pending">pre-wipe data</span>`
+          : ''}
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data">
+          <thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead>
+          <tbody>
+            ${c.checks.map(x => {
+              const cls = x.ok === false ? 'ci-failure' : x.ok === null ? 'ci-neutral' : 'ci-success'
+              const label = x.ok === false ? 'fail' : x.ok === null ? 'unknown' : 'pass'
+              return `<tr>
+                <td>${esc(x.name)}</td>
+                <td><span class="ci-conclusion ${cls}">${label}</span></td>
+                <td class="muted">${esc(x.detail || '')}</td>
+              </tr>`
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deploy-line">
+        <span class="muted mono">
+          ${['clients', 'sessions', 'invoices', 'auth_users']
+            .map(k => `${k} ${counts[k] ?? '—'}`)
+            .join(' · ')}
+          ${counts.service_rates != null ? ` · service_rates ${counts.service_rates}` : ''}
+        </span>
+      </div>
+    </div>`
+}
+
 // ---- Refresh loops ----
 
 async function refreshOverview() {
@@ -389,14 +479,17 @@ async function refreshErrors() {
 }
 
 async function refreshExternal() {
-  const [supabase, ci] = await Promise.all([
+  const [supabase, ci, cert] = await Promise.all([
     fetchJson('/api/supabase').catch(() => null),
     fetchJson('/api/ci').catch(() => null),
+    fetchJson('/api/cert').catch(() => null),
   ])
   if (supabase) state.supabase = supabase
   if (ci) state.ci = ci
+  if (cert) state.cert = cert
   renderEnvCards()
   renderCi()
+  renderCert()
 }
 
 async function init() {
