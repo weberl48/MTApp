@@ -77,7 +77,8 @@ export function baseSeedSql(password) {
       (u) => `(
       '00000000-0000-0000-0000-000000000000', ${q(u.id)}, 'authenticated', 'authenticated',
       ${q(u.email)}, crypt(${q(password)}, gen_salt('bf')), now(), now(), now(),
-      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb)`
+      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
+      '', '', '', '')`
     )
     .join(',\n')
 
@@ -111,12 +112,23 @@ insert into organizations (id, name, slug, settings, timezone, currency)
 values (${q(IDS.org)}, 'May Creative Arts (LOCAL)', 'mca-local', '${JSON.stringify(SETTINGS)}'::jsonb, 'America/New_York', 'USD')
 on conflict (id) do update set settings = excluded.settings, name = excluded.name;
 
+-- confirmation_token / recovery_token / email_change_token_new / email_change have
+-- NO column default and MUST be '' rather than NULL. GoTrue scans them into Go
+-- strings, so a NULL makes every sign-in fail with HTTP 500 "Database error
+-- querying schema" — which reads like a schema problem, not a seeding one. The
+-- three other token columns already default to '' and need nothing.
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
+  email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data,
+  confirmation_token, recovery_token, email_change_token_new, email_change)
 values
 ${authRows}
-on conflict (id) do update set encrypted_password = excluded.encrypted_password;
+on conflict (id) do update set
+  encrypted_password = excluded.encrypted_password,
+  confirmation_token = excluded.confirmation_token,
+  recovery_token = excluded.recovery_token,
+  email_change_token_new = excluded.email_change_token_new,
+  email_change = excluded.email_change;
 
 insert into public.users (id, email, name, role, organization_id)
 values
