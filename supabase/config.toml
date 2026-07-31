@@ -68,7 +68,10 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
-enabled = true
+# Disabled for the same reason migrations are: supabase/seed.sql is a legacy file
+# written against an older schema. The local stack is populated by
+# scripts/local-env/base-seed.mjs plus scripts/dev-seed instead.
+enabled = false
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]
