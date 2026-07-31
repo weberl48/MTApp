@@ -11,6 +11,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "local:bootstrap": "node scripts/local-env/bootstrap.mjs",
+    "local:seed": "node scripts/dev-seed/apply.mjs",
+    "local:reset": "node scripts/local-env/bootstrap.mjs && node scripts/dev-seed/apply.mjs",
     "portal": "node tools/dev-portal/server.mjs",
     "health": "npx tsx scripts/health-check.ts",
     "health:prod": "npx tsx scripts/health-check.ts https://your-production-url.vercel.app"
