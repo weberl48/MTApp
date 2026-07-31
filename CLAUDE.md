@@ -101,7 +101,9 @@ Core tables with RLS policies:
 
 Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND** (SQL editor or Management API query endpoint) — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
 
-**Two Supabase projects since 2026-07-29**: production `ysmwowzxkgisshaormmf` and dev/sandbox `MCA-Dev` `gzrukevymmguqxuoynqk` (local `.env.local` and Vercel Preview/Development point at dev; Vercel Production points at prod; the two use DIFFERENT `ENCRYPTION_KEY`s). **Apply migrations to the dev ref first, verify, then prod.** The dev DB was cloned from the live prod schema (pg_dump) with seeded fake data (`dev-owner@maycreativearts.test` / `dev-contractor@maycreativearts.test`, password in `.env.local` `TEST_USER_PASSWORD`; org `require_mfa` off so e2e runs). Free-tier dev project auto-pauses after ~1 week idle — unpause via dashboard or Management API.
+**Two Supabase projects**: production `ysmwowzxkgisshaormmf` and **cert** `gzrukevymmguqxuoynqk` (formerly MCA-Dev). Local `.env.local` and Vercel Preview/Development point at cert; Vercel Production points at prod. **Apply migrations to cert first, verify, then prod.** Free-tier cert auto-pauses after ~1 week idle — unpause via dashboard or Management API.
+
+**Cert holds a full copy of production data, including decryptable PHI** (2026-07-30). It uses **prod's `ENCRYPTION_KEY` verbatim** — a different key fails *silently* (`decryptField` swallows it) and then `updateClient` double-encrypts on save. Recipient email columns are rewritten to `@cert.mca.invalid`, and Preview has no `RESEND_API_KEY`, so cert cannot mail real clients. `require_mfa` stays on. Rebuild or refresh it with `scripts/cert-refresh/` — see that README before touching cert; the schema comes from `pg_dump` against live prod because **the repo cannot rebuild prod's schema** (`admin_work` exists in prod with no `CREATE TABLE` anywhere here). The old `dev-owner@…test` / `dev-contractor@…test` sandbox accounts no longer exist; testers are listed in `CERT_TESTERS`.
 
 Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
@@ -400,9 +402,11 @@ The root layout uses `next-themes` (`ThemeProvider` with `attribute="class"`) su
 | `semgrep.yml` | Push/PR + weekly | Semgrep SAST (JS/TS/React/Next.js/OWASP rules) |
 | `claude.yml` | `@claude` mention | Claude Code GitHub Action for issue/PR assistance |
 
-CI uses Node 20.
+CI uses Node 24.
 
-**Known issue:** `deploy.yml`'s PR **preview** deploy step fails with "prebuilt environment mismatch" (it runs `vercel build` for the production target, then `vercel deploy --prebuilt` for the preview target). Production deploys (push to `main`) succeed, and Vercel's native GitHub integration deploys regardless — so a red `build-and-deploy` check on a PR is non-blocking and expected until the workflow is fixed (use `--prebuilt --prod` or drop `--prod` from the preview build).
+**Preview deploys target cert.** `deploy.yml` runs `vercel pull --environment=preview` on PRs and matches build/deploy to the same target, so a PR's Preview URL uses the **Preview**-scoped env vars — which point at the cert Supabase project. That makes every PR testable against prod-shaped data. (The old "prebuilt environment mismatch" known-issue is fixed; pull, build and deploy now all match the event.)
+
+Vercel crons only run against the Production deployment, so the four jobs in `vercel.json` never fire on a Preview/cert deploy. To exercise one against cert, call the route directly with cert's `CRON_SECRET`.
 
 ## Development Principles
 
