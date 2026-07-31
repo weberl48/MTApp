@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Organization, User, UserRole, OrganizationSettings, FeatureFlags } from '@/types/database'
 import { can, type Permission } from '@/lib/auth/permissions'
 import { mergeOrganizationSettings } from '@/lib/organization/settings'
+import { updateOrganizationSettings } from '@/app/actions/organization'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
 
@@ -198,19 +199,16 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const updateSettings = useCallback(async (newSettings: OrganizationSettings) => {
     if (!organization) return
 
-    const supabase = createClient()
+    // Goes through a server action, not the browser client: `organizations` RLS is
+    // owner-only, and the action decides which sections a non-owner may actually move.
+    const result = await updateOrganizationSettings(organization.id, newSettings)
 
-    const { error: updateError } = await supabase
-      .from('organizations')
-      .update({ settings: newSettings })
-      .eq('id', organization.id)
-
-    if (updateError) {
-      throw new Error('Failed to update settings')
+    if (!result.success) {
+      throw new Error(result.error)
     }
 
-    // Update local state
-    setOrganization(prev => prev ? { ...prev, settings: newSettings } : null)
+    // Mirror what was actually persisted — a non-owner's denied sections come back unchanged.
+    setOrganization(prev => prev ? { ...prev, settings: result.settings } : null)
   }, [organization])
 
   useEffect(() => {

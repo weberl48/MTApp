@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrganization } from '@/contexts/organization-context'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingUp, Calendar, BarChart3 } from 'lucide-react'
@@ -15,10 +16,16 @@ interface MonthlyStats {
 }
 
 export function AnalyticsSummary() {
+  // Revenue and MCA earnings belong to the owner-only Analytics page; this strip
+  // is the same headline, so it takes the same permission.
+  const { can } = useOrganization()
+  const canViewAnalytics = can('analytics:view')
   const [stats, setStats] = useState<MonthlyStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(canViewAnalytics)
 
   useEffect(() => {
+    if (!canViewAnalytics) return
+
     async function load() {
       const supabase = createClient()
 
@@ -54,9 +61,9 @@ export function AnalyticsSummary() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [canViewAnalytics])
 
-  if (loading) return null
+  if (!canViewAnalytics || loading) return null
 
   return (
     <Card>

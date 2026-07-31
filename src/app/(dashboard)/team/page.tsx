@@ -52,6 +52,8 @@ export default async function TeamPage() {
 
   const canManage = can(currentUserRole as UserRole, 'team:manage')
   const canInvite = can(currentUserRole as UserRole, 'team:invite')
+  // Admins reach this page via team:view but must not see contractor pay rates.
+  const canViewRates = can(currentUserRole as UserRole, 'team:view-rates')
 
   // Fetch all users with their session and invoice stats
   const { data: users, error: usersError } = await supabase
@@ -296,18 +298,22 @@ export default async function TeamPage() {
               )
             }
             ratesContent={
-              users?.[0]?.organization_id ? (
-                <div data-tour="pay-rate-matrix">
-                  <PayRateMatrix
-                    organizationId={users[0].organization_id}
-                    canEdit={canManage}
-                  />
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No team members found
-                </div>
-              )
+              canViewRates
+                ? users?.[0]?.organization_id
+                  ? (
+                    <div data-tour="pay-rate-matrix">
+                      <PayRateMatrix
+                        organizationId={users[0].organization_id}
+                        canEdit={canManage}
+                      />
+                    </div>
+                  )
+                  : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      No team members found
+                    </div>
+                  )
+                : undefined
             }
           />
         </CardContent>

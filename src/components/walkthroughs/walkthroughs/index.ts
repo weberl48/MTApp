@@ -266,7 +266,8 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
   id: 'configure-services',
   name: 'Configure Services',
   description: 'Learn how to set up service types and pricing',
-  audience: 'admin',
+  // Owner-only: the Services tab it tours carries contractor pay config.
+  audience: 'owner',
   steps: [
     {
       title: 'Go to Settings',
@@ -423,7 +424,8 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   id: 'edit-service-type',
   name: 'Edit a Service Type',
   description: 'Learn how to customize service type pricing, pay, and special behaviors',
-  audience: 'admin',
+  // Owner-only: the Services tab it tours carries contractor pay config.
+  audience: 'owner',
   steps: [
     {
       title: 'Go to Settings',

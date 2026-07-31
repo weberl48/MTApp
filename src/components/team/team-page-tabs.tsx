@@ -6,10 +6,19 @@ import { Users, DollarSign } from 'lucide-react'
 
 interface TeamPageTabsProps {
   overviewContent: ReactNode
-  ratesContent: ReactNode
+  /**
+   * Pay Rate Matrix. Omitted for roles without `team:view-rates` (admins) —
+   * absent rather than disabled, so a missing prop fails closed.
+   */
+  ratesContent?: ReactNode
 }
 
 export function TeamPageTabs({ overviewContent, ratesContent }: TeamPageTabsProps) {
+  // Nothing to switch between once Rates is hidden — drop the tab strip.
+  if (!ratesContent) {
+    return <>{overviewContent}</>
+  }
+
   return (
     <Tabs defaultValue="overview">
       <TabsList className="mb-4">

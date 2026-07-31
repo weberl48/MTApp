@@ -218,6 +218,10 @@ export default function TeamMemberPage() {
   // via team:view) must not see the role editor — it includes an "Owner" option.
   const canManageTeam = can(currentUserRole as UserRole, 'team:manage')
 
+  // Same gate as the Team page's Rates tab — admins never see pay rates.
+  const canViewRates =
+    member.role === 'contractor' && can(currentUserRole as UserRole, 'team:view-rates')
+
   // Calculate stats
   const totalSessions = sessions.length
   const totalEarnings = invoices.reduce((sum, inv) => sum + Number(inv.contractor_pay), 0)
@@ -380,7 +384,7 @@ export default function TeamMemberPage() {
             <TabsList className="mb-4">
               <TabsTrigger value="sessions">Sessions ({totalSessions})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices.length})</TabsTrigger>
-              {member.role === 'contractor' && ['owner', 'developer'].includes(currentUserRole) && (
+              {canViewRates && (
                 <TabsTrigger value="rates" className="flex items-center gap-1">
                   <Settings2 className="w-4 h-4" />
                   Rates
@@ -490,7 +494,7 @@ export default function TeamMemberPage() {
               )}
             </TabsContent>
 
-            {member.role === 'contractor' && ['owner', 'developer'].includes(currentUserRole) && (
+            {canViewRates && (
               <TabsContent value="rates">
                 <ContractorRatesForm
                   contractorId={member.id}

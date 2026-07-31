@@ -5,6 +5,7 @@ import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { logger } from '@/lib/logger'
+import { getFromAddress, getReplyTo } from '@/lib/email'
 import { resolveSquareWebhookStatus } from '@/lib/square/webhook-status'
 
 // Types for Supabase join results
@@ -101,9 +102,24 @@ async function sendPaymentNotification(squareInvoiceId: string) {
 
     // Send notification email
     await getResend().emails.send({
-      from: `May Creative Arts <noreply@${process.env.EMAIL_FROM_DOMAIN || 'rattatata.xyz'}>`,
+      from: getFromAddress(),
       to: [owner.email],
+      replyTo: getReplyTo(),
       subject: `Payment Received - ${formatCurrency(typedInvoice.amount)}`,
+      text: [
+        'Payment received',
+        '',
+        'A Square invoice has been paid:',
+        '',
+        `Client: ${clientName || 'Unknown'}`,
+        `Service: ${serviceTypeName || 'Unknown'}`,
+        `Amount: ${formatCurrency(typedInvoice.amount)}`,
+        ...(session?.date
+          ? [`Session Date: ${parseLocalDate(session.date).toLocaleDateString()}`]
+          : []),
+        '',
+        'This is an automated notification from your MCA Manager.',
+      ].join('\n'),
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #059669;">Payment Received!</h2>

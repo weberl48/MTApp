@@ -13,6 +13,7 @@ export type Permission =
   | 'team:view'
   | 'team:manage'
   | 'team:invite'
+  | 'team:view-rates'
   | 'client:manage'
   | 'settings:edit'
   | 'analytics:view'
@@ -31,6 +32,9 @@ const ROLE_PERMISSIONS: Record<Permission, UserRole[]> = {
   'team:view':              ['developer', 'owner', 'admin'],
   'team:manage':            ['developer', 'owner'],
   'team:invite':            ['developer', 'owner', 'admin'],
+  // Contractor pay rates are owner business — admins manage sessions and
+  // invoices without seeing what each contractor is paid.
+  'team:view-rates':        ['developer', 'owner'],
   'client:manage':          ['developer', 'owner', 'admin'],
   'settings:edit':          ['developer', 'owner'],
   'analytics:view':         ['developer', 'owner'],

@@ -280,7 +280,6 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                 </p>
               )}
             </div>
-            </div>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="squareFee"
@@ -297,6 +296,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                   invoice before sending.
                 </p>
               </div>
+            </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>

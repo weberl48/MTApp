@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { sendInvoiceReminderEmail } from '@/lib/email'
+import { getFromAddress, sendInvoiceReminderEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import type { OrganizationSettings } from '@/types/database'
@@ -22,6 +22,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Bail BEFORE any claim_invoice_reminder_day call: the claims are one-shot,
+    // and sendInvoiceReminderEmail throws pre-send when EMAIL_FROM_DOMAIN is
+    // missing — a config outage would burn each invoice's only reminder without
+    // sending anything. Probing here leaves every claim unspent for the next run.
+    try {
+      getFromAddress()
+    } catch {
+      console.error('[MCA] Invoice reminder cron aborted: EMAIL_FROM_DOMAIN not configured')
+      return NextResponse.json({ error: 'Email sender not configured' }, { status: 500 })
+    }
+
     const db = createServiceClient()
     const today = new Date()
 

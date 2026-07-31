@@ -17,7 +17,7 @@ Service types define what your organization offers and how each service is price
 
 ### Where to Find It
 
-Navigate to **Settings > Business Rules > Services** tab.
+Navigate to **Settings > Business Rules > Services** tab. The Services tab is owner-only — it sets contractor pay, so admins do not see it. Admins still get the Invoices, Sessions, and Notifications tabs.
 
 ### Fields When Creating or Editing a Service Type
 
@@ -62,7 +62,7 @@ Service types are the single most powerful tool you have as an owner to customiz
 ### Getting There
 
 1. Go to **Settings** in the sidebar.
-2. Click the **Business Rules** tab, then the **Services** sub-tab.
+2. Click the **Business Rules** tab, then the **Services** sub-tab (owner-only — these fields set contractor pay).
 3. Click any existing service type to edit it, or click **Add Service Type** to create a new one.
 
 Changes you make to a service type only affect new sessions going forward. Existing sessions and invoices keep their original pricing.

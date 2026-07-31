@@ -17,9 +17,55 @@ function getResendClient(): Resend {
   return resend
 }
 
-function getFromAddress(name?: string): string {
-  const domain = process.env.EMAIL_FROM_DOMAIN || 'rattatata.xyz'
+/**
+ * Build the From header from the Resend-verified sending domain.
+ *
+ * This THROWS when EMAIL_FROM_DOMAIN is unset rather than falling back to a
+ * default domain. The previous `|| 'rattatata.xyz'` fallback pointed at a
+ * domain that was later deleted from Resend, so a missing env var silently
+ * turned every send into a 403 — for seven months — while /api/health kept
+ * reporting green (it only checks that RESEND_API_KEY exists). Failing loudly
+ * at send time surfaces the misconfiguration in the error feed immediately.
+ *
+ * Exported so the Square webhook and the reminder cron build From the same way
+ * — a second hardcoded fallback elsewhere is how the first one survived.
+ */
+export function getFromAddress(name?: string): string {
+  const domain = process.env.EMAIL_FROM_DOMAIN
+  if (!domain) {
+    throw new Error(
+      'EMAIL_FROM_DOMAIN is not set — refusing to send from an unverified domain. ' +
+        'Set it to the domain verified in Resend (Vercel env + redeploy).'
+    )
+  }
   return `${name || 'May Creative Arts'} <noreply@${domain}>`
+}
+
+/**
+ * Reply-To address. A From of `noreply@` with no reply path is a deliverability
+ * negative (mailbox providers weight replies as engagement) and a dead end for
+ * clients who just hit reply. Per-call `override` wins so paths that have the
+ * organization loaded can reply to that org; EMAIL_REPLY_TO is the global
+ * default, matching how EMAIL_FROM_DOMAIN is configured.
+ */
+export function getReplyTo(override?: string | null): string | undefined {
+  return override || process.env.EMAIL_REPLY_TO || undefined
+}
+
+/**
+ * Footer line about replying. Only promises a reply path when one actually
+ * resolved — with no Reply-To the From is `noreply@`, so "just reply" would
+ * send the recipient into a black hole.
+ */
+function replyFooterLine(replyToAddress?: string): string {
+  return replyToAddress
+    ? 'Questions? Just reply to this email and it will reach us.'
+    : 'This is an automated message.'
+}
+
+/** Collapse an HTML-ish string to plain text for the text/plain alternative. */
+function stripToText(value: string): string {
+  return value.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
 }
 
 interface SendInvoiceEmailParams {
@@ -33,6 +79,7 @@ interface SendInvoiceEmailParams {
   pdfBuffer?: Buffer
   footerText?: string
   paymentInstructions?: string
+  replyTo?: string | null
 }
 
 export async function sendInvoiceEmail({
@@ -46,6 +93,7 @@ export async function sendInvoiceEmail({
   pdfBuffer,
   footerText,
   paymentInstructions,
+  replyTo,
 }: SendInvoiceEmailParams) {
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -65,10 +113,41 @@ export async function sendInvoiceEmail({
       ]
     : []
 
+  const replyToAddress = getReplyTo(replyTo)
+
   const { data, error } = await getResendClient().emails.send({
     from: getFromAddress(),
     to: [to],
+    replyTo: replyToAddress,
     subject: `Invoice ${invoiceNumber} - May Creative Arts`,
+    text: [
+      `Invoice ${invoiceNumber} from May Creative Arts`,
+      '',
+      `Hello ${clientName},`,
+      '',
+      'Thank you for your recent session with May Creative Arts. Your invoice details are below.',
+      '',
+      `Invoice Number: ${invoiceNumber}`,
+      `Amount Due: ${formattedAmount}`,
+      `Service: ${serviceType}`,
+      `Session Date: ${formattedDate}`,
+      ...(formattedDueDate ? [`Due Date: ${formattedDueDate}`] : []),
+      '',
+      [
+        pdfBuffer ? 'A PDF copy of your invoice is attached.' : null,
+        replyToAddress
+          ? 'If you have any questions about this invoice, just reply to this email.'
+          : "If you have any questions about this invoice, please don't hesitate to reach out.",
+      ]
+        .filter(Boolean)
+        .join(' '),
+      ...(paymentInstructions ? ['', 'Payment Instructions:', paymentInstructions] : []),
+      '',
+      footerText || 'Thank you for choosing May Creative Arts!',
+      '',
+      '--',
+      'May Creative Arts | Music Therapy Services',
+    ].join('\n'),
     html: `
 <!DOCTYPE html>
 <html>
@@ -207,6 +286,7 @@ interface SendInvoiceReminderEmailParams {
   isOverdue: boolean
   paymentInstructions?: string
   footerText?: string
+  replyTo?: string | null
 }
 
 export async function sendInvoiceReminderEmail({
@@ -218,6 +298,7 @@ export async function sendInvoiceReminderEmail({
   isOverdue,
   paymentInstructions,
   footerText,
+  replyTo,
 }: SendInvoiceReminderEmailParams) {
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -235,10 +316,30 @@ export async function sendInvoiceReminderEmail({
     ? 'This invoice is past due. Please submit payment at your earliest convenience.'
     : `This is a friendly reminder that your invoice is due on <strong>${formattedDueDate}</strong>.`
 
+  const replyToAddress = getReplyTo(replyTo)
+
   const { data, error } = await getResendClient().emails.send({
     from: getFromAddress(),
     to: [to],
+    replyTo: replyToAddress,
     subject,
+    text: [
+      `${isOverdue ? 'Overdue' : 'Payment reminder'}: Invoice ${invoiceNumber} — May Creative Arts`,
+      '',
+      `Hello ${clientName},`,
+      '',
+      stripToText(urgencyText),
+      '',
+      `Invoice Number: ${invoiceNumber}`,
+      `Amount Due: ${formattedAmount}`,
+      `Due Date: ${formattedDueDate}`,
+      ...(paymentInstructions ? ['', 'Payment Instructions:', paymentInstructions] : []),
+      '',
+      footerText || 'Thank you for choosing May Creative Arts!',
+      '',
+      '--',
+      'May Creative Arts | Music Therapy Services',
+    ].join('\n'),
     html: `
 <!DOCTYPE html>
 <html>
@@ -353,6 +454,7 @@ interface SendMagicLinkEmailParams {
   clientName: string
   organizationName: string
   portalUrl: string
+  replyTo?: string | null
 }
 
 export async function sendMagicLinkEmail({
@@ -360,11 +462,31 @@ export async function sendMagicLinkEmail({
   clientName,
   organizationName,
   portalUrl,
+  replyTo,
 }: SendMagicLinkEmailParams) {
+  const replyToAddress = getReplyTo(replyTo)
+
   const { data, error } = await getResendClient().emails.send({
     from: getFromAddress(organizationName),
     to: [to],
+    replyTo: replyToAddress,
     subject: `Your Portal Access Link - ${organizationName}`,
+    text: [
+      `Your ${organizationName} client portal access link`,
+      '',
+      `Hello ${clientName},`,
+      '',
+      "Here's your secure link to access your client portal, where you can view your sessions, resources, and goals:",
+      '',
+      portalUrl,
+      '',
+      "Security note: this link is unique to you. Please don't share it with others. If it has expired, you can request a fresh link from the portal sign-in page.",
+      '',
+      "If you didn't request this link, you can safely ignore this email.",
+      '',
+      '--',
+      organizationName,
+    ].join('\n'),
     html: `
 <!DOCTYPE html>
 <html>
@@ -416,7 +538,7 @@ export async function sendMagicLinkEmail({
 
               <div style="background-color: #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
                 <p style="margin: 0; color: #92400e; font-size: 14px;">
-                  <strong>Security note:</strong> This link is unique to you. Please don't share it with others. The link will expire after 30 days of inactivity.
+                  <strong>Security note:</strong> This link is unique to you. Please don't share it with others. If it has expired, you can request a fresh link from the portal sign-in page.
                 </p>
               </div>
 
@@ -433,7 +555,7 @@ export async function sendMagicLinkEmail({
                 ${organizationName}
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
-                This is an automated message. Please do not reply directly to this email.
+                ${replyFooterLine(replyToAddress)}
               </p>
             </td>
           </tr>
@@ -464,6 +586,7 @@ interface SendSessionRequestStatusEmailParams {
   preferredTime?: string | null
   responseNotes?: string | null
   portalUrl: string
+  replyTo?: string | null
 }
 
 export async function sendSessionRequestStatusEmail({
@@ -475,6 +598,7 @@ export async function sendSessionRequestStatusEmail({
   preferredTime,
   responseNotes,
   portalUrl,
+  replyTo,
 }: SendSessionRequestStatusEmailParams) {
   // Use date-fns for consistent date/time formatting
   const formattedDate = format(parseLocalDate(preferredDate), 'EEEE, MMMM d, yyyy')
@@ -487,11 +611,30 @@ export async function sendSessionRequestStatusEmail({
   const statusBgColor = isApproved ? '#d1fae5' : '#fee2e2'
   const statusText = isApproved ? 'Approved' : 'Declined'
   const statusEmoji = isApproved ? '✓' : '✗'
+  const replyToAddress = getReplyTo(replyTo)
 
   const { data, error } = await getResendClient().emails.send({
     from: getFromAddress(organizationName),
     to: [to],
+    replyTo: replyToAddress,
     subject: `Session Request ${statusText} - ${organizationName}`,
+    text: [
+      `Your session request has been ${statusText.toLowerCase()}`,
+      '',
+      `Hello ${clientName},`,
+      '',
+      `Requested date & time: ${formattedDate}${formattedTime ? ` at ${formattedTime}` : ''}`,
+      ...(responseNotes ? ['', 'Message from your therapist:', responseNotes] : []),
+      '',
+      isApproved
+        ? 'Great news! Your session has been confirmed. You can view the details in your portal:'
+        : 'We were unable to accommodate this request. Please visit your portal to request a different time:',
+      '',
+      portalUrl,
+      '',
+      '--',
+      organizationName,
+    ].join('\n'),
     html: `
 <!DOCTYPE html>
 <html>
@@ -571,7 +714,7 @@ export async function sendSessionRequestStatusEmail({
                 ${organizationName}
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
-                This is an automated message. Please do not reply directly to this email.
+                ${replyFooterLine(replyToAddress)}
               </p>
             </td>
           </tr>
@@ -603,6 +746,7 @@ interface SendTeamInviteEmailParams {
   inviteUrl: string
   expiresAt: string
   invitedBy: string
+  replyTo?: string | null
 }
 
 export async function sendTeamInviteEmail({
@@ -613,14 +757,42 @@ export async function sendTeamInviteEmail({
   inviteUrl,
   expiresAt,
   invitedBy,
+  replyTo,
 }: SendTeamInviteEmailParams) {
   const formattedExpiry = format(new Date(expiresAt), 'MMMM d, yyyy')
   const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1)
+  const roleSummary =
+    role === 'owner'
+      ? 'Full access to manage the organization, team, and all settings.'
+      : role === 'admin'
+        ? 'Manage sessions, invoices, clients, and team members.'
+        : 'Log sessions and view your invoices and earnings.'
+  const replyToAddress = getReplyTo(replyTo)
 
   const { data, error } = await getResendClient().emails.send({
     from: getFromAddress(organizationName),
     to: [to],
+    replyTo: replyToAddress,
     subject: `You're invited to join ${organizationName}`,
+    text: [
+      `You're invited to join ${organizationName}`,
+      '',
+      `Hello${inviteeName ? ` ${inviteeName}` : ''},`,
+      '',
+      `${invitedBy} has invited you to join ${organizationName} as a ${roleDisplay}.`,
+      '',
+      `Your role: ${roleDisplay} — ${roleSummary}`,
+      '',
+      'Accept the invitation here:',
+      inviteUrl,
+      '',
+      `This invitation expires on ${formattedExpiry} and can only be used once.`,
+      '',
+      "If you didn't expect this invitation, you can safely ignore this email.",
+      '',
+      '--',
+      organizationName,
+    ].join('\n'),
     html: `
 <!DOCTYPE html>
 <html>
@@ -658,9 +830,7 @@ export async function sendTeamInviteEmail({
                   <td style="padding: 20px;">
                     <p style="margin: 0 0 8px; color: #0369a1; font-size: 14px; font-weight: 600;">Your Role: ${roleDisplay}</p>
                     <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
-                      ${role === 'owner' ? 'Full access to manage the organization, team, and all settings.' :
-                        role === 'admin' ? 'Manage sessions, invoices, clients, and team members.' :
-                        'Log sessions and view your invoices and earnings.'}
+                      ${roleSummary}
                     </p>
                   </td>
                 </tr>
@@ -703,7 +873,7 @@ export async function sendTeamInviteEmail({
                 ${organizationName}
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
-                This is an automated message. Please do not reply directly to this email.
+                ${replyFooterLine(replyToAddress)}
               </p>
             </td>
           </tr>

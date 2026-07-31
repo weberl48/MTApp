@@ -17,6 +17,7 @@ describe('can (permission check)', () => {
     'team:view',
     'team:manage',
     'team:invite',
+    'team:view-rates',
     'client:manage',
     'settings:edit',
     'analytics:view',
@@ -60,6 +61,7 @@ describe('can (permission check)', () => {
 
     const adminDenied: Permission[] = [
       'team:manage',
+      'team:view-rates',
       'settings:edit',
       'analytics:view',
       'payments:view',
@@ -114,6 +116,13 @@ describe('can (permission check)', () => {
       expect(can('owner', 'financial:view-details')).toBe(true)
       expect(can('admin', 'financial:view-details')).toBe(false)
       expect(can('contractor', 'financial:view-details')).toBe(false)
+    })
+
+    it('team:view-rates is restricted to developer and owner only', () => {
+      expect(can('developer', 'team:view-rates')).toBe(true)
+      expect(can('owner', 'team:view-rates')).toBe(true)
+      expect(can('admin', 'team:view-rates')).toBe(false)
+      expect(can('contractor', 'team:view-rates')).toBe(false)
     })
 
     it('team:invite includes admin but not contractor', () => {

@@ -8,7 +8,8 @@ const REQUIRED_VARS = [
 const RECOMMENDED_VARS = [
   'NEXT_PUBLIC_APP_URL',
   'RESEND_API_KEY',
-  'EMAIL_FROM_DOMAIN',
+  'EMAIL_FROM_DOMAIN', // getFromAddress() throws without it — every send fails
+  'EMAIL_REPLY_TO', // without it mail sends from noreply@ with no reply path
   'ANTHROPIC_API_KEY', // AI help assistant (feature hides itself when absent)
 ] as const
 
@@ -21,6 +22,16 @@ export function validateEnv() {
   const missing = REQUIRED_VARS.filter(v => !process.env[v])
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
+  }
+
+  // Email config is a pair: a Resend key without the verified sending domain
+  // means getFromAddress() throws on EVERY send while /api/health stays green
+  // (it only checks the key). Half-configured email fails the boot instead of
+  // failing at send time. No key at all stays a warning — email is optional.
+  if (process.env.RESEND_API_KEY && !process.env.EMAIL_FROM_DOMAIN) {
+    throw new Error(
+      'EMAIL_FROM_DOMAIN is required when RESEND_API_KEY is set — without it every email send throws at getFromAddress()'
+    )
   }
 
   const missingRecommended = RECOMMENDED_VARS.filter(v => !process.env[v])
