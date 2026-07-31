@@ -129,7 +129,7 @@ If you would prefer invoices to be sent immediately when sessions are approved, 
     walkthrough: 'scholarship-billing',
     adminOnly: true,
     relatedArticles: ['generating-invoices', 'automation-settings', 'configuring-services', 'adding-a-client', 'billing-and-pay-rules'],
-    keywords: ['scholarship', 'monthly batch', 'batch invoice', 'flat rate', 'classroom'],
+    keywords: ['scholarship', 'monthly batch', 'batch invoice', 'flat rate', 'classroom', 'location', 'site'],
     content: `
 ## Scholarship Billing
 
@@ -175,17 +175,17 @@ Contractors are paid based on normal pricing rules, not the scholarship rate. If
 
 If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month (1-28) on which invoices are automatically created, covering the previous month's unbilled sessions. Generated invoices start in Pending status so you can review them before sending.
 
-### Classroom Tracking
+### Session Location Tracking
 
-For scholarship group sessions, contractors select a **Classroom** from a dropdown when logging the session. This helps track which room or location the group met in. The classroom list is configured by the owner under **Settings > Business Rules > Sessions > Classrooms**.
+Contractors record where a session happened whenever the billed client has location settings configured — a dropdown, a free-text box, or a dropdown with an **Other…** escape hatch. Configure this per client under **Settings > Business Rules > Sessions > Per-Client Location Settings**. This applies to any payment type, not just scholarship groups.
 
-**Per-agency lists:** each billed client/agency (e.g., a school district, day hab, or group home) can have its **own** classroom/program list — configure these under **Settings > Business Rules > Sessions > Per-Agency Classroom / Program Lists**. When a session is billed to an agency with its own list, the session form shows that agency's options — for any payment type, not just scholarship groups.
+**Showing it on invoices:** turn on **Show Session Location on Invoices** under **Settings > Business Rules > Invoices**. When enabled, the location appears beneath each service line on the invoice PDF — on both single-session invoices and monthly statements — and is appended to the Square invoice description. It is off by default, so invoices are unchanged until you enable it.
 
 ### Setting Up Scholarship Billing
 
 1. **Configure a scholarship service type** - Go to Settings > Services, create or edit a service type, and check "Scholarship Service". Set the flat scholarship rate.
 2. **Set client payment method** - Go to Clients, edit the client, and set their payment method to "Scholarship".
-3. **(Optional) Configure classrooms** - Go to Settings > Business Rules > Sessions and add classroom names so contractors can select a room when logging scholarship group sessions.
+3. **(Optional) Configure session locations** - Go to Settings > Business Rules > Sessions and set up per-client location settings so contractors record where each session happened.
 4. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
 5. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
     `,

@@ -8,7 +8,7 @@ export const SESSIONS_ARTICLES: HelpArticle[] = [
     description: 'How to log a therapy session, including the pricing preview and submission workflow.',
     walkthrough: 'log-session',
     relatedArticles: ['group-sessions', 'approving-sessions'],
-    keywords: ['log', 'new session', 'classroom', 'notes', 'duration', 'quick log'],
+    keywords: ['log', 'new session', 'classroom', 'location', 'site', 'room', 'where', 'notes', 'duration', 'quick log'],
     content: `
 ## Logging a Session
 
@@ -23,7 +23,7 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
    - **Duration** - Select the session length. The default options are 30, 45, 60, or 90 minutes (your organization can customize this list).
    - **Service Type** - The type of therapy provided. Only service types you are authorized for will appear.
    - **Client(s)** - Select the client. For group sessions, you can select multiple clients.
-   - **Classroom / Program** - Appears when the billed client/agency has a classroom or program list configured (e.g., schools, day habs, group homes), or for scholarship group sessions using the general classroom list. Pick where the session took place.
+   - **Session location** - Appears when the billed client has location settings configured (e.g., schools, day habs, group homes, or self-directed clients). The owner names this field, so it may read "Classroom", "Site", or "Location". Depending on how the client is set up it is a dropdown, a free-text box, or a dropdown with an **Other…** choice that lets you type somewhere that isn't on the list. It may be required.
    - **Internal Notes** - Notes for your team. These are encrypted and never visible to clients.
    - **Client Notes** - Notes that may be shared with the client through the portal.
 3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
@@ -96,9 +96,17 @@ However, the owner can also set up a **headcount-based pay matrix** for any grou
 
 If a headcount/duration combination is not defined in the matrix, the system falls back to the normal pay schedule or formula. This feature is configured in **Settings > Business Rules > Services** when editing a group service type.
 
-### Classroom Selection
+### Session Location
 
-For scholarship group sessions, a **Classroom** dropdown appears on the session form. This lets contractors indicate which classroom the session took place in. The list of classrooms is configurable by the owner in **Settings > Business Rules > Sessions**. The classroom is recorded on the session and included in data exports.
+When the billed client has location settings configured, a location field appears on the session form. The owner controls its label ("Classroom", "Site", "Location"), the choices, and whether it is required — see **Settings > Business Rules > Sessions > Per-Client Location Settings**.
+
+The field takes one of three shapes:
+
+- **Dropdown** — pick from a fixed list. Best for schools and facilities with stable room names.
+- **Dropdown with "Other…"** — pick from the list, or choose **Other…** and type somewhere that isn't on it.
+- **Free text** — just type where the session happened. Best for self-directed clients whose location changes every session.
+
+Scholarship group sessions fall back to the general classroom list when their billed client has no settings of their own. The location is recorded on the session, included in data exports, and — if the owner enables it — printed on the client's invoice.
 
 ### Separate Invoices
 

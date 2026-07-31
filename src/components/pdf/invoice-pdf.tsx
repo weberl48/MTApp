@@ -210,6 +210,7 @@ interface InvoiceLineItem {
   amount: number
   service_type_name: string | null
   contractor_name: string | null
+  classroom: string | null
 }
 
 interface InvoiceData {
@@ -241,6 +242,9 @@ interface InvoiceData {
     contractor: {
       name: string
     } | null
+    /** Session location — already gated by `invoice.show_session_location`
+        in fetchInvoicePdfData, so rendering it here is unconditional. */
+    classroom?: string | null
   } | null
   items?: InvoiceLineItem[]
 }
@@ -362,6 +366,11 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
                         Duration: {item.duration_minutes} minutes
                       </Text>
                     )}
+                    {item.classroom && (
+                      <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                        Location: {item.classroom}
+                      </Text>
+                    )}
                   </View>
                   <Text style={styles.col2}>{parseLocalDate(item.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
                   <Text style={[styles.col3, { fontWeight: 'bold' }]}>
@@ -383,6 +392,11 @@ export function InvoicePDF({ invoice, footerText, paymentInstructions }: Invoice
                 {invoice.session.duration_minutes && (
                   <Text style={{ fontSize: 9, color: '#6b7280' }}>
                     Duration: {invoice.session.duration_minutes} minutes
+                  </Text>
+                )}
+                {invoice.session.classroom && (
+                  <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                    Location: {invoice.session.classroom}
                   </Text>
                 )}
               </View>
