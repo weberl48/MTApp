@@ -24,6 +24,8 @@ export interface InvoicePdfLineItem {
   amount: number
   service_type_name: string | null
   contractor_name: string | null
+  /** Session location. Null unless `invoice.show_session_location` is enabled. */
+  classroom: string | null
 }
 
 export interface InvoicePdfSession {
@@ -35,6 +37,8 @@ export interface InvoicePdfSession {
   contractor_id: string | null
   contractor: { id: string; name: string } | null
   service_type: { name: string } | null
+  /** Session location. Null unless `invoice.show_session_location` is enabled. */
+  classroom: string | null
 }
 
 export interface InvoicePdfInvoice {
@@ -78,6 +82,7 @@ export async function fetchInvoicePdfData(
         date,
         duration_minutes,
         client_notes,
+        classroom,
         contractor_id,
         contractor:users(id, name),
         service_type:service_types(name)
@@ -98,7 +103,7 @@ export async function fetchInvoicePdfData(
   if (invoice.invoice_type === 'batch') {
     const { data: itemsData } = await supabase
       .from('invoice_items')
-      .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name')
+      .select('description, session_date, duration_minutes, amount, service_type_name, contractor_name, classroom')
       .eq('invoice_id', invoiceId)
       .order('session_date', { ascending: true })
 
@@ -112,6 +117,15 @@ export async function fetchInvoicePdfData(
     .single()
 
   const settings = org?.settings as OrganizationSettings | undefined
+
+  // The session location is client-identifying context, so it only crosses onto a
+  // client-facing invoice when the owner has explicitly opted in. Blanking it here
+  // — rather than in the template — keeps every consumer (PDF download, preview,
+  // emailed attachment) honouring the toggle from one place.
+  if (settings?.invoice?.show_session_location !== true) {
+    if (invoice.session) invoice.session.classroom = null
+    items = items?.map((i) => ({ ...i, classroom: null }))
+  }
 
   return {
     invoice: { ...invoice, items } as InvoicePdfInvoice,

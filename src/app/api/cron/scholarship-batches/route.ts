@@ -32,7 +32,7 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     .select(`
       client_id,
       session:sessions!inner(
-        id, date, duration_minutes, status, group_headcount, contractor_id,
+        id, date, duration_minutes, status, group_headcount, contractor_id, classroom,
         service_type:service_types(*)
       )
     `)
@@ -74,6 +74,7 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     duration_minutes: number
     status: string
     group_headcount: number | null
+    classroom: string | null
     contractor_id: string | null
     service_type: ServiceType | null
   }
@@ -85,6 +86,7 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
     date: string
     durationMinutes: number
     groupHeadcount: number | null
+    classroom: string | null
     contractorId: string | null
     serviceType: ServiceType
   }[] = []
@@ -102,6 +104,7 @@ async function fetchOrgUnbilledScholarship(supabase: ReturnType<typeof createSer
       date: session.date,
       durationMinutes: session.duration_minutes,
       groupHeadcount: session.group_headcount,
+      classroom: session.classroom ?? null,
       contractorId: session.contractor_id,
       serviceType: session.service_type,
     })
@@ -230,6 +233,7 @@ export async function GET(request: NextRequest) {
             session_date: d.session.date,
             duration_minutes: d.session.durationMinutes,
             service_type_name: d.session.serviceType.name,
+            classroom: d.session.classroom ?? null,
             amount: round(d.pricing.totalAmount),
             mca_cut: round(d.pricing.mcaCut),
             contractor_pay: round(d.pricing.contractorPay),
