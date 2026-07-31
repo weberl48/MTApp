@@ -19,6 +19,12 @@ export const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || ''
  * lets this suite run at all without TEST_USER_PASSWORD.
  */
 export async function login(page: Page) {
+  // Prod runs authenticate ONCE up front and share the result via storageState:
+  // the prod owner/developer accounts enforce TOTP, and prod's auth routes are
+  // rate limited to 5 requests/60s per IP, so a per-test login would both stall
+  // at /mfa-verify and trip the limiter partway through the suite.
+  if (process.env.E2E_REUSE_AUTH) return
+
   if (!TEST_PASSWORD) {
     test.skip()
     return
