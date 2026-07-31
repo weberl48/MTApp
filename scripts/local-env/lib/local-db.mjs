@@ -6,18 +6,47 @@
  * CLOUD projects, so its absence means a bug here cannot reach cert or prod.
  */
 import { execFileSync } from 'node:child_process'
+import { writeFileSync, rmSync, mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { LOCAL, PATHS, MARKER_SCHEMA, FORBIDDEN_REFS } from '../config.mjs'
 
-/** Run SQL against the local DB, returning stdout. Throws on any SQL error. */
+/** psql must be told the client encoding; Windows otherwise assumes the ANSI code page. */
+const PG_ENV = { ...process.env, PGCLIENTENCODING: 'UTF8' }
+
+/**
+ * Run SQL against the local DB, returning stdout. Throws on any SQL error.
+ *
+ * Inline SQL is written to a UTF-8 temp file and run with -f rather than passed
+ * via -c: an argument travels through the Windows command line, which re-encodes
+ * it in the ANSI code page and corrupts any non-ASCII character. The dev-seed
+ * dataset contains em dashes, so -c fails with
+ * `invalid byte sequence for encoding "UTF8": 0x97`.
+ */
 export function sql(query, { file = false } = {}) {
   assertLocalConnectionString(LOCAL.db)
-  const args = ['-v', 'ON_ERROR_STOP=1', '--quiet', '--no-psqlrc']
-  args.push(file ? '-f' : '-c', query)
-  args.push(LOCAL.db)
-  return execFileSync(`${PATHS.pgBin}/psql.exe`, args, {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    timeout: 600_000,
-  }).toString()
+  const base = ['-v', 'ON_ERROR_STOP=1', '--quiet', '--no-psqlrc']
+
+  if (file) {
+    return execFileSync(`${PATHS.pgBin}/psql.exe`, [...base, '-f', query, LOCAL.db], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: PG_ENV,
+      timeout: 600_000,
+    }).toString()
+  }
+
+  const dir = mkdtempSync(join(tmpdir(), 'mca-local-'))
+  const path = join(dir, 'q.sql')
+  try {
+    writeFileSync(path, query, 'utf8')
+    return execFileSync(`${PATHS.pgBin}/psql.exe`, [...base, '-f', path, LOCAL.db], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: PG_ENV,
+      timeout: 600_000,
+    }).toString()
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 }
 
 /** Scalar query helper — returns a single trimmed value. */
@@ -26,7 +55,7 @@ export function scalar(query) {
   return execFileSync(
     `${PATHS.pgBin}/psql.exe`,
     ['-t', '-A', '-v', 'ON_ERROR_STOP=1', '--no-psqlrc', '-c', query, LOCAL.db],
-    { stdio: ['ignore', 'pipe', 'pipe'], timeout: 120_000 }
+    { stdio: ['ignore', 'pipe', 'pipe'], env: PG_ENV, timeout: 120_000 }
   )
     .toString()
     .trim()
