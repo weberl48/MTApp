@@ -47,10 +47,25 @@ The portal also runs as a Docker container on the Home Assistant Pi (`speakeasy`
 
 ```bash
 ssh speakeasy "mkdir -p /root/mca-portal/src /root/mca-portal/data"
-scp -r server.mjs config.mjs Dockerfile lib public speakeasy:/root/mca-portal/src/
+scp -r server.mjs config.mjs Dockerfile .dockerignore lib public speakeasy:/root/mca-portal/src/
 # /root/mca-portal/.env (chmod 600): SUPABASE_ACCESS_TOKEN, CRON_SECRET, LOCAL_APP_URL=http://<pc-ip>:3000
 ssh speakeasy "cd /root/mca-portal/src && docker build -t mca-portal ."
-ssh speakeasy "docker rm -f mca-portal 2>/dev/null; docker run -d --name mca-portal --restart unless-stopped -p 4321:4321 --env-file /root/mca-portal/.env -v /root/mca-portal/data:/app/data mca-portal"
+# One-time, ONLY when upgrading a container that previously ran as root: the
+# existing volume's files are root-owned and the image no longer runs as root.
+ssh speakeasy "docker run --rm -v mca-portal-data:/data alpine chown -R 1000:1000 /data"
+ssh speakeasy "docker rm -f mca-portal 2>/dev/null; docker run -d --name mca-portal --restart unless-stopped -p 4321:4321 --env-file /root/mca-portal/.env -v mca-portal-data:/app/data mca-portal"
 ```
+
+**The container runs as `node` (uid 1000), not root.** Docker seeds a *fresh*
+named volume from the image — ownership included — so a clean deploy needs
+nothing extra. An *existing* volume keeps its old root-owned permissions, hence
+the one-time `chown` above. Skip it on an upgrade and the portal still serves,
+but every write fails with `[portal] failed to persist …` on the container's
+stdout and history/errors silently stop surviving restarts. Verify after any
+redeploy: `ssh speakeasy "docker exec mca-portal sh -c 'id -u && touch /app/data/.wtest && rm /app/data/.wtest && echo writable'"`.
+
+**Use the named volume `mca-portal-data`, not a bind mount.** The SSH addon's `/root` is not the host's `/root`, and Docker resolves bind mounts against the host — where the path does not exist and `/` is read-only. The old `-v /root/mca-portal/data:/app/data` silently never worked (the directory stayed empty and history/errors were lost on every restart); with the named volume they actually persist.
+
+**Linking from Home Assistant:** see the header of `ha/mca_portal.yaml`. Do not add `panel_iframe` — it has been removed from HA core, and a failed integration aborts the whole package, taking the prod health sensor and phone alerts with it.
 
 Pi-specific env vars: `LOCAL_APP_URL` points the "local" card at the PC's dev server; secrets come from the env file (real env vars override `.env.local`). The CI panel needs `gh` and stays "unavailable" in the container. To mirror dev errors to the Pi, set `DEV_PORTAL_URL=http://localhost:4321,http://192.168.1.160:4321` in the app's `.env.local` (comma-separated fan-out).
