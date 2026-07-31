@@ -27,6 +27,14 @@ export const SYNONYMS: Record<string, string[]> = {
   reminder: ['reminders'], overdue: ['due'],
   login: ['sign in', 'password'], phone: ['mobile', 'install'],
   tour: ['walkthrough'], tours: ['walkthrough'], tutorial: ['walkthrough', 'guided tour'],
+  // Owners and contractors call the session-location field many different things.
+  room: ['classroom', 'location'], rooms: ['classroom', 'location'],
+  site: ['location', 'classroom'], sites: ['location', 'classroom'],
+  location: ['classroom'], locations: ['classroom'],
+  place: ['location', 'classroom'], venue: ['location', 'classroom'],
+  building: ['location', 'classroom'], facility: ['location', 'classroom'],
+  dayhab: ['location', 'classroom'], 'day-hab': ['location', 'classroom'],
+  school: ['classroom', 'location'], schools: ['classroom', 'location'],
 }
 
 /** Words that carry question structure but no search meaning. */
