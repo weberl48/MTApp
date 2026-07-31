@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { autoSendInvoicesViaSquare } from '@/lib/square/auto-send'
 import { sendInvoiceById } from '@/lib/invoices/send'
 import { logger } from '@/lib/logger'
@@ -208,9 +209,12 @@ export async function markSessionNoShow(sessionId: string) {
   const noShowFee = settings?.pricing?.no_show_fee
 
   // Contractor's custom rate (so the contractor keeps their normal pay on a no-show).
+  // Service client on purpose: `contractor_rates` is owner-only under RLS, but this action
+  // is admin-callable, and a denied read would silently reprice the contractor to the
+  // service-type formula instead of their negotiated rate.
   let overrides: ContractorPricingOverrides | undefined
   if (session.contractor_id && session.service_type_id) {
-    const { data: rate } = await supabase
+    const { data: rate } = await createServiceClient()
       .from('contractor_rates')
       .select('contractor_pay, duration_increment')
       .eq('contractor_id', session.contractor_id)
@@ -457,7 +461,9 @@ export async function deleteSession(sessionId: string) {
  * contractor_pay. Returns how many were actually marked.
  */
 export async function markSessionsPaid(sessionIds: string[], paidDate: string) {
-  const permErr = await requirePermission('invoice:bulk-action')
+  // Payroll, not billing: gate on the same permission as the Payroll Hub UI so an
+  // admin cannot mark contractor pay as paid by calling the action directly.
+  const permErr = await requirePermission('payments:view')
   if (permErr) return permErr
   if (sessionIds.length === 0) return { success: true as const, count: 0 }
 

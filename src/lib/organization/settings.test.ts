@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_SETTINGS, mergeOrganizationSettings } from './settings'
+import {
+  ADMIN_WRITABLE_SETTING_SECTIONS,
+  DEFAULT_SETTINGS,
+  applySettingsUpdate,
+  mergeOrganizationSettings,
+} from './settings'
 
 describe('mergeOrganizationSettings (regression for #20 — settings defaults/merge)', () => {
   it('returns defaults for null/undefined raw settings', () => {
@@ -91,5 +96,69 @@ describe('locations_by_client', () => {
       allow_other: false,
       required: true,
     })
+  })
+})
+
+describe('applySettingsUpdate (settings write authorization boundary)', () => {
+  const stored = mergeOrganizationSettings({
+    security: { require_mfa: true, max_login_attempts: 3 },
+    features: { client_portal: true, ai_help: true },
+    invoice: { due_days: 30 },
+  } as any)
+
+  it('writes everything for a caller who can edit all sections', () => {
+    const incoming = mergeOrganizationSettings({ security: { require_mfa: false } } as any)
+    expect(applySettingsUpdate(stored, incoming, true)).toBe(incoming)
+  })
+
+  it('keeps owner-only sections when the caller cannot edit them', () => {
+    const incoming = mergeOrganizationSettings({
+      security: { require_mfa: false, max_login_attempts: 99 },
+      features: { client_portal: false, ai_help: false },
+      portal: { token_expiry_days: 3650 },
+      automation: { auto_approve_sessions: true },
+      invoice: { due_days: 14 },
+    } as any)
+
+    const result = applySettingsUpdate(stored, incoming, false)
+
+    // Denied sections keep their stored values...
+    expect(result.security.require_mfa).toBe(true)
+    expect(result.security.max_login_attempts).toBe(3)
+    expect(result.features.client_portal).toBe(true)
+    expect(result.portal.token_expiry_days).toBe(stored.portal.token_expiry_days)
+    expect(result.automation.auto_approve_sessions).toBe(false)
+    // ...while an allowed section still lands.
+    expect(result.invoice.due_days).toBe(14)
+  })
+
+  it('lets an admin move every section on the allow-list', () => {
+    const incoming = mergeOrganizationSettings({
+      invoice: { due_days: 7 },
+      session: { default_duration: 45 },
+      notification: { admin_email: 'ops@example.com' },
+      custom_lists: { classrooms: ['Room B'] },
+      pricing: { no_show_fee: 75 },
+    } as any)
+
+    const result = applySettingsUpdate(stored, incoming, false)
+
+    expect(result.invoice.due_days).toBe(7)
+    expect(result.session.default_duration).toBe(45)
+    expect(result.notification.admin_email).toBe('ops@example.com')
+    expect(result.custom_lists.classrooms).toEqual(['Room B'])
+    expect(result.pricing.no_show_fee).toBe(75)
+  })
+
+  it('never lists a privileged section as admin-writable', () => {
+    for (const section of ['security', 'features', 'portal', 'automation']) {
+      expect(ADMIN_WRITABLE_SETTING_SECTIONS).not.toContain(section)
+    }
+  })
+
+  it('does not mutate the stored settings', () => {
+    const incoming = mergeOrganizationSettings({ invoice: { due_days: 1 } } as any)
+    applySettingsUpdate(stored, incoming, false)
+    expect(stored.invoice.due_days).toBe(30)
   })
 })

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { revalidateInvoicePaths, requirePermission } from '@/lib/actions/helpers'
 import { calculateSessionPricing, ContractorPricingOverrides } from '@/lib/pricing'
 import { fetchUnbilledScholarshipSessions, groupUnbilledByClientMonth, buildContractorRateMap, type ContractorRateRow } from '@/lib/queries/scholarship'
@@ -124,7 +125,10 @@ export async function generateScholarshipBatchInvoice({
 
   let rateMap = new Map<string, ContractorPricingOverrides>()
   if (contractorIds.length > 0) {
-    const { data: rates, error: ratesError } = await supabase
+    // Service client on purpose: `contractor_rates` is owner-only under RLS, but batch
+    // generation is admin-callable, and a denied read would silently pay contractors the
+    // formula rate instead of their negotiated one.
+    const { data: rates, error: ratesError } = await createServiceClient()
       .from('contractor_rates')
       .select('contractor_id, service_type_id, contractor_pay, duration_increment')
       .in('contractor_id', contractorIds)

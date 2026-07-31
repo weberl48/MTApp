@@ -160,12 +160,15 @@ export default function BusinessSettingsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="services" className="space-y-4">
+      <Tabs defaultValue={isOwner ? 'services' : 'invoices'} className="space-y-4">
         <TabsList className="h-auto w-full justify-start overflow-x-auto">
-          <TabsTrigger value="services" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            Services
-          </TabsTrigger>
+          {/* Service pricing carries contractor pay (schedule, cap, MCA cut) — owner only. */}
+          {isOwner && (
+            <TabsTrigger value="services" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Services
+            </TabsTrigger>
+          )}
           <TabsTrigger value="invoices" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Invoices
@@ -186,7 +189,8 @@ export default function BusinessSettingsPage() {
           )}
         </TabsList>
 
-        {/* Services Tab */}
+        {/* Services Tab — owner only, see the trigger above */}
+        {isOwner && (
         <TabsContent value="services">
           <Card>
             <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -250,6 +254,7 @@ export default function BusinessSettingsPage() {
             onSaved={loadData}
           />
         </TabsContent>
+        )}
 
         {/* Invoice Settings Tab */}
         {localSettings && (

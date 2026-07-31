@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrganization } from '@/contexts/organization-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
@@ -14,10 +15,17 @@ interface MissingRate {
 }
 
 export function MissingRates() {
+  // Rate gaps are only actionable by roles that can see rates at all (owner+),
+  // and the card names contractors alongside their pay setup.
+  const { can } = useOrganization()
+  const canViewRates = can('team:view-rates')
   const [missing, setMissing] = useState<MissingRate[]>([])
-  const [loading, setLoading] = useState(true)
+  // Roles that can't see rates never fetch, so they are never "loading".
+  const [loading, setLoading] = useState(canViewRates)
 
   useEffect(() => {
+    if (!canViewRates) return
+
     async function load() {
       const supabase = createClient()
 
@@ -68,9 +76,9 @@ export function MissingRates() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [canViewRates])
 
-  if (loading || missing.length === 0) return null
+  if (!canViewRates || loading || missing.length === 0) return null
 
   // Group by contractor for cleaner display
   const byContractor = new Map<string, { name: string; id: string; serviceTypes: string[] }>()

@@ -135,6 +135,8 @@ export default function InvoiceDetailPage() {
   const [activityLogs, setActivityLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  // Margins and contractor pay are owner business — admins bill without seeing them.
+  const [canViewMargins, setCanViewMargins] = useState(false)
 
   useEffect(() => {
     async function loadInvoice() {
@@ -156,6 +158,7 @@ export default function InvoiceDetailPage() {
 
       const admin = can(userProfile?.role as UserRole, 'invoice:bulk-action')
       setIsAdmin(admin)
+      setCanViewMargins(can(userProfile?.role as UserRole, 'financial:view-details'))
 
       // Fetch invoice with related data
       const { data: invoiceData, error } = await supabase
@@ -378,8 +381,8 @@ export default function InvoiceDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Financial Breakdown — admin/owner only */}
-        {isAdmin && (
+        {/* Financial Breakdown — owner/developer only (shows MCA cut + contractor pay) */}
+        {canViewMargins && (
           <Card>
             <CardHeader>
               <CardTitle>Financial Breakdown</CardTitle>

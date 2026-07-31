@@ -75,6 +75,47 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
 }
 
 /**
+ * Settings sections an admin may write. Everything absent from this list is owner business:
+ * `security` (MFA enforcement, lockout thresholds), `portal` (token expiry), `features`
+ * (feature flags) and `automation` — none of which admins can reach in the UI.
+ *
+ * `pricing` IS listed: the admin-visible Business Rules tabs edit the no-show fee, duration
+ * base and the Square processing fee, so denying it would break a capability admins already
+ * have. Narrow it here (and hide those inputs) if that should change.
+ */
+export const ADMIN_WRITABLE_SETTING_SECTIONS = [
+  'invoice',
+  'session',
+  'notification',
+  'custom_lists',
+  'pricing',
+] as const satisfies readonly (keyof OrganizationSettings)[]
+
+/**
+ * Build the settings object to persist. Callers who can edit everything (`settings:edit` —
+ * owner/developer) write `incoming` as-is; everyone else may only move the sections above,
+ * with the stored values kept for the rest.
+ *
+ * This is the whole authorization boundary for settings writes: `organizations` RLS is
+ * owner-only, so admin edits go through the server action that calls this.
+ */
+export function applySettingsUpdate(
+  stored: OrganizationSettings | null | undefined,
+  incoming: OrganizationSettings,
+  canEditAllSections: boolean
+): OrganizationSettings {
+  if (canEditAllSections) return incoming
+
+  const merged = mergeOrganizationSettings(stored)
+  for (const section of ADMIN_WRITABLE_SETTING_SECTIONS) {
+    if (incoming[section] === undefined) continue
+    // Each section is replaced wholesale, matching how the settings forms submit them.
+    merged[section] = incoming[section] as never
+  }
+  return merged
+}
+
+/**
  * Deep-merge a (possibly partial / null) raw settings JSONB onto the defaults so every section
  * and field has a value. Sections are shallow-spread; `custom_lists` is merged one level deeper.
  *

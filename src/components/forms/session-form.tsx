@@ -224,8 +224,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Build contractor pricing overrides for this service type
   const contractorOverrides = serviceTypeId ? getContractorOverrides(serviceTypeId) : undefined
 
-  // Check if custom rate exists for the selected service type
-  const missingCustomRate = serviceTypeId ? hasMissingRate(serviceTypeId) : false
+  // Check if custom rate exists for the selected service type. Only meaningful for roles
+  // whose rate reads RLS actually answers (the contractor themselves, or owner+): an admin
+  // now sees no rows at all, which would make this warn on every service type.
+  const canSeeRateGaps = can('team:view-rates') || !can('session:view-all')
+  const missingCustomRate = serviceTypeId && canSeeRateGaps ? hasMissingRate(serviceTypeId) : false
 
   // Determine payment method for pricing (scholarship affects pricing)
   // Service types flagged as scholarship always use scholarship pricing

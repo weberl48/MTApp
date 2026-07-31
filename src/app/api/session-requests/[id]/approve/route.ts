@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendSessionRequestStatusEmail } from '@/lib/email'
 import { logger } from '@/lib/logger'
 import { uuidSchema } from '@/lib/validation/schemas'
@@ -117,9 +118,12 @@ export async function POST(
 
       const client = Array.isArray(sessionRequest.client) ? sessionRequest.client[0] : sessionRequest.client
 
-      // Contractor's custom rate (if any), so their pay matches their negotiated rate
+      // Contractor's custom rate (if any), so their pay matches their negotiated rate.
+      // Service client on purpose: `contractor_rates` is owner-only under RLS, but staff
+      // approving a request may be an admin, and a denied read would silently drop the
+      // contractor to the service-type formula rate.
       let overrides: ContractorPricingOverrides | undefined
-      const { data: rate } = await supabase
+      const { data: rate } = await createServiceClient()
         .from('contractor_rates')
         .select('contractor_pay, duration_increment')
         .eq('contractor_id', contractor_id)

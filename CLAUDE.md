@@ -105,6 +105,8 @@ Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are a
 
 Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
+`20260731_owner_only_rates_and_settings.sql` narrows two RLS policies to developer/owner: `contractor_rates` (was "Admins can manage contractor rates", FOR ALL) and `organizations` UPDATE (was "Admins can update organization" — one JSONB column, so an admin could flip `security.require_mfa` or owner-only feature flags client-side). **`supabase/schema.sql` is stale for the `organizations` policy** — it still shows the pre-2025 owner-only version; the live DB is authoritative. Applied to cert AND prod on 2026-07-31 (verified: no admin-inclusive policy left on either table). The app code that adapts to it — owner-only rate surfaces plus `updateOrganizationSettings()` — landed on `main` the same day. **The two halves must ship together**: RLS without the code gives an admin save errors on Business Rules and silently formula-priced contractor pay, so never revert one without the other.
+
 July 2026 billing-controls objects (20260704_client_billing_controls.sql): columns `clients.billing_frequency` (`per_session`|`monthly` — monthly clients skip per-session invoices and batch on the Scholarship tab at normal pricing), `clients.square_fee_enabled` + `invoices.apply_square_fee` (per-client Square-fee opt-in snapshotted per invoice; null = follow org setting), `sessions.submitted_at`/`approved_at` (maintained by the `set_session_status_timestamps()` BEFORE trigger — do NOT set them in app code).
 
 ### Configurable Organization Settings
@@ -151,7 +153,17 @@ import type { UserRole } from '@/types/database'
 const allowed = can(userProfile.role as UserRole, 'session:approve')
 ```
 
-**Available permissions**: `session:approve`, `session:delete`, `session:cancel`, `session:mark-no-show`, `session:view-all`, `invoice:bulk-action`, `invoice:delete`, `invoice:send`, `team:view`, `team:manage`, `team:invite`, `client:manage`, `settings:edit`, `analytics:view`, `payments:view`, `financial:view-details`
+**Available permissions**: `session:approve`, `session:delete`, `session:cancel`, `session:mark-no-show`, `session:view-all`, `invoice:bulk-action`, `invoice:delete`, `invoice:send`, `team:view`, `team:manage`, `team:invite`, `team:view-rates`, `client:manage`, `settings:edit`, `analytics:view`, `payments:view`, `financial:view-details`
+
+**Owner-only money surfaces.** Admins run sessions, clients and billing; contractor pay and margins are owner/developer business. The gates:
+
+- `team:view-rates` — Team page **Rates** tab (`PayRateMatrix`), the per-contractor **Rates** tab on `/team/[id]/`, and the dashboard's Missing Contractor Rates card.
+- `financial:view-details` — session pricing everywhere, plus the invoice detail **Financial Breakdown** card (MCA cut + contractor pay).
+- `analytics:view` — `/analytics/` and the dashboard revenue/MCA summary strip (`AnalyticsSummary` self-gates).
+- `payments:view` — `/payments/`, `/api/payroll/*`, and `markSessionsPaid()` (payroll, not billing — do NOT relax it to `invoice:bulk-action`).
+- `settings:edit` — Settings > Business Rules **Services** tab (service types carry `contractor_pay_schedule`), plus Practice, Customize, Audit Log and the Features tab.
+
+Backed by RLS: `contractor_rates` and `organizations` are owner/developer-only (`20260731_owner_only_rates_and_settings.sql`). Two consequences: (1) server code that must price a session for *someone else* reads `contractor_rates` with `createServiceClient()` after its own authz — no-show repricing, scholarship batches and session-request approval all do this, and using the user client there silently pays the formula rate instead of the negotiated one; (2) settings writes go through `updateOrganizationSettings()` (below), never the browser client.
 
 ### Service Types
 
@@ -278,7 +290,8 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/health/detail-auth.ts` — `isHealthDetailAuthorized()`: gates `/api/health` per-check detail behind `CRON_SECRET` in production
 - `src/app/actions/session-requests.ts` — `getPendingSessionRequests()`: staff read of pending session requests with the client-submitted notes decrypted
 - Atomic payroll mark-paid: `markSessionsPaid()` in `src/app/actions/sessions.ts` → the `mark_sessions_paid(uuid[], date)` Postgres function (one statement, only touches not-yet-paid rows, snapshots each session's `contractor_pay`)
-- `src/lib/organization/settings.ts` — `DEFAULT_SETTINGS` + `mergeOrganizationSettings()` (see Configurable Organization Settings above)
+- `src/lib/organization/settings.ts` — `DEFAULT_SETTINGS` + `mergeOrganizationSettings()` (see Configurable Organization Settings above), plus `ADMIN_WRITABLE_SETTING_SECTIONS` / `applySettingsUpdate()`: the section allow-list an admin may write (`invoice`, `session`, `notification`, `custom_lists`, `pricing`) — `security`, `portal`, `features` and `automation` are owner-only
+- `src/app/actions/organization.ts` — `updateOrganizationSettings()`: the ONLY settings write path (`organizations` RLS is owner-only). Checks `session:view-all`, pins non-owners to their own org, applies the allow-list above, then writes with the service client. `OrganizationContext.updateSettings()` calls it and mirrors back what was actually persisted
 - `src/lib/payroll/constants.ts` — `UNPAID_PAYROLL_STATUSES` (`submitted`, `approved`, `no_show`): the single source for "unpaid contractor work" — Payroll Hub (`/payments`) and contractor Earnings (`/earnings`) MUST both use it or approved sessions silently vanish from payroll
 - `src/lib/payroll/annual-summary.ts` — cash-basis annual contractor earnings (tax summaries): `isPaidInYear()` (date-string compare on `contractor_paid_date`), `paidAmountForSession()` (`contractor_paid_amount ?? contractor_pay ?? 0`), `summarizeContractorYear()`/`summarizeByContractor()` (rounded at the aggregation boundary), CSV builders. Zero PHI by design — consumed by the Tax Summaries tab, the Earnings annual card, and both `/api/payroll/*` routes; any fetch feeding it must paginate (PostgREST max-rows silently truncates)
 - `src/lib/earnings/buckets.ts` — `monthBoundaries()`: local-calendar month/year date ranges (UTC conversion made evening sessions count in two months)
@@ -336,7 +349,15 @@ ENCRYPTION_KEY=64-hex-character-key-here
 # Recommended (warned if missing)
 NEXT_PUBLIC_APP_URL=
 RESEND_API_KEY=
+# The Resend-VERIFIED sending domain. `getFromAddress()` THROWS when it is unset rather
+# than falling back to a default — the old `|| 'rattatata.xyz'` fallback pointed at a
+# domain later deleted from Resend, so every send 403'd for seven months while
+# /api/health stayed green (it only checks that RESEND_API_KEY exists). Setting
+# RESEND_API_KEY without this pair-mate now fails the production boot in validateEnv().
 EMAIL_FROM_DOMAIN=
+# Reply-To for outbound mail. Without it mail sends from noreply@ with no reply path,
+# which is a deliverability negative and a dead end for clients who hit reply.
+EMAIL_REPLY_TO=
 
 # Square integration
 SQUARE_ACCESS_TOKEN=

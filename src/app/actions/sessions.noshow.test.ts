@@ -91,6 +91,9 @@ function makeClient() {
 }
 
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => makeClient() }))
+// The contractor-rate lookup uses the service client: `contractor_rates` is owner-only
+// under RLS and this action is admin-callable.
+vi.mock('@/lib/supabase/service', () => ({ createServiceClient: () => makeClient() }))
 vi.mock('@/lib/actions/helpers', () => ({
   requirePermission: async () => null,
   handleSupabaseError: () => null,

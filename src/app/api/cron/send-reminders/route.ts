@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { Resend } from 'resend'
 import { parseLocalDate } from '@/lib/dates'
 import { decryptField, isEncrypted } from '@/lib/crypto'
+import { getFromAddress, getReplyTo } from '@/lib/email'
 import { escape as escapeHtml } from 'he'
 
 // Lazy initialize Resend client to avoid build-time errors
@@ -36,6 +37,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // A missing EMAIL_FROM_DOMAIN is a deploy-config outage, not a per-reminder
+    // failure: getFromAddress() would throw inside the loop, whose catch marks
+    // each reminder 'failed' — and the fetch below only ever selects 'pending',
+    // so a config gap would permanently consume every reminder due during it.
+    // Probe once and bail early, leaving the rows pending for the next run.
+    try {
+      getFromAddress()
+    } catch {
+      console.error('[MCA] Reminder cron aborted: EMAIL_FROM_DOMAIN not configured')
+      return NextResponse.json({ error: 'Email sender not configured' }, { status: 500 })
+    }
+
     // Get pending reminders that are due
     const { data: reminders, error: fetchError } = await createServiceClient()
       .from('session_reminders')
@@ -173,11 +186,35 @@ export async function GET(request: NextRequest) {
           </div>
         `
 
-        // Send email
+        const textContent = [
+          'Session Reminder',
+          '',
+          `Hi ${reminder.recipient_name || 'there'},`,
+          '',
+          'This is a reminder about your upcoming session:',
+          '',
+          `Date: ${formattedDate}`,
+          `Service: ${session.service_type?.name || 'N/A'}`,
+          `Duration: ${session.duration_minutes} minutes`,
+          `Clients: ${clients}`,
+          ...(sessionNotes ? ['', `Notes: ${sessionNotes}`] : []),
+          '',
+          `- ${org?.name || 'Your Practice'}`,
+        ].join('\n')
+
+        // Send email.
+        //
+        // From MUST be the Resend-verified sending domain. This used to send
+        // `from: org.email` — an address the owner types into settings, on a
+        // domain Resend has never verified — so Resend rejected the send (403)
+        // and every reminder silently failed. The org's own address belongs in
+        // Reply-To, which has no domain-verification requirement.
         const { error: emailError } = await resendClient.emails.send({
-          from: org?.email || 'noreply@maycreativearts.com',
+          from: getFromAddress(org?.name),
           to: reminder.recipient_email,
+          replyTo: getReplyTo(org?.email),
           subject,
+          text: textContent,
           html: htmlContent,
         })
 
