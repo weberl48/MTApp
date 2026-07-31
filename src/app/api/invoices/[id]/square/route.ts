@@ -63,6 +63,7 @@ export async function POST(
           date,
           duration_minutes,
           group_member_names,
+          classroom,
           contractor:users(id, name),
           service_type:service_types(name)
         )
@@ -126,6 +127,17 @@ export async function POST(
     // Calculate due date (30 days from now if not set)
     const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
+    // Organization settings drive both the description (session location) and the
+    // processing fee below, so they must be read before the description is built.
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', invoice.organization_id)
+      .single()
+
+    const orgSettings = org?.settings as OrganizationSettings | undefined
+    const showSessionLocation = orgSettings?.invoice?.show_session_location === true
+
     // Build description based on invoice type
     let description: string
     let note: string | undefined
@@ -136,7 +148,7 @@ export async function POST(
       // Fetch invoice items for batch invoices
       const { data: items } = await supabase
         .from('invoice_items')
-        .select('description, session_id, session_date, duration_minutes, amount, service_type_name, contractor_name')
+        .select('description, session_id, session_date, duration_minutes, amount, service_type_name, contractor_name, classroom')
         .eq('invoice_id', id)
         .order('session_date', { ascending: true })
 
@@ -192,18 +204,16 @@ export async function POST(
       const names = attendeeNames.length > 0 ? attendeeNames : [invoice.client.name]
       const nameList = names.join(', ')
 
-      description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate} — ${nameList}`
+      // Location rides on the Square description only when the owner opted in —
+      // the same gate the PDF uses, read from the org settings fetched above.
+      const locationSuffix = showSessionLocation && invoice.session?.classroom
+        ? ` — ${invoice.session.classroom}`
+        : ''
+      description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate} — ${nameList}${locationSuffix}`
       note = nameList
     }
 
-    // Fetch organization settings for processing fee
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('settings')
-      .eq('id', invoice.organization_id)
-      .single()
-
-    const pricingSettings = (org?.settings as OrganizationSettings)?.pricing
+    const pricingSettings = orgSettings?.pricing
     const serviceCharge = buildSquareProcessingFee(
       pricingSettings,
       Number(invoice.amount),
