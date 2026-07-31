@@ -1,0 +1,7 @@
+# Runtime state, not app code — it lives in the mca-portal-data volume. Copying
+# it would bake captured error messages and stack traces into the image layers.
+data
+
+# Secrets reach the container via --env-file, never through the image.
+.env
+.env.*
