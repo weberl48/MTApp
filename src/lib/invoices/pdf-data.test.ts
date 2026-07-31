@@ -57,8 +57,46 @@ const baseInvoice = {
     contractor_id: 'u1',
     contractor: { id: 'u1', name: 'Colleen' },
     service_type: { name: 'Scholarship Group' },
+    classroom: null,
   },
 }
+
+describe('session location gating', () => {
+  const withLocation = () => ({
+    ...baseInvoice,
+    session: { ...baseInvoice.session, classroom: 'Room 101' },
+  })
+
+  it('includes the session location when show_session_location is on', async () => {
+    const result = await fetchInvoicePdfData(
+      mockSupabase({ invoice: withLocation(), settings: { invoice: { show_session_location: true } } }),
+      'inv1'
+    )
+    expect(result!.invoice.session!.classroom).toBe('Room 101')
+  })
+
+  it('blanks the session location when the setting is off', async () => {
+    const result = await fetchInvoicePdfData(mockSupabase({ invoice: withLocation(), settings: {} }), 'inv1')
+    expect(result!.invoice.session!.classroom).toBeNull()
+  })
+
+  it('blanks batch line-item locations when the setting is off', async () => {
+    const batch = { ...baseInvoice, invoice_type: 'batch' }
+    const items = [{ description: 'X', session_date: '2026-02-03', amount: 60, classroom: 'Room 9' }]
+    const result = await fetchInvoicePdfData(mockSupabase({ invoice: batch, items, settings: {} }), 'inv1')
+    expect(result!.invoice.items![0].classroom).toBeNull()
+  })
+
+  it('keeps batch line-item locations when the setting is on', async () => {
+    const batch = { ...baseInvoice, invoice_type: 'batch' }
+    const items = [{ description: 'X', session_date: '2026-02-03', amount: 60, classroom: 'Room 9' }]
+    const result = await fetchInvoicePdfData(
+      mockSupabase({ invoice: batch, items, settings: { invoice: { show_session_location: true } } }),
+      'inv1'
+    )
+    expect(result!.invoice.items![0].classroom).toBe('Room 9')
+  })
+})
 
 describe('fetchInvoicePdfData', () => {
   it('returns null when the invoice is missing', async () => {

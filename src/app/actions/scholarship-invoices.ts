@@ -61,7 +61,7 @@ export async function generateScholarshipBatchInvoice({
     .select(`
       session_id,
       session:sessions!inner(
-        id, date, duration_minutes, status, group_headcount,
+        id, date, duration_minutes, status, group_headcount, classroom,
         contractor:users!sessions_contractor_id_fkey(id, name),
         service_type:service_types!inner(*)
       )
@@ -75,7 +75,7 @@ export async function generateScholarshipBatchInvoice({
   // Filter to sessions in the month that are submitted/approved
   const eligibleSessions = (attendeeRows || []).filter((row) => {
     const session = row.session as unknown as {
-      id: string; date: string; duration_minutes: number; status: string; group_headcount: number | null
+      id: string; date: string; duration_minutes: number; status: string; group_headcount: number | null; classroom: string | null
       contractor: { id: string; name: string } | null
       service_type: ServiceType
     }
@@ -153,13 +153,14 @@ export async function generateScholarshipBatchInvoice({
     rent_amount: number
     service_type_name: string | null
     contractor_name: string | null
+    classroom: string | null
   }
 
   const items: ItemData[] = []
 
   for (const row of uninvoicedSessions) {
     const session = row.session as unknown as {
-      id: string; date: string; duration_minutes: number; group_headcount: number | null
+      id: string; date: string; duration_minutes: number; group_headcount: number | null; classroom: string | null
       contractor: { id: string; name: string } | null
       service_type: ServiceType
     }
@@ -196,6 +197,7 @@ export async function generateScholarshipBatchInvoice({
       rent_amount: pricing.rentAmount,
       service_type_name: serviceType.name,
       contractor_name: session.contractor?.name || null,
+      classroom: session.classroom ?? null,
     })
   }
 

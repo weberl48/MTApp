@@ -6,6 +6,7 @@ import { uuidSchema } from '@/lib/validation/schemas'
 import { createNewSession } from '@/lib/session-form/create-session'
 import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
+import { resolveLocationConfig, isLocationSatisfied } from '@/lib/session-location/config'
 import type { ServiceType, OrganizationSettings, PaymentMethod, UserRole } from '@/types/database'
 
 /**
@@ -89,6 +90,7 @@ export async function POST(
       session_time,
       service_type_id,
       contractor_id,
+      classroom,
     } = body
 
     let createdSessionId = null
@@ -142,7 +144,23 @@ export async function POST(
         .select('settings')
         .eq('id', sessionRequest.organization_id)
         .single()
-      const dueDays = (org?.settings as OrganizationSettings | undefined)?.invoice?.due_days
+      const orgSettings = org?.settings as OrganizationSettings | undefined
+      const dueDays = orgSettings?.invoice?.due_days
+
+      // Portal-originated sessions previously hardcoded `classroom: null`, silently
+      // bypassing a client's required-location config. Reject instead of writing null.
+      const submittedClassroom = typeof classroom === 'string' ? classroom.trim() : ''
+      const locationConfig = resolveLocationConfig(
+        orgSettings ?? null,
+        sessionRequest.client_id,
+        { isScholarshipGroup: false }
+      )
+      if (!isLocationSatisfied(locationConfig, submittedClassroom)) {
+        return NextResponse.json(
+          { error: `A ${locationConfig!.label.toLowerCase()} is required for this client` },
+          { status: 400 }
+        )
+      }
 
       // Reuse the shared creation path: prices the session, inserts attendees (rolling back the
       // session if that fails), and generates the invoice — the old inline insert did none of these.
@@ -160,7 +178,7 @@ export async function POST(
         status: 'approved',
         groupHeadcount: null,
         groupMemberNames: null,
-        classroom: null,
+        classroom: submittedClassroom || null,
         pricing,
         isScholarshipService: serviceType.is_scholarship ?? false,
         dueDays,
