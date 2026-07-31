@@ -802,7 +802,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           <div data-tour="session-form-duration" className="space-y-2">
             <Label htmlFor="duration">Duration (minutes) *</Label>
             <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger>
+              <SelectTrigger id="duration">
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
@@ -831,6 +831,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               }}
             >
               <SelectTrigger
+                id="serviceType"
                 className={errors.serviceType ? 'border-red-500' : ''}
                 aria-invalid={!!errors.serviceType}
                 aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
