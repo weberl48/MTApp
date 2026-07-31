@@ -12,19 +12,27 @@ export const WALKTHROUGHS_CHANGED_EVENT = 'mca:walkthroughs-changed'
 
 /**
  * Suggested order for new staff — mirrors the Admin Onboarding Guide: orient,
- * learn the daily review job, then the surrounding workflows. Owner-level
- * configuration tours come last.
+ * learn the daily review job, then the surrounding money workflows, then team,
+ * with owner-level configuration tours last. Each user only sees the tours
+ * their role's audience allows, so the effective list stays short (e.g.
+ * contractors get app-overview → log-session → my-earnings).
  */
 export const RECOMMENDED_WALKTHROUGH_ORDER = [
   'app-overview',
   'approve-sessions',
   'log-session',
   'add-client',
+  'send-invoice',
   'scholarship-billing',
+  'payroll',
+  'my-earnings',
   'invite-contractor',
-  'contractor-pay',
+  'contractor-rates',
   'configure-services',
   'edit-service-type',
+  'automation',
+  'custom-lists',
+  'analytics',
 ] as const
 
 export function getCompletedWalkthroughs(): string[] {

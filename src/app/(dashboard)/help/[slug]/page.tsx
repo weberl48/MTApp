@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useOrganization } from '@/contexts/organization-context'
-import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { useWalkthrough, useWalkthroughAudienceFlags } from '@/components/walkthroughs/walkthrough-provider'
+import { canStartWalkthrough } from '@/components/walkthroughs/walkthroughs'
 import { ArticleFeedback } from '@/components/help/article-feedback'
 import { getArticleBySlug, getArticlesByCategory, HELP_CATEGORIES } from '../_data/help-articles'
 
@@ -54,6 +55,7 @@ export default function HelpArticlePage({
   const { slug } = use(params)
   const { can } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
+  const audienceFlags = useWalkthroughAudienceFlags()
 
   const isAdminOrAbove = can('session:view-all')
 
@@ -102,8 +104,8 @@ export default function HelpArticlePage({
         </h1>
         <p className="text-lg text-muted-foreground">{article.description}</p>
 
-        {/* Walkthrough Button */}
-        {article.walkthrough && (
+        {/* Walkthrough Button — only when the tour's audience matches the user */}
+        {canStartWalkthrough(article.walkthrough, audienceFlags) && (
           <Button
             onClick={() => startWalkthrough(article.walkthrough!)}
             className="gap-2"

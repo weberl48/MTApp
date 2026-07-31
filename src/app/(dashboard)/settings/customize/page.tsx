@@ -84,7 +84,7 @@ export default function CustomizeSettingsPage() {
             <List className="w-4 h-4" />
             Custom Lists
           </TabsTrigger>
-          <TabsTrigger value="automation" className="flex items-center gap-2">
+          <TabsTrigger value="automation" data-tour="customize-tab-automation" className="flex items-center gap-2">
             <Zap className="w-4 h-4" />
             Automation
           </TabsTrigger>
@@ -100,6 +100,7 @@ export default function CustomizeSettingsPage() {
 
             {localSettings && (
               <>
+                <div data-tour="customize-payment-methods">
                 <ListCustomizer
                   title="Payment Methods"
                   description="How clients pay for sessions"
@@ -116,7 +117,9 @@ export default function CustomizeSettingsPage() {
                     })
                   }
                 />
+                </div>
 
+                <div data-tour="customize-billing-methods">
                 <ListCustomizer
                   title="Billing Methods"
                   description="How invoices are sent to clients"
@@ -133,6 +136,7 @@ export default function CustomizeSettingsPage() {
                     })
                   }
                 />
+                </div>
 
                 <Button onClick={handleSave} disabled={saving} className="w-full">
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -149,7 +153,7 @@ export default function CustomizeSettingsPage() {
           <div className="space-y-6 max-w-2xl">
             {localSettings && (
               <>
-                <Card>
+                <Card data-tour="automation-sessions">
                   <CardHeader>
                     <CardTitle className="text-base">Session Automation</CardTitle>
                     <CardDescription>Automate the session approval workflow</CardDescription>
@@ -182,7 +186,7 @@ export default function CustomizeSettingsPage() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card data-tour="automation-invoices">
                   <CardHeader>
                     <CardTitle className="text-base">Invoice Automation</CardTitle>
                     <CardDescription>Automate invoice sending after session approval</CardDescription>
@@ -248,7 +252,7 @@ export default function CustomizeSettingsPage() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card data-tour="automation-scholarship">
                   <CardHeader>
                     <CardTitle className="text-base">Scholarship Automation</CardTitle>
                     <CardDescription>Auto-generate monthly scholarship batch invoices</CardDescription>

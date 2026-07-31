@@ -385,7 +385,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-tour="pay-rate-matrix">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {isBaseDuration

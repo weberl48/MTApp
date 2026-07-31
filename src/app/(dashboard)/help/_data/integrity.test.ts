@@ -65,15 +65,20 @@ describe('help content integrity', () => {
     }
   })
 
-  it('article walkthrough refs resolve and adminOnly stays in sync both ways', async () => {
+  it('article walkthrough refs resolve and audience stays consistent with article visibility', async () => {
     const { ALL_WALKTHROUGHS, getWalkthroughById } = await import('@/components/walkthroughs/walkthroughs')
     for (const a of HELP_ARTICLES) {
       if (!a.walkthrough) continue
       const w = getWalkthroughById(a.walkthrough)
       expect(w, `${a.slug} → missing walkthrough ${a.walkthrough}`).toBeDefined()
-      // A contractor-visible article must not launch an admin tour (and vice
-      // versa) — the Guided Tours card and next-tour chaining rely on the flag.
-      expect(!!w!.adminOnly, `${a.slug} adminOnly (${!!a.adminOnly}) != walkthrough ${w!.id} adminOnly (${!!w!.adminOnly})`).toBe(!!a.adminOnly)
+      // Admin/owner tours must hang off adminOnly articles (contractors never
+      // see a tour they can't take); contractor/everyone tours must hang off
+      // articles contractors can actually open.
+      if (w!.audience === 'admin' || w!.audience === 'owner') {
+        expect(!!a.adminOnly, `${a.slug} must be adminOnly to launch ${w!.id} (audience ${w!.audience})`).toBe(true)
+      } else {
+        expect(!!a.adminOnly, `${a.slug} must be contractor-visible to launch ${w!.id} (audience ${w!.audience ?? 'everyone'})`).toBe(false)
+      }
     }
     for (const w of ALL_WALKTHROUGHS) {
       expect(
@@ -83,14 +88,17 @@ describe('help content integrity', () => {
     }
   })
 
-  it('RECOMMENDED_WALKTHROUGH_ORDER covers exactly the registered walkthroughs', async () => {
-    // A tour missing from the order silently vanishes from the Guided Tours
-    // card and next-tour chaining; a stale id in the order is dead weight.
+  it('every walkthrough is in the recommended order exactly once', async () => {
     const { ALL_WALKTHROUGHS } = await import('@/components/walkthroughs/walkthroughs')
     const { RECOMMENDED_WALKTHROUGH_ORDER } = await import('@/lib/walkthroughs/completion')
-    const registered = ALL_WALKTHROUGHS.map(w => w.id).sort()
-    const ordered = [...RECOMMENDED_WALKTHROUGH_ORDER].sort()
-    expect(ordered).toEqual(registered)
+    const order = [...RECOMMENDED_WALKTHROUGH_ORDER]
+    expect(new Set(order).size).toBe(order.length)
+    for (const w of ALL_WALKTHROUGHS) {
+      expect(order, `walkthrough ${w.id} missing from RECOMMENDED_WALKTHROUGH_ORDER`).toContain(w.id)
+    }
+    for (const id of order) {
+      expect(ALL_WALKTHROUGHS.some(w => w.id === id), `order entry ${id} has no walkthrough`).toBe(true)
+    }
   })
 
   it('relatedArticles and FAQ links resolve; FAQ ids unique', () => {

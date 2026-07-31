@@ -68,9 +68,13 @@ describe('nextRecommendedWalkthrough', () => {
   })
 
   it('skips tours rejected by the allowed filter (contractor role)', () => {
-    const contractorAllowed = (id: string) => id === 'app-overview' || id === 'log-session'
+    const contractorAllowed = (id: string) =>
+      ['app-overview', 'log-session', 'my-earnings'].includes(id)
     expect(nextRecommendedWalkthrough('app-overview', [], contractorAllowed)).toBe('log-session')
-    expect(nextRecommendedWalkthrough('log-session', ['app-overview'], contractorAllowed)).toBeNull()
+    expect(nextRecommendedWalkthrough('log-session', ['app-overview'], contractorAllowed)).toBe('my-earnings')
+    expect(
+      nextRecommendedWalkthrough('my-earnings', ['app-overview', 'log-session'], contractorAllowed)
+    ).toBeNull()
   })
 
   it('returns null when everything is done', () => {

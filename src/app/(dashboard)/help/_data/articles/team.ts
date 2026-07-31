@@ -28,7 +28,7 @@ The invite link is single-use and expires after 30 days. If you include an email
 ### Roles Explained
 
 - **Contractor** - Can log sessions, view their own submitted and approved sessions, and track their own earnings. Cannot see other contractors' data, client lists, or invoices.
-- **Admin** - Can manage clients, review and approve sessions, send invoices, and view the team list. Cannot access payroll, analytics, or sensitive financial reporting.
+- **Admin** - Can manage clients, review and approve sessions, send invoices, and view the team list. Cannot access payroll, analytics, contractor pay rates, or sensitive financial reporting.
 - **Owner** - Full access to everything, including payroll, analytics, settings, and billing configuration.
 
 ### Viewing the Team List
@@ -37,7 +37,7 @@ The Team page shows all active team members with their name, role, total session
 
 ### Team Member Detail
 
-From a team member's detail page, you can view their stats, see their recent sessions and invoices, and manage their custom pay rates per service type.
+From a team member's detail page, you can view their stats and see their recent sessions and invoices. Owners also get a **Rates** tab there for that contractor's custom pay rates per service type; admins do not see it.
 
 ### Removing a Team Member
 
@@ -50,26 +50,19 @@ Removal is blocked if the member has ever logged a session — you'll see a mess
     slug: 'managing-contractor-rates',
     title: 'Managing Contractor Pay Rates',
     category: 'team',
-    description: 'How contractor pay is calculated — the priority chain — and how to set custom per-contractor rates.',
+    description: 'How to set custom per-contractor pay rates per service type.',
     adminOnly: true,
-    walkthrough: 'contractor-pay',
+    walkthrough: 'contractor-rates',
     relatedArticles: ['inviting-team-members', 'configuring-services'],
-    keywords: ['pay rate', 'custom rate', 'rate matrix', 'raise', 'contractor pay', 'pay priority', 'pay calculation'],
+    keywords: ['pay rate', 'custom rate', 'rate matrix', 'raise', 'contractor pay'],
     content: `
 ## Managing Contractor Pay Rates
 
 MCA Manager supports custom pay rates per contractor per service type. This lets you give individual contractors different base pay, such as when a raise has been negotiated.
 
-### How Pay Is Decided: The Priority Chain
+### Who Can See Rates
 
-When a session is priced, contractor pay comes from the first rule that applies, checked in this order:
-
-1. **Group pay matrix** — group service types can define exact pay by headcount and duration ("Group Contractor Pay by Headcount" on the service type). When a cell matches, it wins outright.
-2. **Custom contractor rate** — the per-contractor, per-service rate from the Team > Rates matrix (this article), plus its per-15-minute increment for longer sessions.
-3. **Service pay schedule** — "Contractor Pay by Duration" amounts set directly on an individual service type.
-4. **Percentage formula** — when nothing above applies: pay = total billed minus the service's MCA percentage.
-
-Whatever rule produced the number, the service type's **Contractor Cap** (if set) is applied last as a hard ceiling. Scholarship pricing never reduces contractor pay — the organization absorbs the difference.
+Pay rates are owner-only. Admins can review sessions, manage clients, and handle invoicing, but the Rates tabs described below do not appear for them at all — so contractor pay stays between the contractor and the owner.
 
 ### Where to Find It
 

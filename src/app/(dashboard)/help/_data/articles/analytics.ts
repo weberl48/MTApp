@@ -7,6 +7,7 @@ export const ANALYTICS_ARTICLES: HelpArticle[] = [
     category: 'analytics',
     description: 'How to use the Analytics section to review revenue, sessions, and payment status.',
     adminOnly: true,
+    walkthrough: 'analytics',
     relatedArticles: ['payroll-and-payments'],
     keywords: ['revenue', 'charts', 'date range', 'summary cards', 'invoice status'],
     content: `
@@ -53,6 +54,7 @@ Next to the invoice status chart, the Payment Summary card totals what has been 
     category: 'analytics',
     description: 'How to track contractor pay, record payments, and reconcile Square invoices.',
     adminOnly: true,
+    walkthrough: 'payroll',
     relatedArticles: ['analytics-and-reports', 'managing-contractor-rates', 'tax-summaries'],
     keywords: ['payroll hub', 'mark paid', 'unpaid sessions', 'payment history', 'square reconciliation', 'tax summaries'],
     content: `
@@ -103,6 +105,7 @@ These exports are informal records to support tax preparation — they are not o
     title: 'My Earnings',
     category: 'analytics',
     description: 'How to track your earnings, view payment history, and understand your pay breakdown.',
+    walkthrough: 'my-earnings',
     relatedArticles: ['logging-a-session', 'payroll-and-payments', 'tax-summaries'],
     keywords: ['pay stub', 'paycheck', 'earnings', 'pay', 'ytd', 'annual summary'],
     content: `

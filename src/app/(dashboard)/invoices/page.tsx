@@ -120,7 +120,7 @@ function InvoiceTable({
       <TableHeader>
         <TableRow>
           {showSelection && isAdmin && (
-            <TableHead className="w-12">
+            <TableHead className="w-12" data-tour="invoices-select-all">
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={(checked) => {
@@ -206,7 +206,7 @@ function InvoiceTable({
               </TableCell>
               {showActions && isAdmin && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" data-tour="invoice-row-actions">
                     {invoice.status === 'pending' && (
                       <Button
                         size="sm"
@@ -734,6 +734,7 @@ export default function InvoicesPage() {
                     {isAdmin && unbilledByClientMonth.length > 0 && (
                       <Button
                         size="sm"
+                        data-tour="scholarship-generate-all"
                         disabled={generatingAll}
                         onClick={async () => {
                           setGeneratingAll(true)

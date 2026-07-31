@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
+import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { getCompletedWalkthroughs } from '@/lib/walkthroughs/completion'
 import { Button } from '@/components/ui/button'
 import { HelpCircle, X } from 'lucide-react'
 import {
@@ -23,6 +26,7 @@ export function OwnerOnboardingGate() {
   const supabase = useMemo(() => createClient(), [])
 
   const { user, organization, can } = useOrganization()
+  const { startWalkthrough } = useWalkthrough()
   const isOwner = can('settings:edit')
 
   const [ready, setReady] = useState(false)
@@ -138,7 +142,16 @@ export function OwnerOnboardingGate() {
     })
     setOpen(false)
     setShowButton(false)
-  }, [upsertProgress])
+    // Hand off to the guided tours: the wizard explained the concepts, the
+    // App Overview shows them on the real screens.
+    if (!getCompletedWalkthroughs().includes('app-overview')) {
+      toast.success('Setup guide complete!', {
+        description: 'Want to see it all on the real screens? Take the two-minute App Overview tour.',
+        action: { label: 'Start tour', onClick: () => startWalkthrough('app-overview') },
+        duration: 15000,
+      })
+    }
+  }, [startWalkthrough, upsertProgress])
 
   const handleDismissButton = useCallback(() => {
     setDismissed(true)
