@@ -101,9 +101,20 @@ Core tables with RLS policies:
 
 Schema is in `supabase/schema.sql`. **Migrations in `supabase/migrations/` are applied BY HAND** (SQL editor or Management API query endpoint) — the project isn't `supabase link`ed and there's no `schema_migrations` tracking table, so when you add a migration, call it out for manual application.
 
-**Two Supabase projects**: production `ysmwowzxkgisshaormmf` and **cert** `gzrukevymmguqxuoynqk` (formerly MCA-Dev). Local `.env.local` and Vercel Preview/Development point at cert; Vercel Production points at prod. **Apply migrations to cert first, verify, then prod.** Free-tier cert auto-pauses after ~1 week idle — unpause via dashboard or Management API.
+**Three environments, data flowing one way only** (`docs/superpowers/specs/2026-07-31-env-topology-design.md`):
 
-**Cert holds a full copy of production data, including decryptable PHI** (2026-07-30). It uses **prod's `ENCRYPTION_KEY` verbatim** — a different key fails *silently* (`decryptField` swallows it) and then `updateClient` double-encrypts on save. Recipient email columns are rewritten to `@cert.mca.invalid`, and Preview has no `RESEND_API_KEY`, so cert cannot mail real clients. `require_mfa` stays on. Rebuild or refresh it with `scripts/cert-refresh/` — see that README before touching cert; the schema comes from `pg_dump` against live prod because **the repo cannot rebuild prod's schema** (`admin_work` exists in prod with no `CREATE TABLE` anywhere here). The old `dev-owner@…test` / `dev-contractor@…test` sandbox accounts no longer exist; testers are listed in `CERT_TESTERS`.
+| Environment | What it is | Who writes to it |
+|---|---|---|
+| **prod** `ysmwowzxkgisshaormmf` | the business | the business; Vercel Production |
+| **cert** `gzrukevymmguqxuoynqk` (formerly MCA-Dev) | a mirror of prod, **real PHI** | human testers; read-only automated runs; Vercel Preview/Development |
+| **local** `supabase start` | prod's *schema* + fake data | you, freely — **the only environment anything may break** |
+
+Prod → cert copies schema *and* data; prod → local copies schema *only*. Nothing flows back up.
+**Apply migrations to cert first, verify, then prod.** Free-tier cert auto-pauses after ~1 week idle — unpause via dashboard or Management API.
+
+**Local setup:** `scripts/local-env/README.md` — `node scripts/local-env/bootstrap.mjs` then `node scripts/dev-seed/apply.mjs`. Needs Docker. It recreates `dev-owner@maycreativearts.test` / `dev-contractor@maycreativearts.test` (password `TEST_USER_PASSWORD`) with `require_mfa` off, which is why the e2e suite defaults work there and nowhere else. Every script under `scripts/local-env/` calls `assertLocal()` — loopback-only, `mca_local.marker` required, `mca_cert.marker` must be absent.
+
+**Cert holds a full copy of production data, including decryptable PHI** (2026-07-30). It uses **prod's `ENCRYPTION_KEY` verbatim** — a different key fails *silently* (`decryptField` swallows it) and then `updateClient` double-encrypts on save. Recipient email columns are rewritten to `@cert.mca.invalid`, and Preview has no `RESEND_API_KEY`, so cert cannot mail real clients. `require_mfa` stays on. Rebuild or refresh it with `scripts/cert-refresh/` — see that README before touching cert; the schema comes from `pg_dump` against live prod because **the repo cannot rebuild prod's schema** (`admin_work` exists in prod with no `CREATE TABLE` anywhere here). Cert's testers are listed in `CERT_TESTERS`; the `dev-*@…test` sandbox accounts do NOT exist on cert (they live only on the local stack now — see above).
 
 Audit-added DB objects that app code now depends on: functions `mark_sessions_paid(uuid[], date)`, `claim_invoice_reminder_day(uuid, int)`, the `create_session_reminders()` trigger fn, and the audit-log PHI helpers `get_phi_fields()` / `hash_for_audit(text)` / `sanitize_phi_jsonb(jsonb)` (required by `audit_trigger_function()` — every audited-table write fails without them); table `square_webhook_events` (webhook replay dedupe); column `login_attempts.organization_id` (org-scoped reads).
 
@@ -333,7 +344,15 @@ npm run test:e2e:headed   # Run with visible browser
 
 E2E tests are in `tests/e2e/` and cover auth, sessions, invoices, settings, and navigation flows.
 
-**Note**: Full e2e coverage requires `TEST_USER_PASSWORD` environment variable for authenticated tests.
+**Which environment can run which specs** — this is not a preference, it is what each environment permits:
+
+| Target | Command | Coverage |
+|---|---|---|
+| **local** | `npm run test:e2e` | **the full suite, including `session-creation` and `session-resubmit-invoice`** — the only place data-creating specs may run |
+| cert | `TEST_USER_EMAIL=<a CERT_TESTERS address> TEST_USER_PASSWORD=$CERT_TESTER_PASSWORD npx playwright test --workers=1` | read-only specs only (44). Never the two data-creating specs — cert holds real PHI and live testers use it |
+| prod | `playwright.prod.config.ts` + `E2E_REUSE_AUTH=1` and a pre-saved `storageState` | 28 specs. Auth-page specs (`app.spec.ts`, navigation's `Responsive Design`) **cannot pass** — prod rate-limits auth routes to ~2 requests/60s, then 429s |
+
+Authenticated specs need `TEST_USER_PASSWORD`. Without it `login()` calls `test.skip()`, so the suite reports green while covering almost nothing — check the skip count, not just the colour. Prod additionally enforces TOTP, so a per-test login is impossible there; authenticate once and reuse `storageState`.
 
 ## Environment Variables
 
