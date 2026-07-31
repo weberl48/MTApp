@@ -5,7 +5,11 @@ import { readFileSync } from 'node:fs'
 // TEST_USER_PASSWORD never reaches the test process and ~70% of the suite
 // silently skips while still reporting green. No dotenv dependency: parse the
 // two keys we need and never overwrite a value already set in the environment.
-for (const key of ['TEST_USER_EMAIL', 'TEST_USER_PASSWORD']) {
+// ANTHROPIC_API_KEY is loaded for the same reason: help-ai.spec.ts self-skips
+// without it, so the zero-cost chat-UI test silently never ran locally even
+// though the feature was configured and working. (The answer-generating test
+// stays opt-in behind HELP_AI_E2E — that one spends real credits.)
+for (const key of ['TEST_USER_EMAIL', 'TEST_USER_PASSWORD', 'ANTHROPIC_API_KEY']) {
   if (process.env[key]) continue
   try {
     const match = readFileSync('.env.local', 'utf8').match(

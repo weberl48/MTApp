@@ -1,22 +1,17 @@
-/**
- * Run:  node scripts/local-env/lib/toml-config.test.mjs
- *
- * Two earlier regex versions of this helper silently corrupted
- * supabase/config.toml — once by adding a duplicate `enabled` key, once by
- * treating a bracket inside a comment as a section boundary. The CLI reports
- * either as a bare "ProjectConfigParseError", so the damage is only visible by
- * reading the file. These cases are exactly those two failures.
- */
+import { describe, it, expect } from 'vitest'
 import { setSectionDisabled, findTomlDuplicates } from './toml-config.mjs'
 
-let failures = 0
-const ok = (cond, msg) => {
-  console.log(`${cond ? 'PASS  ' : 'FAIL  '}${msg}`)
-  if (!cond) failures++
-}
+/**
+ * Two earlier regex versions of this helper silently corrupted
+ * supabase/config.toml — once by adding a duplicate `enabled` key, once by
+ * treating a bracket inside a comment as a section boundary and splicing a bogus
+ * table header into the file. The CLI reports either as a bare
+ * "ProjectConfigParseError" with no line number, so the damage was only visible
+ * by reading the file. These cases pin both failures.
+ */
 
-// The exact shape that broke it: a comment containing a table-like token, and a
-// value containing brackets, both inside the section being edited.
+// A comment containing a table-like token AND a value containing brackets, both
+// inside the section being edited: the exact shape that broke it.
 const tricky = [
   '[db.seed]',
   '# disabled for the same reason as [db.migrations]',
@@ -27,30 +22,54 @@ const tricky = [
   'enabled = true',
 ].join('\n')
 
-const r = setSectionDisabled(tricky, 'db.seed')
-ok(r.result === 'updated', 'rewrites the existing key rather than adding one')
-ok(findTomlDuplicates(r.text).length === 0, 'introduces no duplicate table or key')
-ok(/\[realtime\]\nenabled = true/.test(r.text), 'leaves the following section untouched')
-ok(r.text.includes('sql_paths = ["./seed.sql"]'), 'preserves a bracketed value')
-ok((r.text.match(/^enabled/gm) || []).length === 2, 'still exactly two enabled keys')
-ok(!/^\[db\.migrations\]/m.test(r.text), 'does not promote a comment into a table header')
+describe('setSectionDisabled', () => {
+  const r = setSectionDisabled(tricky, 'db.seed')
 
-ok(setSectionDisabled(r.text, 'db.seed').result === 'unchanged', 'second run is a no-op')
+  it('rewrites the existing key rather than adding a second one', () => {
+    expect(r.result).toBe('updated')
+    expect((r.text.match(/^enabled/gm) || []).length).toBe(2)
+  })
 
-const added = setSectionDisabled('[api]\nenabled = true', 'db.seed')
-ok(
-  added.result === 'added-section' && findTomlDuplicates(added.text).length === 0,
-  'creates a missing section cleanly'
-)
+  it('introduces no duplicate table or key', () => {
+    expect(findTomlDuplicates(r.text)).toEqual([])
+  })
 
-const noKey = setSectionDisabled('[db.seed]\n# nothing here\n\n[api]\nenabled = true', 'db.seed')
-ok(noKey.result === 'inserted' && /\[db\.seed\]\nenabled = false/.test(noKey.text),
-  'inserts the key when the section has none')
+  it('leaves the following section untouched', () => {
+    expect(r.text).toMatch(/\[realtime\]\nenabled = true/)
+  })
 
-ok(findTomlDuplicates('[db.migrations]\nenabled = false\nenabled = true').length === 1,
-  'detects the duplicate-key corruption')
-ok(findTomlDuplicates('[api]\nenabled = true\n[api]\nport = 1').length === 1,
-  'detects a duplicated table')
+  it('preserves a bracketed value and does not promote a comment to a header', () => {
+    expect(r.text).toContain('sql_paths = ["./seed.sql"]')
+    expect(r.text).not.toMatch(/^\[db\.migrations\]/m)
+  })
 
-console.log(failures ? `\n${failures} FAILURE(S)` : '\nall passed')
-process.exit(failures ? 1 : 0)
+  it('is idempotent', () => {
+    expect(setSectionDisabled(r.text, 'db.seed').result).toBe('unchanged')
+  })
+
+  it('creates a missing section cleanly', () => {
+    const added = setSectionDisabled('[api]\nenabled = true', 'db.seed')
+    expect(added.result).toBe('added-section')
+    expect(findTomlDuplicates(added.text)).toEqual([])
+  })
+
+  it('inserts the key when the section has none', () => {
+    const noKey = setSectionDisabled('[db.seed]\n# nothing here\n\n[api]\nenabled = true', 'db.seed')
+    expect(noKey.result).toBe('inserted')
+    expect(noKey.text).toMatch(/\[db\.seed\]\nenabled = false/)
+  })
+})
+
+describe('findTomlDuplicates', () => {
+  it('detects the duplicate-key corruption', () => {
+    expect(findTomlDuplicates('[db.migrations]\nenabled = false\nenabled = true')).toHaveLength(1)
+  })
+
+  it('detects a duplicated table', () => {
+    expect(findTomlDuplicates('[api]\nenabled = true\n[api]\nport = 1')).toHaveLength(1)
+  })
+
+  it('accepts a well-formed file', () => {
+    expect(findTomlDuplicates('[api]\nenabled = true\n\n[db]\nport = 54322')).toEqual([])
+  })
+})
