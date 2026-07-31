@@ -58,3 +58,29 @@ next-env.d.ts
 
 # Local backup-script failure log (written when the backup drive is unavailable)
 backup-failures.log
+
+# ----------------------------------------------------------------------------
+# Real-data artifacts. THIS REPO IS PUBLIC, and cert holds a full copy of
+# production including real client names, so anything rendered from the running
+# app or exported from the owner's records is PHI. Same reasoning as the
+# walkthrough-audit rule above, applied to the places real data actually lands.
+#
+# The root-anchored patterns deliberately do NOT match nested paths, so genuine
+# assets (public/icons, docs illustrations) stay committable.
+# ----------------------------------------------------------------------------
+/docs/feature-tour/
+/*.png
+/*.jpg
+/*.jpeg
+/*.pdf
+/*.xlsx
+/*.xls
+/*.csv
+/.dev-server.log
+
+# Legacy/reference copy of the app — see CLAUDE.md; not part of the build.
+/mca-app/
+
+# Local agent tooling — machine-specific, not project content.
+/.claude/settings.local.json
+/skill-observations/
