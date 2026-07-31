@@ -24,6 +24,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { LOCAL, PATHS, MARKER_SCHEMA } from './config.mjs'
 import { sql, scalar, isUp, assertLocalConnectionString } from './lib/local-db.mjs'
+import { disableCliSection, findTomlDuplicates } from './lib/toml-config.mjs'
 import { baseSeedSql } from './base-seed.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -35,39 +36,10 @@ const envText = readFileSync(join(REPO, '.env.local'), 'utf8')
 const envValue = (k) => envText.match(new RegExp(`^${k}=("?)(.+?)\\1\\s*$`, 'm'))?.[2]
 
 // ------------------------------------------------------------------ 1. stack up
-/**
- * `supabase start` auto-applies supabase/migrations/*.sql to a fresh local DB.
- * Those files are incremental ALTERs written against an existing production
- * schema, so on an empty database they fail — and they are redundant here
- * anyway, because step 3 loads the complete prod schema dump. Disable them.
- */
-function disableCliMigrations(configPath) {
-  const toml = readFileSync(configPath, 'utf8')
-  const section = /^\[db\.migrations\][^[]*/m
-  const match = toml.match(section)
-
-  // Rewrite the EXISTING enabled key rather than inserting another one. Adding a
-  // second `enabled` under the same table is a duplicate-key TOML error, which
-  // the CLI reports only as an opaque "ProjectConfigParseError".
-  if (match) {
-    const body = match[0]
-    if (/^enabled\s*=\s*false/m.test(body)) return
-    if (/^enabled\s*=/m.test(body)) {
-      const fixed = body.replace(/^enabled\s*=.*$/m, 'enabled = false')
-      writeFileSync(configPath, toml.replace(section, fixed))
-    } else {
-      writeFileSync(configPath, toml.replace(section, `${body.trimEnd()}\nenabled = false\n\n`))
-    }
-  } else {
-    writeFileSync(
-      configPath,
-      `${toml}\n# Local is rebuilt from a full prod schema dump (scripts/local-env/bootstrap.mjs),\n` +
-        '# so the incremental ALTER migrations must not run against an empty database.\n' +
-        '[db.migrations]\nenabled = false\n'
-    )
-  }
-  console.log('  disabled CLI migrations in supabase/config.toml')
-}
+// Both [db.migrations] and [db.seed] must be off before the stack starts: the
+// migration files are incremental ALTERs against an existing production schema
+// and supabase/seed.sql is a legacy seed, so neither can run on an empty DB -
+// and both are redundant once the full prod schema dump loads in step 3.
 
 if (!process.argv.includes('--skip-start')) {
   const configPath = join(REPO, 'supabase', 'config.toml')
@@ -75,7 +47,17 @@ if (!process.argv.includes('--skip-start')) {
     console.log('  supabase init ...')
     execFileSync('npx', ['supabase', 'init'], { cwd: REPO, stdio: 'inherit', shell: true })
   }
-  disableCliMigrations(configPath)
+  disableCliSection(configPath, 'db.migrations')
+  disableCliSection(configPath, 'db.seed')
+
+  // Validate before starting. A malformed config surfaces from the CLI only as
+  // "ProjectConfigParseError" with no line number, which is a slow thing to
+  // diagnose after a multi-minute image pull.
+  const problems = findTomlDuplicates(readFileSync(configPath, 'utf8'))
+  if (problems.length) {
+    throw new Error(`supabase/config.toml is malformed:\n  ${problems.join('\n  ')}`)
+  }
+
   if (!isUp()) {
     console.log('  supabase start (first run pulls images — this takes a while) ...')
     execFileSync('npx', ['supabase', 'start'], { cwd: REPO, stdio: 'inherit', shell: true, timeout: 900_000 })
