@@ -27,6 +27,27 @@ export interface FeatureFlags {
   ai_help: boolean
 }
 
+/**
+ * Per-client session-location field config.
+ *
+ * One structure covers every case: a fixed picklist (options, no free text), a
+ * picklist with an escape hatch (options + allow_other), and pure free text —
+ * which is just the degenerate case of empty `options` plus `allow_other`, not a
+ * separate code path.
+ */
+export interface ClientLocationConfig {
+  /** Field label on the session form, e.g. "Classroom", "Site", "Location". */
+  label: string
+  /** Picklist choices. May be empty. */
+  options: string[]
+  /** Offer an "Other…" choice that reveals a free-text input. */
+  allow_other: boolean
+  /** Block submit when no location is supplied. */
+  required: boolean
+}
+
+export const DEFAULT_LOCATION_LABEL = 'Classroom / Program'
+
 // Organization settings structure
 export interface OrganizationSettings {
   invoice: {
@@ -35,6 +56,8 @@ export interface OrganizationSettings {
     due_days: number
     send_reminders: boolean
     reminder_days: number[]
+    /** Show the session location on client-facing invoices and Square descriptions. */
+    show_session_location: boolean
   }
   session: {
     default_duration: number
@@ -72,10 +95,13 @@ export interface OrganizationSettings {
     payment_methods: Record<string, { label: string; visible: boolean }>
     billing_methods: Record<string, { label: string; visible: boolean }>
     classrooms: string[]
-    /** Per-agency classroom/program lists keyed by the billed client's id.
-        When the session's Bill To client has a list here, it wins over the
-        global `classrooms` list and shows for any payment type. */
+    /** @deprecated Superseded by `locations_by_client`. Still read and upgraded
+        on merge (see `mergeOrganizationSettings`) so existing org config keeps
+        working; nothing new should write here. */
     classrooms_by_client: Record<string, string[]>
+    /** Per-client session-location config keyed by the BILLED client's id.
+        Wins over the global `classrooms` list and applies to any payment type. */
+    locations_by_client: Record<string, ClientLocationConfig>
   }
   automation: {
     auto_approve_sessions: boolean
@@ -373,6 +399,7 @@ export interface Database {
           is_scholarship: boolean
           requires_client: boolean
           allowed_contractor_ids: string[] | null
+          admin_only: boolean
           display_order: number
           organization_id: string
           created_at: string
@@ -398,6 +425,7 @@ export interface Database {
           is_scholarship?: boolean
           requires_client?: boolean
           allowed_contractor_ids?: string[] | null
+          admin_only?: boolean
           display_order?: number
           organization_id: string
           created_at?: string
@@ -422,6 +450,7 @@ export interface Database {
           is_scholarship?: boolean
           requires_client?: boolean
           allowed_contractor_ids?: string[] | null
+          admin_only?: boolean
           display_order?: number
           organization_id?: string
           updated_at?: string
@@ -598,6 +627,7 @@ export interface Database {
           rent_amount: number
           service_type_name: string | null
           contractor_name: string | null
+          classroom: string | null
           created_at: string
         }
         Insert: {
@@ -613,6 +643,7 @@ export interface Database {
           rent_amount?: number
           service_type_name?: string | null
           contractor_name?: string | null
+          classroom?: string | null
           created_at?: string
         }
         Update: {
@@ -627,6 +658,7 @@ export interface Database {
           rent_amount?: number
           service_type_name?: string | null
           contractor_name?: string | null
+          classroom?: string | null
         }
       }
       client_goals: {
@@ -881,6 +913,8 @@ export interface InvoiceSettings {
   due_days: number
   send_reminders: boolean
   reminder_days: number[]
+  /** Show the session location on client-facing invoices and Square descriptions. */
+  show_session_location: boolean
 }
 
 export interface SessionSettings {

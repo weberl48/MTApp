@@ -21,7 +21,7 @@ describe('calculateSessionPricing', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -161,7 +161,7 @@ describe('scholarship pricing', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -259,7 +259,7 @@ describe('calculateNoShowPricing', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -315,7 +315,7 @@ describe('contractor pay schedule', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -391,7 +391,7 @@ describe('contractor duration increment', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -522,7 +522,7 @@ describe('group contractor pay matrix in pricing', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -614,7 +614,7 @@ describe('validateMinimumAttendees', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -680,7 +680,7 @@ describe('calculateContractorTotal', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -740,7 +740,7 @@ describe('getPricingDescription', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -796,7 +796,7 @@ describe('perPersonCost', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -871,7 +871,7 @@ describe('custom duration base', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -913,7 +913,7 @@ describe('calculateNoShowPricing extended', () => {
     is_active: true,
     is_scholarship: false,
     requires_client: true,
-    allowed_contractor_ids: null,
+    allowed_contractor_ids: null, admin_only: false,
     display_order: 0,
     organization_id: 'org-1',
     created_at: '',
@@ -951,7 +951,7 @@ describe('billing rules: where every dollar goes', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
 
@@ -969,7 +969,7 @@ describe('billing rules: where every dollar goes', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: 60,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
 
@@ -990,7 +990,7 @@ describe('billing rules: where every dollar goes', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
 
@@ -1013,7 +1013,7 @@ describe('billing rules: group session billing with duration', () => {
     minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
     contractor_pay_schedule: null, group_contractor_pay: null,
     is_active: true, is_scholarship: false, requires_client: true,
-    allowed_contractor_ids: null, display_order: 0,
+    allowed_contractor_ids: null, admin_only: false, display_order: 0,
     organization_id: 'org-1', created_at: '', updated_at: '',
   }
 
@@ -1049,7 +1049,7 @@ describe('billing rules: contractor pay priority chain', () => {
     contractor_pay_schedule: { '30': 38.5, '45': 54 },
     group_contractor_pay: { '3_30': 63 },
     is_active: true, is_scholarship: false, requires_client: true,
-    allowed_contractor_ids: null, display_order: 0,
+    allowed_contractor_ids: null, admin_only: false, display_order: 0,
     organization_id: 'org-1', created_at: '', updated_at: '',
   }
 
@@ -1116,7 +1116,7 @@ describe('billing rules: MCA cut invariant', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
     const result = calculateSessionPricing(service, 1, 30)
@@ -1131,7 +1131,7 @@ describe('billing rules: MCA cut invariant', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
     const result = calculateSessionPricing(service, 5, 45)
@@ -1146,7 +1146,7 @@ describe('billing rules: MCA cut invariant', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: 60,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
     const result = calculateSessionPricing(service, 1, 30, undefined, {
@@ -1164,7 +1164,7 @@ describe('billing rules: MCA cut invariant', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
     const result = calculateSessionPricing(service, 1, 30)
@@ -1180,7 +1180,7 @@ describe('billing rules: MCA cut invariant', () => {
       minimum_attendees: 1, scholarship_discount_percentage: 0, scholarship_rate: null,
       contractor_pay_schedule: null, group_contractor_pay: null,
       is_active: true, is_scholarship: false, requires_client: true,
-      allowed_contractor_ids: null, display_order: 0,
+      allowed_contractor_ids: null, admin_only: false, display_order: 0,
       organization_id: 'org-1', created_at: '', updated_at: '',
     }
     const result = calculateNoShowPricing(service)
