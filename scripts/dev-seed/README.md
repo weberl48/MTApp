@@ -1,12 +1,18 @@
 # Dev-DB scenario dataset
 
-A full production-shaped dataset for the **MCA-Dev** Supabase project (`gzrukevymmguqxuoynqk`), sized to exercise every scenario the app and test suites cover. Never touches production — the apply script hard-codes the dev ref and refuses to run if `.env.local` points at prod.
+A full production-shaped dataset for the **local** experiment stack, sized to exercise every scenario the app and test suites cover.
+
+`gzrukevymmguqxuoynqk` was this dataset's original home as MCA-Dev. It is now **cert** — a mirror of production holding real PHI — so seeding synthetic rows into it would corrupt the dataset cert exists to provide. `apply.mjs` refuses it outright (`mca_cert.marker`) and refuses production too.
 
 ## Quick start
 
 ```bash
-node scripts/dev-seed/apply.mjs      # regenerates dev-seed.sql, then applies to MCA-Dev
+node scripts/local-env/bootstrap.mjs   # first: schema + base rows this dataset assumes
+node scripts/dev-seed/apply.mjs        # regenerates dev-seed.sql, then applies to LOCAL
+node scripts/dev-seed/apply.mjs --cloud  # legacy cloud path (still refuses cert + prod)
 ```
+
+**This dataset does not stand alone.** `generate.mjs` hard-codes the organization, both dev users, seven service types and four clients by UUID and assumes they already exist; `scripts/local-env/base-seed.mjs` creates them. Change an id in one file and you must change it in the other.
 
 (`generate.mjs` can also be run alone to inspect `dev-seed.sql` — the file is generated output and not committed.)
 
