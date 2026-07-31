@@ -91,6 +91,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     is_active: serviceType?.is_active ?? true,
     is_scholarship: serviceType?.is_scholarship ?? false,
     requires_client: serviceType?.requires_client ?? true,
+    admin_only: serviceType?.admin_only ?? false,
     allowed_contractor_ids: serviceType?.allowed_contractor_ids || ([] as string[]),
     pay_schedule: initPaySchedule(),
     group_pay: initGroupPay(),
@@ -156,6 +157,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       is_active: formData.is_active,
       is_scholarship: formData.is_scholarship,
       requires_client: formData.requires_client,
+      admin_only: formData.admin_only,
       allowed_contractor_ids: formData.allowed_contractor_ids.length > 0 ? formData.allowed_contractor_ids : null,
       contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
       group_contractor_pay: hasAnyGroupPay ? groupPay : null,
@@ -500,6 +502,21 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               id="requires_client"
               checked={formData.requires_client}
               onCheckedChange={(checked) => setFormData({ ...formData, requires_client: checked })}
+            />
+          </div>
+
+          {/* Admin-only: role rule, unlike the per-contractor allowlist below */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="admin_only">Admin Only</Label>
+              <p className="text-xs text-gray-500">
+                Hide this service from contractors when they log a session. Admins and owners always see it.
+              </p>
+            </div>
+            <Switch
+              id="admin_only"
+              checked={formData.admin_only}
+              onCheckedChange={(checked) => setFormData({ ...formData, admin_only: checked })}
             />
           </div>
 
