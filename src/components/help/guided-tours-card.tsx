@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react'
 import { CheckCircle2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useOrganization } from '@/contexts/organization-context'
-import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
-import { getWalkthroughById } from '@/components/walkthroughs/walkthroughs'
+import { useWalkthrough, useWalkthroughAudienceFlags } from '@/components/walkthroughs/walkthrough-provider'
+import { canStartWalkthrough, getWalkthroughById } from '@/components/walkthroughs/walkthroughs'
 import {
   RECOMMENDED_WALKTHROUGH_ORDER,
   WALKTHROUGHS_CHANGED_EVENT,
@@ -15,11 +14,12 @@ import {
 
 /**
  * Interactive tour list in recommended onboarding order, with per-browser
- * completion checkmarks. Admin-only tours are hidden from contractors.
+ * completion checkmarks. Each tour's audience decides who sees it (admin,
+ * owner, contractor, or everyone).
  */
 export function GuidedToursCard() {
-  const { can } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
+  const flags = useWalkthroughAudienceFlags()
   // Read after mount: localStorage isn't available during SSR/hydration.
   const [completed, setCompleted] = useState<string[]>([])
   useEffect(() => {
@@ -29,10 +29,9 @@ export function GuidedToursCard() {
     return () => window.removeEventListener(WALKTHROUGHS_CHANGED_EVENT, refresh)
   }, [])
 
-  const isAdmin = can('session:view-all')
   const tours = RECOMMENDED_WALKTHROUGH_ORDER
     .map(id => getWalkthroughById(id))
-    .filter((w): w is NonNullable<typeof w> => !!w && (!w.adminOnly || isAdmin))
+    .filter((w): w is NonNullable<typeof w> => !!w && canStartWalkthrough(w.id, flags))
 
   const doneCount = tours.filter(w => completed.includes(w.id)).length
 

@@ -17,6 +17,8 @@
 /tests/.auth/
 /.playwright-mcp/
 audit-*.png
+# walkthrough audit output — screenshots can contain real cert data
+/.walkthrough-audit*/
 
 # next.js
 /.next/
@@ -37,6 +39,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but the template must be committable — README.md tells you to copy it,
+# and the blanket rule above is why it never existed.
+!.env.example
 
 # vercel
 .vercel

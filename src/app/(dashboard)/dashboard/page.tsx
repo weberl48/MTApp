@@ -13,6 +13,7 @@ import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
+import { WalkthroughNudge } from '@/components/walkthroughs/walkthrough-nudge'
 import { PendingApprovals } from '@/components/dashboard/pending-approvals'
 import { UnbilledSessions } from '@/components/dashboard/unbilled-sessions'
 import { UnsentInvoices } from '@/components/dashboard/unsent-invoices'
@@ -181,6 +182,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <WalkthroughNudge />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>

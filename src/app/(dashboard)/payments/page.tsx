@@ -296,7 +296,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2" data-tour="payroll-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -342,22 +342,22 @@ export default function PaymentsPage() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
+          <TabsTrigger value="history" data-tour="payroll-tab-history" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Payment History
           </TabsTrigger>
-          <TabsTrigger value="reconciliation" className="flex items-center gap-2">
+          <TabsTrigger value="reconciliation" data-tour="payroll-tab-reconciliation" className="flex items-center gap-2">
             <Receipt className="w-4 h-4" />
             Invoice Reconciliation
           </TabsTrigger>
-          <TabsTrigger value="tax" className="flex items-center gap-2">
+          <TabsTrigger value="tax" data-tour="payroll-tab-tax" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Tax Summaries
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="payroll" className="mt-4">
-          <Card>
+          <Card data-tour="payroll-hub">
             <CardHeader>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>

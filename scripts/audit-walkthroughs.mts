@@ -1,18 +1,9 @@
-// Audit every in-app walkthrough against a running dev server. For each tour:
-// start it from its help article, step through all steps, and verify the
-// popover shows the right step and the highlight lands on the element the
-// definition asks for (or is intentionally centered).
+// Audit every in-app walkthrough against a running dev server (localhost:3000,
+// DEV_AUTO_LOGIN). For each tour: start it from its help article, step through
+// all steps, and verify the popover shows the right step and the highlight
+// lands on the element the definition asks for (or is intentionally centered).
 //
-//   npx tsx scripts/audit-walkthroughs.mts [outDir]                 # desktop
-//   VIEWPORT=mobile npx tsx scripts/audit-walkthroughs.mts [outDir] # phone
-//
-// ONE viewport per invocation — run BOTH commands for full coverage (mobile
-// exercises the drawer nav and FAB paths the desktop run never touches).
-// Other knobs: ONLY=id1,id2 audits a subset; APP_URL overrides the server.
-//
-// Requires an authenticated ADMIN/OWNER browser context (e.g. DEV_AUTO_LOGIN
-// against a sandbox with test accounts): tours launch from Help articles, and
-// contractor runs drop admin-only steps, which would desync the step count.
+//   npx tsx scripts/audit-walkthroughs.mts [outDir]
 //
 // Writes walkthrough-results.json + per-step screenshots to outDir (default
 // .walkthrough-audit/). Exits 1 if any step fails.
@@ -20,21 +11,34 @@ import { chromium, type Page } from '@playwright/test'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ALL_WALKTHROUGHS } from '../src/components/walkthroughs/walkthroughs/index'
+import { audienceAllows, visibleWalkthroughSteps, type AudienceFlags } from '../src/lib/walkthroughs/audience'
+import { HELP_ARTICLES } from '../src/app/(dashboard)/help/_data/help-articles'
 
 const BASE = process.env.APP_URL || 'http://localhost:3000'
 const OUT = process.argv[2] || '.walkthrough-audit'
 
-const ARTICLE_FOR: Record<string, string> = {
-  'app-overview': 'getting-started',
-  'add-client': 'adding-a-client',
-  'log-session': 'logging-a-session',
-  'invite-contractor': 'inviting-team-members',
-  'contractor-pay': 'managing-contractor-rates',
-  'configure-services': 'configuring-services',
-  'edit-service-type': 'editing-service-types',
-  'approve-sessions': 'approving-sessions',
-  'scholarship-billing': 'scholarship-billing',
+// Audience flags must match the account the audit logs in with, or tours the
+// app hides for that role fail with a missing Start button while the provider
+// filters steps differently than the script expects. AUDIT_ROLE selects them
+// (default owner — the DEV_AUTO_LOGIN / cert-tester account).
+const ROLE_FLAGS: Record<string, AudienceFlags> = {
+  owner: { isAdmin: true, isOwner: true, isContractor: false },
+  admin: { isAdmin: true, isOwner: false, isContractor: false },
+  contractor: { isAdmin: false, isOwner: false, isContractor: true },
 }
+const AUDIT_ROLE = process.env.AUDIT_ROLE || 'owner'
+const AUDIT_FLAGS = ROLE_FLAGS[AUDIT_ROLE]
+if (!AUDIT_FLAGS) {
+  console.error(`AUDIT_ROLE must be one of ${Object.keys(ROLE_FLAGS).join('|')}, got "${AUDIT_ROLE}"`)
+  process.exit(1)
+}
+
+// Walkthrough id → launching article slug, derived from the articles' own
+// `walkthrough:` declarations (integrity.test.ts enforces the bijection) —
+// a hand-maintained copy here is how a new tour silently goes unaudited.
+const ARTICLE_FOR: Record<string, string> = Object.fromEntries(
+  HELP_ARTICLES.filter((a) => a.walkthrough).map((a) => [a.walkthrough as string, a.slug])
+)
 
 type StepResult = {
   index: number
@@ -81,14 +85,6 @@ function popoverState(page: Page): Promise<PopoverState> {
   })()`) as Promise<PopoverState>
 }
 
-// Fail fast, by name, if a tour has no launch-article mapping — otherwise the
-// script would navigate to /help/undefined/ and die on an anonymous timeout.
-const unmapped = ALL_WALKTHROUGHS.filter((w) => !ARTICLE_FOR[w.id]).map((w) => w.id)
-if (unmapped.length) {
-  console.error(`ARTICLE_FOR is missing entries for: ${unmapped.join(', ')} — add them to this script.`)
-  process.exit(1)
-}
-
 mkdirSync(OUT, { recursive: true })
 // VIEWPORT=mobile audits the phone layout (off-canvas nav drawer, FAB).
 const isMobile = process.env.VIEWPORT === 'mobile'
@@ -98,6 +94,21 @@ const page = await browser.newPage({ viewport, ...(isMobile ? { hasTouch: true, 
 const consoleErrors: string[] = []
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`))
 
+// Since the cert switch there is no DEV_AUTO_LOGIN: pass AUDIT_EMAIL +
+// AUDIT_PASSWORD to log in through the UI first (one login per run — repeated
+// logins hit Supabase auth rate limits). Local dev skips the MFA challenge, so
+// email+password is enough even for MFA-enrolled accounts.
+const audEmail = process.env.AUDIT_EMAIL
+const audPassword = process.env.AUDIT_PASSWORD
+if (audEmail && audPassword) {
+  await page.goto(BASE + '/login/', { waitUntil: 'networkidle' })
+  await page.fill('#email', audEmail)
+  await page.fill('#password', audPassword)
+  await page.getByRole('button', { name: /sign in/i }).click()
+  await page.waitForURL('**/dashboard/', { timeout: 45000 })
+  console.log(`logged in as ${audEmail}`)
+}
+
 // Pre-warm every route the tours visit so on-demand dev compilation doesn't
 // eat into the provider's 2.5s element-ready timeout.
 const warmPaths = new Set<string>(['/dashboard/', '/help/getting-started/'])
@@ -106,26 +117,56 @@ for (const p of warmPaths) {
   await page.goto(BASE + p, { waitUntil: 'networkidle' })
 }
 
+// Resilience probes: walkthrough id → the step after which to dismiss the
+// dialog the tour is touring. These tours describe fields that live inside a
+// Radix dialog, and a user can close it mid-tour (its X, Escape). That used to
+// be unrecoverable — the page auto-opened the form once per mount, so every
+// later step highlighted nothing and showed the "can't see a highlight?" note.
+// The steps after the probe are asserted normally, so a regression reads as
+// "no element highlighted" rather than passing silently on the happy path.
+const DISMISS_PROBE: Record<string, number> = { 'edit-service-type': 4 }
+
 const results: { id: string; steps: StepResult[]; endedCleanly: boolean }[] = []
 
 const only = process.env.ONLY?.split(',')
+const skipped: string[] = []
 for (const w of ALL_WALKTHROUGHS) {
   if (only && !only.includes(w.id)) continue
+  if (!audienceAllows(w.audience, AUDIT_FLAGS)) {
+    // e.g. my-earnings under the default owner role: the page itself redirects
+    // non-contractors — rerun with AUDIT_ROLE=contractor (+ matching account),
+    // or verify by hand on cert.
+    skipped.push(w.id)
+    console.log(`\n=== ${w.id} — SKIPPED (audience ${w.audience} not auditable as ${AUDIT_ROLE}) ===`)
+    continue
+  }
+  // Audit exactly the steps the provider would run for this role.
+  const auditSteps = visibleWalkthroughSteps(w.steps, AUDIT_FLAGS)
   const article = ARTICLE_FOR[w.id]
   const steps: StepResult[] = []
   let endedCleanly = false
-  console.log(`\n=== ${w.id} (${w.steps.length} steps) ===`)
+  console.log(`\n=== ${w.id} (${auditSteps.length} steps) ===`)
 
-  // One tour blowing up (dead selector, navigation hang) must not lose the
-  // results of the tours already audited — record it and move on.
-  try {
+  if (!article) {
+    console.log(`  FAIL no launching article declares walkthrough: '${w.id}'`)
+    results.push({ id: w.id, steps, endedCleanly: false })
+    continue
+  }
 
   await page.goto(`${BASE}/help/${article}/`, { waitUntil: 'networkidle' })
   const startBtn = page.getByRole('button', { name: 'Start Interactive Walkthrough' })
-  await startBtn.click()
+  // Missing button = role/audience mismatch or article gating — record the
+  // tour as failed and keep auditing the rest instead of crashing the run.
+  try {
+    await startBtn.click({ timeout: 15000 })
+  } catch {
+    console.log(`  FAIL Start button not found on /help/${article}/ (role mismatch or article hidden for ${AUDIT_ROLE})`)
+    results.push({ id: w.id, steps, endedCleanly: false })
+    continue
+  }
 
-  for (let i = 0; i < w.steps.length; i++) {
-    const step = w.steps[i]
+  for (let i = 0; i < auditSteps.length; i++) {
+    const step = auditSteps[i]
     const t0 = Date.now()
     const problems: string[] = []
     let state: Awaited<ReturnType<typeof popoverState>> = { title: null, progress: null, nextBtn: null, highlighted: null }
@@ -144,7 +185,7 @@ for (const w of ALL_WALKTHROUGHS) {
     }
     const msToReady = Date.now() - t0
 
-    const expectedProgress = `${i + 1} of ${w.steps.length}`
+    const expectedProgress = `${i + 1} of ${auditSteps.length}`
     if (state.progress && state.progress !== expectedProgress) {
       problems.push(`progress "${state.progress}" != "${expectedProgress}"`)
     }
@@ -179,9 +220,19 @@ for (const w of ALL_WALKTHROUGHS) {
       status: problems.length ? 'fail' : 'ok', problems,
       highlighted: state.highlighted, progressText: state.progress, msToReady, screenshot: shot,
     })
-    console.log(`  ${problems.length ? 'FAIL' : ' ok '} ${i + 1}/${w.steps.length} ${step.title} (${msToReady}ms)${problems.length ? ' — ' + problems.join('; ') : ''}`)
+    console.log(`  ${problems.length ? 'FAIL' : ' ok '} ${i + 1}/${auditSteps.length} ${step.title} (${msToReady}ms)${problems.length ? ' — ' + problems.join('; ') : ''}`)
 
     await page.locator('.driver-popover-next-btn').click()
+
+    if (DISMISS_PROBE[w.id] === i + 1) {
+      await page.evaluate(`(() => {
+        const openDialogs = Array.from(document.querySelectorAll('[role="dialog"]'))
+        // The tour's own popover is also role="dialog" — pick the app's.
+        const form = openDialogs.find((d) => !d.classList.contains('driver-popover'))
+        form?.querySelector('[data-slot="dialog-close"]')?.click()
+      })()`)
+      console.log(`  .... dismissed the dialog after step ${i + 1} (resilience probe)`)
+    }
   }
 
   try {
@@ -191,16 +242,6 @@ for (const w of ALL_WALKTHROUGHS) {
     console.log('  FAIL popover still open after final step')
     await page.evaluate(`document.querySelector('.driver-popover-close-btn')?.click()`)
   }
-
-  } catch (e) {
-    console.log(`  ABORTED ${w.id}: ${(e as Error).message.split('\n')[0]}`)
-    steps.push({
-      index: steps.length + 1, title: '(tour aborted)', expectedElement: null,
-      status: 'fail', problems: [`aborted: ${(e as Error).message.split('\n')[0]}`],
-      highlighted: null, progressText: null, msToReady: 0, screenshot: '',
-    })
-    await page.evaluate(`document.querySelector('.driver-popover-close-btn')?.click()`).catch(() => {})
-  }
   results.push({ id: w.id, steps, endedCleanly })
 }
 
@@ -208,7 +249,8 @@ await browser.close()
 
 const failCount = results.reduce((n, r) => n + r.steps.filter((s) => s.status === 'fail').length, 0) +
   results.filter((r) => !r.endedCleanly).length
-writeFileSync(join(OUT, 'walkthrough-results.json'), JSON.stringify({ results, consoleErrors }, null, 2))
+writeFileSync(join(OUT, 'walkthrough-results.json'), JSON.stringify({ results, skipped, consoleErrors }, null, 2))
 console.log(`\n${failCount === 0 ? 'ALL PASS' : failCount + ' FAILURES'} across ${results.length} walkthroughs; results in ${OUT}/walkthrough-results.json`)
+if (skipped.length) console.log(`skipped (audience not auditable as owner): ${skipped.join(', ')}`)
 if (consoleErrors.length) console.log('page errors:', consoleErrors.slice(0, 10))
 process.exit(failCount === 0 ? 0 : 1)

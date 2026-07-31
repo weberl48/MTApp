@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,6 +23,7 @@ import {
 import { ServiceTypeForm } from '@/components/forms/service-type-form'
 import { ClientLocationEditor } from '@/components/settings/client-location-editor'
 import { useOrganization } from '@/contexts/organization-context'
+import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import {
   ArrowLeft,
   DollarSign,
@@ -49,6 +50,7 @@ import { parseSettingNumber } from '@/lib/settings/input'
 
 export default function BusinessSettingsPage() {
   const { organization, can, settings, feature, updateSettings } = useOrganization()
+  const { activeWalkthrough, stepIndex } = useWalkthrough()
   const searchParams = useSearchParams()
   const isOwner = can('settings:edit')
   const isAdmin = can('session:view-all')
@@ -59,15 +61,20 @@ export default function BusinessSettingsPage() {
   const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(settings)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
 
-  // Auto-open the service type form when navigated from a walkthrough (once only)
-  const tourHandled = useRef(false)
+  // Hold the service type form open for the walkthrough that tours its fields.
+  // Re-asserted while the tour is live rather than once per mount: dismissing
+  // the dialog (its X, a click outside) used to be unrecoverable — the tour kept
+  // advancing through steps whose fields no longer existed, so every remaining
+  // step showed the "can't see a highlight?" note. Gated on the tour being
+  // active, so closing the form once it ends still sticks.
+  const editServiceTourActive = activeWalkthrough?.id === 'edit-service-type'
   useEffect(() => {
-    if (searchParams.get('tour') === 'edit-service' && serviceTypes.length > 0 && !tourHandled.current) {
-      tourHandled.current = true
-      setEditingServiceType(serviceTypes[0])
-      setIsServiceTypeFormOpen(true)
-    }
-  }, [searchParams, serviceTypes])
+    if (!editServiceTourActive) return
+    if (searchParams.get('tour') !== 'edit-service') return
+    if (serviceTypes.length === 0) return
+    setEditingServiceType((current) => current ?? serviceTypes[0])
+    setIsServiceTypeFormOpen(true)
+  }, [editServiceTourActive, stepIndex, isServiceTypeFormOpen, searchParams, serviceTypes])
 
   useEffect(() => {
     if (settings) setLocalSettings(settings)
@@ -163,7 +170,7 @@ export default function BusinessSettingsPage() {
             <FileText className="w-4 h-4" />
             Invoices
           </TabsTrigger>
-          <TabsTrigger value="sessions" className="flex items-center gap-2">
+          <TabsTrigger value="sessions" data-tour="business-tab-sessions" className="flex items-center gap-2">
             <Settings2 className="w-4 h-4" />
             Sessions
           </TabsTrigger>
@@ -187,13 +194,13 @@ export default function BusinessSettingsPage() {
                 <CardTitle>Service Types</CardTitle>
                 <CardDescription>Configure pricing rules for each service type</CardDescription>
               </div>
-              <Button onClick={() => { setEditingServiceType(null); setIsServiceTypeFormOpen(true) }} className="w-full sm:w-auto" data-tour="add-service-type">
+              <Button data-tour="services-add-button" onClick={() => { setEditingServiceType(null); setIsServiceTypeFormOpen(true) }} className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Service Type
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3" data-tour="service-types-list">
+              <div className="space-y-3" data-tour="services-list">
                 {serviceTypes.map((st) => (
                   <div
                     key={st.id}
@@ -609,7 +616,7 @@ export default function BusinessSettingsPage() {
                 </div>
                 <Separator />
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">Session Locations</h3>
-                <div className="space-y-2">
+                <div className="space-y-2" data-tour="classrooms-editor">
                   <Label htmlFor="classrooms">Classroom Options</Label>
                   <Input
                     id="classrooms"

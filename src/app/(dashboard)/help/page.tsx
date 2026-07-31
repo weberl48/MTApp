@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useOrganization } from '@/contexts/organization-context'
-import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
+import { useWalkthrough, useWalkthroughAudienceFlags } from '@/components/walkthroughs/walkthrough-provider'
+import { canStartWalkthrough } from '@/components/walkthroughs/walkthroughs'
 import { HelpGapsCard } from '@/components/help/help-gaps-card'
 import { GuidedToursCard } from '@/components/help/guided-tours-card'
 import { AiChat, useAiHelpVisible } from '@/components/help/ai-chat'
@@ -96,6 +97,7 @@ export default function HelpPage() {
   const aiVisible = useAiHelpVisible()
   const { can, organization, user } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
+  const audienceFlags = useWalkthroughAudienceFlags()
 
   const isAdminOrAbove = can('session:view-all')
 
@@ -368,7 +370,7 @@ export default function HelpPage() {
                           )}
                         </div>
                       </div>
-                      {article.walkthrough && (
+                      {canStartWalkthrough(article.walkthrough, audienceFlags) && (
                         <Button
                           variant="outline"
                           size="sm"

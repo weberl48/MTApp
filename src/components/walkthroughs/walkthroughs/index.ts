@@ -1,4 +1,5 @@
 import type { Walkthrough } from '../walkthrough-types'
+import { audienceAllows, type AudienceFlags } from '@/lib/walkthroughs/audience'
 
 export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
   id: 'app-overview',
@@ -17,8 +18,6 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
       title: 'Action Center',
       description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on — an empty Action Center means you\'re caught up.',
       element: '[data-tour="dashboard-action-center"]',
-      // The Action Center only renders for admins — skip for contractors.
-      adminOnly: true,
       popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -43,9 +42,8 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     {
       title: 'Clients',
       description: 'Manage your client list, contact info, and payment methods. Each client\'s payment method determines how their invoices are generated.',
+      audience: 'admin',
       element: 'nav a[href="/clients/"]',
-      // The Clients nav item is admin-only — skip for contractors.
-      adminOnly: true,
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -54,9 +52,18 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     {
       title: 'Invoices',
       description: 'Invoices live under the Billing menu. Track pending, sent, paid, and overdue invoices. Scholarship billing has its own tab for monthly batch invoicing.',
+      audience: 'admin',
       element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
-      // The Billing menu is admin-only — skip for contractors.
-      adminOnly: true,
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/dashboard/',
+      mobileNav: true,
+    },
+    {
+      title: 'Earnings',
+      description: 'The Earnings page shows your pay: year-to-date totals, what\'s been paid out, what\'s still pending, and your annual summary for taxes.',
+      audience: 'contractor',
+      element: 'nav a[href="/earnings/"]',
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -78,16 +85,24 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
   id: 'add-client',
   name: 'Add Your First Client',
   description: 'Learn how to add a client to your practice',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Navigate to Clients',
-      description: 'The Clients page shows all your clients. The stats at the top give you a quick count and flag any clients missing contact info.',
+      description: 'The Clients page is where you manage everyone you bill for — contact info, payment setup, and portal access.',
       element: 'nav a[href="/clients/"]',
       popoverSide: 'right',
       ctaLabel: 'Next',
       href: '/clients/',
       mobileNav: true,
+    },
+    {
+      title: 'Client Stats',
+      description: 'These cards give you a quick count of your clients and flag any that are missing contact info, so incomplete records are easy to spot.',
+      element: '[data-tour="clients-stats"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/clients/',
     },
     {
       title: 'Your Client List',
@@ -107,14 +122,11 @@ export const ADD_CLIENT_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Payment & Billing Setup',
-      description: 'These three fields drive all billing. Payment Method is who pays and how the session is classified (Scholarship clients are batch-invoiced monthly at the scholarship rate). Billing Method is how their invoice is delivered — Square payment link, emailed PDF, or a check you track by hand. Invoicing switches a client from per-session invoices to one monthly batch. Press Finish and the form stays open — fill in the client\'s details and click "Add Client", or press Esc to close it.',
+      description: 'These fields drive all billing. Payment Method is who pays and how the session is classified (Scholarship clients are batch-invoiced monthly at the scholarship rate). Billing Method is how their invoice is delivered — Square payment link, emailed PDF, or a check you track by hand. Invoicing switches the client from per-session invoices to one monthly batch, and the Square-fee checkbox adds your processing fee when their invoices go through Square. For a new client with an email, you can also send a portal invite right from this form. Click "Add Client" to save — or press Esc to close without saving.',
       element: '[data-tour="client-billing-fields"]',
       // The fields live inside the Add Client dialog — open it for users who
       // pressed the button above (no-op if they already clicked it).
       preClick: '[data-tour="clients-add-button"] button',
-      // Showcase only: interacting comes after Finish (a highlighted Select
-      // would open its dropdown underneath driver's overlay).
-      disableInteraction: true,
       popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/clients/',
@@ -131,10 +143,7 @@ export const LOG_SESSION_WALKTHROUGH: Walkthrough = {
       title: 'Start a New Session',
       description: 'Click "New Session" on the Sessions page to open the session form. Press "Go to the Form" below and we\'ll take you straight there.',
       mobileDescription: 'On your phone, the floating + button opens quick session logging from any page. Press "Go to the Form" below and we\'ll take you to the full form.',
-      // FAB first: below lg BOTH controls can be visible (tablet widths), and
-      // the mobileDescription above describes the FAB — keep copy & highlight
-      // pointing at the same control.
-      element: '[data-tour="quick-session-fab"], [data-tour="sessions-new-button"]',
+      element: '[data-tour="sessions-new-button"], [data-tour="quick-session-fab"]',
       popoverSide: 'bottom',
       ctaLabel: 'Go to the Form',
       href: '/sessions/',
@@ -194,7 +203,7 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
   id: 'invite-contractor',
   name: 'Invite a Contractor',
   description: 'Learn how to invite team members',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Go to Team',
@@ -223,6 +232,8 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Pay Rate Matrix',
+      // Owner-only step: the Rates tab is hidden from admins (team:view-rates).
+      audience: 'owner',
       description: 'Switch to the Rates tab to see a matrix of all contractor pay rates across service types at a glance. You can set custom per-contractor rates here.',
       element: '[data-tour="team-tab-rates"]',
       popoverSide: 'bottom',
@@ -239,14 +250,11 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Choose a Role & Send',
-      description: 'Contractors can log their own sessions and see their earnings. Admins can additionally review sessions, manage clients, and handle invoicing. Press Finish and the form stays open — choose the role, then enter their email to send the invite (or generate a link to share; they\'ll create their own account from it), or press Esc to close it.',
+      description: 'Contractors can log their own sessions and see their earnings. Admins can additionally review sessions, manage clients, and handle invoicing. Enter their email to send the invite, or generate a link to share directly — they\'ll create their own account from it. Press Esc when you\'re done to close the form.',
       element: '#invite_role',
       // The role selector lives inside the invite dialog — open it for users
       // who pressed the button above (no-op if they already clicked it).
       preClick: '[data-tour="team-invite-button"] button',
-      // Showcase only: interacting comes after Finish (a highlighted Select
-      // would open its dropdown underneath driver's overlay).
-      disableInteraction: true,
       popoverSide: 'left',
       ctaLabel: 'Finish',
       href: '/team/',
@@ -258,7 +266,7 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
   id: 'configure-services',
   name: 'Configure Services',
   description: 'Learn how to set up service types and pricing',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Go to Settings',
@@ -271,25 +279,23 @@ export const CONFIGURE_SERVICES_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Service Types List',
-      description: 'Every service your practice offers lives here, with its pricing summary. Each entry shows the base rate and key settings at a glance — this list is what contractors pick from when they log a session.',
-      element: '[data-tour="service-types-list"]',
+      description: 'You\'ll see all your current service types with their pricing. Each row summarizes the base rate and key settings, with a badge for the location. Click the pencil on any service type to edit it.',
+      element: '[data-tour="services-list"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/settings/business/',
     },
     {
-      title: 'Add a New Service',
-      description: 'This button creates a new service type. The form lets you set the base rate (billed per 30 minutes), per-person rate for groups, contractor pay, caps, rent, and scholarship behavior.',
-      element: '[data-tour="add-service-type"]',
+      title: 'Add or Edit a Service',
+      description: 'Click "Add Service Type" to create a new one, or edit an existing service. The form lets you set base rate, per-person rate (for groups), contractor cap, total cap, rent, scholarship rate, and more.',
+      element: '[data-tour="services-add-button"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/settings/business/',
     },
     {
-      title: 'Edit an Existing Service',
-      description: 'Click any service in the list to open its edit form. For a field-by-field guide through everything in that form — pricing, contractor pay, toggles — take the "Edit a Service Type" tour from the Help Center\'s Guided Tours list.',
-      element: '[data-tour="service-type-row"]',
-      popoverSide: 'bottom',
+      title: 'Detailed Editing Walkthrough',
+      description: 'For a step-by-step guide through every field in the service type form, take the "Edit a Service Type" tour — you\'ll find it in the Help Center\'s Guided Tours list. It highlights each field and explains what it does.',
       ctaLabel: 'Finish',
       href: '/settings/business/',
     },
@@ -300,7 +306,7 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
   id: 'approve-sessions',
   name: 'Approve Sessions',
   description: 'Learn how to review and approve submitted sessions',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Sessions Page',
@@ -329,28 +335,23 @@ export const APPROVE_SESSIONS_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Inline Approve',
-      description: 'For submitted sessions, you\'ll see Approve and Revise buttons right on the session card. Click Approve to confirm instantly, or Revise to send it back to the contractor with a note. (These buttons only appear when a session is waiting for review.)',
-      // Present only when a submitted session is in view — the centered
-      // fallback + note explains itself when the queue is empty.
-      element: '[data-tour="session-approve-actions"]',
-      popoverSide: 'top',
+      description: 'Submitted sessions carry Approve and Revise buttons right on the card (if the whole list is highlighted instead, nothing is waiting for review right now). Click Approve to confirm instantly, or Revise to send it back to the contractor with a note. You can try it right now — the tour will stay with you.',
+      element: '[data-tour="session-approve-inline"], [data-tour="sessions-list"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
     {
       title: 'Bulk Approve',
-      description: 'This "Select all submitted" checkbox (or the checkboxes on each card) selects multiple sessions at once. A blue bar appears with an "Approve (N)" button that approves them all together — handy at the end of a pay period.',
-      // Present only when a submitted session is in view.
-      element: '[data-tour="sessions-select-all"]',
+      description: 'Use the "Select all submitted" checkbox at the top of the list (or the checkboxes on each card) to select multiple sessions. A blue bar appears with an "Approve (N)" button that approves them all at once.',
+      element: '[data-tour="sessions-select-all"], [data-tour="sessions-list"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/sessions/',
     },
     {
       title: 'Other Actions',
-      description: 'Click any session card to open its detail page — that\'s where you can also Request Revision (with a reason), Mark No-Show (charges the no-show fee), or Cancel. The session\'s invoice was already created when it was submitted — approving confirms the session so the invoice is ready to send.',
-      element: '[data-tour="session-card"]',
-      popoverSide: 'bottom',
+      description: 'From a session\'s detail page, you can also Request Revision (with a reason), Mark No-Show (charges the no-show fee), or Cancel. The session\'s invoice was already created when it was submitted — approving confirms the session so the invoice is ready to send.',
       ctaLabel: 'Finish',
       href: '/sessions/',
     },
@@ -361,7 +362,7 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
   id: 'scholarship-billing',
   name: 'Scholarship Billing',
   description: 'Learn how to generate monthly scholarship invoices',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Go to Invoices',
@@ -410,6 +411,8 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
     {
       title: 'Generate Invoices',
       description: 'Click "Generate Invoice" for each client/month group, or "Generate All" to create batch invoices for all unbilled sessions at once. Invoices are created as Pending so you can review before sending.',
+      element: '[data-tour="scholarship-generate-all"], [data-tour="invoices-scholarship-content"]',
+      popoverSide: 'bottom',
       ctaLabel: 'Finish',
       href: '/invoices/',
     },
@@ -420,7 +423,7 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   id: 'edit-service-type',
   name: 'Edit a Service Type',
   description: 'Learn how to customize service type pricing, pay, and special behaviors',
-  adminOnly: true,
+  audience: 'admin',
   steps: [
     {
       title: 'Go to Settings',
@@ -541,55 +544,361 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   ],
 }
 
-export const CONTRACTOR_PAY_WALKTHROUGH: Walkthrough = {
-  id: 'contractor-pay',
-  name: 'How Contractor Pay Works',
-  description: 'Where contractor pay comes from and which setting wins',
-  adminOnly: true,
+export const SEND_INVOICE_WALKTHROUGH: Walkthrough = {
+  id: 'send-invoice',
+  name: 'Send & Track Invoices',
+  description: 'Learn the invoice workflow — from pending to sent to paid',
+  audience: 'admin',
   steps: [
     {
-      title: 'Pay Is Looked Up, Not Guessed',
-      description: 'Every session\'s contractor pay comes from a priority chain of settings you control — nothing is hardcoded. The first place to look is the Rates tab here on the Team page. Press "Open the Rates Tab" and we\'ll open it for you.',
+      title: 'Go to Invoices',
+      description: 'Invoices live under Billing. When a session is submitted, its invoice is created automatically as Pending — everything after that happens here.',
+      element: 'nav a[href="/invoices/"], [data-tour="nav-billing"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/invoices/',
+      mobileNav: true,
+    },
+    {
+      title: 'The Invoice Lifecycle',
+      description: 'Invoices move through three statuses: Pending (created, not yet delivered), Sent (delivered, awaiting payment), and Paid. Overdue isn\'t a status — it\'s computed from the due date, and an Overdue tab appears automatically when anything is past due.',
+      element: '[data-tour="invoices-card"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/invoices/',
+    },
+    {
+      title: 'Row Actions',
+      description: 'Each row has quick actions: Send marks a pending invoice sent, Paid records payment on a sent one, and the menu holds more — email the PDF, create a Square invoice, or delete a pending invoice. Sent and paid invoices are financial records and can never be deleted.',
+      element: '[data-tour="invoice-row-actions"], [data-tour="invoices-card"]',
+      popoverSide: 'left',
+      ctaLabel: 'Next',
+      href: '/invoices/',
+    },
+    {
+      title: 'Open an Invoice',
+      description: 'Click any row to open the full invoice: download or email the PDF, send it through Square, or record a payment. Emailing uses the address on the client\'s profile.',
+      ctaLabel: 'Next',
+      href: '/invoices/',
+    },
+    {
+      title: 'Bulk Actions',
+      description: 'Use the checkboxes to select several invoices — a blue bar appears with Export CSV, Mark Sent, and Mark Paid so you can process a whole batch at once.',
+      element: '[data-tour="invoices-select-all"], [data-tour="invoices-card"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/invoices/',
+    },
+    {
+      title: 'Due Dates & Reminders',
+      description: 'Due dates come from your invoice settings (30 days by default). If reminders are enabled, clients get automatic emails as the due date approaches — and anything unpaid past due shows up here in red. That\'s the invoice workflow!',
+      element: '[data-tour="invoices-stats"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Finish',
+      href: '/invoices/',
+    },
+  ],
+}
+
+export const PAYROLL_WALKTHROUGH: Walkthrough = {
+  id: 'payroll',
+  name: 'Run Payroll',
+  description: 'Learn how to review unpaid sessions and record contractor payouts',
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Go to Payroll',
+      description: 'Payroll lives under Billing. This is where you see what contractors have earned and record payouts.',
+      element: 'nav a[href="/payments/"], [data-tour="nav-billing"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/payments/',
+      mobileNav: true,
+    },
+    {
+      title: 'Payroll at a Glance',
+      description: 'All-time contractor earnings, next to what\'s currently awaiting payout and how many sessions that covers.',
+      element: '[data-tour="payroll-stats"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/payments/',
+    },
+    {
+      title: 'Unpaid Sessions',
+      description: 'The Payroll Hub groups unpaid sessions by contractor. Expand a contractor to review their sessions, use the date filter to work a pay period, and click Mark Paid to record the payout. Each session\'s pay is snapshotted at that moment, so later rate changes never rewrite history.',
+      element: '[data-tour="payroll-hub"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/payments/',
+    },
+    {
+      title: 'Payment History',
+      description: 'The History tab summarizes every contractor — sessions logged, total earned, paid out, and still pending.',
+      element: '[data-tour="payroll-tab-history"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/payments/',
+    },
+    {
+      title: 'Invoice Reconciliation',
+      description: 'Reconciliation cross-checks your invoices against Square, so what\'s recorded as paid matches what clients actually paid.',
+      element: '[data-tour="payroll-tab-reconciliation"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/payments/',
+    },
+    {
+      title: 'Tax Summaries',
+      description: 'Tax Summaries builds cash-basis annual totals per contractor — a payment counts in the year it was paid, not when the session happened. Download the CSV or per-contractor PDFs at year end. That\'s payroll!',
+      element: '[data-tour="payroll-tab-tax"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Finish',
+      href: '/payments/',
+    },
+  ],
+}
+
+export const MY_EARNINGS_WALKTHROUGH: Walkthrough = {
+  id: 'my-earnings',
+  name: 'Track Your Earnings',
+  description: 'Learn how your pay is tracked, from submission to payout',
+  audience: 'contractor',
+  steps: [
+    {
+      title: 'Your Earnings Page',
+      description: 'Everything about your pay lives on the Earnings page.',
+      element: 'nav a[href="/earnings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/earnings/',
+      mobileNav: true,
+    },
+    {
+      title: 'Earnings Summary',
+      description: 'Year-to-date earnings, what\'s already been paid out, what\'s still pending, and this month at a glance. Sessions count toward earnings once you submit them — drafts don\'t.',
+      element: '[data-tour="earnings-stats"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/earnings/',
+    },
+    {
+      title: 'What Pending Means',
+      description: 'After you submit a session it goes to review. Approved or not-yet-paid sessions show here as Pending until the practice records your payout — then they move to Paid Out. If a session is sent back for revision, fix and resubmit it from the Sessions page; it counts again the moment it\'s resubmitted.',
+      ctaLabel: 'Next',
+      href: '/earnings/',
+    },
+    {
+      title: 'Monthly Breakdown',
+      description: 'Your recent months side by side — sessions and earnings per month, with the chart above showing the trend.',
+      element: '[data-tour="earnings-monthly"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/earnings/',
+    },
+    {
+      title: 'Annual Summary for Taxes',
+      description: 'At tax time, download your annual earnings summary PDF here. It\'s cash-basis: a payment counts in the year you were paid, not the year of the session. That\'s your earnings page!',
+      element: '[data-tour="earnings-annual"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/earnings/',
+    },
+  ],
+}
+
+export const AUTOMATION_WALKTHROUGH: Walkthrough = {
+  id: 'automation',
+  name: 'Automate Your Workflow',
+  description: 'Learn the auto-approve, auto-send, and scholarship automation switches',
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Customize & Automate',
+      description: 'Automation lives in Settings, on the Customize & Automate page.',
+      element: 'nav a[href="/settings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+      mobileNav: true,
+    },
+    {
+      title: 'Open the Automation Tab',
+      description: 'The Automation tab holds three switches that change how work flows through the app. Click it — or press "Open the Tab" and we\'ll switch for you.',
+      element: '[data-tour="customize-tab-automation"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Open the Tab',
+      href: '/settings/customize/',
+    },
+    {
+      title: 'Auto-Approve Sessions',
+      description: 'When on, submitted sessions are approved instantly — no review queue, and their invoices are created right away. Turn this on only once you trust what\'s being submitted.',
+      element: '[data-tour="automation-sessions"]',
+      preClick: '[data-tour="customize-tab-automation"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+    },
+    {
+      title: 'Auto-Send Invoices',
+      description: 'When a session is approved (by you or by auto-approve), its invoice can go out immediately — by email or as a Square invoice. This applies to per-session billing; monthly-batch clients still get one statement at month end.',
+      element: '[data-tour="automation-invoices"]',
+      preClick: '[data-tour="customize-tab-automation"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+    },
+    {
+      title: 'Scholarship Auto-Generation',
+      description: 'Generates the monthly scholarship batch invoices automatically on the day you pick (1–28), instead of pressing "Generate All" on the Scholarship tab yourself. Remember to click "Save Automation Settings" to apply any changes.',
+      element: '[data-tour="automation-scholarship"]',
+      preClick: '[data-tour="customize-tab-automation"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/settings/customize/',
+    },
+  ],
+}
+
+export const CUSTOM_LISTS_WALKTHROUGH: Walkthrough = {
+  id: 'custom-lists',
+  name: 'Customize Lists & Labels',
+  description: 'Learn how to rename or hide payment methods, billing methods, and classrooms',
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Customize & Automate',
+      description: 'Custom lists live in Settings, on the Customize & Automate page.',
+      element: 'nav a[href="/settings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+      mobileNav: true,
+    },
+    {
+      title: 'Payment Methods',
+      description: 'Rename any payment method to match how you actually talk about it, or hide ones you never use — hidden options disappear from the client and session forms. The internal key in gray never changes, so existing data stays consistent.',
+      element: '[data-tour="customize-payment-methods"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+    },
+    {
+      title: 'Billing Methods',
+      description: 'The same controls for how invoices are delivered. Click "Save Custom Lists" when you\'re done.',
+      element: '[data-tour="customize-billing-methods"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/customize/',
+    },
+    {
+      title: 'Classrooms',
+      description: 'Classroom options for the session form are managed in Business Rules under the Sessions tab — including per-agency lists that override the global one for specific clients.',
+      element: '[data-tour="classrooms-editor"]',
+      preClick: '[data-tour="business-tab-sessions"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/settings/business/',
+    },
+  ],
+}
+
+export const CONTRACTOR_RATES_WALKTHROUGH: Walkthrough = {
+  id: 'contractor-rates',
+  name: 'Set Contractor Pay Rates',
+  description: 'Learn how the pay rate matrix and custom per-contractor rates work',
+  // Owner-only: the Rates tab this tour walks through is hidden from admins.
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Go to Team',
+      description: 'Custom pay rates live on the Team page.',
+      element: 'nav a[href="/team/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/team/',
+      mobileNav: true,
+    },
+    {
+      title: 'Open the Rates Tab',
+      description: 'The Rates tab shows the full pay rate matrix. Click it — or press "Open the Tab" and we\'ll switch for you.',
       element: '[data-tour="team-tab-rates"]',
       popoverSide: 'bottom',
-      ctaLabel: 'Open the Rates Tab',
+      ctaLabel: 'Open the Tab',
       href: '/team/',
     },
     {
-      title: 'Custom Rates Matrix',
-      description: 'One row per contractor, one column per service type. A filled cell is that contractor\'s personal 30-minute pay for that service — use it when someone negotiates a raise. Longer sessions add the per-15-minute increment saved with the rate. When a session is priced, a custom rate here beats everything except a group pay matrix.',
-      element: '[data-tour="pay-rate-matrix"]',
-      // The Rates panel only mounts once its tab is active.
+      title: 'The Pay Rate Matrix',
+      description: 'One row per service type, one column per contractor. Each cell is that contractor\'s pay for a 30-minute session of that service — blank cells fall back to the service type\'s pay schedule or formula.',
+      element: '[data-tour="pay-rate-matrix"], [data-tour="team-members-card"]',
       preClick: '[data-tour="team-tab-rates"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
       href: '/team/',
     },
     {
-      title: 'Pay on the Service Type',
-      description: 'Each service type carries its own pay rules. Individual services set exact contractor pay per duration ("Contractor Pay by Duration" — used when a contractor has no custom rate; the "auto" hint shows what the formula would pay). Group services instead use a pay matrix by headcount and duration, which beats every other rule.',
-      // Whichever the opened service renders: schedule (individual) or
-      // group matrix (group service).
-      element: '[data-tour="pay-schedule"], [data-tour="group-pay-matrix"]',
-      popoverSide: 'bottom',
+      title: 'Editing a Rate',
+      description: 'Click the pencil in a cell to set a custom rate — raises are baked into the number you enter, and "Set all" fills a whole column at once (editing requires the owner). Use the duration tabs to check longer sessions: they add the service\'s pay-schedule offset on top of the 30-minute rate.',
+      element: '[data-tour="pay-rate-matrix"], [data-tour="team-members-card"]',
+      preClick: '[data-tour="team-tab-rates"]',
+      popoverSide: 'top',
       ctaLabel: 'Next',
-      href: '/settings/business/?tour=edit-service',
+      href: '/team/',
     },
     {
-      title: 'Caps & the Percentage Fallback',
-      description: 'When no matrix, custom rate, or schedule applies, the formula kicks in: contractor pay = total billed minus the service\'s MCA percentage. The Contractor Cap here is a hard ceiling on pay per session no matter which rule produced it — leave it empty for no limit.',
-      element: '#contractor_cap',
-      popoverSide: 'bottom',
-      ctaLabel: 'Next',
-      href: '/settings/business/?tour=edit-service',
-    },
-    {
-      title: 'The Priority Chain',
-      description: 'Putting it together, the app checks in order: 1) the group pay matrix (group services), 2) the contractor\'s custom rate from Team > Rates, 3) the service\'s pay-by-duration schedule, 4) the percentage formula — then applies the Contractor Cap. The first rule that matches wins, so a personal raise only ever needs one cell in the rates matrix. One more rule: scholarship pricing never reduces contractor pay — the organization absorbs the difference.',
-      element: '[data-tour="pay-schedule"], [data-tour="group-pay-matrix"]',
-      popoverSide: 'bottom',
+      title: 'When Rates Apply',
+      description: 'Rate changes affect sessions logged from then on — approved and paid sessions keep the pay they were priced at. To spot-check a contractor\'s pay on a real session, open any of their sessions and review the pricing breakdown.',
       ctaLabel: 'Finish',
-      href: '/settings/business/?tour=edit-service',
+      href: '/team/',
+    },
+  ],
+}
+
+export const ANALYTICS_WALKTHROUGH: Walkthrough = {
+  id: 'analytics',
+  name: 'Explore Analytics',
+  description: 'Learn the revenue, session, and payment-status views',
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Go to Analytics',
+      description: 'Analytics gives you the business-wide picture — revenue, session volume, and payment status.',
+      element: 'nav a[href="/analytics/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/analytics/',
+      mobileNav: true,
+    },
+    {
+      title: 'Pick a Date Range',
+      description: 'Everything on this page follows the selected range — the last 3, 6, or 12 months, or year to date.',
+      element: '[data-tour="analytics-range"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/analytics/',
+    },
+    {
+      title: 'Summary Cards',
+      description: 'Total revenue billed in the range, your organization\'s share of it, session count, and active clients.',
+      element: '[data-tour="analytics-stats"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/analytics/',
+    },
+    {
+      title: 'Revenue & Sessions',
+      description: 'Revenue by month, split into your share and contractor pay — next to session volume split individual vs group.',
+      element: '[data-tour="analytics-charts"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/analytics/',
+    },
+    {
+      title: 'Payment Status',
+      description: 'How much of the billed revenue is collected, awaiting payment, or still pending review — with total outstanding at the bottom. For raw data, the Sessions page has a CSV export. That\'s analytics!',
+      element: '[data-tour="analytics-payments"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/analytics/',
     },
   ],
 }
@@ -598,14 +907,31 @@ export const ALL_WALKTHROUGHS: Walkthrough[] = [
   APP_OVERVIEW_WALKTHROUGH,
   ADD_CLIENT_WALKTHROUGH,
   LOG_SESSION_WALKTHROUGH,
+  SEND_INVOICE_WALKTHROUGH,
   INVITE_CONTRACTOR_WALKTHROUGH,
-  CONTRACTOR_PAY_WALKTHROUGH,
   CONFIGURE_SERVICES_WALKTHROUGH,
   EDIT_SERVICE_TYPE_WALKTHROUGH,
   APPROVE_SESSIONS_WALKTHROUGH,
   SCHOLARSHIP_BILLING_WALKTHROUGH,
+  PAYROLL_WALKTHROUGH,
+  MY_EARNINGS_WALKTHROUGH,
+  AUTOMATION_WALKTHROUGH,
+  CUSTOM_LISTS_WALKTHROUGH,
+  CONTRACTOR_RATES_WALKTHROUGH,
+  ANALYTICS_WALKTHROUGH,
 ]
 
 export function getWalkthroughById(id: string): Walkthrough | undefined {
   return ALL_WALKTHROUGHS.find(w => w.id === id)
+}
+
+/**
+ * THE gate for offering/starting a tour by id — article pages, the Guided
+ * Tours card, and next-tour chaining must all use this one predicate so a
+ * gating-rule change can't leave one entry point behind.
+ */
+export function canStartWalkthrough(id: string | undefined, flags: AudienceFlags): boolean {
+  if (!id) return false
+  const walkthrough = getWalkthroughById(id)
+  return !!walkthrough && audienceAllows(walkthrough.audience, flags)
 }

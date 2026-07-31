@@ -228,7 +228,7 @@ export default function AnalyticsPage() {
             Business insights and performance metrics
           </p>
         </div>
-        <div className="flex gap-1 rounded-lg border p-1">
+        <div className="flex gap-1 rounded-lg border p-1" data-tour="analytics-range">
           {([['3m', '3M'], ['6m', '6M'], ['12m', '12M'], ['ytd', 'YTD']] as const).map(([value, label]) => (
             <Button
               key={value}
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-tour="analytics-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -298,12 +298,12 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2" data-tour="analytics-charts">
         <RevenueChart data={revenueData} />
         <SessionsChart data={sessionsChartData} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2" data-tour="analytics-payments">
         <PaymentStatusChart data={paymentStatusData} />
 
         {/* Quick Stats */}

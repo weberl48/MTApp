@@ -299,6 +299,7 @@ Result: When logging a session, the form asks "Who did this work?" instead of as
     category: 'settings',
     description: 'How to configure automatic session approval, invoice sending, and scholarship billing.',
     adminOnly: true,
+    walkthrough: 'automation',
     relatedArticles: ['generating-invoices', 'scholarship-billing', 'configuring-services', 'custom-lists'],
     keywords: ['auto-approve', 'auto-send invoice', 'scholarship batch', 'automation', 'custom lists'],
     content: `
@@ -560,8 +561,9 @@ See **Editing Service Types: A Complete Guide** for a field-by-field walkthrough
     category: 'settings',
     description: 'How to rename or hide payment and billing methods, and manage global and per-client classroom lists.',
     adminOnly: true,
+    walkthrough: 'custom-lists',
     relatedArticles: ['configuring-services', 'automation-settings', 'client-billing-controls', 'client-details'],
-    keywords: ['payment methods', 'billing methods', 'classroom', 'location', 'site', 'room', 'where', 'admin only', 'dropdown', 'rename', 'hide'],
+    keywords: ['payment methods', 'billing methods', 'classroom', 'dropdown', 'rename', 'hide'],
     content: `
 ## Custom Lists: Payment Methods, Billing Methods & Classrooms
 
@@ -578,36 +580,16 @@ For each entry in both lists, you can:
 
 > **Where to find it:** Navigate to **Settings > Customize and Automate > Custom Lists** tab. Payment methods and billing methods each have their own editable list, with a **Save Custom Lists** button to apply changes.
 
-### Session Locations
+### Classrooms
 
-Session locations control the field contractors use to record **where** a session took place. Each client gets its own settings, so a school and a self-directed client can behave completely differently.
+The **Classrooms** list powers a dropdown on the session form, most commonly used for scholarship or group-home clients attending sessions at a facility with multiple rooms.
 
-Each per-client entry has four settings:
+There are two layers to the classroom list:
 
-- **Field label** — what contractors see, e.g. "Classroom", "Site", or "Location". Defaults to "Classroom / Program".
-- **Options** — the comma-separated dropdown choices. Leave empty for free text only.
-- **Allow free text** — adds an **Other…** choice that reveals a text box, or makes the field pure free text when there are no options.
-- **Required** — blocks submitting the session until a location is given.
+- **Global classroom list** — a single comma-separated list of room names (e.g., "Room A, Room B, Music Hall") shown for any client when no per-client list applies.
+- **Per-agency overrides** (\`classrooms_by_client\`) — a classroom list scoped to a specific client. When a client has their own list configured, it replaces the global list on the session form for that client, regardless of their payment method. This is useful for group-home or facility clients whose room names differ from your general list.
 
-That gives three useful shapes:
-
-| Client type | Options | Allow free text | Result |
-|---|---|---|---|
-| School with fixed rooms | Room 101, Room 102… | Off | Mandatory dropdown |
-| Facility with occasional exceptions | Main Chapel, Day Hab East… | On | Dropdown plus an escape hatch |
-| Self-directed client, location varies | *(empty)* | On | Plain text box |
-
-Clients with no entry get no location field at all.
-
-The **global classroom list** above remains a fallback used only by scholarship group sessions whose billed client has no per-client settings.
-
-> **Where to find it:** Navigate to **Settings > Business Rules > Sessions** tab, in the **Session Locations** section. To print locations on client invoices, enable **Show Session Location on Invoices** on the **Invoices** tab.
-
-### Admin-Only Service Types
-
-Some service types — Admin work being the obvious one — should never appear to contractors logging their own sessions. Edit the service type under **Settings > Business Rules > Services** and turn on **Admin Only**. Contractors stop seeing it in the Service Type dropdown; admins and owners always see everything.
-
-This is a role rule, so it keeps working as staff join and leave. Use **Restrict to Contractors** instead when you need to limit a service to a few specific named people rather than to a role.
+> **Where to find it:** Navigate to **Settings > Business Rules > Sessions** tab. The **Classrooms** section has the global comma-separated list, plus a per-client editor for setting overrides on individual clients.
 
 ### Why This Matters
 
@@ -616,7 +598,7 @@ Keeping these lists accurate avoids confusion on the session and client forms �
 ### Tips
 
 - Hiding an option is safer than deleting data — existing clients keep their assigned payment or billing method even if it's hidden from new selections.
-- If no location field appears for a client, check that the client has an entry under **Per-Client Location Settings** with either options or free text enabled — an entry with neither shows nothing.
+- If a classroom dropdown looks empty for a specific client, check whether that client has a per-client classroom override configured — it silently replaces the global list.
 - Changes save immediately across the organization; there's no per-user override.
     `,
   },
