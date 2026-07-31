@@ -17,7 +17,7 @@
  *
  * Usage:  node scripts/local-env/bootstrap.mjs [--source <stamp>] [--skip-start]
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { join, dirname } from 'node:path'
@@ -35,11 +35,47 @@ const envText = readFileSync(join(REPO, '.env.local'), 'utf8')
 const envValue = (k) => envText.match(new RegExp(`^${k}=("?)(.+?)\\1\\s*$`, 'm'))?.[2]
 
 // ------------------------------------------------------------------ 1. stack up
+/**
+ * `supabase start` auto-applies supabase/migrations/*.sql to a fresh local DB.
+ * Those files are incremental ALTERs written against an existing production
+ * schema, so on an empty database they fail — and they are redundant here
+ * anyway, because step 3 loads the complete prod schema dump. Disable them.
+ */
+function disableCliMigrations(configPath) {
+  const toml = readFileSync(configPath, 'utf8')
+  const section = /^\[db\.migrations\][^[]*/m
+  const match = toml.match(section)
+
+  // Rewrite the EXISTING enabled key rather than inserting another one. Adding a
+  // second `enabled` under the same table is a duplicate-key TOML error, which
+  // the CLI reports only as an opaque "ProjectConfigParseError".
+  if (match) {
+    const body = match[0]
+    if (/^enabled\s*=\s*false/m.test(body)) return
+    if (/^enabled\s*=/m.test(body)) {
+      const fixed = body.replace(/^enabled\s*=.*$/m, 'enabled = false')
+      writeFileSync(configPath, toml.replace(section, fixed))
+    } else {
+      writeFileSync(configPath, toml.replace(section, `${body.trimEnd()}\nenabled = false\n\n`))
+    }
+  } else {
+    writeFileSync(
+      configPath,
+      `${toml}\n# Local is rebuilt from a full prod schema dump (scripts/local-env/bootstrap.mjs),\n` +
+        '# so the incremental ALTER migrations must not run against an empty database.\n' +
+        '[db.migrations]\nenabled = false\n'
+    )
+  }
+  console.log('  disabled CLI migrations in supabase/config.toml')
+}
+
 if (!process.argv.includes('--skip-start')) {
-  if (!existsSync(join(REPO, 'supabase', 'config.toml'))) {
+  const configPath = join(REPO, 'supabase', 'config.toml')
+  if (!existsSync(configPath)) {
     console.log('  supabase init ...')
     execFileSync('npx', ['supabase', 'init'], { cwd: REPO, stdio: 'inherit', shell: true })
   }
+  disableCliMigrations(configPath)
   if (!isUp()) {
     console.log('  supabase start (first run pulls images — this takes a while) ...')
     execFileSync('npx', ['supabase', 'start'], { cwd: REPO, stdio: 'inherit', shell: true, timeout: 900_000 })
