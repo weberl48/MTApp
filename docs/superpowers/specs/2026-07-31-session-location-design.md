@@ -1,5 +1,13 @@
 # Session Location, Invoice Location, and Admin-Only Service Types
 
+> **SUPERSEDED (same day, 2026-07-31)** — the location model in §3–§5 (per-client
+> picklist config in `custom_lists.locations_by_client`, the `ClientLocationEditor`,
+> and the `invoice.show_session_location` toggle) shipped and was replaced hours
+> later by two boolean flags: `service_types.requires_classroom` and
+> `clients.requires_location` (free text only; prints on invoices whenever present).
+> See migration `20260731_location_requirement_flags.sql`. The admin-only service
+> types section (§4.5) and the answers in §7 remain current.
+
 **Date:** 2026-07-31
 **Branch:** `feat/session-location` (off `main`)
 **Origin:** Five verbatim notes from Amara (owner), relayed 2026-07-31.

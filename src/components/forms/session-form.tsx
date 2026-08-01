@@ -48,10 +48,7 @@ import { ensureSessionInvoices, type EnsureSessionInvoicesResult } from '@/lib/i
 import { resolveDurationOptions } from '@/lib/settings/input'
 import { perClientInvoiceShare } from '@/lib/invoices/split'
 import { encryptPHI } from '@/lib/crypto/actions'
-import { resolveLocationConfig, isLocationSatisfied } from '@/lib/session-location/config'
-
-/** Sentinel for the "Other…" choice. Never stored — it selects the free-text input. */
-const OTHER_LOCATION = '__other__'
+import { resolveLocationField, isLocationProvided } from '@/lib/session-location/resolve'
 
 interface ExistingSession {
   id: string
@@ -70,7 +67,7 @@ interface ExistingSession {
 
 interface SessionFormProps {
   serviceTypes: ServiceType[]
-  clients: Array<Pick<Client, 'id' | 'name' | 'payment_method'>>
+  clients: Array<Pick<Client, 'id' | 'name' | 'payment_method' | 'requires_location'>>
   contractorId: string
   existingSession?: ExistingSession
 }
@@ -117,10 +114,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Group session fields
   const [groupHeadcount, setGroupHeadcount] = useState(existingSession?.group_headcount?.toString() || '')
   const [groupMemberNames, setGroupMemberNames] = useState(existingSession?.group_member_names || '')
-  // Location is split into a picklist choice and a free-text value. An existing
-  // value that isn't among the configured options is treated as free text.
-  const [classroomChoice, setClassroomChoice] = useState('')
-  const [classroomOther, setClassroomOther] = useState('')
+  // Session location (free text). Required when the service type or an involved
+  // client is flagged; hydrated straight from the saved value in edit mode.
+  const [classroom, setClassroom] = useState(existingSession?.classroom || '')
   // Group billing client (the agency being invoiced, e.g., People Inc, Brylin, OLV)
   const [groupBillingClientId, setGroupBillingClientId] = useState(
     existingSession?.attendees?.length === 1 ? existingSession.attendees[0].client_id : ''
@@ -173,40 +169,21 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Check if this is a group service type (has per_person_rate > 0)
   const isGroupService = selectedServiceType && selectedServiceType.per_person_rate > 0
 
-  // Scholarship group sessions fall back to the global classroom list
-  const isScholarshipGroup = !!(selectedServiceType?.is_scholarship && isGroupService)
-  // The billed client drives the location config: the group "Bill To" agency, or
-  // the single selected client for an individual session.
-  const billedClientId = isGroupService
-    ? groupBillingClientId
-    : (selectedClients.length === 1 ? selectedClients[0] : '')
-  const locationConfig = useMemo(
-    () => resolveLocationConfig(settings, billedClientId, { isScholarshipGroup }),
-    [settings, billedClientId, isScholarshipGroup]
-  )
-  const showClassroom = locationConfig !== null
-  // A config with no options is free-text-only; otherwise "Other…" opts into it.
-  const usingOtherLocation =
-    locationConfig !== null &&
-    (locationConfig.options.length === 0 || classroomChoice === OTHER_LOCATION)
-  const resolvedClassroom = usingOtherLocation ? classroomOther.trim() : classroomChoice
-
-  // Edit mode: hydrate the saved location once the config is known. A value that
-  // isn't in the configured options came from free text, so restore it there.
-  const didHydrateLocationRef = useRef(false)
-  useEffect(() => {
-    if (didHydrateLocationRef.current || !locationConfig) return
-    const existing = existingSession?.classroom || ''
-    if (existing) {
-      if (locationConfig.options.includes(existing)) {
-        setClassroomChoice(existing)
-      } else {
-        setClassroomChoice(OTHER_LOCATION)
-        setClassroomOther(existing)
-      }
+  // Which clients drive the location rule: the "Bill To" agency for group
+  // services, ALL selected clients for individual sessions — any flagged client
+  // triggers the field, since the session happens in one place.
+  const locationClients = useMemo(() => {
+    if (isGroupService) {
+      const billTo = clients.find((c) => c.id === groupBillingClientId)
+      return billTo ? [billTo] : []
     }
-    didHydrateLocationRef.current = true
-  }, [locationConfig, existingSession?.classroom])
+    return clients.filter((c) => selectedClients.includes(c.id))
+  }, [isGroupService, clients, groupBillingClientId, selectedClients])
+  const locationField = useMemo(
+    () => resolveLocationField(selectedServiceType ?? null, locationClients),
+    [selectedServiceType, locationClients]
+  )
+  const showClassroom = locationField !== null
 
   // Check if this service type requires a client (admin work does not)
   const requiresClient = selectedServiceType?.requires_client !== false
@@ -398,7 +375,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // defaults are applied so auto-populated values don't count as user edits.
   const formSnapshot = JSON.stringify({
     date, time, duration, serviceTypeId, selectedClients, notes, clientNotes,
-    groupHeadcount, groupMemberNames, classroomChoice, classroomOther, groupBillingClientId, selectedAdminUserId,
+    groupHeadcount, groupMemberNames, classroom, groupBillingClientId, selectedAdminUserId,
   })
   const baselineSnapshotRef = useRef<string | null>(null)
   useEffect(() => {
@@ -461,11 +438,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
       }
     }
 
-    // Session location. Deliberately OUTSIDE the group branch: individually-billed
-    // clients (e.g. self-directed agency clients) need a location too — previously
-    // this only ran for group services, so their config was never enforced.
-    if (showClassroom && !isLocationSatisfied(locationConfig, resolvedClassroom)) {
-      setFieldError('classroom', `Please provide a ${locationConfig!.label.toLowerCase()}`)
+    // Session location. Deliberately OUTSIDE the group branch: the flags apply to
+    // individual sessions (any selected client) as much as to group Bill To agencies.
+    if (showClassroom && !isLocationProvided(classroom)) {
+      setFieldError('classroom', `Please provide a ${locationField!.label.toLowerCase()}`)
       hasErrors = true
     }
 
@@ -523,7 +499,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             client_notes: encryptedClientNotes,
             group_headcount: isGroupService ? parseInt(groupHeadcount) || null : null,
             group_member_names: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
-            classroom: showClassroom ? (resolvedClassroom || null) : null,
+            // Only write the location while its field is on-screen; otherwise leave
+            // the stored value untouched (switching service/clients must not wipe it).
+            ...(showClassroom ? { classroom: classroom.trim() || null } : {}),
             total_amount: pricing?.totalAmount ?? null,
             contractor_pay: pricing?.contractorPay ?? null,
             mca_cut: pricing?.mcaCut ?? null,
@@ -660,7 +638,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           status: effectiveStatus,
           groupHeadcount: isGroupService ? parseInt(groupHeadcount) || null : null,
           groupMemberNames: isGroupService && groupMemberNames.trim() ? groupMemberNames.trim() : null,
-          classroom: showClassroom ? (resolvedClassroom || null) : null,
+          classroom: showClassroom ? (classroom.trim() || null) : null,
           pricing: pricing!,
           isScholarshipService: selectedServiceType?.is_scholarship ?? false,
           dueDays: settings?.invoice?.due_days,
@@ -709,8 +687,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
     setClientNotes('')
     setGroupHeadcount('')
     setGroupMemberNames('')
-    setClassroomChoice('')
-    setClassroomOther('')
+    setClassroom('')
     setGroupBillingClientId('')
     setSelectedClients([])
     setSelectedAdminUserId('')
@@ -1069,48 +1046,20 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </div>
           )}
 
-          {/* Session location — driven by the billed client's config: a fixed
-              picklist, free text, or a picklist with an "Other…" escape hatch. */}
-          {showClassroom && locationConfig && (
+          {/* Session location — required free text when the service type needs a
+              classroom or any involved client is flagged as needing a location. */}
+          {locationField && (
             <div className="space-y-2">
-              <Label htmlFor="classroom">
-                {locationConfig.label}{locationConfig.required ? ' *' : ''}
-              </Label>
-              {locationConfig.options.length > 0 && (
-                <Select
-                  value={classroomChoice}
-                  onValueChange={(val) => { setClassroomChoice(val); clearFieldError('classroom') }}
-                >
-                  <SelectTrigger
-                    id="classroom"
-                    className={errors.classroom ? 'border-red-500' : ''}
-                    aria-invalid={!!errors.classroom}
-                    aria-describedby={errors.classroom ? 'classroom-error' : undefined}
-                  >
-                    <SelectValue placeholder={`Select ${locationConfig.label.toLowerCase()}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locationConfig.options.map((room) => (
-                      <SelectItem key={room} value={room}>{room}</SelectItem>
-                    ))}
-                    {locationConfig.allow_other && (
-                      <SelectItem value={OTHER_LOCATION}>Other…</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              )}
-              {usingOtherLocation && (
-                <Input
-                  id={locationConfig.options.length > 0 ? 'classroomOther' : 'classroom'}
-                  value={classroomOther}
-                  onChange={(e) => { setClassroomOther(e.target.value); clearFieldError('classroom') }}
-                  placeholder={`Enter ${locationConfig.label.toLowerCase()}`}
-                  className={errors.classroom ? 'border-red-500' : ''}
-                  aria-invalid={!!errors.classroom}
-                  aria-describedby={errors.classroom ? 'classroom-error' : undefined}
-                  aria-label={locationConfig.options.length > 0 ? `${locationConfig.label} (other)` : undefined}
-                />
-              )}
+              <Label htmlFor="classroom">{locationField.label} *</Label>
+              <Input
+                id="classroom"
+                value={classroom}
+                onChange={(e) => { setClassroom(e.target.value); clearFieldError('classroom') }}
+                placeholder={`Enter ${locationField.label.toLowerCase()}`}
+                className={errors.classroom ? 'border-red-500' : ''}
+                aria-invalid={!!errors.classroom}
+                aria-describedby={errors.classroom ? 'classroom-error' : undefined}
+              />
               {errors.classroom && (
                 <p id="classroom-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
                   <AlertCircle aria-hidden="true" className="w-4 h-4" />

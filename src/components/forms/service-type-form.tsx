@@ -92,6 +92,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     is_scholarship: serviceType?.is_scholarship ?? false,
     requires_client: serviceType?.requires_client ?? true,
     admin_only: serviceType?.admin_only ?? false,
+    requires_classroom: serviceType?.requires_classroom ?? false,
     allowed_contractor_ids: serviceType?.allowed_contractor_ids || ([] as string[]),
     pay_schedule: initPaySchedule(),
     group_pay: initGroupPay(),
@@ -158,6 +159,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
       is_scholarship: formData.is_scholarship,
       requires_client: formData.requires_client,
       admin_only: formData.admin_only,
+      requires_classroom: formData.requires_classroom,
       allowed_contractor_ids: formData.allowed_contractor_ids.length > 0 ? formData.allowed_contractor_ids : null,
       contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
       group_contractor_pay: hasAnyGroupPay ? groupPay : null,
@@ -517,6 +519,21 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               id="admin_only"
               checked={formData.admin_only}
               onCheckedChange={(checked) => setFormData({ ...formData, admin_only: checked })}
+            />
+          </div>
+
+          {/* Requires Classroom */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="requires_classroom">Requires Classroom</Label>
+              <p className="text-xs text-gray-500">
+                Sessions of this service must record a classroom (e.g. in-school groups). It prints on the invoice.
+              </p>
+            </div>
+            <Switch
+              id="requires_classroom"
+              checked={formData.requires_classroom}
+              onCheckedChange={(checked) => setFormData({ ...formData, requires_classroom: checked })}
             />
           </div>
 

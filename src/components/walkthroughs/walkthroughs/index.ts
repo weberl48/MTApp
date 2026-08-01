@@ -764,7 +764,7 @@ export const AUTOMATION_WALKTHROUGH: Walkthrough = {
 export const CUSTOM_LISTS_WALKTHROUGH: Walkthrough = {
   id: 'custom-lists',
   name: 'Customize Lists & Labels',
-  description: 'Learn how to rename or hide payment methods, billing methods, and classrooms',
+  description: 'Learn how to rename or hide payment methods and billing methods',
   audience: 'owner',
   steps: [
     {
@@ -789,17 +789,8 @@ export const CUSTOM_LISTS_WALKTHROUGH: Walkthrough = {
       description: 'The same controls for how invoices are delivered. Click "Save Custom Lists" when you\'re done.',
       element: '[data-tour="customize-billing-methods"]',
       popoverSide: 'top',
-      ctaLabel: 'Next',
-      href: '/settings/customize/',
-    },
-    {
-      title: 'Classrooms',
-      description: 'Classroom options for the session form are managed in Business Rules under the Sessions tab — including per-agency lists that override the global one for specific clients.',
-      element: '[data-tour="classrooms-editor"]',
-      preClick: '[data-tour="business-tab-sessions"]',
-      popoverSide: 'top',
       ctaLabel: 'Finish',
-      href: '/settings/business/',
+      href: '/settings/customize/',
     },
   ],
 }

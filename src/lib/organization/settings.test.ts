@@ -34,68 +34,9 @@ describe('mergeOrganizationSettings (regression for #20 — settings defaults/me
     )
   })
 
-  it('uses the provided classrooms array when present', () => {
-    const merged = mergeOrganizationSettings({ custom_lists: { classrooms: ['Room A'] } } as any)
-    expect(merged.custom_lists.classrooms).toEqual(['Room A'])
-  })
-
   it('does not mutate the defaults', () => {
     mergeOrganizationSettings({ pricing: { no_show_fee: 999 } } as any)
     expect(DEFAULT_SETTINGS.pricing.no_show_fee).toBe(60)
-  })
-})
-
-describe('locations_by_client', () => {
-  it('defaults to an empty map with the invoice toggle off', () => {
-    const s = mergeOrganizationSettings(null)
-    expect(s.custom_lists.locations_by_client).toEqual({})
-    expect(s.invoice.show_session_location).toBe(false)
-  })
-
-  it('upgrades a legacy classrooms_by_client entry to a required picklist', () => {
-    const s = mergeOrganizationSettings({
-      custom_lists: { classrooms_by_client: { c1: ['Room A', 'Room B'] } },
-    } as any)
-    expect(s.custom_lists.locations_by_client.c1).toEqual({
-      label: 'Classroom / Program',
-      options: ['Room A', 'Room B'],
-      allow_other: false,
-      required: true,
-    })
-  })
-
-  it('lets an explicit locations_by_client entry win over the legacy list', () => {
-    const s = mergeOrganizationSettings({
-      custom_lists: {
-        classrooms_by_client: { c1: ['Legacy'] },
-        locations_by_client: {
-          c1: { label: 'Site', options: ['New'], allow_other: true, required: false },
-        },
-      },
-    } as any)
-    expect(s.custom_lists.locations_by_client.c1.label).toBe('Site')
-    expect(s.custom_lists.locations_by_client.c1.options).toEqual(['New'])
-    expect(s.custom_lists.locations_by_client.c1.allow_other).toBe(true)
-    expect(s.custom_lists.locations_by_client.c1.required).toBe(false)
-  })
-
-  it('keeps the legacy map readable so nothing silently drops', () => {
-    const s = mergeOrganizationSettings({
-      custom_lists: { classrooms_by_client: { c1: ['Room A'] } },
-    } as any)
-    expect(s.custom_lists.classrooms_by_client.c1).toEqual(['Room A'])
-  })
-
-  it('fills partial explicit configs with sane defaults', () => {
-    const s = mergeOrganizationSettings({
-      custom_lists: { locations_by_client: { c1: { options: ['A'] } } },
-    } as any)
-    expect(s.custom_lists.locations_by_client.c1).toEqual({
-      label: 'Classroom / Program',
-      options: ['A'],
-      allow_other: false,
-      required: true,
-    })
   })
 })
 
@@ -137,7 +78,7 @@ describe('applySettingsUpdate (settings write authorization boundary)', () => {
       invoice: { due_days: 7 },
       session: { default_duration: 45 },
       notification: { admin_email: 'ops@example.com' },
-      custom_lists: { classrooms: ['Room B'] },
+      custom_lists: { payment_methods: { venmo: { label: 'V-Pay', visible: false } } },
       pricing: { no_show_fee: 75 },
     } as any)
 
@@ -146,7 +87,7 @@ describe('applySettingsUpdate (settings write authorization boundary)', () => {
     expect(result.invoice.due_days).toBe(7)
     expect(result.session.default_duration).toBe(45)
     expect(result.notification.admin_email).toBe('ops@example.com')
-    expect(result.custom_lists.classrooms).toEqual(['Room B'])
+    expect(result.custom_lists.payment_methods.venmo).toEqual({ label: 'V-Pay', visible: false })
     expect(result.pricing.no_show_fee).toBe(75)
   })
 

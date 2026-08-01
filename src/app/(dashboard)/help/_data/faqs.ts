@@ -173,11 +173,11 @@ If your organization has **Auto-Generate Scholarship Invoices** enabled (Setting
   },
   {
     id: 'classroom-options',
-    question: 'How do I change the classroom choices in the session form?',
-    answer: `Go to **Settings > Business Rules > Sessions tab** and edit the **Classroom Options** field — it's a comma-separated list that populates the classroom dropdown, which only appears on the session form for scholarship group sessions.
+    question: 'How do I make sessions record a classroom or location?',
+    answer: `Turn on **Requires Classroom** on a service type (Settings > Business Rules > Services) to require a free-text **Classroom** field on every session that uses it — useful for in-school group sessions where you want to know which room a group met in.
 
-If a specific agency or client needs its own set of classrooms instead of the shared list, that can be configured per-client — a per-agency classroom list overrides the global one and takes priority whenever that client is selected, regardless of payment type.`,
-    articleSlug: 'custom-lists',
+For a specific client or agency instead — for example OLV or People Inc — check **Require a session location** on the client (Clients > Add/Edit Client). That shows a required free-text **Location** field on any session involving that client, including when they're the group "Bill To" agency. If both flags apply to the same session, the field is labeled Classroom. Either way it's free text with no list to maintain, and the recorded value prints on the invoice automatically.`,
+    articleSlug: 'configuring-services',
     category: 'settings',
     adminOnly: true,
   },

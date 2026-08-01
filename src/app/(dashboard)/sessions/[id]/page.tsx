@@ -445,6 +445,18 @@ export default function SessionDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Session location: shown for ANY session that recorded one — individual
+                sessions carry locations too (client flag), not just groups. */}
+            {session.classroom && (
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Location</p>
+                  <p className="font-medium">{session.classroom}</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -534,16 +546,6 @@ export default function SessionDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Attendee Names</p>
                   <p className="font-medium">{session.group_member_names}</p>
-                </div>
-              </div>
-            )}
-
-            {session.classroom && (
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-purple-500" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Classroom</p>
-                  <p className="font-medium">{session.classroom}</p>
                 </div>
               </div>
             )}

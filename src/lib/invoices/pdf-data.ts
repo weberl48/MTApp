@@ -24,7 +24,7 @@ export interface InvoicePdfLineItem {
   amount: number
   service_type_name: string | null
   contractor_name: string | null
-  /** Session location. Null unless `invoice.show_session_location` is enabled. */
+  /** Printed whenever present — a value is only recorded when a service/client flag required it. */
   classroom: string | null
 }
 
@@ -37,7 +37,7 @@ export interface InvoicePdfSession {
   contractor_id: string | null
   contractor: { id: string; name: string } | null
   service_type: { name: string } | null
-  /** Session location. Null unless `invoice.show_session_location` is enabled. */
+  /** Printed whenever present — a value is only recorded when a service/client flag required it. */
   classroom: string | null
 }
 
@@ -117,15 +117,6 @@ export async function fetchInvoicePdfData(
     .single()
 
   const settings = org?.settings as OrganizationSettings | undefined
-
-  // The session location is client-identifying context, so it only crosses onto a
-  // client-facing invoice when the owner has explicitly opted in. Blanking it here
-  // — rather than in the template — keeps every consumer (PDF download, preview,
-  // emailed attachment) honouring the toggle from one place.
-  if (settings?.invoice?.show_session_location !== true) {
-    if (invoice.session) invoice.session.classroom = null
-    items = items?.map((i) => ({ ...i, classroom: null }))
-  }
 
   return {
     invoice: { ...invoice, items } as InvoicePdfInvoice,

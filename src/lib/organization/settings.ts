@@ -1,5 +1,4 @@
-import { DEFAULT_LOCATION_LABEL } from '@/types/database'
-import type { ClientLocationConfig, OrganizationSettings } from '@/types/database'
+import type { OrganizationSettings } from '@/types/database'
 
 // Default settings for new organizations. Organizations without a given field automatically
 // get these values via the deep merge below.
@@ -10,7 +9,6 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
     due_days: 30,
     send_reminders: true,
     reminder_days: [7, 1],
-    show_session_location: false,
   },
   session: {
     default_duration: 30,
@@ -61,9 +59,6 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
       email: { label: 'Email', visible: true },
       other: { label: 'Other', visible: true },
     },
-    classrooms: [],
-    classrooms_by_client: {},
-    locations_by_client: {},
   },
   automation: {
     auto_approve_sessions: false,
@@ -123,37 +118,6 @@ export function applySettingsUpdate(
  * re-renders that don't change the organization — settings forms mirror this value into local
  * state via useEffect, and an unstable identity wiped their unsaved edits on every render.
  */
-/**
- * Upgrade legacy `classrooms_by_client` string lists into full location configs.
- *
- * The legacy map only ever expressed a required, fixed picklist, so that is
- * exactly what it becomes. Explicit `locations_by_client` entries win for the
- * same client. Pure — nothing is written back to the database.
- */
-function mergeLocationConfigs(
-  legacy: Record<string, string[]> | undefined,
-  explicit: Record<string, ClientLocationConfig> | undefined
-): Record<string, ClientLocationConfig> {
-  const out: Record<string, ClientLocationConfig> = {}
-  for (const [clientId, options] of Object.entries(legacy || {})) {
-    out[clientId] = {
-      label: DEFAULT_LOCATION_LABEL,
-      options: options ?? [],
-      allow_other: false,
-      required: true,
-    }
-  }
-  for (const [clientId, cfg] of Object.entries(explicit || {})) {
-    out[clientId] = {
-      label: cfg?.label || DEFAULT_LOCATION_LABEL,
-      options: cfg?.options ?? [],
-      allow_other: cfg?.allow_other ?? false,
-      required: cfg?.required ?? true,
-    }
-  }
-  return out
-}
-
 export function mergeOrganizationSettings(
   raw: OrganizationSettings | null | undefined,
   defaults: OrganizationSettings = DEFAULT_SETTINGS
@@ -175,12 +139,6 @@ export function mergeOrganizationSettings(
         ...defaults.custom_lists.billing_methods,
         ...(raw?.custom_lists?.billing_methods || {}),
       },
-      classrooms: raw?.custom_lists?.classrooms ?? defaults.custom_lists.classrooms,
-      classrooms_by_client: raw?.custom_lists?.classrooms_by_client ?? defaults.custom_lists.classrooms_by_client,
-      locations_by_client: mergeLocationConfigs(
-        raw?.custom_lists?.classrooms_by_client,
-        raw?.custom_lists?.locations_by_client
-      ),
     },
     automation: { ...defaults.automation, ...(raw?.automation || {}) },
   }

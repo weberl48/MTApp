@@ -7,8 +7,8 @@ import { uuidSchema } from '@/lib/validation/schemas'
 import { createNewSession } from '@/lib/session-form/create-session'
 import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
 import { can } from '@/lib/auth/permissions'
-import { resolveLocationConfig, isLocationSatisfied } from '@/lib/session-location/config'
-import type { ServiceType, OrganizationSettings, PaymentMethod, UserRole } from '@/types/database'
+import { resolveLocationField, isLocationProvided } from '@/lib/session-location/resolve'
+import type { Client, ServiceType, OrganizationSettings, PaymentMethod, UserRole } from '@/types/database'
 
 /**
  * POST /api/session-requests/[id]/approve
@@ -58,7 +58,7 @@ export async function POST(
     // Get the request with client and organization info
     const { data: sessionRequest, error: fetchError } = await supabase
       .from('session_requests')
-      .select('*, client:clients(id, name, contact_email, payment_method), organization:organizations(id, name)')
+      .select('*, client:clients(id, name, contact_email, payment_method, requires_location), organization:organizations(id, name)')
       .eq('id', requestId)
       .single()
 
@@ -152,16 +152,15 @@ export async function POST(
       const dueDays = orgSettings?.invoice?.due_days
 
       // Portal-originated sessions previously hardcoded `classroom: null`, silently
-      // bypassing a client's required-location config. Reject instead of writing null.
+      // bypassing the required-location flags. Reject instead of writing null.
       const submittedClassroom = typeof classroom === 'string' ? classroom.trim() : ''
-      const locationConfig = resolveLocationConfig(
-        orgSettings ?? null,
-        sessionRequest.client_id,
-        { isScholarshipGroup: false }
+      const locationField = resolveLocationField(
+        serviceType as ServiceType,
+        client ? [client as Pick<Client, 'requires_location'>] : []
       )
-      if (!isLocationSatisfied(locationConfig, submittedClassroom)) {
+      if (locationField && !isLocationProvided(submittedClassroom)) {
         return NextResponse.json(
-          { error: `A ${locationConfig!.label.toLowerCase()} is required for this client` },
+          { error: `A ${locationField.label.toLowerCase()} is required for this session` },
           { status: 400 }
         )
       }

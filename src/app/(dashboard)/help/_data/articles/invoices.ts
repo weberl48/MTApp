@@ -176,17 +176,17 @@ Contractors are paid based on normal pricing rules, not the scholarship rate. If
 
 If you prefer to automate this process, go to **Settings > Customize and Automate > Automation** and enable auto-generate for scholarship invoices. You can set a day of the month (1-28) on which invoices are automatically created, covering the previous month's unbilled sessions. Generated invoices start in Pending status so you can review them before sending.
 
-### Classroom Tracking
+### Location Tracking
 
-For scholarship group sessions, contractors select a **Classroom** from a dropdown when logging the session. This helps track which room or location the group met in. The classroom list is configured by the owner under **Settings > Business Rules > Sessions > Classrooms**.
+If a scholarship session's service type has **Requires Classroom** turned on, or the billed client/agency has **Require a session location** checked, the contractor records a free-text Classroom or Location value when logging the session — there's no list to maintain.
 
-**Per-agency lists:** each billed client/agency (e.g., a school district, day hab, or group home) can have its **own** classroom/program list — configure these under **Settings > Business Rules > Sessions > Per-Agency Classroom / Program Lists**. When a session is billed to an agency with its own list, the session form shows that agency's options — for any payment type, not just scholarship groups.
+When that session lands on a batch invoice, its recorded value carries automatically onto the batch's line item. There's no separate toggle for this — it prints whenever a value is present.
 
 ### Setting Up Scholarship Billing
 
 1. **Configure a scholarship service type** - Go to Settings > Services, create or edit a service type, and check "Scholarship Service". Set the flat scholarship rate.
 2. **Set client payment method** - Go to Clients, edit the client, and set their payment method to "Scholarship".
-3. **(Optional) Configure classrooms** - Go to Settings > Business Rules > Sessions and add classroom names so contractors can select a room when logging scholarship group sessions.
+3. **(Optional) Flag classrooms or locations** - If sessions for this service need one, turn on **Requires Classroom** on the service type (Settings > Business Rules > Services). If a specific client or agency needs one instead, check **Require a session location** on the client (Clients > Edit Client).
 4. **Log sessions as usual** - Contractors log sessions normally. The system automatically routes scholarship sessions to batch invoicing.
 5. **Generate invoices monthly** - Visit the Scholarship tab on Invoices and click Generate, or enable auto-generation in Settings.
     `,

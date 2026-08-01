@@ -32,6 +32,7 @@ Navigate to **Settings > Business Rules > Services** tab. The Services tab is ow
 - **Requires Client** - Turn this off for administrative tasks that do not involve a specific client.
 - **Restrict to Contractors** - Limit which contractors can select this service type when logging sessions.
 - **Scholarship Service** - Mark this type as a scholarship service and set a flat scholarship rate per session.
+- **Requires Classroom** - When on, any session using this service type shows a required free-text **Classroom** field (for example, an in-school group session). The recorded value prints on the invoice automatically.
 - **Contractor Pay Schedule** - A duration-to-pay mapping (e.g., 30 min = $38.50, 45 min = $54.00) used for precise contractor pay calculations.
 
 ### Notes on Pricing
@@ -557,17 +558,17 @@ See **Editing Service Types: A Complete Guide** for a field-by-field walkthrough
   },
   {
     slug: 'custom-lists',
-    title: 'Custom Lists: Payment Methods, Billing Methods & Classrooms',
+    title: 'Custom Lists: Payment Methods & Billing Methods',
     category: 'settings',
-    description: 'How to rename or hide payment and billing methods, and manage global and per-client classroom lists.',
+    description: 'How to rename or hide payment and billing methods.',
     adminOnly: true,
     walkthrough: 'custom-lists',
     relatedArticles: ['configuring-services', 'automation-settings', 'client-billing-controls', 'client-details'],
-    keywords: ['payment methods', 'billing methods', 'classroom', 'dropdown', 'rename', 'hide'],
+    keywords: ['payment methods', 'billing methods', 'dropdown', 'rename', 'hide'],
     content: `
-## Custom Lists: Payment Methods, Billing Methods & Classrooms
+## Custom Lists: Payment Methods & Billing Methods
 
-MCA Manager ships with a default set of payment methods, billing methods, and classroom lists, but every organization uses different terminology. Custom Lists let you rename, hide, and extend these lists without any code changes.
+MCA Manager ships with a default set of payment methods and billing methods, but every organization uses different terminology. Custom Lists let you rename, hide, and extend these lists without any code changes.
 
 ### Payment Methods and Billing Methods
 
@@ -580,17 +581,6 @@ For each entry in both lists, you can:
 
 > **Where to find it:** Navigate to **Settings > Customize and Automate > Custom Lists** tab. Payment methods and billing methods each have their own editable list, with a **Save Custom Lists** button to apply changes.
 
-### Classrooms
-
-The **Classrooms** list powers a dropdown on the session form, most commonly used for scholarship or group-home clients attending sessions at a facility with multiple rooms.
-
-There are two layers to the classroom list:
-
-- **Global classroom list** — a single comma-separated list of room names (e.g., "Room A, Room B, Music Hall") shown for any client when no per-client list applies.
-- **Per-agency overrides** (\`classrooms_by_client\`) — a classroom list scoped to a specific client. When a client has their own list configured, it replaces the global list on the session form for that client, regardless of their payment method. This is useful for group-home or facility clients whose room names differ from your general list.
-
-> **Where to find it:** Navigate to **Settings > Business Rules > Sessions** tab. The **Classrooms** section has the global comma-separated list, plus a per-client editor for setting overrides on individual clients.
-
 ### Why This Matters
 
 Keeping these lists accurate avoids confusion on the session and client forms — contractors only see options that are relevant to your practice, in language your team already uses. If you rename "Self-Directed" to something your organization actually calls it, that label appears everywhere the payment method is shown: the client form, session form, invoices, and reports.
@@ -598,7 +588,6 @@ Keeping these lists accurate avoids confusion on the session and client forms �
 ### Tips
 
 - Hiding an option is safer than deleting data — existing clients keep their assigned payment or billing method even if it's hidden from new selections.
-- If a classroom dropdown looks empty for a specific client, check whether that client has a per-client classroom override configured — it silently replaces the global list.
 - Changes save immediately across the organization; there's no per-user override.
     `,
   },
