@@ -9,7 +9,7 @@ export const CLIENTS_ARTICLES: HelpArticle[] = [
     walkthrough: 'add-client',
     adminOnly: true,
     relatedArticles: ['logging-a-session', 'client-portal', 'scholarship-billing', 'client-billing-controls'],
-    keywords: ['add client', 'payment method', 'billing method', 'monthly batch', 'new client'],
+    keywords: ['add client', 'payment method', 'billing method', 'monthly batch', 'new client', 'location'],
     content: `
 ## Adding a New Client
 
@@ -27,6 +27,7 @@ Clients must be added before sessions can be logged for them. Only admins and ow
    - **Billing Method** - How invoices are delivered and collected.
    - **Invoicing** - **Per session** (default) creates an invoice when a session is submitted. **Monthly batch** holds sessions and combines them into one invoice per month — see below.
    - **Add Square processing fee to invoices** - Check this for clients who pay online; their Square invoices automatically include the processing fee configured in Settings > Business Rules > Invoices. You can still remove the fee from an individual invoice before sending it.
+   - **Require a session location** - Check this if sessions involving this client need a recorded location (for example, an agency with multiple sites). Any session involving this client — including as the group "Bill To" agency — then shows a required free-text **Location** field (labeled **Classroom** instead if the session's service type also requires one). The recorded value prints on the invoice automatically.
    - **Notes** - Internal notes visible only to your team (encrypted for HIPAA compliance).
    - **Send portal invite** - If the Client Portal feature is enabled and you entered an email, you can check this box to email the client a portal access link right away. This is currently the only way to send a portal invite — see **Client Portal** for details.
 4. Click **Save** to create the client.

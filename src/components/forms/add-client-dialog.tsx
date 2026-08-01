@@ -52,6 +52,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
   const [billingMethod, setBillingMethod] = useState<BillingMethod>('square')
   const [billingFrequency, setBillingFrequency] = useState<BillingFrequency>('per_session')
   const [squareFeeEnabled, setSquareFeeEnabled] = useState(false)
+  const [requiresLocation, setRequiresLocation] = useState(false)
   const [notes, setNotes] = useState('')
   const [sendInvite, setSendInvite] = useState(false)
 
@@ -65,6 +66,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
       setBillingMethod(client.billing_method || 'square')
       setBillingFrequency(client.billing_frequency || 'per_session')
       setSquareFeeEnabled(client.square_fee_enabled ?? false)
+      setRequiresLocation(client.requires_location ?? false)
       // Notes are PHI (encrypted at rest) — fetch the decrypted value for editing.
       getDecryptedClientNotes(client.id)
         .then(setNotes)
@@ -80,6 +82,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
     setBillingMethod('square')
     setBillingFrequency('per_session')
     setSquareFeeEnabled(false)
+    setRequiresLocation(false)
     setNotes('')
     setSendInvite(false)
   }
@@ -105,6 +108,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
           billing_method: billingMethod,
           billing_frequency: billingFrequency,
           square_fee_enabled: squareFeeEnabled,
+          requires_location: requiresLocation,
           notes: notes.trim() || null,
         })
 
@@ -120,6 +124,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
           billing_method: billingMethod,
           billing_frequency: billingFrequency,
           square_fee_enabled: squareFeeEnabled,
+          requires_location: requiresLocation,
           notes: notes.trim() || null,
           organization_id: organization!.id,
         })
@@ -297,6 +302,22 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
                 </p>
               </div>
             </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="requiresLocation"
+                checked={requiresLocation}
+                onCheckedChange={(checked) => setRequiresLocation(checked === true)}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label htmlFor="requiresLocation" className="text-sm font-medium leading-none">
+                  Require a session location for this client
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Every session involving this client must record where it happened (e.g. OLV, People
+                  Inc site programs). The location prints on invoices.
+                </p>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>

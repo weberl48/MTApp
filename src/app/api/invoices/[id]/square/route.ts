@@ -127,8 +127,8 @@ export async function POST(
     // Calculate due date (30 days from now if not set)
     const dueDate = invoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
-    // Organization settings drive both the description (session location) and the
-    // processing fee below, so they must be read before the description is built.
+    // Organization settings feed the processing fee logic below, so they must
+    // be read before it's calculated.
     const { data: org } = await supabase
       .from('organizations')
       .select('settings')
@@ -136,7 +136,6 @@ export async function POST(
       .single()
 
     const orgSettings = org?.settings as OrganizationSettings | undefined
-    const showSessionLocation = orgSettings?.invoice?.show_session_location === true
 
     // Build description based on invoice type
     let description: string
@@ -187,7 +186,8 @@ export async function POST(
           const dur = item.duration_minutes ? ` (${item.duration_minutes} min)` : ''
           const names = item.session_id ? attendeesBySession.get(item.session_id)?.join(', ') : ''
           const namesSuffix = names ? ` — ${names}` : ''
-          return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}${namesSuffix}`
+          const loc = item.classroom ? ` — ${item.classroom}` : ''
+          return `${date} - ${svc}${dur}: $${item.amount.toFixed(2)}${namesSuffix}${loc}`
         })
         note = lines.join('\n')
       }
@@ -204,9 +204,9 @@ export async function POST(
       const names = attendeeNames.length > 0 ? attendeeNames : [invoice.client.name]
       const nameList = names.join(', ')
 
-      // Location rides on the Square description only when the owner opted in —
-      // the same gate the PDF uses, read from the org settings fetched above.
-      const locationSuffix = showSessionLocation && invoice.session?.classroom
+      // Location rides on the Square description whenever present — a value is
+      // only recorded when a service/client flag required it (same as the PDF).
+      const locationSuffix = invoice.session?.classroom
         ? ` — ${invoice.session.classroom}`
         : ''
       description = `${invoice.session?.service_type?.name || 'Session'} on ${sessionDate} — ${nameList}${locationSuffix}`

@@ -242,8 +242,7 @@ interface InvoiceData {
     contractor: {
       name: string
     } | null
-    /** Session location — already gated by `invoice.show_session_location`
-        in fetchInvoicePdfData, so rendering it here is unconditional. */
+    /** Recorded only when a service/client flag required it; rendered whenever present. */
     classroom?: string | null
   } | null
   items?: InvoiceLineItem[]

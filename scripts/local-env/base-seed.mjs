@@ -152,6 +152,16 @@ values
 ${rateRows}
 on conflict do nothing;
 
+-- Session-location flag for "In-school group session". No-op until the
+-- 20260731_location_requirement_flags migration is present in the local schema.
+do $$ begin
+  if exists (select 1 from information_schema.columns
+             where table_name = 'service_types' and column_name = 'requires_classroom') then
+    update service_types set requires_classroom = true
+      where id = 'bfda7114-408c-4f79-a162-31c2d002fafc'; -- In-school group session
+  end if;
+end $$;
+
 commit;
 `
 }

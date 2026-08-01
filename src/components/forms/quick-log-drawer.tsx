@@ -25,6 +25,7 @@ import {
   saveQuickLogDefaults,
 } from '@/lib/session-form/defaults'
 import { createNewSession } from '@/lib/session-form/create-session'
+import { resolveLocationField, isLocationProvided } from '@/lib/session-location/resolve'
 import { encryptPHI } from '@/lib/crypto/actions'
 import { calculateSessionPricing, formatCurrency } from '@/lib/pricing'
 import { todayLocal } from '@/lib/dates'
@@ -49,6 +50,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
   const [date, setDate] = useState(todayLocal())
   const [notes, setNotes] = useState('')
   const [clientNotes, setClientNotes] = useState('')
+  const [classroom, setClassroom] = useState('')
 
   // Load defaults from localStorage (quick-log has its own storage with serviceTypeId)
   const storageKey = useMemo(() => {
@@ -84,12 +86,17 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
       setDate(todayLocal())
       setNotes('')
       setClientNotes('')
+      setClassroom('')
     }
   }, [open])
 
   // Resolve defaults to names
   const serviceType = serviceTypes.find(st => st.id === defaults?.serviceTypeId)
   const hasValidDefaults = !!defaults && !!serviceType
+
+  // Quick-log sessions carry no clients, so only the service-type flag can
+  // require a location here (label "Classroom").
+  const locationField = resolveLocationField(serviceType ?? null, [])
 
   // Calculate pricing (no client pre-selected, so use 1 attendee and no payment method override)
   const contractorOverrides = defaults?.serviceTypeId ? getOverrides(defaults.serviceTypeId) : undefined
@@ -117,6 +124,10 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
       toast.error('Please add client notes')
       return
     }
+    if (locationField && !isLocationProvided(classroom)) {
+      toast.error(`Please enter a ${locationField.label.toLowerCase()}`)
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -139,7 +150,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         status: effectiveStatus as 'submitted' | 'approved',
         groupHeadcount: null,
         groupMemberNames: null,
-        classroom: null,
+        classroom: locationField ? classroom.trim() : null,
         pricing,
         isScholarshipService: serviceType?.is_scholarship ?? false,
         dueDays: settings?.invoice?.due_days,
@@ -223,6 +234,19 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
                   className="text-base"
                 />
               </div>
+
+              {/* Session location (service-type flag, e.g. in-school sessions) */}
+              {locationField && (
+                <div className="space-y-2">
+                  <Label htmlFor="quick-classroom">{locationField.label} *</Label>
+                  <Input
+                    id="quick-classroom"
+                    value={classroom}
+                    onChange={(e) => setClassroom(e.target.value)}
+                    placeholder={`Enter ${locationField.label.toLowerCase()}`}
+                  />
+                </div>
+              )}
 
               {/* Notes */}
               <div className="space-y-2">

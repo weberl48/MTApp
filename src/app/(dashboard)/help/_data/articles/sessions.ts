@@ -23,7 +23,7 @@ Every session you provide should be logged in MCA Manager. Logged sessions flow 
    - **Duration** - Select the session length. The default options are 30, 45, 60, or 90 minutes (your organization can customize this list).
    - **Service Type** - The type of therapy provided. Only service types you are authorized for will appear.
    - **Client(s)** - Select the client. For group sessions, you can select multiple clients.
-   - **Session location** - Appears when the billed client has location settings configured (e.g., schools, day habs, group homes, or self-directed clients). The owner names this field, so it may read "Classroom", "Site", or "Location". Depending on how the client is set up it is a dropdown, a free-text box, or a dropdown with an **Other…** choice that lets you type somewhere that isn't on the list. It may be required.
+   - **Classroom / Location** - Appears when the service type has **Requires Classroom** turned on, or any selected client (or the group's "Bill To" agency) has **Require a session location** checked. It's a free-text field, always required when shown, labeled "Classroom" if the service type flag applies (otherwise "Location"). Configure these flags on the service type form or the client dialog.
    - **Internal Notes** - Notes for your team. These are encrypted and never visible to clients.
    - **Client Notes** - Notes that may be shared with the client through the portal.
 3. Under **Save as**, choose **Submit for approval** or **Save as draft**, then click the button at the bottom (it reads **Submit Session** or **Save Draft** to match your choice).
@@ -98,15 +98,9 @@ If a headcount/duration combination is not defined in the matrix, the system fal
 
 ### Session Location
 
-When the billed client has location settings configured, a location field appears on the session form. The owner controls its label ("Classroom", "Site", "Location"), the choices, and whether it is required — see **Settings > Business Rules > Sessions > Per-Client Location Settings**.
+A **Classroom** or **Location** field appears on the session form when it's needed: **Classroom** shows up when the session's service type has **Requires Classroom** turned on (set on the service type form); **Location** shows up when any client on the session — including the "Bill To" agency for a group billed to one — has **Require a session location** checked (set in the client add/edit dialog). If both flags apply to the same session, the field is labeled Classroom.
 
-The field takes one of three shapes:
-
-- **Dropdown** — pick from a fixed list. Best for schools and facilities with stable room names.
-- **Dropdown with "Other…"** — pick from the list, or choose **Other…** and type somewhere that isn't on it.
-- **Free text** — just type where the session happened. Best for self-directed clients whose location changes every session.
-
-Scholarship group sessions fall back to the general classroom list when their billed client has no settings of their own. The location is recorded on the session, included in data exports, and — if the owner enables it — printed on the client's invoice.
+The field is free text and always required when it appears. Whatever the contractor enters is recorded on the session, included in data exports, and automatically printed on the client's invoice.
 
 ### Separate Invoices
 

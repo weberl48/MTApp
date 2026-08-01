@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ServiceTypeForm } from '@/components/forms/service-type-form'
-import { ClientLocationEditor } from '@/components/settings/client-location-editor'
 import { useOrganization } from '@/contexts/organization-context'
 import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import {
@@ -307,25 +306,6 @@ export default function BusinessSettingsPage() {
                       })
                     }
                     rows={3}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="show_session_location">Show Session Location on Invoices</Label>
-                    <p className="text-xs text-gray-500">
-                      Include the classroom, site, or location on client-facing invoices and Square descriptions
-                    </p>
-                  </div>
-                  <Switch
-                    id="show_session_location"
-                    checked={localSettings.invoice.show_session_location ?? false}
-                    onCheckedChange={(checked) =>
-                      setLocalSettings({
-                        ...localSettings,
-                        invoice: { ...localSettings.invoice, show_session_location: checked },
-                      })
-                    }
                   />
                 </div>
                 <Separator />
@@ -618,47 +598,6 @@ export default function BusinessSettingsPage() {
                     }
                   />
                   <p className="text-xs text-gray-500">Service type base rates are for this many minutes</p>
-                </div>
-                <Separator />
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Session Locations</h3>
-                <div className="space-y-2" data-tour="classrooms-editor">
-                  <Label htmlFor="classrooms">Classroom Options</Label>
-                  <Input
-                    id="classrooms"
-                    value={(localSettings.custom_lists?.classrooms ?? []).join(', ')}
-                    onChange={(e) =>
-                      setLocalSettings({
-                        ...localSettings,
-                        custom_lists: {
-                          ...localSettings.custom_lists,
-                          classrooms: e.target.value
-                            .split(',')
-                            .map((v: string) => v.trim())
-                            .filter(Boolean),
-                        },
-                      })
-                    }
-                    placeholder="Room A, Room B, Music Hall"
-                  />
-                  <p className="text-xs text-gray-500">Comma-separated fallback list, used for scholarship group sessions when the billed client has no settings below</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Per-Client Location Settings</Label>
-                  {organization && (
-                    <ClientLocationEditor
-                      organizationId={organization.id}
-                      value={localSettings.custom_lists?.locations_by_client ?? {}}
-                      onChange={(next) =>
-                        setLocalSettings({
-                          ...localSettings,
-                          custom_lists: {
-                            ...localSettings.custom_lists,
-                            locations_by_client: next,
-                          },
-                        })
-                      }
-                    />
-                  )}
                 </div>
 
                 {feature('client_portal') && (
