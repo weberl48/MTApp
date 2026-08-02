@@ -1,14 +1,24 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const { mockIsSquareSandbox, mockGetPilotSquareRecipient } = vi.hoisted(() => ({
+  mockIsSquareSandbox: vi.fn(() => false),
+  mockGetPilotSquareRecipient: vi.fn((): string | null => null),
+}))
 
 // Avoid initializing the Square SDK on import.
 vi.mock('./client', () => ({
   squareClient: {},
   getDefaultLocationId: async () => 'loc',
   dollarsToCents: (d: number) => Math.round(d * 100),
-  isSquareSandbox: () => false,
+  isSquareSandbox: mockIsSquareSandbox,
 }))
 
-import { squareIdempotencyKeys, buildSquareProcessingFee } from './invoices'
+// Avoid pulling in the real pilot module's env-var parsing.
+vi.mock('../email/pilot', () => ({
+  getPilotSquareRecipient: mockGetPilotSquareRecipient,
+}))
+
+import { squareIdempotencyKeys, buildSquareProcessingFee, resolveSquareRecipient, DEV_EMAIL } from './invoices'
 
 describe('squareIdempotencyKeys (regression for #10 — duplicate Square invoices on retry)', () => {
   it('is deterministic for the same invoice id', () => {
@@ -65,5 +75,48 @@ describe('buildSquareProcessingFee per-invoice override', () => {
       100,
       true
     )).toBeUndefined()
+  })
+})
+
+describe('resolveSquareRecipient (pilot-mode + sandbox redirect for Square-sent invoice mail)', () => {
+  beforeEach(() => {
+    mockIsSquareSandbox.mockReset().mockReturnValue(false)
+    mockGetPilotSquareRecipient.mockReset().mockReturnValue(null)
+  })
+
+  it('passes through the real client when neither sandbox nor pilot mode is active', () => {
+    expect(resolveSquareRecipient('client@example.com', 'Jane Client')).toEqual({
+      email: 'client@example.com',
+      name: 'Jane Client',
+      redirectReason: null,
+    })
+  })
+
+  it('redirects to DEV_EMAIL with a [TEST] prefix when sandbox is active', () => {
+    mockIsSquareSandbox.mockReturnValue(true)
+    expect(resolveSquareRecipient('client@example.com', 'Jane Client')).toEqual({
+      email: DEV_EMAIL,
+      name: '[TEST] Jane Client',
+      redirectReason: 'sandbox',
+    })
+  })
+
+  it('redirects to the pilot recipient with a [PILOT] prefix when only pilot mode is active', () => {
+    mockGetPilotSquareRecipient.mockReturnValue('tester@example.com')
+    expect(resolveSquareRecipient('client@example.com', 'Jane Client')).toEqual({
+      email: 'tester@example.com',
+      name: '[PILOT] Jane Client',
+      redirectReason: 'pilot',
+    })
+  })
+
+  it('sandbox wins when both sandbox and pilot mode are active', () => {
+    mockIsSquareSandbox.mockReturnValue(true)
+    mockGetPilotSquareRecipient.mockReturnValue('tester@example.com')
+    expect(resolveSquareRecipient('client@example.com', 'Jane Client')).toEqual({
+      email: DEV_EMAIL,
+      name: '[TEST] Jane Client',
+      redirectReason: 'sandbox',
+    })
   })
 })

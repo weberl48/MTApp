@@ -69,6 +69,15 @@ backup-failures.log
 # assets (public/icons, docs illustrations) stay committable.
 # ----------------------------------------------------------------------------
 /docs/feature-tour/
+# The BUILT onboarding guide inlines every screenshot as base64, so the artifact
+# carries whatever those screenshots contain — ignoring the screenshot folders
+# above does nothing if the rendered output is committed. `guide-src.html` stays
+# tracked: it holds only {{SS}}/name.png placeholders. Rebuild locally with
+# `node scripts/build-onboarding-guide.mjs` and send the file directly.
+/docs/onboarding/MCA-Admin-Onboarding-Guide.html
+/docs/onboarding/MCA-Admin-Onboarding-Guide.pdf
+# Screenshots of the running app for the admin guide — same real-client-name risk.
+/docs/admin-guide/
 /*.png
 /*.jpg
 /*.jpeg

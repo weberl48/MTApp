@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { escape as escapeHtml } from 'he'
 import { format, parse } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
+import { applyPilotRedirect } from './pilot'
 
 // Lazy initialize Resend to avoid build-time errors
 let resend: Resend | null = null
@@ -50,6 +51,75 @@ export function getFromAddress(name?: string): string {
  */
 export function getReplyTo(override?: string | null): string | undefined {
   return override || process.env.EMAIL_REPLY_TO || undefined
+}
+
+/**
+ * Inject the pilot banner into a full HTML document, immediately after the
+ * opening <body> tag so it renders above the template's own chrome. Falls back
+ * to prepending for fragments (the session-reminder cron sends one).
+ */
+function injectHtmlBanner(html: string, banner: string): string {
+  if (!banner) return html
+  const bodyOpen = html.match(/<body[^>]*>/i)
+  if (bodyOpen) {
+    const at = html.indexOf(bodyOpen[0]) + bodyOpen[0].length
+    return html.slice(0, at) + banner + html.slice(at)
+  }
+  return banner + html
+}
+
+interface SendMailParams {
+  to: string | string[]
+  subject: string
+  html: string
+  text: string
+  from?: string
+  replyTo?: string
+  attachments?: { filename: string; content: Buffer }[]
+  /**
+   * Bypass the pilot redirect. Reserved for mail addressed to our OWN staff —
+   * team invites — which must keep working while client email is intercepted.
+   * Never set this on anything a client could receive.
+   */
+  pilotExempt?: boolean
+}
+
+/**
+ * The single send path. Every outbound email in the app goes through here so
+ * the pilot redirect (see ./pilot.ts) has exactly one choke point that cannot
+ * be routed around — including the crons, which used to construct their own
+ * Resend client.
+ *
+ * Throws on Resend error so callers keep their existing failure handling.
+ */
+export async function sendMail({
+  to,
+  subject,
+  html,
+  text,
+  from,
+  replyTo,
+  attachments,
+  pilotExempt = false,
+}: SendMailParams) {
+  const pilot = pilotExempt
+    ? null
+    : applyPilotRedirect(to, subject)
+
+  const recipients = pilot ? pilot.to : (Array.isArray(to) ? to : [to])
+
+  const { data, error } = await getResendClient().emails.send({
+    from: from ?? getFromAddress(),
+    to: recipients,
+    replyTo,
+    subject: pilot ? pilot.subject : subject,
+    text: pilot?.redirected ? pilot.textBanner + text : text,
+    html: pilot?.redirected ? injectHtmlBanner(html, pilot.htmlBanner) : html,
+    ...(attachments && attachments.length > 0 ? { attachments } : {}),
+  })
+
+  if (error) throw error
+  return data
 }
 
 /**
@@ -115,12 +185,13 @@ export async function sendInvoiceEmail({
 
   const replyToAddress = getReplyTo(replyTo)
 
-  const { data, error } = await getResendClient().emails.send({
-    from: getFromAddress(),
-    to: [to],
-    replyTo: replyToAddress,
-    subject: `Invoice ${invoiceNumber} - May Creative Arts`,
-    text: [
+  try {
+    return await sendMail({
+      from: getFromAddress(),
+      to: [to],
+      replyTo: replyToAddress,
+      subject: `Invoice ${invoiceNumber} - May Creative Arts`,
+      text: [
       `Invoice ${invoiceNumber} from May Creative Arts`,
       '',
       `Hello ${clientName},`,
@@ -264,15 +335,12 @@ export async function sendInvoiceEmail({
 </body>
 </html>
     `,
-    attachments,
-  })
-
-  if (error) {
+      attachments,
+    })
+  } catch (error) {
     console.error('[MCA] Email send error')
     throw error
   }
-
-  return data
 }
 
 // Invoice Reminder Email
@@ -318,12 +386,13 @@ export async function sendInvoiceReminderEmail({
 
   const replyToAddress = getReplyTo(replyTo)
 
-  const { data, error } = await getResendClient().emails.send({
-    from: getFromAddress(),
-    to: [to],
-    replyTo: replyToAddress,
-    subject,
-    text: [
+  try {
+    return await sendMail({
+      from: getFromAddress(),
+      to: [to],
+      replyTo: replyToAddress,
+      subject,
+      text: [
       `${isOverdue ? 'Overdue' : 'Payment reminder'}: Invoice ${invoiceNumber} — May Creative Arts`,
       '',
       `Hello ${clientName},`,
@@ -437,14 +506,11 @@ export async function sendInvoiceReminderEmail({
 </body>
 </html>
     `,
-  })
-
-  if (error) {
+    })
+  } catch (error) {
     console.error('[MCA] Invoice reminder email error')
     throw error
   }
-
-  return data
 }
 
 // Portal Email Templates
@@ -466,12 +532,13 @@ export async function sendMagicLinkEmail({
 }: SendMagicLinkEmailParams) {
   const replyToAddress = getReplyTo(replyTo)
 
-  const { data, error } = await getResendClient().emails.send({
-    from: getFromAddress(organizationName),
-    to: [to],
-    replyTo: replyToAddress,
-    subject: `Your Portal Access Link - ${organizationName}`,
-    text: [
+  try {
+    return await sendMail({
+      from: getFromAddress(organizationName),
+      to: [to],
+      replyTo: replyToAddress,
+      subject: `Your Portal Access Link - ${organizationName}`,
+      text: [
       `Your ${organizationName} client portal access link`,
       '',
       `Hello ${clientName},`,
@@ -567,14 +634,11 @@ export async function sendMagicLinkEmail({
 </body>
 </html>
     `,
-  })
-
-  if (error) {
+    })
+  } catch (error) {
     console.error('[MCA] Magic link email error')
     throw error
   }
-
-  return data
 }
 
 interface SendSessionRequestStatusEmailParams {
@@ -613,12 +677,13 @@ export async function sendSessionRequestStatusEmail({
   const statusEmoji = isApproved ? '✓' : '✗'
   const replyToAddress = getReplyTo(replyTo)
 
-  const { data, error } = await getResendClient().emails.send({
-    from: getFromAddress(organizationName),
-    to: [to],
-    replyTo: replyToAddress,
-    subject: `Session Request ${statusText} - ${organizationName}`,
-    text: [
+  try {
+    return await sendMail({
+      from: getFromAddress(organizationName),
+      to: [to],
+      replyTo: replyToAddress,
+      subject: `Session Request ${statusText} - ${organizationName}`,
+      text: [
       `Your session request has been ${statusText.toLowerCase()}`,
       '',
       `Hello ${clientName},`,
@@ -726,14 +791,11 @@ export async function sendSessionRequestStatusEmail({
 </body>
 </html>
     `,
-  })
-
-  if (error) {
+    })
+  } catch (error) {
     console.error('[MCA] Session request status email error')
     throw error
   }
-
-  return data
 }
 
 // Team Invite Email
@@ -769,12 +831,16 @@ export async function sendTeamInviteEmail({
         : 'Log sessions and view your invoices and earnings.'
   const replyToAddress = getReplyTo(replyTo)
 
-  const { data, error } = await getResendClient().emails.send({
-    from: getFromAddress(organizationName),
-    to: [to],
-    replyTo: replyToAddress,
-    subject: `You're invited to join ${organizationName}`,
-    text: [
+  try {
+    return await sendMail({
+      from: getFromAddress(organizationName),
+      to: [to],
+      replyTo: replyToAddress,
+      // Team invites go to our own staff, not clients — they must keep
+      // working while client-facing email is redirected in pilot mode.
+      pilotExempt: true,
+      subject: `You're invited to join ${organizationName}`,
+      text: [
       `You're invited to join ${organizationName}`,
       '',
       `Hello${inviteeName ? ` ${inviteeName}` : ''},`,
@@ -885,12 +951,9 @@ export async function sendTeamInviteEmail({
 </body>
 </html>
     `,
-  })
-
-  if (error) {
+    })
+  } catch (error) {
     console.error('[MCA] Team invite email error')
     throw error
   }
-
-  return data
 }

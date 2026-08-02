@@ -76,16 +76,18 @@
     <h4>Contents</h4>
     <ul>
       <li><a href="#welcome">1. Welcome</a></li>
-      <li><a href="#day-one">2. Day One Checklist</a></li>
-      <li><a href="#around">3. Finding Your Way Around</a></li>
-      <li><a href="#sessions">4. Sessions — Your Daily Core</a></li>
-      <li><a href="#clients">5. Clients</a></li>
-      <li><a href="#invoices">6. Invoices</a></li>
-      <li><a href="#team">7. Team</a></li>
-      <li><a href="#portal">8. The Client Portal</a></li>
-      <li><a href="#help">9. Learn More &amp; Getting Help</a></li>
-      <li><a href="#owner-only">10. What's Owner-Only</a></li>
-      <li><a href="#reference">11. Quick Reference</a></li>
+      <li><a href="#phase-one"><b>2. Phase 1 — What's Live Right Now</b></a></li>
+      <li><a href="#day-one">3. Day One Checklist</a></li>
+      <li><a href="#around">4. Finding Your Way Around</a></li>
+      <li><a href="#sessions">5. Sessions — Your Daily Core</a></li>
+      <li><a href="#clients">6. Clients</a></li>
+      <li><a href="#invoices">7. Invoices</a></li>
+      <li><a href="#team">8. Team</a></li>
+      <li><a href="#portal">9. The Client Portal</a></li>
+      <li><a href="#help">10. Learn More &amp; Getting Help</a></li>
+      <li><a href="#bugs"><b>11. Found a Bug? How to Tell Us</b></a></li>
+      <li><a href="#owner-only">12. What's Owner-Only</a></li>
+      <li><a href="#reference">13. Quick Reference</a></li>
     </ul>
   </nav>
 
@@ -99,26 +101,87 @@
       <p>As an <b>admin</b>, you're the hub of the daily workflow. Contractors log their sessions; you review
         and approve them; the app turns approved work into invoices; you send those invoices and record
         payments. This guide walks you through each of those pieces in the order you'll meet them.</p>
-      <p><b>How to use this guide:</b> read sections 1–4 before your first day if you can — they cover
-        everything you'll touch in a normal day. Sections 5–8 are there when you need them. Section 11 is a
+      <p><b>How to use this guide:</b> read sections 1–5 before your first day if you can — they cover
+        everything you'll touch in a normal day. Sections 6–9 are there when you need them. Section 13 is a
         one-page cheat sheet worth printing.</p>
       <div class="callout">
-        <b>The app teaches too.</b> MCA Manager has built-in interactive walkthroughs that highlight each
-        button on the real screens as you click through. This guide tells you which ones to take and when —
-        see <a href="#help">Section 9</a>.
+        <b>Start with the walkthroughs, not this document.</b> MCA Manager has built-in interactive
+        walkthroughs that highlight each button on the real screens as you click through. They will
+        orient you far faster than reading — take the <b>App Overview</b> tour first, then come back
+        here. <a href="#help">Section 10</a> lists them in the order to take them.
+      </div>
+      <div class="callout warn">
+        <b>Before you start:</b> <a href="#phase-one">Section 2</a> explains that clients are not
+        receiving any email yet. Read it before you send your first invoice.
+      </div>
+    </div>
+  </section>
+
+  <section id="phase-one">
+    <h2>2. Phase 1 — What's Live Right Now</h2>
+    <p class="blurb">Read this one first. It explains the single most important thing about this stage.</p>
+
+    <div class="feature">
+      <div class="callout warn">
+        <b>Clients are not receiving anything yet.</b> Every invoice, reminder and portal link the app
+        sends during Phase 1 is redirected to three internal inboxes — Lucas, Amara and you. Nothing
+        reaches a real client until we deliberately switch that off.
+      </div>
+
+      <p>We're turning the app on in stages. Phase 1 is you using it for real — logging sessions,
+        reviewing them, creating and sending invoices — while the app's outbound email is held back.
+        That way we find the problems before a client ever sees one.</p>
+
+      <h3>How you'll know it's on</h3>
+      <p>An amber bar sits across the top of every screen while Phase 1 is active. It lists exactly
+        which inboxes the app is sending to:</p>
+      <img src="{{SS}}/16-pilot-mode-banner.png" alt="Amber pilot mode banner reading: Pilot mode — clients are not receiving email. Invoices, reminders and portal links are being redirected to the testing inboxes, listing the three recipient addresses." />
+      <p>If that bar is gone, the app is live and invoices really are going to clients. Nobody will
+        turn it off without telling you first.</p>
+
+      <h3>What the redirected emails look like</h3>
+      <p>When you send an invoice, it lands in all three inboxes instead of the client's. You'll spot
+        them immediately:</p>
+      <ul>
+        <li>The subject line starts with <code>[PILOT &rarr; client@example.com]</code> — naming the
+          person who <i>would</i> have received it.</li>
+        <li>A yellow band across the top of the email repeats that warning.</li>
+        <li>Everything else — the wording, the amount, the PDF attachment — is exactly what the client
+          would have got.</li>
+      </ul>
+
+      <h3>What we need from you</h3>
+      <p><b>Use the app exactly as if it were real.</b> Don't soften anything or skip steps to be
+        safe — the whole point is to exercise the real workflow. When an invoice arrives in your inbox,
+        open it and check:</p>
+      <ul>
+        <li>Right client name, spelled correctly</li>
+        <li>Right amount, right session date, right service</li>
+        <li>The PDF opens and reads the way you'd want a client to see it</li>
+        <li>The wording sounds like May Creative Arts</li>
+      </ul>
+      <p>Anything that looks off — however small — is worth reporting. Wording and formatting count.
+        See <a href="#bugs">Section 11</a>.</p>
+
+      <div class="callout">
+        <b>One thing that is genuinely different:</b> because the client never receives the email, you
+        can't test whether <i>they</i> can pay it. Payment collection is a later phase. For now we're
+        testing that the right invoice, for the right amount, gets generated and sent.
       </div>
     </div>
   </section>
 
   <section id="day-one">
-    <h2>2. Day One Checklist</h2>
+    <h2>3. Day One Checklist</h2>
     <p class="blurb">Six steps, about 20 minutes, and you're fully set up.</p>
     <ol class="checklist">
       <li>
-        <b>Accept your invite.</b>
-        You'll receive an email invitation to join May Creative Arts on MCA Manager. Click the link and
-        create your account with a strong password. The app lives at
-        <code>https://maycreativearts.vercel.app</code> — bookmark it.
+        <b>Sign in and change your password.</b>
+        Your account is already set up — you don't need to accept an invite. The app lives at
+        <code>https://maycreativearts.vercel.app</code> — bookmark it. Sign in with the temporary
+        password Lucas gives you, then <b>change it immediately</b> under
+        <b>Settings &gt; Profile &amp; Security</b>. If the temporary password doesn't work, use
+        <b>Forgot password?</b> on the login page.
       </li>
       <li>
         <b>Log in and look around.</b>
@@ -126,10 +189,13 @@
         client — invoices only go out when you explicitly send them.
       </li>
       <li>
-        <b>Set up two-factor authentication (if prompted).</b>
-        Because the app holds client health information, your account may require an authenticator app
-        (Google Authenticator, Authy, etc.). Follow the prompt, or set it up any time under
-        <b>Settings &gt; Profile &amp; Security</b>.
+        <b>Set up two-factor authentication.</b>
+        This is required, not optional — the app holds client health information, so May Creative Arts
+        has two-factor turned on for everyone. Have your phone with you when you first log in. The app
+        will walk you through pairing an authenticator app (Google Authenticator, Authy, or whatever
+        your phone already uses), and from then on you'll enter a 6-digit code at login.
+        <b>Save the backup codes it gives you somewhere safe</b> — without them, a lost phone means
+        Lucas has to reset your account manually.
       </li>
       <li>
         <b>Install the app on your phone.</b>
@@ -153,7 +219,7 @@
   </section>
 
   <section id="around">
-    <h2>3. Finding Your Way Around</h2>
+    <h2>4. Finding Your Way Around</h2>
     <p class="blurb">The Dashboard is your morning coffee screen — it surfaces everything that needs you.</p>
     <div class="feature">
       <h3>The Dashboard</h3>
@@ -162,7 +228,7 @@
         lists what actually needs doing, most urgent first — overdue invoices, sessions waiting for approval,
         unsent invoices, unbilled scholarship sessions. Each card has a jump-in link, and cards only appear
         when there's something to act on. An empty Action Center means you're caught up.</p>
-      <img src="{{SS}}/tour-01-dashboard.png" alt="Dashboard with stats and action center" />
+      <img src="{{SS}}/02-dashboard-admin.png" alt="Dashboard with stats and action center" />
     </div>
     <div class="feature">
       <h3>The sidebar — your map</h3>
@@ -177,12 +243,12 @@
         <tr><td><b>Help</b></td><td>The Help Center: searchable articles, FAQs, interactive walkthroughs, and the AI helper.</td></tr>
       </table>
       <p>If you've seen screenshots with <b>Payroll</b> or <b>Analytics</b> menu items and don't have them —
-        that's normal. Those are owner-only (see <a href="#owner-only">Section 10</a>).</p>
+        that's normal. Those are owner-only (see <a href="#owner-only">Section 12</a>).</p>
     </div>
   </section>
 
   <section id="sessions">
-    <h2>4. Sessions — Your Daily Core</h2>
+    <h2>5. Sessions — Your Daily Core</h2>
     <p class="blurb">Sessions are the heartbeat of the app. Everything else — invoices, pay, reports — flows from them.</p>
 
     <div class="feature">
@@ -206,7 +272,7 @@
       <p>Each card shows the date, service type, client, contractor, duration, and a status badge. Use the
         search bar (client, contractor, or service name) and the filters (status, date range, contractor) to
         find anything. Sessions with a <b>Submitted</b> badge are waiting on you.</p>
-      <img src="{{SS}}/tour-02-sessions-list.png" alt="Sessions list with status badges and filters" />
+      <img src="{{SS}}/07-sessions-list.png" alt="Sessions list with status badges and filters" />
     </div>
 
     <div class="feature">
@@ -236,7 +302,7 @@
         you never calculate anything by hand.</p>
       <p>Two kinds of notes, and the difference matters: <b>Internal Notes</b> are visible only to staff.
         <b>Client Notes</b> appear in the client's portal. Both are encrypted for HIPAA compliance.</p>
-      <img src="{{SS}}/tour-03-new-session.png" alt="New session form" />
+      <img src="{{SS}}/08-new-session-empty.png" alt="New session form" />
       <div class="callout">
         <b>Tip:</b> the form remembers your last-used time, duration, and service type, and a <b>Log
         Another</b> button appears after each submission — logging a full day of sessions takes a couple of
@@ -246,7 +312,7 @@
   </section>
 
   <section id="clients">
-    <h2>5. Clients</h2>
+    <h2>6. Clients</h2>
     <p class="blurb">Every client's contact info, billing setup, and history in one place.</p>
 
     <div class="feature">
@@ -254,7 +320,7 @@
       <p>The Clients page shows everyone with their contact info and payment method. The stats at the top
         flag clients missing contact details. Click any row to open the client's full record: session
         history, invoices, goals, and shared resources.</p>
-      <img src="{{SS}}/tour-05-clients-list.png" alt="Clients list" />
+      <img src="{{SS}}/11-clients-list.png" alt="Clients list" />
     </div>
 
     <div class="feature">
@@ -288,12 +354,12 @@
       <h3>The client portal invite</h3>
       <p>From a client's page you can send a <b>portal invite</b> — a secure link where the client (or their
         family) sees their session history, notes you've shared, goals, and resources. More in
-        <a href="#portal">Section 8</a>.</p>
+        <a href="#portal">Section 9</a>.</p>
     </div>
   </section>
 
   <section id="invoices">
-    <h2>6. Invoices</h2>
+    <h2>7. Invoices</h2>
     <p class="blurb">The app writes the invoices; you decide when they go out.</p>
 
     <div class="feature">
@@ -308,7 +374,7 @@
       <p>Summary cards up top show pending, awaiting-payment, and overdue totals. The tabs split invoices by
         status — <b>Pending</b>, <b>Sent</b>, <b>Paid</b>, <b>Overdue</b> — plus filters for Self-Directed
         and Group Home clients, and the purple <b>Scholarship</b> tab.</p>
-      <img src="{{SS}}/tour-08-invoices-list.png" alt="Invoices list with tabs and summary cards" />
+      <img src="{{SS}}/13-invoices-list.png" alt="Invoices list with tabs and summary cards" />
     </div>
 
     <div class="feature">
@@ -323,7 +389,7 @@
       <p>For invoices handled outside the app (checks, Venmo), use the quick <b>Send</b> and <b>Paid</b>
         buttons to record the status yourself. Checkboxes + the action bar let you <b>Mark Sent</b> /
         <b>Mark Paid</b> in bulk.</p>
-      <img src="{{SS}}/tour-09-invoice-detail.png" alt="Invoice detail" />
+      <img src="{{SS}}/14-invoice-detail.png" alt="Invoice detail" />
       <div class="callout">
         <b>Reminders are automatic.</b> Unpaid sent invoices get email reminders before their due date (by
         default 7 days and 1 day before, each sent once). You don't chase these by hand.
@@ -341,7 +407,7 @@
   </section>
 
   <section id="team">
-    <h2>7. Team</h2>
+    <h2>8. Team</h2>
     <p class="blurb">See the whole team, and bring new people on board.</p>
     <div class="feature">
       <p>The Team page lists every member with their role and session counts. As an admin you can view the
@@ -354,7 +420,7 @@
   </section>
 
   <section id="portal">
-    <h2>8. The Client Portal</h2>
+    <h2>9. The Client Portal</h2>
     <p class="blurb">What clients see when you send them a portal invite.</p>
     <div class="feature">
       <p>The portal is a simplified, secure view for clients and families — no account or password needed,
@@ -372,7 +438,7 @@
   </section>
 
   <section id="help">
-    <h2>9. Learn More &amp; Getting Help</h2>
+    <h2>10. Learn More &amp; Getting Help</h2>
     <p class="blurb">The Help Center is built into the app — articles, FAQs, walkthroughs, and an AI helper.</p>
 
     <div class="feature">
@@ -390,7 +456,7 @@
       <p>Find them all in <b>Help</b> — the Guided Tours card lists them in this order and tracks which
         ones you've finished. Each tour highlights the actual buttons on the actual screens.
         (You may also see service-type configuration walkthroughs; those cover owner-managed settings.)</p>
-      <img src="{{SS}}/tour-24-help-center.png" alt="Help Center" />
+      <img src="{{SS}}/04-help-center.png" alt="Help Center" />
     </div>
 
     <div class="feature">
@@ -408,8 +474,112 @@
     </div>
   </section>
 
+  <section id="bugs">
+    <h2>11. Found a Bug? Here's How to Tell Us</h2>
+    <p class="blurb">You're the first person really using this. What you notice is the whole point of Phase 1.</p>
+
+    <div class="feature">
+      <p>Report anything that looks wrong, reads badly, or just feels clumsy. You do not need to be
+        sure it's a bug — "this seemed weird" is a perfectly good report. A confusing button is as
+        worth reporting as a broken one, because a client or contractor will hit the same confusion.</p>
+
+      <div class="callout">
+        <b>Where to send it:</b> email <code>lucasemersonweber@gmail.com</code>. If something is
+        blocking you from working, text instead of emailing so it gets seen straight away.
+      </div>
+
+      <h3>The recipe: a screenshot, then bullets</h3>
+      <ol class="checklist">
+        <li>
+          <b>Take a screenshot.</b>
+          Capture the whole window if you can, not just the problem area — the surrounding screen tells
+          us which page you were on and what state it was in.
+          <ul>
+            <li><b>Windows:</b> press <code>Windows</code> + <code>Shift</code> + <code>S</code>, drag
+              a box, then paste into the email with <code>Ctrl</code> + <code>V</code>.</li>
+            <li><b>Mac:</b> press <code>Cmd</code> + <code>Shift</code> + <code>4</code>, drag a box.
+              It saves to your desktop.</li>
+            <li><b>iPhone:</b> press the side button and volume-up together.</li>
+            <li><b>Android:</b> press power and volume-down together.</li>
+          </ul>
+        </li>
+        <li>
+          <b>Write what's wrong as bullets.</b>
+          Short bullets beat a paragraph. Cover these four things:
+          <ul>
+            <li><b>What I was doing</b> — the steps you took, in order</li>
+            <li><b>What I expected</b> — what you thought would happen</li>
+            <li><b>What actually happened</b> — what you saw instead</li>
+            <li><b>Why it matters</b> — what it would cost, confuse or get wrong if a client or
+              contractor hit this</li>
+          </ul>
+        </li>
+        <li>
+          <b>Add the boring details.</b>
+          Date and rough time, whether you were on your phone or a computer, and which client, session
+          or invoice number was involved. These are what let us find it in the logs.
+        </li>
+      </ol>
+
+      <h3>What a strong report looks like</h3>
+      <table>
+        <tr>
+          <th style="width:50%">Strong — we can act on this</th>
+          <th>Weak — we'll have to come back and ask</th>
+        </tr>
+        <tr>
+          <td>
+            <p style="margin:0 0 6px"><i>[screenshot attached]</i></p>
+            <ul style="margin:0">
+              <li><b>What I was doing:</b> Invoices page, opened invoice #1043 for the Miller group
+                session on Jul 29, clicked Send.</li>
+              <li><b>Expected:</b> the invoice to email out and the status to flip to Sent.</li>
+              <li><b>Actually happened:</b> a red "Failed to send email" toast, status stayed Pending.
+                Tried twice, same thing.</li>
+              <li><b>Why it matters:</b> it's a group session so it's our biggest invoice this month,
+                and I can't tell whether it half-sent.</li>
+              <li><b>Details:</b> Jul 31 around 2:15pm, on my laptop in Chrome.</li>
+            </ul>
+          </td>
+          <td>
+            <p style="margin:0">"The invoices page is broken, it won't let me send anything."</p>
+            <p style="margin:8px 0 0; color:#6b7280"><i>No screenshot, no invoice number, no time. We
+              can't reproduce it, so the first thing that happens is three emails back and forth
+              before anyone can start looking.</i></p>
+          </td>
+        </tr>
+      </table>
+
+      <h3>Wording and layout count too</h3>
+      <p>Not everything is a crash. These are all worth a report:</p>
+      <ul>
+        <li>A label that uses the wrong word for how May Creative Arts actually talks</li>
+        <li>An email to a client that sounds too stiff, too casual, or just wrong</li>
+        <li>Something that takes six clicks that ought to take two</li>
+        <li>A screen that's unreadable or cut off on your phone</li>
+        <li>A number that's right but formatted confusingly</li>
+      </ul>
+      <p>For these, "what's wrong and why" is still the format — tell us what it says now, what it
+        should say, and what a reader would misunderstand.</p>
+
+      <div class="callout warn">
+        <b>Check this first:</b> a fair number of "missing" things are deliberate. Contractor pay,
+        rates, analytics, payroll and Settings are hidden from admins on purpose — see
+        <a href="#owner-only">Section 12</a>. If something's missing and it's on that list, it's
+        working as intended. If it's missing and it <i>isn't</i> on that list, definitely report it.
+      </div>
+
+      <div class="callout">
+        <b>A note on client privacy:</b> screenshots may show client names and session notes. When you
+        report something, a first name, initials, or the invoice number is plenty — there's no need to
+        include health details, and please don't forward these screenshots any further than the address
+        above.
+      </div>
+    </div>
+  </section>
+
   <section id="owner-only">
-    <h2>10. What's Owner-Only</h2>
+    <h2>12. What's Owner-Only</h2>
     <p class="blurb">Things you'll hear about but won't see in your menus — by design, not by accident.</p>
     <div class="feature">
       <table>
@@ -425,7 +595,7 @@
   </section>
 
   <section id="reference">
-    <h2>11. Quick Reference</h2>
+    <h2>13. Quick Reference</h2>
     <p class="blurb">Print this page.</p>
 
     <div class="feature">

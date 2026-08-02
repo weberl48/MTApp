@@ -1,11 +1,43 @@
 import { squareClient, getDefaultLocationId, dollarsToCents, isSquareSandbox } from './client'
+import { getPilotSquareRecipient } from '../email/pilot'
 import { randomUUID } from 'crypto'
 
 // Development email for sandbox testing - prevents sending to real clients
-const DEV_EMAIL = process.env.SQUARE_DEV_EMAIL || 'maycreativearts@gmail.com'
+export const DEV_EMAIL = process.env.SQUARE_DEV_EMAIL || 'maycreativearts@gmail.com'
 
 // Re-export for convenience
 export { isSquareSandbox }
+
+export interface SquareRecipientResolution {
+  email: string
+  name: string
+  redirectReason: 'sandbox' | 'pilot' | null
+}
+
+/**
+ * Square emails the customer directly — this app's own pilot-mode redirect
+ * (`src/lib/email/index.ts`) never touches that mail, so the substitution has
+ * to happen here, at invoice-creation time.
+ *
+ * Sandbox takes priority over pilot mode: sandbox is "this isn't real Square
+ * activity at all," which is a stronger guarantee than "redirect real
+ * activity to testers."
+ *
+ * @throws when pilot mode is active but its recipient list is unusable
+ * (propagated from `getPilotSquareRecipient()`).
+ */
+export function resolveSquareRecipient(clientEmail: string, clientName: string): SquareRecipientResolution {
+  if (isSquareSandbox()) {
+    return { email: DEV_EMAIL, name: `[TEST] ${clientName}`, redirectReason: 'sandbox' }
+  }
+
+  const pilotRecipient = getPilotSquareRecipient()
+  if (pilotRecipient) {
+    return { email: pilotRecipient, name: `[PILOT] ${clientName}`, redirectReason: 'pilot' }
+  }
+
+  return { email: clientEmail, name: clientName, redirectReason: null }
+}
 
 interface SquareServiceCharge {
   name: string
@@ -87,12 +119,17 @@ export async function createSquareInvoice(
 ): Promise<SquareInvoiceResult> {
   const idem = squareIdempotencyKeys(params.idempotencyKey)
 
-  // In sandbox mode, redirect all emails to dev email
-  const customerEmail = isSquareSandbox() ? DEV_EMAIL : params.clientEmail
-  const customerName = isSquareSandbox() ? `[TEST] ${params.clientName}` : params.clientName
+  // In sandbox mode (or pilot mode), redirect the customer email so Square
+  // never mails a real client. Sandbox wins if both apply.
+  const { email: customerEmail, name: customerName, redirectReason } = resolveSquareRecipient(
+    params.clientEmail,
+    params.clientName
+  )
 
-  if (isSquareSandbox()) {
-    console.log(`[Square Sandbox] Redirecting invoice from ${params.clientEmail} to ${DEV_EMAIL}`)
+  if (redirectReason === 'sandbox') {
+    console.log(`[Square Sandbox] Redirecting invoice from ${params.clientEmail} to ${customerEmail}`)
+  } else if (redirectReason === 'pilot') {
+    console.log(`[Square Pilot] Redirecting invoice from ${params.clientEmail} to ${customerEmail}`)
   }
 
   // Get location ID

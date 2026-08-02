@@ -13,6 +13,7 @@ import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
 import { QuickSessionFab } from '@/components/layout/quick-session-fab'
+import { PilotModeBanner } from '@/components/layout/pilot-mode-banner'
 import { AiChatBubble } from '@/components/help/ai-chat-bubble'
 import { WalkthroughProvider } from '@/components/walkthroughs/walkthrough-provider'
 
@@ -86,6 +87,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <Sidebar />
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
+                <PilotModeBanner />
                 <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none">
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
