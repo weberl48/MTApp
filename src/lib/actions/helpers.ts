@@ -10,13 +10,29 @@ export function handleSupabaseError(error: PostgrestError | null): { success: fa
   return null
 }
 
-/** Check that the current user has the given permission. Returns an error result if not. */
+/**
+ * Check that the current user has the given permission. Returns an error result if not.
+ *
+ * Also asserts the session has cleared MFA. `getUser()` returns a user at aal1 —
+ * password accepted, TOTP not yet entered — and server actions POST to the page
+ * URL, so a page route missing from the proxy's `protectedPaths` allow-list would
+ * otherwise let a half-authenticated session mutate data.
+ */
 export async function requirePermission(
   permission: Permission
 ): Promise<{ success: false; error: string } | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Not authenticated' }
+
+  // Skipped in local development, matching the proxy: seeded local accounts have
+  // no enrolled factors and require_mfa is off.
+  if (process.env.NODE_ENV === 'production') {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.currentLevel === 'aal1' && aal?.nextLevel === 'aal2') {
+      return { success: false, error: 'MFA verification required' }
+    }
+  }
 
   const { data: profile } = await supabase
     .from('users')

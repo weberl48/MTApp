@@ -469,8 +469,19 @@ CREATE POLICY "Users in same org can view each other" ON users
 CREATE POLICY "Developers can view all users" ON users
     FOR SELECT USING (is_developer());
 
+-- WITH CHECK pins role and organization_id: without it this policy permits
+-- `UPDATE users SET role='developer' WHERE id = auth.uid()`. Backed at runtime by
+-- the prevent_user_privilege_escalation() trigger
+-- (supabase/migrations/20260702_audit_remediation.sql); both layers are load-bearing.
+-- Canonical: supabase/migrations/20260802_close_tenant_join_and_rls_gaps.sql
 CREATE POLICY "Users can update own profile" ON users
-    FOR UPDATE USING (id = auth.uid());
+    FOR UPDATE
+    USING (id = auth.uid())
+    WITH CHECK (
+        id = auth.uid()
+        AND role = (SELECT u.role FROM users u WHERE u.id = auth.uid())
+        AND organization_id = (SELECT u.organization_id FROM users u WHERE u.id = auth.uid())
+    );
 
 CREATE POLICY "Admins can update users in org" ON users
     FOR UPDATE USING (
@@ -487,6 +498,16 @@ CREATE POLICY "Developers can update all users" ON users
 -- RLS POLICIES: CLIENTS
 -- ==============================================================================
 
+-- NOTE (verified against the live cert database 2026-08-02): this org-wide
+-- SELECT is the CURRENT production behaviour. Every member of the organization,
+-- contractor included, can read every client row.
+--
+-- 20241212_restrict_contractor_client_access.sql would narrow this to "clients
+-- you have had a session with", but it was never applied — the live database has
+-- no "Contractors can view own clients" policy. Do not assume that file
+-- describes reality; migrations here are applied by hand with no tracking table.
+-- See the "deliberately not changed" note in
+-- supabase/migrations/20260802_close_tenant_join_and_rls_gaps.sql.
 CREATE POLICY "Users can view clients in org" ON clients
     FOR SELECT USING (organization_id = get_user_organization_id());
 
@@ -637,6 +658,8 @@ CREATE POLICY "Developers can manage all invoices" ON invoices
 -- RLS POLICIES: CLIENT GOALS
 -- ==============================================================================
 
+-- Org-wide, same as `clients` above and matching the live database. See the note
+-- there before "fixing" this.
 CREATE POLICY "Users can view goals in org" ON client_goals
     FOR SELECT USING (organization_id = get_user_organization_id());
 
@@ -863,29 +886,35 @@ BEGIN
             UPDATE public.user_invites
             SET used_at = NOW(), used_by = NEW.id
             WHERE token = invite_token;
+        ELSE
+            RAISE EXCEPTION
+                'This invitation link is no longer valid. Ask your practice administrator to send a new one.'
+                USING ERRCODE = 'insufficient_privilege';
         END IF;
     END IF;
 
-    -- Fall back to legacy org join/create
     IF org_id IS NULL THEN
-        -- Check if organization is specified in metadata
-        org_id := (NEW.raw_user_meta_data->>'organization_id')::UUID;
-
-        IF org_id IS NULL THEN
-            -- Create a new organization for this user
-            INSERT INTO public.organizations (name, slug)
-            VALUES (
-                COALESCE(NEW.raw_user_meta_data->>'organization_name', split_part(NEW.email, '@', 1) || '''s Practice'),
-                COALESCE(NEW.raw_user_meta_data->>'organization_slug', replace(lower(split_part(NEW.email, '@', 1)), '.', '-') || '-' || substr(gen_random_uuid()::text, 1, 8))
-            )
-            RETURNING id INTO org_id;
-
-            -- Keep legacy behavior: new org creator becomes admin
-            new_user_role := 'admin';
-        ELSE
-            -- Joining an existing org without a secure invite token always creates a contractor
-            new_user_role := 'contractor';
+        -- Self-serve CREATION of a new practice is open; JOINING an existing one
+        -- requires an invite token. raw_user_meta_data is the browser's
+        -- signUp() options.data, so an organization_id there is an assertion of
+        -- intent, never an authorization — honouring it let anyone who knew an
+        -- org UUID sign themselves into that tenant.
+        -- Canonical: supabase/migrations/20260802_close_tenant_join_and_rls_gaps.sql
+        IF NULLIF(NEW.raw_user_meta_data->>'organization_id', '') IS NOT NULL THEN
+            RAISE EXCEPTION
+                'Joining an existing organization requires a valid invitation link.'
+                USING ERRCODE = 'insufficient_privilege';
         END IF;
+
+        INSERT INTO public.organizations (name, slug)
+        VALUES (
+            COALESCE(NEW.raw_user_meta_data->>'organization_name', split_part(NEW.email, '@', 1) || '''s Practice'),
+            COALESCE(NEW.raw_user_meta_data->>'organization_slug', replace(lower(split_part(NEW.email, '@', 1)), '.', '-') || '-' || substr(gen_random_uuid()::text, 1, 8))
+        )
+        RETURNING id INTO org_id;
+
+        -- Keep legacy behavior: new org creator becomes admin
+        new_user_role := 'admin';
     END IF;
 
     INSERT INTO public.users (id, email, name, role, organization_id)

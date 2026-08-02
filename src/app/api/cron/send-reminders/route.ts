@@ -1,33 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { Resend } from 'resend'
 import { parseLocalDate } from '@/lib/dates'
 import { decryptField, isEncrypted } from '@/lib/crypto'
-import { getFromAddress, getReplyTo } from '@/lib/email'
+import { getFromAddress, getReplyTo, sendMail } from '@/lib/email'
 import { escape as escapeHtml } from 'he'
+import { verifyBearerSecret } from '@/lib/auth/bearer'
 
-// Lazy initialize Resend client to avoid build-time errors
-let resend: Resend | null = null
-
-function getResend(): Resend | null {
-  if (resend === null && process.env.RESEND_API_KEY) {
-    resend = new Resend(process.env.RESEND_API_KEY)
-  }
-  return resend
-}
-
-// Verify the cron secret to ensure this is called by Vercel Cron
+// Verify the cron secret to ensure this is called by Vercel Cron.
+// Fails closed in every environment: the previous form fell through to
+// `NODE_ENV !== 'production'` when CRON_SECRET was unset, so on any non-Vercel
+// runtime ANY Authorization header authorized this route.
 function verifyCronSecret(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) return false
-
-  // In production, verify against the cron secret
-  if (process.env.CRON_SECRET) {
-    return authHeader === `Bearer ${process.env.CRON_SECRET}`
-  }
-
-  // In development, allow all requests
-  return process.env.NODE_ENV !== 'production'
+  return verifyBearerSecret(request.headers.get('authorization'), process.env.CRON_SECRET)
 }
 
 export async function GET(request: NextRequest) {
@@ -89,8 +73,7 @@ export async function GET(request: NextRequest) {
     for (const reminder of reminders) {
       try {
         // Skip if no email configured
-        const resendClient = getResend()
-        if (!resendClient) {
+        if (!process.env.RESEND_API_KEY) {
           console.log('Resend not configured, skipping reminder:', reminder.id)
           await createServiceClient()
             .from('session_reminders')
@@ -209,22 +192,34 @@ export async function GET(request: NextRequest) {
         // domain Resend has never verified — so Resend rejected the send (403)
         // and every reminder silently failed. The org's own address belongs in
         // Reply-To, which has no domain-verification requirement.
-        const { error: emailError } = await resendClient.emails.send({
-          from: getFromAddress(org?.name),
-          to: reminder.recipient_email,
-          replyTo: getReplyTo(org?.email),
-          subject,
-          text: textContent,
-          html: htmlContent,
-        })
-
-        if (emailError) {
+        try {
+          await sendMail({
+            from: getFromAddress(org?.name),
+            to: reminder.recipient_email,
+            replyTo: getReplyTo(org?.email),
+            subject,
+            text: textContent,
+            html: htmlContent,
+          })
+        } catch (emailError) {
           console.error('[MCA] Error sending reminder email')
+          // sendMail() rethrows the Resend SDK's ErrorResponse as-is on send
+          // failure — a plain { message, statusCode, name } object, not an
+          // Error instance — alongside real Error instances from its own
+          // upstream checks (e.g. getFromAddress()). Read `.message` off
+          // either shape so the persisted error_message matches what the
+          // original direct-Resend-client code recorded.
+          const message =
+            emailError instanceof Error
+              ? emailError.message
+              : typeof emailError === 'object' && emailError !== null && 'message' in emailError
+                ? String((emailError as { message: unknown }).message)
+                : 'Unknown error'
           await createServiceClient()
             .from('session_reminders')
             .update({
               status: 'failed',
-              error_message: emailError.message,
+              error_message: message,
               updated_at: new Date().toISOString(),
             })
             .eq('id', reminder.id)

@@ -3,11 +3,10 @@ import { createServiceClient } from '@/lib/supabase/service'
 import type { OrganizationSettings, ServiceType } from '@/types/database'
 import { calculateSessionPricing, type ContractorPricingOverrides } from '@/lib/pricing'
 import { buildContractorRateMap, type ContractorRateRow } from '@/lib/queries/scholarship'
+import { verifyBearerSecret } from '@/lib/auth/bearer'
 
 function verifyCronSecret(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader || !process.env.CRON_SECRET) return false
-  return authHeader === `Bearer ${process.env.CRON_SECRET}`
+  return verifyBearerSecret(request.headers.get('authorization'), process.env.CRON_SECRET)
 }
 
 /**

@@ -13,6 +13,15 @@ export const lockoutBodySchema = z.object({
   success: z.boolean().optional(),
 })
 
+/** Server-side login body (POST /api/auth/login) */
+export const loginBodySchema = z.object({
+  email: emailSchema,
+  // No max/complexity rules here on purpose: this validates a login attempt, not
+  // a new password. Rejecting an over-long password would leak that the policy
+  // changed and breaks nothing an attacker cares about.
+  password: z.string().min(1),
+})
+
 /** Portal request-link body */
 export const portalRequestLinkSchema = z.object({
   email: emailSchema,

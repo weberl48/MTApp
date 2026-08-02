@@ -3,14 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Clock, Loader2, Lock } from 'lucide-react'
-import { needsMfaVerification } from '@/lib/supabase/mfa'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,7 +20,8 @@ export default function LoginPage() {
   const [restoring, setRestoring] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
+  // No browser Supabase client here: authentication goes through
+  // POST /api/auth/login so the lockout policy is enforced server-side.
 
   useEffect(() => {
     // Check if user was redirected due to session timeout
@@ -58,6 +57,11 @@ export default function LoginPage() {
       const res = await fetch('/api/health/restore/', { method: 'POST' })
       if (res.ok) {
         setError('Server is restoring — this usually takes 1-2 minutes. Please try signing in again shortly.')
+      } else if (res.status === 401) {
+        // Expected in production: /api/health/restore now requires the operator
+        // bearer secret. It used to be anonymous, which meant any visitor could
+        // spend an org-wide Supabase personal access token.
+        setError('Server unavailable. An operator needs to restore the project from the Supabase dashboard (or call /api/health/restore with CRON_SECRET).')
       } else {
         const data = await res.json().catch(() => null)
         setError(data?.error === 'SUPABASE_ACCESS_TOKEN not configured'
@@ -77,57 +81,38 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      // Check lockout status before attempting login
-      const lockoutRes = await fetch('/api/auth/lockout/', {
+      // Authentication happens server-side (POST /api/auth/login): the lockout
+      // check, the credential exchange and the attempt record are one
+      // transaction there. Doing it from here meant the lockout policy only
+      // applied to clients that chose to ask — see the route's header comment.
+      const res = await fetch('/api/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'check' }),
+        body: JSON.stringify({ email, password }),
       })
 
-      if (lockoutRes.ok) {
-        const lockoutStatus = await lockoutRes.json()
-        if (lockoutStatus.locked) {
-          setLockoutMinutes(lockoutStatus.remainingMinutes)
-          setError(`Account temporarily locked due to too many failed attempts. Try again in ${lockoutStatus.remainingMinutes} minute${lockoutStatus.remainingMinutes === 1 ? '' : 's'}.`)
-          return
-        }
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        if (isNetworkError(error.message)) {
-          await attemptRestore()
-          return
-        }
-
-        // Record failed attempt
-        fetch('/api/auth/lockout/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, action: 'record', success: false }),
-        })
-
-        setError(error.message === 'Invalid login credentials'
-          ? 'Invalid email or password. Double-check both, or use "Forgot password?" to reset it.'
-          : error.message)
+      if (res.status === 423) {
+        const { remainingMinutes } = await res.json()
+        setLockoutMinutes(remainingMinutes)
+        setError(`Account temporarily locked due to too many failed attempts. Try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`)
         return
       }
 
-      // Record successful login
-      fetch('/api/auth/lockout/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'record', success: true }),
-      })
+      // The auth service is unreachable (usually a paused Supabase project),
+      // which the route reports separately from a bad password.
+      if (res.status === 503) {
+        await attemptRestore()
+        return
+      }
 
-      // Check if MFA verification is needed
-      const { needsVerification } = await needsMfaVerification()
+      if (!res.ok) {
+        setError('Invalid email or password. Double-check both, or use "Forgot password?" to reset it.')
+        return
+      }
 
-      if (needsVerification) {
+      const { needsMfa } = await res.json()
+
+      if (needsMfa) {
         router.push('/mfa-verify/')
         return
       }

@@ -101,7 +101,11 @@ export const ENDPOINTS = [
   { method: 'GET', path: '/api/health/live/', expect: [200], group: 'health' },
   { method: 'GET', path: '/api/health/ready/', expect: [200, 503], group: 'health' },
   { method: 'POST', path: '/api/health/restore/', group: 'health', skip: 'side effect: triggers a Supabase restore' },
-  { method: 'POST', path: '/api/auth/lockout/', expect: [400, 415, 422], group: 'auth' },
+  // Replaced /api/auth/lockout/, which was removed in the 2026-08-02 security
+  // audit: authentication moved server-side to this route so the lockout policy
+  // is actually enforced, and the old endpoint was an unauthenticated write into
+  // login_attempts (anyone could run a victim's failure counter up).
+  { method: 'POST', path: '/api/auth/login/', expect: [400, 401, 415, 422], group: 'auth' },
   { method: 'POST', path: `/api/clients/${FAKE_ID}/access-token/`, expect: [401, 403, 404], group: 'clients' },
   { method: 'GET', path: `/api/clients/${FAKE_ID}/resources/`, expect: [401, 403, 404], group: 'clients' },
   { method: 'POST', path: `/api/clients/${FAKE_ID}/send-invite/`, expect: [401, 403, 404], group: 'clients' },

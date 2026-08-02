@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { decryptField, isEncrypted } from '@/lib/crypto'
 import { format } from 'date-fns'
 import { can } from '@/lib/auth/permissions'
-import type { UserRole } from '@/types/database'
+import { requireStaffSession } from '@/lib/auth/require-session'
 
 // Types for Supabase join results
 interface NameJoinResult {
@@ -37,26 +37,21 @@ interface SessionWithJoins {
 
 export async function GET(request: NextRequest) {
   try {
+    // This route decrypts session notes (PHI) server-side, so it goes through the
+    // full gate: authenticated AND past MFA. `getUser()` alone accepts an aal1
+    // session that has not completed its TOTP challenge.
+    const auth = await requireStaffSession()
+    if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+    const { userId, role, organizationId } = {
+      userId: auth.session.userId,
+      role: auth.session.role,
+      organizationId: auth.session.organizationId,
+    }
+
     const supabase = await createClient()
 
-    // Verify user is authenticated and is admin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('role, organization_id')
-      .eq('id', user.id)
-      .single()
-
-    if (!userProfile) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const isAdmin = can(userProfile.role as UserRole, 'session:view-all')
-    const isContractor = userProfile.role === 'contractor'
+    const isAdmin = can(role, 'session:view-all')
+    const isContractor = role === 'contractor'
 
     if (!isAdmin && !isContractor) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -90,13 +85,13 @@ export async function GET(request: NextRequest) {
           client:clients(id, name)
         )
       `)
-      .eq('organization_id', userProfile.organization_id)
+      .eq('organization_id', organizationId)
       .order('date', { ascending: false })
 
     // Contractors can only export their own sessions.
     // Admins may scope to a specific contractor (e.g., when using "View As Contractor").
     if (isContractor) {
-      query = query.eq('contractor_id', user.id)
+      query = query.eq('contractor_id', userId)
     } else if (isAdmin && contractorIdParam) {
       query = query.eq('contractor_id', contractorIdParam)
     }

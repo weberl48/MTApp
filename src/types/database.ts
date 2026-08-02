@@ -668,7 +668,11 @@ export interface Database {
         Row: {
           id: string
           client_id: string
-          token: string
+          /** DEPRECATED plaintext token. NULL for rows created after 2026-08-02;
+           *  dropped by 20260802_drop_portal_token_plaintext.sql. Use token_hash. */
+          token: string | null
+          /** sha256(token) as lowercase hex — see hashPortalToken(). */
+          token_hash: string
           expires_at: string
           last_accessed_at: string | null
           is_revoked: boolean
@@ -680,7 +684,8 @@ export interface Database {
         Insert: {
           id?: string
           client_id: string
-          token: string
+          token?: string | null
+          token_hash: string
           expires_at: string
           last_accessed_at?: string | null
           is_revoked?: boolean
@@ -691,7 +696,8 @@ export interface Database {
         }
         Update: {
           client_id?: string
-          token?: string
+          token?: string | null
+          token_hash?: string
           expires_at?: string
           last_accessed_at?: string | null
           is_revoked?: boolean

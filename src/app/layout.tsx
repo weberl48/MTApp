@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
@@ -47,17 +48,23 @@ export const viewport: Viewport = {
   themeColor: "#1e40af",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // next-themes injects an inline <script> to set the theme class before
+  // hydration (that is what prevents the light-mode flash). The CSP built in
+  // src/proxy.ts drops 'unsafe-inline' from script-src, so that script has to
+  // carry the request's nonce or the browser blocks it and dark mode breaks.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <ServiceWorkerProvider />
           <PWAInstallPrompt />
           {process.env.NODE_ENV === "development" ? <DevErrorReporter /> : null}

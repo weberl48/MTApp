@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import { Resend } from 'resend'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
 import { logger } from '@/lib/logger'
-import { getFromAddress, getReplyTo } from '@/lib/email'
+import { getFromAddress, getReplyTo, sendMail } from '@/lib/email'
 import { resolveSquareWebhookStatus } from '@/lib/square/webhook-status'
+import { escape as escapeHtml } from 'he'
 
 // Types for Supabase join results
 interface ClientJoinResult {
@@ -32,7 +32,6 @@ interface InvoiceWithJoins {
 
 // Lazy initialize clients to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
-let resendClient: Resend | null = null
 
 function getSupabaseAdmin(): SupabaseClient {
   if (!supabaseAdmin) {
@@ -44,17 +43,6 @@ function getSupabaseAdmin(): SupabaseClient {
     supabaseAdmin = createClient(url, key)
   }
   return supabaseAdmin
-}
-
-function getResend(): Resend {
-  if (!resendClient) {
-    const key = process.env.RESEND_API_KEY
-    if (!key) {
-      throw new Error('Missing RESEND_API_KEY environment variable')
-    }
-    resendClient = new Resend(key)
-  }
-  return resendClient
 }
 
 // Send payment notification to organization owner
@@ -100,8 +88,15 @@ async function sendPaymentNotification(squareInvoiceId: string) {
     const serviceType = session?.service_type
     const serviceTypeName = Array.isArray(serviceType) ? serviceType[0]?.name : serviceType?.name
 
-    // Send notification email
-    await getResend().emails.send({
+    // Send notification email.
+    //
+    // pilotExempt: this notifies OUR owner that a payment landed — it never goes
+    // to a client, and suppressing it during the pilot would hide real money
+    // movement from the person who most needs to see it. Routed through sendMail
+    // anyway so that Resend has exactly one caller and every exemption is
+    // explicit and greppable.
+    await sendMail({
+      pilotExempt: true,
       from: getFromAddress(),
       to: [owner.email],
       replyTo: getReplyTo(),
@@ -120,15 +115,19 @@ async function sendPaymentNotification(squareInvoiceId: string) {
         '',
         'This is an automated notification from your MCA Manager.',
       ].join('\n'),
+      // Client and service names are staff-entered free text. Every other HTML
+      // mail in src/lib/email/index.ts escapes interpolated values with `he`;
+      // this template was the one place that did not, so markup in a client name
+      // rendered inside a notification the owner trusts.
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #059669;">Payment Received!</h2>
           <p>A Square invoice has been paid:</p>
           <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
-            <p style="margin: 4px 0;"><strong>Client:</strong> ${clientName || 'Unknown'}</p>
-            <p style="margin: 4px 0;"><strong>Service:</strong> ${serviceTypeName || 'Unknown'}</p>
-            <p style="margin: 4px 0;"><strong>Amount:</strong> ${formatCurrency(typedInvoice.amount)}</p>
-            ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${parseLocalDate(session.date).toLocaleDateString()}</p>` : ''}
+            <p style="margin: 4px 0;"><strong>Client:</strong> ${escapeHtml(clientName || 'Unknown')}</p>
+            <p style="margin: 4px 0;"><strong>Service:</strong> ${escapeHtml(serviceTypeName || 'Unknown')}</p>
+            <p style="margin: 4px 0;"><strong>Amount:</strong> ${escapeHtml(formatCurrency(typedInvoice.amount))}</p>
+            ${session?.date ? `<p style="margin: 4px 0;"><strong>Session Date:</strong> ${escapeHtml(parseLocalDate(session.date).toLocaleDateString())}</p>` : ''}
           </div>
           <p style="color: #6b7280; font-size: 14px;">This is an automated notification from your MCA Manager.</p>
         </div>
@@ -164,28 +163,33 @@ export async function POST(request: NextRequest) {
     const body = await request.text()
     const signature = request.headers.get('x-square-hmacsha256-signature')
 
-    // Verify webhook signature in production (fail closed)
-    if (process.env.NODE_ENV === 'production') {
-      if (!process.env.SQUARE_WEBHOOK_SIGNATURE_KEY) {
-        logger.error('SQUARE_WEBHOOK_SIGNATURE_KEY is not configured')
-        return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 503 })
-      }
+    // Verify the webhook signature UNCONDITIONALLY (fail closed).
+    //
+    // This used to sit inside `if (NODE_ENV === 'production')`. Vercel sets
+    // NODE_ENV=production on Preview builds too, so the deployed app was covered —
+    // but on any other runtime (the Pi mirror, a container, a self-host) an
+    // anonymous POST of a forged `invoice.payment_made` event marked an invoice
+    // paid and fired an owner notification. There is no environment in which
+    // accepting an unsigned payment event is correct.
+    if (!process.env.SQUARE_WEBHOOK_SIGNATURE_KEY) {
+      logger.error('SQUARE_WEBHOOK_SIGNATURE_KEY is not configured')
+      return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 503 })
+    }
 
-      if (!signature) {
-        return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
-      }
+    if (!signature) {
+      return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
+    }
 
-      const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/square/`
-      const isValid = verifySquareSignature(
-        body,
-        signature,
-        process.env.SQUARE_WEBHOOK_SIGNATURE_KEY,
-        notificationUrl
-      )
+    const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/square/`
+    const isValid = verifySquareSignature(
+      body,
+      signature,
+      process.env.SQUARE_WEBHOOK_SIGNATURE_KEY,
+      notificationUrl
+    )
 
-      if (!isValid) {
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-      }
+    if (!isValid) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
     const event = JSON.parse(body)

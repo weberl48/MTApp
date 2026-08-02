@@ -12,6 +12,25 @@ function generateSecureToken(): string {
 }
 
 /**
+ * Hash a portal token for storage/lookup.
+ *
+ * The token is a 90-day bearer credential for a client's PHI, so the database
+ * stores only its hash — a DB compromise, a backup, or the cert copy of
+ * production must not yield working portal access. The raw token exists only in
+ * the emailed link.
+ *
+ * SHA-256 rather than a slow KDF on purpose: the input is 256 bits of CSPRNG
+ * output, so there is no guessing to slow down, and this runs on every portal
+ * request.
+ *
+ * MUST match the backfill in supabase/migrations/20260802_hash_portal_tokens.sql
+ * (`encode(digest(token,'sha256'),'hex')`).
+ */
+export function hashPortalToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
+/**
  * Calculate expiry date from now
  */
 function calculateExpiryDate(days: number): string {
@@ -62,7 +81,9 @@ export async function generateAccessToken(
     .from('client_access_tokens')
     .insert({
       client_id: clientId,
-      token,
+      // Only the hash is persisted; `token` below is returned to the caller so it
+      // can be put in the emailed link, and is never written.
+      token_hash: hashPortalToken(token),
       expires_at: expiresAt,
       created_by: createdBy,
       organization_id: organizationId,
@@ -104,7 +125,7 @@ export async function validateAccessToken(token: string): Promise<TokenValidatio
       client:clients(id, name, contact_email),
       organization:organizations(id, name, logo_url, primary_color, settings)
     `)
-    .eq('token', token)
+    .eq('token_hash', hashPortalToken(token))
     .single()
 
   if (tokenError || !tokenData) {
@@ -189,14 +210,24 @@ export async function revokeAllClientTokens(clientId: string): Promise<void> {
 }
 
 /**
- * Get all active tokens for a client
+ * A portal token as shown in a staff listing — metadata only.
+ * Deliberately omits `token` and `token_hash`: this shape is serialized to the
+ * browser and neither the credential nor its hash belongs there.
  */
-export async function getClientTokens(clientId: string): Promise<ClientAccessToken[]> {
+export type ClientAccessTokenSummary = Omit<ClientAccessToken, 'token' | 'token_hash'>
+
+/**
+ * Get all active tokens for a client (metadata only — no credential material).
+ */
+export async function getClientTokens(clientId: string): Promise<ClientAccessTokenSummary[]> {
   const supabase = createServiceClient()
 
+  // Explicit column list, not `*`: this result is serialized straight to the
+  // browser by /api/clients/[id]/access-token, and `*` used to ship the raw
+  // bearer token with it. Neither the token nor its hash belongs in a listing.
   const { data, error } = await supabase
     .from('client_access_tokens')
-    .select('*')
+    .select('id, client_id, organization_id, expires_at, last_accessed_at, is_revoked, created_by, created_at, updated_at')
     .eq('client_id', clientId)
     .eq('is_revoked', false)
     .gte('expires_at', new Date().toISOString())
@@ -252,31 +283,16 @@ export async function getOrCreateClientToken(
 ): Promise<GeneratedToken> {
   const supabase = createServiceClient()
 
-  // Check for existing valid token
-  const { data: existingToken } = await supabase
-    .from('client_access_tokens')
-    .select('token, expires_at')
-    .eq('client_id', clientId)
-    .eq('is_revoked', false)
-    .gte('expires_at', new Date().toISOString())
-    .order('expires_at', { ascending: false })
-    .limit(1)
-    .single()
+  // No "reuse the existing token" path any more: tokens are stored hashed, so
+  // the raw value is unrecoverable by design. Each magic-link request therefore
+  // mints a fresh credential.
+  //
+  // Previously-issued tokens are deliberately NOT revoked here — that matches
+  // the existing behaviour when staff generate a second link, and avoids a
+  // client's own re-request silently breaking a link an admin just sent them.
+  // They still age out at expires_at.
 
-  if (existingToken) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-    if (!baseUrl && process.env.NODE_ENV === 'production') {
-      throw new Error('NEXT_PUBLIC_APP_URL is required in production')
-    }
-    const appUrl = baseUrl || 'http://localhost:3000'
-    return {
-      token: existingToken.token,
-      expiresAt: existingToken.expires_at,
-      portalUrl: `${appUrl}/portal/${existingToken.token}`,
-    }
-  }
-
-  // No valid token exists - we need a user ID to create one
+  // We need a user ID to attribute the token to.
   // For magic link requests, we'll use a system user or the first admin
   const { data: adminUser } = await supabase
     .from('users')

@@ -35,35 +35,16 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              // React dev mode needs eval() for debugging features (callstack
-              // reconstruction, Fast Refresh); production never uses eval and
-              // keeps the strict policy.
-              process.env.NODE_ENV === "development"
-                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-                : "script-src 'self' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              // The local Supabase stack (scripts/local-env) serves auth and REST
-              // from http://127.0.0.1:54321, which the production allow-list does
-              // not cover. Without this every local sign-in is blocked by CSP, and
-              // because the fetch never reaches the server it surfaces as the
-              // paused-project "Server unavailable" banner rather than a CSP error.
-              // Loopback only, development only — production keeps the strict list.
-              process.env.NODE_ENV === "development"
-                ? "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.squareup.com https://connect.squareup.com https://*.resend.com capacitor://localhost http://localhost http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*"
-                : "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.squareup.com https://connect.squareup.com https://*.resend.com capacitor://localhost http://localhost",
-              "object-src 'none'",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join("; "),
-          },
+          // NOTE: the document Content-Security-Policy is NOT set here.
+          //
+          // It needs a per-request nonce so that `script-src` can drop
+          // 'unsafe-inline' (which otherwise cancels most of CSP's XSS value),
+          // and headers() can only emit static values. The policy is built in
+          // src/lib/security/csp.ts and applied by src/proxy.ts.
+          //
+          // API responses get no CSP from the proxy, so they rely on the
+          // X-Frame-Options / nosniff headers above plus the per-route
+          // exception below.
         ],
       },
       // Invoice PDFs are previewed in a same-origin <iframe> on the invoice

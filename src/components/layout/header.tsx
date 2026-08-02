@@ -36,7 +36,6 @@ interface ContractorOption {
 interface ClientOption {
   id: string
   name: string
-  active_token: string | null
 }
 
 const roleLabels: Record<string, string> = {
@@ -63,6 +62,33 @@ export function Header({ user }: HeaderProps) {
 
   const [contractors, setContractors] = useState<ContractorOption[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
+  const [openingPortalFor, setOpeningPortalFor] = useState<string | null>(null)
+
+  /**
+   * Mint a fresh portal token for this client and open it.
+   *
+   * Tokens are stored hashed, so there is no existing token to look up — the raw
+   * value only exists at the moment it is created. This goes through the staff
+   * API, which re-checks the caller's role and org server-side; the browser
+   * never sees any other client's credential.
+   */
+  async function openClientPortal(clientId: string) {
+    setOpeningPortalFor(clientId)
+    try {
+      const res = await fetch(`/api/clients/${clientId}/access-token/`, { method: 'POST' })
+      if (!res.ok) {
+        router.push(`/clients/${clientId}/`)
+        return
+      }
+      const { portalUrl } = (await res.json()) as { portalUrl?: string }
+      if (portalUrl) window.open(portalUrl, '_blank', 'noopener,noreferrer')
+      else router.push(`/clients/${clientId}/`)
+    } catch {
+      router.push(`/clients/${clientId}/`)
+    } finally {
+      setOpeningPortalFor(null)
+    }
+  }
 
   // Show view-as tools for developers and owners
   const showViewAsTools = actualRole === 'developer' || actualRole === 'owner'
@@ -85,32 +111,23 @@ export function Header({ user }: HeaderProps) {
         setContractors(contractorData)
       }
 
-      // Fetch clients with their active portal tokens from client_access_tokens table
+      // Clients only — deliberately NOT their portal tokens.
+      //
+      // This used to select client_access_tokens(token, ...), which pulled every
+      // client's raw portal bearer credential into the browser just to decide
+      // whether to show a "Has Token" badge. Tokens are now stored hashed and are
+      // unrecoverable by design, so the preview mints one on demand instead
+      // (see openClientPortal below).
+      //
+      // The old query also filtered on `is_active`, a column this table does not
+      // have — so it errored and every client silently showed "No Token".
       const { data: clientData } = await supabase
         .from('clients')
-        .select(`
-          id,
-          name,
-          client_access_tokens!client_access_tokens_client_id_fkey(token, is_active, expires_at)
-        `)
+        .select('id, name')
         .order('name')
 
       if (clientData) {
-        // Transform to get the active token for each client
-        const clientsWithTokens = clientData.map((client) => {
-          const tokens = client.client_access_tokens || []
-          // Find first active, non-expired token
-          const activeToken = tokens.find(
-            (t: { token: string; is_active: boolean; expires_at: string }) =>
-              t.is_active && new Date(t.expires_at) > new Date()
-          )
-          return {
-            id: client.id,
-            name: client.name,
-            active_token: activeToken?.token || null,
-          }
-        })
-        setClients(clientsWithTokens)
+        setClients(clientData.map((client) => ({ id: client.id, name: client.name })))
       }
     }
 
@@ -307,20 +324,13 @@ export function Header({ user }: HeaderProps) {
               {clients.map((client) => (
                 <DropdownMenuItem
                   key={client.id}
-                  onClick={() => {
-                    if (client.active_token) {
-                      window.open(`/portal/${client.active_token}/`, '_blank')
-                    } else {
-                      router.push(`/clients/${client.id}/`)
-                    }
-                  }}
+                  disabled={openingPortalFor === client.id}
+                  onClick={() => openClientPortal(client.id)}
                 >
                   <div className="flex items-center justify-between w-full">
                     <span className="font-medium truncate">{client.name}</span>
-                    {client.active_token ? (
-                      <Badge variant="outline" className="ml-2 text-xs">Has Token</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="ml-2 text-xs">No Token</Badge>
+                    {openingPortalFor === client.id && (
+                      <Badge variant="secondary" className="ml-2 text-xs">Opening…</Badge>
                     )}
                   </div>
                 </DropdownMenuItem>

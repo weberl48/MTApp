@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { apiRateLimit, authRateLimit } from '@/lib/rate-limit'
+import { buildCsp } from '@/lib/security/csp'
 
 let _encryptionWarned = false
 
@@ -34,7 +35,11 @@ export async function proxy(request: NextRequest) {
   // Rate limiting (skipped if Upstash is not configured)
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1'
 
-  const authPaths = ['/login', '/signup', '/forgot-password', '/reset-password']
+  // `/api/auth/*` belongs in the strict auth bucket, not the 60/60s API one.
+  // Credential exchange now happens at POST /api/auth/login (so the lockout
+  // policy is enforced server-side); leaving it in the API bucket would have
+  // handed brute-force 60 attempts a minute instead of 5.
+  const authPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/api/auth/']
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
   const isApiPath = pathname.startsWith('/api/')
 
@@ -71,7 +76,30 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return await updateSession(request)
+  // Per-request CSP nonce. This has to happen here rather than in
+  // next.config.ts's headers() because that can only emit static values — which
+  // is why the policy used to carry `script-src 'unsafe-inline'`.
+  //
+  // Document responses only. API responses keep the static headers from
+  // next.config.ts, whose per-route exception lets the invoice PDF be framed
+  // same-origin; a second CSP from here would intersect with that and re-break
+  // the preview iframe.
+  const nonce = crypto.randomUUID()
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-nonce', nonce)
+
+  const response = await updateSession(request, requestHeaders)
+
+  if (!isApiPath) {
+    // Next.js reads this header and stamps the same nonce onto the scripts it
+    // injects, so its bootstrap still runs under a strict policy.
+    response.headers.set(
+      'Content-Security-Policy',
+      buildCsp({ nonce, isDev: process.env.NODE_ENV === 'development' })
+    )
+  }
+
+  return response
 }
 
 export const config = {

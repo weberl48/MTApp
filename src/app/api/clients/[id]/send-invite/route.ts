@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { generateAccessToken, getClientTokens } from '@/lib/portal/token'
+import { generateAccessToken } from '@/lib/portal/token'
 import { sendMagicLinkEmail } from '@/lib/email'
 import { isFeatureEnabled } from '@/lib/features'
 import { uuidSchema } from '@/lib/validation/schemas'
@@ -93,29 +93,20 @@ export async function POST(
 
     const organizationName = organization?.name || 'Your Therapy Practice'
 
-    // Check for existing valid token, or generate new one
-    const existingTokens = await getClientTokens(clientId)
-    let portalUrl: string
-
-    if (existingTokens.length > 0) {
-      // Use existing token
-      const token = existingTokens[0].token
-      const envUrl = process.env.NEXT_PUBLIC_APP_URL
-      if (!envUrl && process.env.NODE_ENV === 'production') {
-        throw new Error('NEXT_PUBLIC_APP_URL is required in production')
-      }
-      const baseUrl = envUrl || 'http://localhost:3000'
-      portalUrl = `${baseUrl}/portal/${token}`
-    } else {
-      // Generate new token
-      const tokenInfo = await generateAccessToken(
-        clientId,
-        user.id,
-        client.organization_id,
-        90 // 90 days expiry
-      )
-      portalUrl = tokenInfo.portalUrl
-    }
+    // Always mint a fresh token for the invite.
+    //
+    // The "reuse the existing one" branch is gone because it cannot work any
+    // more: tokens are stored hashed, so the raw value exists only at the moment
+    // of creation. That is the point — a database read must not yield working
+    // portal credentials. Re-sending an invite therefore issues a new link;
+    // previously-issued links stay valid until they expire or are revoked.
+    const tokenInfo = await generateAccessToken(
+      clientId,
+      user.id,
+      client.organization_id,
+      90 // 90 days expiry
+    )
+    const portalUrl = tokenInfo.portalUrl
 
     // Send the email
     await sendMagicLinkEmail({

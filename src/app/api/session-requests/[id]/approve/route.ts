@@ -213,25 +213,19 @@ export async function POST(
     const organization = Array.isArray(sessionRequest.organization) ? sessionRequest.organization[0] : sessionRequest.organization
 
     if (client?.contact_email) {
-      // Get client's portal token for the link
-      const { data: tokenData } = await supabase
-        .from('client_access_tokens')
-        .select('token')
-        .eq('client_id', client.id)
-        .eq('is_active', true)
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
+      // Link to the portal's request-a-link page rather than a deep link.
+      //
+      // Portal tokens are stored hashed, so there is no existing raw token to
+      // look up, and minting a fresh 90-day credential just to decorate a
+      // status email is not a trade worth making — the client can request a link
+      // themselves. (The previous query filtered on `is_active`, a column this
+      // table does not have, so it errored and this already fell back here.)
       const envUrl = process.env.NEXT_PUBLIC_APP_URL
       if (!envUrl && process.env.NODE_ENV === 'production') {
         throw new Error('NEXT_PUBLIC_APP_URL is required in production')
       }
       const appUrl = envUrl || 'http://localhost:3000'
-      const portalUrl = tokenData?.token
-        ? `${appUrl}/portal/${tokenData.token}/sessions`
-        : `${appUrl}/portal`
+      const portalUrl = `${appUrl}/portal`
 
       try {
         await sendSessionRequestStatusEmail({

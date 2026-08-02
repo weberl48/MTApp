@@ -104,25 +104,15 @@ export async function POST(
     const organization = Array.isArray(sessionRequest.organization) ? sessionRequest.organization[0] : sessionRequest.organization
 
     if (client?.contact_email) {
-      // Get client's portal token for the link
-      const { data: tokenData } = await supabase
-        .from('client_access_tokens')
-        .select('token')
-        .eq('client_id', client.id)
-        .eq('is_active', true)
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
+      // See the matching comment in approve/route.ts: tokens are stored hashed,
+      // so there is no raw token to look up and no reason to mint a new 90-day
+      // credential for a status email.
       const envUrl = process.env.NEXT_PUBLIC_APP_URL
       if (!envUrl && process.env.NODE_ENV === 'production') {
         throw new Error('NEXT_PUBLIC_APP_URL is required in production')
       }
       const appUrl = envUrl || 'http://localhost:3000'
-      const portalUrl = tokenData?.token
-        ? `${appUrl}/portal/${tokenData.token}/sessions`
-        : `${appUrl}/portal`
+      const portalUrl = `${appUrl}/portal`
 
       try {
         await sendSessionRequestStatusEmail({

@@ -4,16 +4,13 @@ import { getFromAddress, sendInvoiceReminderEmail } from '@/lib/email'
 import { formatInvoiceNumber } from '@/lib/constants/display'
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import type { OrganizationSettings } from '@/types/database'
+import { verifyBearerSecret } from '@/lib/auth/bearer'
 
+// Fail closed, in every environment. The previous form fell through to
+// `NODE_ENV !== 'production'` when CRON_SECRET was unset, so on any non-Vercel
+// runtime ANY Authorization header authorized this route.
 function verifyCronSecret(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) return false
-
-  if (process.env.CRON_SECRET) {
-    return authHeader === `Bearer ${process.env.CRON_SECRET}`
-  }
-
-  return process.env.NODE_ENV !== 'production'
+  return verifyBearerSecret(request.headers.get('authorization'), process.env.CRON_SECRET)
 }
 
 export async function GET(request: NextRequest) {

@@ -1,0 +1,79 @@
+name: No real-data artifacts
+
+# THIS REPO IS PUBLIC and cert holds a full copy of production, so anything
+# rendered from the running app carries real client names.
+#
+# .gitignore already states that intent — but .gitignore does not UNTRACK.
+# The built admin onboarding guide was ignored and committed anyway (it inlines
+# 12 app screenshots as base64), and stayed in history for two commits before
+# the 2026-08-02 security audit found it. A rule with no check gets violated;
+# this is the check.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reject tracked real-data artifacts
+        run: |
+          set -euo pipefail
+
+          # Binary/document formats that only enter this repo by being exported
+          # or screenshotted from a running app. public/ is exempt: icons and
+          # PWA assets genuinely belong there.
+          BAD_EXT=$(git ls-files \
+            | grep -Ei '\.(png|jpg|jpeg|pdf|xlsx|xls|csv)$' \
+            | grep -v '^public/' \
+            || true)
+
+          # The built guide specifically — it embeds screenshots as base64, so
+          # extension-matching alone would never catch it.
+          BAD_BUILT=$(git ls-files | grep -E 'MCA-Admin-Onboarding-Guide\.(html|pdf)$' || true)
+
+          # Any tracked file carrying inlined raster images, which is how a
+          # rendered artifact smuggles screenshots past an extension check.
+          BAD_INLINE=""
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            if grep -qlE 'data:image/(png|jpe?g);base64' "$f" 2>/dev/null; then
+              BAD_INLINE="${BAD_INLINE}${f}"$'\n'
+            fi
+          done < <(git ls-files '*.html' '*.md' | grep -v '^docs/onboarding/guide-src.html$' || true)
+
+          FAILED=0
+
+          if [ -n "$BAD_EXT" ]; then
+            echo "::error::Tracked real-data artifact(s) — these can contain client PHI:"
+            echo "$BAD_EXT"
+            FAILED=1
+          fi
+
+          if [ -n "$BAD_BUILT" ]; then
+            echo "::error::The BUILT onboarding guide is tracked. It inlines app screenshots."
+            echo "Rebuild locally with 'node scripts/build-onboarding-guide.mjs' and send the file directly."
+            echo "$BAD_BUILT"
+            FAILED=1
+          fi
+
+          if [ -n "$BAD_INLINE" ]; then
+            echo "::error::Tracked file(s) with base64-inlined images — screenshots of the app are PHI:"
+            echo "$BAD_INLINE"
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "If a file is genuinely safe, add an explicit exception to this workflow"
+            echo "and say why in the commit message. Do not weaken the whole rule."
+            exit 1
+          fi
+
+          echo "No real-data artifacts tracked."

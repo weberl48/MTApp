@@ -16,18 +16,25 @@ import { PasswordStrength } from '@/components/forms/password-strength'
 
 export default function SignupPage() {
   const searchParams = useSearchParams()
-  const inviteOrgId = searchParams.get('org') // For joining existing org via invite link
-  const inviteToken = searchParams.get('invite') // Secure role-based invite token
+  // Secure role-based invite token — the ONLY way to join an existing practice.
+  //
+  // There used to be a second path: an "Invite Code" text field that was really
+  // the organization's UUID, passed to signUp() as metadata.organization_id and
+  // honoured by the handle_new_user() trigger. That made a database identifier
+  // into a non-rotatable shared credential — anyone who had ever seen it (a
+  // former contractor, anyone forwarded the "code") could sign themselves into
+  // the tenant. Closed by 20260802_close_tenant_join_and_rls_gaps.sql; the field
+  // is removed here so the UI stops teaching people to circulate org UUIDs.
+  const inviteToken = searchParams.get('invite')
 
   const [signupType, setSignupType] = useState<'new-org' | 'join-org'>(
-    inviteOrgId || inviteToken ? 'join-org' : 'new-org'
+    inviteToken ? 'join-org' : 'new-org'
   )
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [organizationName, setOrganizationName] = useState('')
-  const [inviteCode, setInviteCode] = useState(inviteOrgId || '')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -57,14 +64,19 @@ export default function SignupPage() {
       return
     }
 
-    if (signupType === 'join-org' && !inviteCode.trim() && !inviteToken) {
-      setError('Please enter an invite code or organization ID')
+    if (signupType === 'join-org' && !inviteToken) {
+      setError('Joining a practice requires an invitation link. Ask your administrator to send you one.')
       setLoading(false)
       return
     }
 
     try {
-      // Build metadata based on signup type
+      // Build metadata based on signup type.
+      //
+      // Note what is NOT here: organization_id and role. raw_user_meta_data is
+      // attacker-controlled, so the trigger must never take either from it — the
+      // organization comes from the invite row, the role from the invite or from
+      // the create-a-practice branch.
       const metadata: Record<string, string> = {
         name,
       }
@@ -72,14 +84,14 @@ export default function SignupPage() {
       if (signupType === 'new-org') {
         // Creating new organization - will become owner
         metadata.organization_name = organizationName.trim()
+      } else if (inviteToken) {
+        metadata.invite_token = inviteToken
       } else {
-        // Joining existing organization - either via org id (contractor) or secure invite token (role-based)
-        if (inviteToken) {
-          metadata.invite_token = inviteToken
-        } else {
-          metadata.organization_id = inviteCode.trim()
-          metadata.role = 'contractor'
-        }
+        // Unreachable via the guard above; kept as an explicit failure so a
+        // future refactor cannot turn "join" into "silently create a new org".
+        setError('Joining a practice requires an invitation link.')
+        setLoading(false)
+        return
       }
 
       const { error } = await supabase.auth.signUp({
@@ -140,7 +152,7 @@ export default function SignupPage() {
           )}
 
           {/* Signup Type Toggle */}
-          {!inviteOrgId && !inviteToken && (
+          {!inviteToken && (
             <Tabs value={signupType} onValueChange={(v) => setSignupType(v as 'new-org' | 'join-org')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="new-org" className="flex items-center gap-2">
@@ -171,20 +183,14 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* Invite Code (for joining org) */}
+          {/* Joining a practice requires a secure invite link — there is no
+              code to type. The old free-text field accepted the organization's
+              UUID, which let anyone who knew it join the tenant uninvited. */}
           {signupType === 'join-org' && !inviteToken && (
-            <div className="space-y-2">
-              <Label htmlFor="inviteCode">Invite Code</Label>
-              <Input
-                id="inviteCode"
-                type="text"
-                placeholder="Enter invite code from your admin"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-                required={signupType === 'join-org'}
-                disabled={!!inviteOrgId}
-              />
-              <p className="text-xs text-gray-500">Get this from your practice administrator</p>
+            <div className="p-3 text-sm text-amber-800 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300 rounded-md">
+              Joining an existing practice needs an invitation link. Ask your practice
+              administrator to invite you from <span className="font-medium">Team &rarr; Invite</span>,
+              then open the link they send you.
             </div>
           )}
 

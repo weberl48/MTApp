@@ -1,11 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { shouldDevAutoLogin, DEV_AUTO_LOGIN_EMAIL } from '@/lib/auth/dev-auto-login'
+import { isMfaGuardedApiPath } from '@/lib/auth/mfa-scope'
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+/**
+ * @param requestHeaders Headers to forward to the app (the proxy uses this to
+ *   pass the per-request CSP nonce through as `x-nonce`). Omitted in tests.
+ */
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
+  const nextOptions = requestHeaders ? { request: { headers: requestHeaders } } : { request }
+
+  let supabaseResponse = NextResponse.next(nextOptions)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,9 +22,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          supabaseResponse = NextResponse.next(nextOptions)
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -58,8 +61,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Protected routes - redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/sessions', '/clients', '/invoices', '/settings', '/team', '/payments', '/analytics', '/earnings']
+  // Protected routes - redirect to login if not authenticated.
+  // NOTE: this is an allow-list, so a new dashboard route is unprotected until it
+  // is added here. `/help` was missing for exactly that reason.
+  const protectedPaths = ['/dashboard', '/sessions', '/clients', '/invoices', '/settings', '/team', '/payments', '/analytics', '/earnings', '/help']
   const isProtectedPath = protectedPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
@@ -69,6 +74,10 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/login/'
     return NextResponse.redirect(url)
   }
+
+  // Deny-by-default for /api/*: guarded unless the route authenticates with a
+  // portal token, an HMAC, or a bearer secret. See @/lib/auth/mfa-scope.
+  const isGuardedApiPath = isMfaGuardedApiPath(request.nextUrl.pathname)
 
   // MFA enforcement: check AAL level once for all authenticated user redirects
   // Skip MFA checks entirely in local development
@@ -87,11 +96,23 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Fetch AAL once for any authenticated path that needs it
-  const needsAalCheck = !skipMfa && user && (isProtectedPath || isAuthPath || isMfaVerifyPath)
+  const needsAalCheck =
+    !skipMfa && user && (isProtectedPath || isAuthPath || isMfaVerifyPath || isGuardedApiPath)
   const aalData = needsAalCheck
     ? (await supabase.auth.mfa.getAuthenticatorAssuranceLevel()).data
     : null
   const needsMfaVerify = aalData?.currentLevel === 'aal1' && aalData?.nextLevel === 'aal2'
+
+  // API routes are not in `protectedPaths`, so before this check an aal1 session
+  // (password accepted, TOTP not yet entered) reached every API route — including
+  // /api/sessions/export, which decrypts session notes server-side. Reject rather
+  // than redirect: an API caller wants a status code, not HTML.
+  if (isGuardedApiPath && user && needsMfaVerify) {
+    return NextResponse.json(
+      { error: 'MFA verification required' },
+      { status: 403, headers: { 'x-mfa-required': '1' } }
+    )
+  }
 
   if (isProtectedPath && user && needsMfaVerify) {
     // User has MFA enrolled but hasn't verified this session — redirect to MFA
