@@ -426,8 +426,9 @@ The root layout uses `next-themes` (`ThemeProvider` with `attribute="class"`) su
 | `codeql.yml` | Push/PR + weekly | CodeQL static analysis (security-extended + security-and-quality) |
 | `semgrep.yml` | Push/PR + weekly | Semgrep SAST (JS/TS/React/Next.js/OWASP rules) |
 | `claude.yml` | `@claude` mention | Claude Code GitHub Action for issue/PR assistance |
+| `no-real-data.yml` | Push/PR to `main` | Rejects tracked PHI-bearing artifacts (images/exports outside `public/`, the built onboarding guide, base64-inlined screenshots) |
 
-CI uses Node 24.
+CI uses Node 24. Semgrep's `github-actions-mutable-action-tag` rule is blocking: every `uses:` in a workflow must be pinned to a full 40-char commit SHA (`@<sha> # v<version>` comment convention).
 
 **Preview deploys target cert.** `deploy.yml` runs `vercel pull --environment=preview` on PRs and matches build/deploy to the same target, so a PR's Preview URL uses the **Preview**-scoped env vars — which point at the cert Supabase project. That makes every PR testable against prod-shaped data. (The old "prebuilt environment mismatch" known-issue is fixed; pull, build and deploy now all match the event.)
 
