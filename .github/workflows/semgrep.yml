@@ -22,6 +22,10 @@ jobs:
   semgrep:
     name: Scan
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     # Skip dependabot PRs to avoid noise
     if: github.actor != 'dependabot[bot]'
@@ -34,7 +38,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Run Semgrep
-        run: semgrep ci
+        run: semgrep ci --sarif-output=semgrep.sarif
         env:
           # Use Semgrep's curated rulesets for JavaScript/TypeScript
           # These cover OWASP Top 10, React security, and more

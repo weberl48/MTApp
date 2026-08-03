@@ -26,15 +26,13 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 1
 
       - name: Run Claude Code
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@be7b93b1907a4abad570368f3c74b6fe3807510b # v1.0.183
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Optional: Use a specific model (defaults to Sonnet)
-          # model: "claude-sonnet-4-20250514"
-          # Optional: Limit max turns
-          # max_turns: 10
+          # Optional: model/turn overrides go through claude_args in v1, e.g.
+          # claude_args: "--model claude-sonnet-5 --max-turns 10"
