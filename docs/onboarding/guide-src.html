@@ -18,16 +18,23 @@
   .toc ul { margin: 0; padding-left: 18px; columns: 2; column-gap: 28px; }
   .toc li { margin-bottom: 4px; }
   .toc a { color: #1e40af; text-decoration: none; }
-  section { background: #fff; border: 1px solid #e5e8ee; border-radius: 12px; padding: 22px 26px; margin-top: 22px;
-            break-inside: avoid-page; }
+  /* No break-inside here. Sections are longer than a page, so asking the printer
+     to keep one whole made it bail and start a fresh page, stranding most of the
+     previous one — 11 of 30 pages came out mostly white. Breaking is allowed;
+     the rules further down keep the small units (headings, callouts, rows,
+     checklist steps) intact instead. */
+  section { background: #fff; border: 1px solid #e5e8ee; border-radius: 12px; padding: 22px 26px; margin-top: 22px; }
   h2 { font-size: 1.3rem; margin: 0 0 4px; color: #111827; }
   .blurb { color: #5b6472; margin: 0 0 6px; font-size: 0.97rem; }
-  .feature { margin-top: 18px; padding-top: 16px; border-top: 1px solid #eef1f5; break-inside: avoid; }
+  .feature { margin-top: 18px; padding-top: 16px; border-top: 1px solid #eef1f5; }
   .feature:first-of-type { border-top: none; }
   h3 { font-size: 1.05rem; margin: 0 0 6px; }
   p { margin: 0 0 10px; }
   img { width: 100%; height: auto; border: 1px solid #dfe3ea; border-radius: 8px; margin-top: 10px;
         break-inside: avoid; }
+  /* Keep a heading with the text it introduces; never strand one or two lines. */
+  h2, h3 { break-after: avoid; }
+  p, li { orphans: 2; widows: 2; }
   footer { color: #8a93a3; font-size: 0.85rem; margin-top: 28px; text-align: center; }
 
   /* Guide additions */
@@ -60,8 +67,12 @@
   .flow .arrow { color: #9ca3af; margin: 0 8px; }
   @media print {
     body { background: #fff; }
-    section { border: none; padding: 12px 0; }
+    section { border: none; padding: 12px 0; margin-top: 14px; }
     .toc { border: 1px solid #e5e8ee; }
+    /* A full-width screenshot is ~7in tall on Letter, so a single image could
+       own most of a page and shove everything after it onto the next one.
+       Cap the height and letterbox rather than scaling to full width. */
+    img { max-height: 3.4in; width: auto; max-width: 100%; object-fit: contain; }
   }
 </style>
 </head>
@@ -176,12 +187,14 @@
     <p class="blurb">Six steps, about 20 minutes, and you're fully set up.</p>
     <ol class="checklist">
       <li>
-        <b>Sign in and change your password.</b>
-        Your account is already set up — you don't need to accept an invite. The app lives at
-        <code>https://app.maycreativearts.com</code> — bookmark it. Sign in with the temporary
-        password Lucas gives you, then <b>change it immediately</b> under
-        <b>Settings &gt; Profile &amp; Security</b>. If the temporary password doesn't work, use
-        <b>Forgot password?</b> on the login page.
+        <b>Set your password.</b>
+        Your account already exists — there's no invite to accept. The app lives at
+        <code>https://app.maycreativearts.com</code> — bookmark it. On the login page click
+        <b>Forgot password?</b>, enter your work email, and you'll get a <b>"Reset Your Password"</b>
+        email from <i>May Creative Arts &lt;noreply@maycreativearts.com&gt;</i> — check spam if it
+        doesn't arrive within a minute or two. The link lasts <b>one hour</b>; if it lapses, just
+        request another. Your password needs an uppercase letter, a lowercase letter, a number and
+        a special character.
       </li>
       <li>
         <b>Log in and look around.</b>
@@ -449,10 +462,13 @@
         <tr><td>2</td><td><b>Approve Sessions</b></td><td>Before your first review — the core of your job.</td></tr>
         <tr><td>3</td><td><b>Log a Session</b></td><td>First week — so you can help contractors and fill gaps.</td></tr>
         <tr><td>4</td><td><b>Add Your First Client</b></td><td>Before you add a real client.</td></tr>
-        <tr><td>5</td><td><b>Scholarship Billing</b></td><td>Before your first month-end batch.</td></tr>
-        <tr><td>6</td><td><b>Invite a Contractor</b></td><td>Whenever someone new joins.</td></tr>
-        <tr><td>7</td><td><b>How Contractor Pay Works</b></td><td>Before your first payroll question — the pay rules and which one wins.</td></tr>
+        <tr><td>5</td><td><b>Send &amp; Track Invoices</b></td><td>Before you send your first invoice — the most important one during Phase 1.</td></tr>
+        <tr><td>6</td><td><b>Scholarship Billing</b></td><td>Before your first month-end batch.</td></tr>
+        <tr><td>7</td><td><b>Invite a Contractor</b></td><td>Whenever someone new joins.</td></tr>
       </table>
+      <p>Those seven are all the walkthroughs available to you. If you see a tour mentioned
+        somewhere that you can't find, it's an owner-only one (pay rates, payroll, analytics,
+        service setup, automation) — see <a href="#owner-only">Section 12</a>.</p>
       <p>Find them all in <b>Help</b> — the Guided Tours card lists them in this order and tracks which
         ones you've finished. Each tour highlights the actual buttons on the actual screens.
         (You may also see service-type configuration walkthroughs; those cover owner-managed settings.)</p>
@@ -471,6 +487,43 @@
           automation, payroll.</li>
       </ul>
       <p>Small comfort feature: the sun/moon icon in the header switches light/dark mode.</p>
+    </div>
+
+    <div class="feature">
+      <h3>The AI helper — what it knows, and what it can't see</h3>
+      <p>The sparkle button in the bottom-right corner opens a chat assistant. It's worth
+        understanding what's behind it, because that tells you which questions it's good at.</p>
+
+      <p><b>It has been given two things:</b> the full Help Center — every article and FAQ, filtered to
+        what your role can see — and <i>your</i> organization's actual configuration: your service
+        types and their rates, your invoice and session settings, your payment and billing methods,
+        your automation settings. So it can answer "what's our no-show fee?" or "how long before a
+        portal link expires?" with your real numbers, not generic advice.</p>
+
+      <div class="callout">
+        <b>It cannot see client, session, invoice, team or payroll data.</b> Not "it's told not to
+        look" — that data is never sent to it. So it can explain <i>how</i> scholarship billing works,
+        but it genuinely cannot tell you whether Tuesday's session got approved. For anything about a
+        specific person or a specific invoice, go to the screen.
+      </div>
+
+      <p><b>Good questions:</b> "how do I mark a session as a no-show?", "what's the difference between
+        self-directed and group home billing?", "when do scholarship invoices get generated?", "why
+        can't I see contractor pay?"</p>
+      <p><b>Questions it can't help with:</b> "did the Miller invoice send?", "how much did we bill in
+        July?", "which sessions are still waiting for approval?" — all of those need the actual page.</p>
+
+      <div class="callout warn">
+        <b>Never type client names or health details into it.</b> It doesn't need them for any question
+        it can actually answer, and the chat leaves the app to be processed. Describe the situation
+        generically — "a group session with three attendees" works just as well as naming anyone.
+      </div>
+
+      <p>It answers with links to the Help Center articles it drew from, so you can read the full
+        version. There's a limit of about <b>20 questions per hour</b> — generous for normal use, but
+        if it stops responding, that's usually why. And if it's ever wrong, that's a bug worth
+        reporting like any other (<a href="#bugs">Section 11</a>) — tell us what you asked and what it
+        said.</p>
     </div>
   </section>
 
