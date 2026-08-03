@@ -48,7 +48,7 @@ export function PilotModeBanner() {
       <div className="text-sm text-amber-900 dark:text-amber-200">
         <p className="font-semibold">Pilot mode — clients are not receiving email.</p>
         <p className="mt-0.5">
-          Invoices, reminders and portal links are being redirected to the testing inboxes.
+          Invoices and reminders are being redirected to the testing inboxes.
           {status.recipients.length > 0 && (
             <> Recipients: {status.recipients.join(', ')}.</>
           )}
