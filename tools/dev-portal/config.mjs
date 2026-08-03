@@ -75,12 +75,12 @@ export const ENVIRONMENTS = [
   {
     key: 'prod',
     name: 'Production',
-    subtitle: 'maycreativearts.vercel.app',
-    baseUrl: 'https://maycreativearts.vercel.app',
+    subtitle: 'app.maycreativearts.com',
+    baseUrl: 'https://app.maycreativearts.com',
     supabaseRef: 'ysmwowzxkgisshaormmf',
     supabaseName: 'MCA-Prod',
     links: [
-      { label: 'Open app', url: 'https://maycreativearts.vercel.app/dashboard/' },
+      { label: 'Open app', url: 'https://app.maycreativearts.com/dashboard/' },
       { label: 'Supabase', url: 'https://supabase.com/dashboard/project/ysmwowzxkgisshaormmf' },
       { label: 'Vercel', url: 'https://vercel.com/lucas-projects-eee2f5e6/maycreativearts' },
     ],

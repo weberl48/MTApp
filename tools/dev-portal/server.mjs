@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url'
 import { PORT, ENVIRONMENTS, GLOBAL_LINKS, ENDPOINTS, POLL_INTERVAL_MS } from './config.mjs'
 import { loadRepoEnv } from './lib/env.mjs'
 import { addError, listErrors, clearErrors, addHistoryPoint, getHistory } from './lib/store.mjs'
+import { prodErrors } from './lib/prod-errors.mjs'
 import { checkEnvironmentHealth, sweepEndpoints } from './lib/checks.mjs'
 import { supabaseProjectStatuses, restoreSupabaseProject, ciStatus } from './lib/external.mjs'
 import { certStatus } from './lib/cert.mjs'
@@ -106,7 +107,14 @@ async function handleApi(req, res, url) {
       return
     }
     case 'GET /api/errors': {
-      json(res, 200, { errors: listErrors() })
+      // Local ring buffer (dev pushes here) merged with production's
+      // app_errors table. Production cannot post to this portal — it is
+      // LAN-only and Vercel can't reach it — so prod errors are pulled
+      // instead. Newest first across both sources.
+      const local = listErrors()
+      const remote = await prodErrors(repoEnv)
+      const merged = [...local, ...remote].sort((a, b) => String(b.ts).localeCompare(String(a.ts)))
+      json(res, 200, { errors: merged })
       return
     }
     case 'POST /api/errors': {
