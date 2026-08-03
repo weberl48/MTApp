@@ -105,6 +105,18 @@ export default function LoginPage() {
         return
       }
 
+      // Rate limited, NOT a bad password. This fell through to the credential
+      // error below, so someone typing the right password on a busy network was
+      // told it was wrong — and would go reset a password that worked fine.
+      // The bucket is per-IP, so colleagues on one office connection share it.
+      if (res.status === 429) {
+        const retryAfter = Number(res.headers.get('Retry-After')) || 60
+        setError(
+          `Too many sign-in attempts from this network. Wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} and try again — your password is fine.`
+        )
+        return
+      }
+
       if (!res.ok) {
         setError('Invalid email or password. Double-check both, or use "Forgot password?" to reset it.')
         return

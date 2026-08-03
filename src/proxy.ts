@@ -43,10 +43,22 @@ export async function proxy(request: NextRequest) {
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
   const isApiPath = pathname.startsWith('/api/')
 
+  // Only CREDENTIAL SUBMISSIONS get the strict 5/60s bucket — not page views.
+  //
+  // This used to count every GET of /login, /signup, /forgot-password and
+  // /reset-password. The bucket is keyed by IP, so a household or an office on
+  // one public address burned it just by navigating: open the login page,
+  // mistype, go to Forgot password, come back, and you are locked out for a
+  // minute having never submitted a password. Brute force is a POST problem, so
+  // limiting POSTs preserves the protection exactly (still 5 attempts a minute
+  // per IP) while page views stop being rationed.
+  const isCredentialSubmission =
+    isAuthPath && request.method !== 'GET' && request.method !== 'HEAD'
+
   // Portal API traffic uses the normal API bucket: one portal dashboard load
   // makes 4-6 requests, which instantly exhausted the 5/60s auth bucket and
   // surfaced as silent empty states (each page swallows the 429).
-  if (isAuthPath && authRateLimit) {
+  if (isCredentialSubmission && authRateLimit) {
     const { success, remaining, reset } = await authRateLimit.limit(ip)
     if (!success) {
       return NextResponse.json(
