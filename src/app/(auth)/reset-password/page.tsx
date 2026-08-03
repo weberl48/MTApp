@@ -10,6 +10,7 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { MfaChallenge } from '@/components/forms/mfa-challenge'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -19,6 +20,9 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [checking, setChecking] = useState(true)
   const [hasSession, setHasSession] = useState(false)
+  // Set when the recovery session is AAL1 but the account has a verified TOTP
+  // factor — the password cannot be changed until that code is entered.
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -60,7 +64,28 @@ export default function ResetPasswordPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (cancelled) return
       setHasSession(!!session)
-      setChecking(false)
+
+      /**
+       * A recovery link only ever produces an AAL1 session. Supabase refuses
+       * `updateUser({ password })` at AAL1 once the account has a verified MFA
+       * factor — it answers "AAL2 session is required to update email or
+       * password when MFA is enabled". Without a challenge here, every user
+       * with MFA is permanently unable to reset a forgotten password, which is
+       * everyone privileged once security.require_mfa is on.
+       *
+       * Ask for the 6-digit code first; verifying it raises this same session
+       * to AAL2 and the update below then succeeds.
+       */
+      if (session) {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        if (!cancelled && aal?.currentLevel === 'aal1' && aal?.nextLevel === 'aal2') {
+          const { data: factors } = await supabase.auth.mfa.listFactors()
+          const verified = factors?.totp?.find((f) => f.status === 'verified')
+          if (verified && !cancelled) setMfaFactorId(verified.id)
+        }
+      }
+
+      if (!cancelled) setChecking(false)
     }
 
     establishSession()
@@ -144,6 +169,16 @@ export default function ResetPasswordPage() {
           </Link>
         </CardFooter>
       </Card>
+    )
+  }
+
+  // Raise the recovery session to AAL2 before showing the password form.
+  if (mfaFactorId) {
+    return (
+      <MfaChallenge
+        factorId={mfaFactorId}
+        onSuccess={() => setMfaFactorId(null)}
+      />
     )
   }
 

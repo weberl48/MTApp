@@ -12,9 +12,17 @@ import { createMfaChallenge, verifyMfaChallenge } from '@/lib/supabase/mfa'
 interface MfaChallengeProps {
   factorId: string
   onCancel?: () => void
+  /**
+   * What to do once the code verifies. Defaults to sending the user to the
+   * dashboard, which is right for the login path. The password-reset page
+   * passes its own handler: there the challenge only exists to raise the
+   * recovery session to AAL2 so the password can actually be changed, and
+   * navigating away would abandon the reset.
+   */
+  onSuccess?: () => void
 }
 
-export function MfaChallenge({ factorId, onCancel }: MfaChallengeProps) {
+export function MfaChallenge({ factorId, onCancel, onSuccess }: MfaChallengeProps) {
   const router = useRouter()
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -32,6 +40,11 @@ export function MfaChallenge({ factorId, onCancel }: MfaChallengeProps) {
 
       // Verify the code
       await verifyMfaChallenge(factorId, challengeId, code)
+
+      if (onSuccess) {
+        onSuccess()
+        return
+      }
 
       // Success - redirect to dashboard
       router.push('/dashboard/')
