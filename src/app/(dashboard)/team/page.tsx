@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { PageHelp } from '@/components/help/page-help'
@@ -14,6 +15,7 @@ import {
 import { formatCurrency } from '@/lib/pricing'
 import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
 import { fetchAdminGrants } from '@/lib/auth/admin-grants'
+import { resolveEffectiveRole, VIEW_AS_COOKIE } from '@/lib/auth/view-as'
 import type { UserRole } from '@/types/database'
 import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
@@ -43,7 +45,14 @@ export default async function TeamPage() {
     if (profileError) {
       console.error('[MCA] Failed to load user profile for team page')
     }
-    const role = userProfile?.role
+    // Honour the "View As" switcher. This is a SERVER component, so it cannot
+    // read OrganizationContext; without the cookie it gated on the real role and
+    // showed a developer previewing "As Admin" the Rates tab, the Pending
+    // Contractor Pay card and every contractor's earnings — exactly the figures
+    // an admin must never see. resolveEffectiveRole re-validates against the
+    // real role, so the cookie can only narrow access, never widen it.
+    const viewAs = (await cookies()).get(VIEW_AS_COOKIE)?.value
+    const role = resolveEffectiveRole((userProfile?.role as UserRole) ?? null, viewAs)
     currentUserRole = role || ''
     isAdmin = can(role as UserRole, 'team:view')
     adminGrants = await fetchAdminGrants(supabase, userProfile?.organization_id)

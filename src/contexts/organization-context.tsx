@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useMemo, R
 import { createClient } from '@/lib/supabase/client'
 import type { Organization, User, UserRole, OrganizationSettings, FeatureFlags } from '@/types/database'
 import { canWithGrants, type Permission } from '@/lib/auth/permissions'
+import { VIEW_AS_COOKIE } from '@/lib/auth/view-as'
 import { adminGrantsFromSettings, mergeOrganizationSettings } from '@/lib/organization/settings'
 import { updateOrganizationSettings } from '@/app/actions/organization'
 
@@ -49,8 +50,39 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([])
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null)
-  const [viewAsRole, setViewAsRole] = useState<ViewAsRole>(null)
+  const [viewAsRole, setViewAsRoleState] = useState<ViewAsRole>(null)
   const [viewAsContractor, setViewAsContractor] = useState<ViewAsContractor | null>(null)
+
+  /**
+   * Mirror the simulated role into a cookie so SERVER components can honour it.
+   *
+   * Client components read `can()` from this context and were always correct.
+   * Server-rendered pages (notably /team) had no way to know the switcher was
+   * set, so they gated on the real database role and happily rendered contractor
+   * pay rates and earnings while the header said "As Admin". The cookie is
+   * re-validated server-side against the real role (see lib/auth/view-as.ts), so
+   * it cannot be used to escalate — it only ever narrows what is shown.
+   *
+   * Not httpOnly: the browser has to write it. It is not a credential.
+   */
+  const setViewAsRole = useCallback((role: ViewAsRole) => {
+    setViewAsRoleState(role)
+    if (typeof document === 'undefined') return
+    document.cookie = role
+      ? `${VIEW_AS_COOKIE}=${role}; path=/; SameSite=Lax; max-age=86400`
+      : `${VIEW_AS_COOKIE}=; path=/; SameSite=Lax; max-age=0`
+  }, [])
+
+  // A hard navigation remounts this provider, so re-adopt whatever the cookie
+  // says; otherwise the switcher silently snapped back to the real role on every
+  // full page load and the preview quietly stopped applying.
+  useEffect(() => {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${VIEW_AS_COOKIE}=([^;]*)`))
+    const stored = match?.[1]
+    if (stored === 'owner' || stored === 'admin' || stored === 'contractor') {
+      setViewAsRoleState(stored)
+    }
+  }, [])
 
   // Actual role from the database
   const actualRole = user?.role || null
