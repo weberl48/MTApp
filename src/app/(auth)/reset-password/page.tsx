@@ -23,13 +23,61 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if user has a valid session from the reset link
-    async function checkSession() {
+    let cancelled = false
+
+    /**
+     * A recovery link reaches this page in one of two shapes:
+     *
+     *   ?code=…            PKCE. Exchangeable ONLY in the browser that asked for
+     *                      the reset, because that browser holds the code_verifier.
+     *                      `@supabase/ssr` handles this one itself.
+     *   #access_token=…    Implicit. What Supabase's admin-generated links return,
+     *                      and what you get when the email is opened on a different
+     *                      device from the one that requested the reset.
+     *
+     * `createBrowserClient` is PKCE-only and silently ignores the fragment, so a
+     * perfectly valid link rendered "Invalid or expired link" for every
+     * cross-device reset — request it on your laptop, open the mail on your
+     * phone, dead end. Verified against production: the token sat unconsumed in
+     * the URL and no session was ever written to storage. Consume it explicitly.
+     */
+    async function establishSession() {
+      const hash = window.location.hash
+      if (hash.startsWith('#')) {
+        const params = new URLSearchParams(hash.slice(1))
+        const access_token = params.get('access_token')
+        const refresh_token = params.get('refresh_token')
+
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+          if (!error) {
+            // Don't leave credentials sitting in the address bar or in history.
+            window.history.replaceState(null, '', window.location.pathname)
+          }
+        }
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled) return
       setHasSession(!!session)
       setChecking(false)
     }
-    checkSession()
+
+    establishSession()
+
+    // Safety net for the PKCE path: if the client finishes its own exchange
+    // after the check above, adopt that session rather than showing the
+    // dead-end card.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled || !session) return
+      setHasSession(true)
+      setChecking(false)
+    })
+
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
   }, [supabase.auth])
 
   async function handleSubmit(e: React.FormEvent) {
