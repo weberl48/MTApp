@@ -2,7 +2,8 @@
 // itself, but streamHelpAnswer takes the Anthropic API key).
 import Anthropic from '@anthropic-ai/sdk'
 import { HELP_ARTICLES, HELP_FAQS } from '@/app/(dashboard)/help/_data/help-articles'
-import { can } from '@/lib/auth/permissions'
+import { canWithGrants } from '@/lib/auth/permissions'
+import { adminGrantsFromSettings } from '@/lib/organization/settings'
 import type { OrganizationSettings, ServiceType, UserRole } from '@/types/database'
 
 /** Serialize the whole help corpus for the system prompt. Deterministic; the
@@ -32,7 +33,13 @@ export function buildOrgContext(
   serviceTypes: ServiceType[],
   role: UserRole
 ): string {
-  const showFinancials = can(role, 'financial:view-details')
+  // Margin fields reach the assistant only for roles allowed to see them —
+  // including an admin whose owner has granted it (the settings are in hand).
+  const showFinancials = canWithGrants(
+    role,
+    'financial:view-details',
+    adminGrantsFromSettings(settings)
+  )
   const safeSettings = {
     pricing: settings.pricing,
     invoice: settings.invoice,

@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/pricing'
-import { can } from '@/lib/auth/permissions'
+import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import { updateUserRole } from '@/app/actions/team'
 import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
@@ -80,6 +81,7 @@ export default function TeamMemberPage() {
   const [newRole, setNewRole] = useState('')
   const [savingRole, setSavingRole] = useState(false)
   const [currentUserRole, setCurrentUserRole] = useState<string>('')
+  const [adminGrants, setAdminGrants] = useState<AdminGrants>({})
 
   useEffect(() => {
     async function loadMemberData() {
@@ -97,9 +99,9 @@ export default function TeamMemberPage() {
       // Check if user is admin or above
       const { data: userProfile } = await supabase
         .from('users')
-        .select('role')
+        .select('role, organization_id')
         .eq('id', user.id)
-        .single<{ role: string }>()
+        .single<{ role: string; organization_id: string }>()
 
       const isAdminOrAbove = can(userProfile?.role as UserRole, 'team:view')
       if (!isAdminOrAbove) {
@@ -107,6 +109,7 @@ export default function TeamMemberPage() {
         return
       }
       setCurrentUserRole(userProfile?.role || '')
+      setAdminGrants(await fetchAdminGrants(supabase, userProfile?.organization_id))
 
       // Fetch team member details
       const { data: memberData, error } = await supabase
@@ -218,9 +221,10 @@ export default function TeamMemberPage() {
   // via team:view) must not see the role editor — it includes an "Owner" option.
   const canManageTeam = can(currentUserRole as UserRole, 'team:manage')
 
-  // Same gate as the Team page's Rates tab — admins never see pay rates.
-  const canViewRates =
-    member.role === 'contractor' && can(currentUserRole as UserRole, 'team:view-rates')
+  // Same gate as the Team page — admins see neither this member's pay rates nor
+  // what they have earned, unless the owner has granted it.
+  const canViewPay = canWithGrants(currentUserRole as UserRole, 'team:view-rates', adminGrants)
+  const canViewRates = member.role === 'contractor' && canViewPay
 
   // Calculate stats
   const totalSessions = sessions.length
@@ -308,41 +312,45 @@ export default function TeamMemberPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Total Earnings
-            </CardTitle>
-            <DollarSign className="w-4 h-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalEarnings)}</div>
-          </CardContent>
-        </Card>
+        {canViewPay && (
+          <>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Earnings
+                </CardTitle>
+                <DollarSign className="w-4 h-4 text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatCurrency(totalEarnings)}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Paid Out
-            </CardTitle>
-            <DollarSign className="w-4 h-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(paidEarnings)}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Paid Out
+                </CardTitle>
+                <DollarSign className="w-4 h-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{formatCurrency(paidEarnings)}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Pending Pay
-            </CardTitle>
-            <DollarSign className="w-4 h-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{formatCurrency(pendingEarnings)}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Pending Pay
+                </CardTitle>
+                <DollarSign className="w-4 h-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{formatCurrency(pendingEarnings)}</div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Contact Info */}
@@ -446,7 +454,7 @@ export default function TeamMemberPage() {
                       <TableHead>Client</TableHead>
                       <TableHead>Service</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
-                      <TableHead className="text-right">Contractor Pay</TableHead>
+                      {canViewPay && <TableHead className="text-right">Contractor Pay</TableHead>}
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -475,9 +483,11 @@ export default function TeamMemberPage() {
                         <TableCell className="text-right">
                           {formatCurrency(invoice.amount)}
                         </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(invoice.contractor_pay)}
-                        </TableCell>
+                        {canViewPay && (
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(invoice.contractor_pay)}
+                          </TableCell>
+                        )}
                         <TableCell>
                           <Badge className={invoiceStatusColors[invoice.status]}>
                             {invoiceStatusLabels[invoice.status] || invoice.status}

@@ -12,7 +12,8 @@ import { formatCurrency } from '@/lib/pricing'
 import { DollarSign, TrendingUp, Users, Calendar } from 'lucide-react'
 import { PageHelp } from '@/components/help/page-help'
 import { AdminGuard } from '@/components/guards/admin-guard'
-import { can } from '@/lib/auth/permissions'
+import { canWithGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import type { UserRole } from '@/types/database'
 import { subMonths, format, startOfMonth, endOfMonth } from 'date-fns'
 import { parseLocalDate } from '@/lib/dates'
@@ -93,7 +94,11 @@ export default function AnalyticsPage() {
         .single<{ role: string; organization_id: string }>()
 
       const role = userProfile?.role as UserRole | undefined
-      if (!can(role ?? null, 'analytics:view')) {
+      // Resolved here rather than from OrganizationContext: this check runs inside
+      // the page's own fetch effect, and reading a context that may still be
+      // loading would bounce a granted admin before their grants arrived.
+      const grants = await fetchAdminGrants(supabase, userProfile?.organization_id)
+      if (!canWithGrants(role ?? null, 'analytics:view', grants)) {
         router.push('/dashboard/')
         return
       }

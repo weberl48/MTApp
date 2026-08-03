@@ -1,5 +1,10 @@
-import { can } from './permissions'
-import type { Permission } from './permissions'
+import {
+  can,
+  canWithGrants,
+  isAdminGrantable,
+  ADMIN_GRANTABLE_PERMISSIONS,
+} from './permissions'
+import type { AdminGrants, Permission } from './permissions'
 import type { UserRole } from '@/types/database'
 
 describe('can (permission check)', () => {
@@ -136,5 +141,67 @@ describe('can (permission check)', () => {
       expect(can('admin', 'client:manage')).toBe(true)
       expect(can('contractor', 'client:manage')).toBe(false)
     })
+  })
+})
+
+describe('canWithGrants (owner-configurable admin visibility)', () => {
+  const ALL: AdminGrants = {
+    'team:view-rates': true,
+    'financial:view-details': true,
+    'analytics:view': true,
+    'payments:view': true,
+  }
+
+  it('grants a listed permission to an admin when the owner turned it on', () => {
+    for (const permission of ADMIN_GRANTABLE_PERMISSIONS) {
+      expect(can('admin', permission)).toBe(false)
+      expect(canWithGrants('admin', permission, ALL)).toBe(true)
+    }
+  })
+
+  it('changes nothing when there are no grants', () => {
+    for (const permission of ADMIN_GRANTABLE_PERMISSIONS) {
+      expect(canWithGrants('admin', permission, {})).toBe(false)
+      expect(canWithGrants('admin', permission, null)).toBe(false)
+      expect(canWithGrants('admin', permission, undefined)).toBe(false)
+    }
+  })
+
+  // The whole point of the feature: a grant widens what an ADMIN sees, nothing else.
+  it('never elevates a contractor, whatever the settings say', () => {
+    for (const permission of ADMIN_GRANTABLE_PERMISSIONS) {
+      expect(canWithGrants('contractor', permission, ALL)).toBe(false)
+    }
+    expect(canWithGrants(null, 'payments:view', ALL)).toBe(false)
+  })
+
+  it('leaves owner and developer exactly as they were', () => {
+    for (const permission of ADMIN_GRANTABLE_PERMISSIONS) {
+      expect(canWithGrants('owner', permission, {})).toBe(true)
+      expect(canWithGrants('developer', permission, {})).toBe(true)
+    }
+  })
+
+  // Settings are user-editable JSONB. A stray or hostile key must not become a grant —
+  // above all `settings:edit`, which would let an admin grant themselves everything else.
+  it('ignores grants for permissions that are not grantable', () => {
+    const forged = { 'settings:edit': true, 'session:approve': true } as unknown as AdminGrants
+    expect(canWithGrants('admin', 'settings:edit', forged)).toBe(false)
+    expect(canWithGrants('contractor', 'session:approve', forged)).toBe(false)
+    expect(isAdminGrantable('settings:edit')).toBe(false)
+    expect(isAdminGrantable('team:view-rates')).toBe(true)
+  })
+
+  it('only ever grants the permission that was turned on', () => {
+    const onlyRates: AdminGrants = { 'team:view-rates': true }
+    expect(canWithGrants('admin', 'team:view-rates', onlyRates)).toBe(true)
+    expect(canWithGrants('admin', 'payments:view', onlyRates)).toBe(false)
+    expect(canWithGrants('admin', 'analytics:view', onlyRates)).toBe(false)
+    expect(canWithGrants('admin', 'financial:view-details', onlyRates)).toBe(false)
+  })
+
+  it('treats a falsy flag as no grant', () => {
+    const off = { 'payments:view': false } as AdminGrants
+    expect(canWithGrants('admin', 'payments:view', off)).toBe(false)
   })
 })

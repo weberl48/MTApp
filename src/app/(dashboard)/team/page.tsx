@@ -12,7 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
-import { can } from '@/lib/auth/permissions'
+import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import type { UserRole } from '@/types/database'
 import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
@@ -31,12 +32,13 @@ export default async function TeamPage() {
   // Check if user is admin
   let isAdmin = false
   let currentUserRole = ''
+  let adminGrants: AdminGrants = {}
   if (user) {
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
-      .single<{ role: string }>()
+      .single<{ role: string; organization_id: string }>()
 
     if (profileError) {
       console.error('[MCA] Failed to load user profile for team page')
@@ -44,6 +46,7 @@ export default async function TeamPage() {
     const role = userProfile?.role
     currentUserRole = role || ''
     isAdmin = can(role as UserRole, 'team:view')
+    adminGrants = await fetchAdminGrants(supabase, userProfile?.organization_id)
   }
 
   if (!isAdmin) {
@@ -52,8 +55,9 @@ export default async function TeamPage() {
 
   const canManage = can(currentUserRole as UserRole, 'team:manage')
   const canInvite = can(currentUserRole as UserRole, 'team:invite')
-  // Admins reach this page via team:view but must not see contractor pay rates.
-  const canViewRates = can(currentUserRole as UserRole, 'team:view-rates')
+  // Admins reach this page via team:view but must not see contractor pay rates —
+  // or, below, what each contractor has earned. The owner can grant this back.
+  const canViewRates = canWithGrants(currentUserRole as UserRole, 'team:view-rates', adminGrants)
 
   // Fetch all users with their session and invoice stats
   const { data: users, error: usersError } = await supabase
@@ -165,20 +169,22 @@ export default async function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Pending Contractor Pay
-            </CardTitle>
-            <DollarSign className="w-4 h-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPendingPay)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Awaiting payment
-            </p>
-          </CardContent>
-        </Card>
+        {canViewRates && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Pending Contractor Pay
+              </CardTitle>
+              <DollarSign className="w-4 h-4 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPendingPay)}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Awaiting payment
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -215,8 +221,8 @@ export default async function TeamPage() {
                       <TableHead>Contact</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead className="text-center">Sessions</TableHead>
-                      <TableHead className="text-right">Total Earned</TableHead>
-                      <TableHead className="text-right">Pending Pay</TableHead>
+                      {canViewRates && <TableHead className="text-right">Total Earned</TableHead>}
+                      {canViewRates && <TableHead className="text-right">Pending Pay</TableHead>}
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -262,18 +268,22 @@ export default async function TeamPage() {
                           <TableCell className="text-center">
                             {stats.sessionCount}
                           </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatCurrency(stats.totalEarnings)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {stats.pendingPay > 0 ? (
-                              <span className="text-amber-600 font-medium">
-                                {formatCurrency(stats.pendingPay)}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </TableCell>
+                          {canViewRates && (
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(stats.totalEarnings)}
+                            </TableCell>
+                          )}
+                          {canViewRates && (
+                            <TableCell className="text-right">
+                              {stats.pendingPay > 0 ? (
+                                <span className="text-amber-600 font-medium">
+                                  {formatCurrency(stats.pendingPay)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell>
                             <TeamMemberActions
                               member={{

@@ -17,6 +17,9 @@ export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
     {
       title: 'Action Center',
       description: 'Below the stats you\'ll find action items ordered by urgency — overdue invoices first, then pending approvals, unsent invoices, unbilled scholarship sessions, and any configuration warnings. Cards only appear when there is something to act on — an empty Action Center means you\'re caught up.',
+      // Admin-only step: the dashboard renders this container behind `stats.isAdmin`, and every
+      // card in it (approvals, invoicing, scholarship batches) is work only an admin can do.
+      audience: 'admin',
       element: '[data-tour="dashboard-action-center"]',
       popoverSide: 'top',
       ctaLabel: 'Next',
@@ -216,7 +219,10 @@ export const INVITE_CONTRACTOR_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Team Summary',
-      description: 'The summary cards show total team members, total sessions logged, pending contractor pay, and active contractor count.',
+      // Deliberately doesn't enumerate the pay card: it only renders for roles
+      // allowed to see contractor pay, so naming it would describe missing UI
+      // to an admin the owner hasn't granted that to.
+      description: 'The summary cards give you a quick read on your team — how many members you have, how many sessions they have logged, and how many contractors are active.',
       element: '[data-tour="team-stats"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',

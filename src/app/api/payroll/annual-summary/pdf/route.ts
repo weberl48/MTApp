@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer, DocumentProps } from '@react-pdf/renderer'
 import { createElement, ReactElement } from 'react'
 import { format } from 'date-fns'
-import { can } from '@/lib/auth/permissions'
+import { canWithGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import { taxYearSchema, uuidSchema } from '@/lib/validation/schemas'
 import {
   taxYearRange,
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
     let targetContractorId: string
     if (role === 'contractor') {
       targetContractorId = user.id
-    } else if (can(role, 'payments:view')) {
+    } else if (canWithGrants(role, 'payments:view', await fetchAdminGrants(supabase, userProfile.organization_id))) {
       const param = request.nextUrl.searchParams.get('contractorId')
       if (!param || !uuidSchema.safeParse(param).success) {
         return NextResponse.json({ error: 'contractorId is required' }, { status: 400 })

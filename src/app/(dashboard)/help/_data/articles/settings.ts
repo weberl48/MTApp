@@ -385,6 +385,17 @@ Owners can configure organization-wide security settings:
 - **Require Two-Factor Authentication** - When enabled, admin, owner, and developer accounts must set up MFA before they can use the app. Contractor accounts are not blocked by this setting.
 - **Max Login Attempts** - How many failed login attempts before an account is temporarily locked (3 to 10, default 5).
 - **Lockout Duration** - How long a locked account stays locked, in minutes (5 to 60, default 15).
+
+### What Admins Can See (Owner Only)
+
+Administrators run sessions, clients and billing. By default they see none of the money side — not what any contractor earns, not pay rates, not margins, payroll or analytics. Owners decide how much to open up with four switches, all off by default:
+
+- **Contractor pay & rates** - what each contractor earns, the Team page's earnings columns, and the Rates tabs.
+- **Session & invoice margins** - pricing breakdowns on sessions and the Financial Breakdown on invoices.
+- **Analytics & revenue** - the Analytics page and the dashboard revenue summary.
+- **Payroll** - the Payroll page, contractor payouts, and the tax summary exports.
+
+These only ever affect administrators. Contractors are never granted access this way, and owners always see everything. Only an owner can change them: an admin who tries to save these switches has the change discarded, so admins cannot grant themselves visibility.
     `,
   },
   {

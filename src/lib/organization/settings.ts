@@ -1,4 +1,5 @@
 import type { OrganizationSettings } from '@/types/database'
+import type { AdminGrantablePermission, AdminGrants } from '@/lib/auth/permissions'
 
 // Default settings for new organizations. Organizations without a given field automatically
 // get these values via the deep merge below.
@@ -67,6 +68,39 @@ export const DEFAULT_SETTINGS: OrganizationSettings = {
     auto_generate_scholarship_invoices: false,
     scholarship_invoice_day: 1,
   },
+  // Admins see no money until the owner opts in.
+  permissions: {
+    admin_view_contractor_pay: false,
+    admin_view_margins: false,
+    admin_view_analytics: false,
+    admin_view_payroll: false,
+  },
+}
+
+/**
+ * `settings.permissions` flag -> the permission it grants an admin. The single
+ * place the two representations meet; `adminGrantsFromSettings()` below is the
+ * only way to turn stored settings into grants, so a renamed flag breaks loudly
+ * here instead of silently granting nothing.
+ */
+const ADMIN_GRANT_BY_SETTING = {
+  admin_view_contractor_pay: 'team:view-rates',
+  admin_view_margins: 'financial:view-details',
+  admin_view_analytics: 'analytics:view',
+  admin_view_payroll: 'payments:view',
+} as const satisfies Record<keyof OrganizationSettings['permissions'], AdminGrantablePermission>
+
+/** The admin grants this organization has turned on. Safe on partial/legacy settings. */
+export function adminGrantsFromSettings(
+  settings: OrganizationSettings | null | undefined
+): AdminGrants {
+  const grants: AdminGrants = {}
+  const flags = settings?.permissions
+  if (!flags) return grants
+  for (const [flag, permission] of Object.entries(ADMIN_GRANT_BY_SETTING)) {
+    if (flags[flag as keyof typeof flags] === true) grants[permission] = true
+  }
+  return grants
 }
 
 /**
@@ -141,5 +175,6 @@ export function mergeOrganizationSettings(
       },
     },
     automation: { ...defaults.automation, ...(raw?.automation || {}) },
+    permissions: { ...defaults.permissions, ...(raw?.permissions || {}) },
   }
 }

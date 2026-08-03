@@ -17,7 +17,8 @@ import { PayrollHubTable, ContractorPayout, UnpaidSession } from '@/components/t
 import { PaymentReconciliationTable } from '@/components/tables/payment-reconciliation-table'
 import { TaxSummariesCard } from '@/components/payroll/tax-summaries-card'
 import { AdminGuard } from '@/components/guards/admin-guard'
-import { can } from '@/lib/auth/permissions'
+import { can, canWithGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import type { UserRole } from '@/types/database'
 
 interface InvoiceData {
@@ -99,12 +100,15 @@ export default function PaymentsPage() {
     // Check if user is admin
     const { data: userProfile } = await supabase
       .from('users')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
-      .single<{ role: string }>()
+      .single<{ role: string; organization_id: string }>()
 
     const role = userProfile?.role as UserRole | undefined
-    if (!can(role ?? null, 'payments:view')) {
+    // Owner-granted admins may reach payroll; resolved here rather than from
+    // OrganizationContext because this check runs in the page's own fetch effect.
+    const grants = await fetchAdminGrants(supabase, userProfile?.organization_id)
+    if (!canWithGrants(role ?? null, 'payments:view', grants)) {
       router.push('/dashboard/')
       return
     }

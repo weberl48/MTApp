@@ -79,6 +79,18 @@ export interface OrganizationSettings {
     auto_generate_scholarship_invoices: boolean
     scholarship_invoice_day: number
   }
+  /**
+   * What an ADMIN may see, decided by the owner. All default false: contractor pay
+   * and margins are owner business unless the owner says otherwise. Owner-only
+   * writable — `permissions` is deliberately absent from
+   * ADMIN_WRITABLE_SETTING_SECTIONS, or an admin could grant themselves.
+   */
+  permissions: {
+    admin_view_contractor_pay: boolean // -> team:view-rates
+    admin_view_margins: boolean        // -> financial:view-details
+    admin_view_analytics: boolean      // -> analytics:view
+    admin_view_payroll: boolean        // -> payments:view
+  }
 }
 
 // Social links structure

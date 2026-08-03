@@ -3,8 +3,9 @@
  *
  * A walkthrough (or a single step) can declare an `audience`; anything without
  * one is for everyone. The flags mirror how the app itself gates the UI the
- * tours point at: admin/owner via `can()` (effective role, so View As works),
- * contractor via the effective contractor check the Earnings page uses.
+ * tours point at — all from the EFFECTIVE role, so View As works: admin/owner
+ * via `can()`, contractor via `OrganizationContext`'s `isContractor`, the same
+ * value the sidebar uses to render the contractor-only nav a tour highlights.
  */
 
 export type WalkthroughAudience = 'admin' | 'owner' | 'contractor'
@@ -14,7 +15,7 @@ export type AudienceFlags = {
   isAdmin: boolean
   /** `can('settings:edit')` — owner, developer */
   isOwner: boolean
-  /** Effective role is contractor (including View As a contractor) */
+  /** `OrganizationContext.isContractor` — effective role, including View As */
   isContractor: boolean
 }
 

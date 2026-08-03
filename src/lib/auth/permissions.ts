@@ -46,3 +46,40 @@ export function can(role: UserRole | null, permission: Permission): boolean {
   if (!role) return false
   return ROLE_PERMISSIONS[permission]?.includes(role) ?? false
 }
+
+/**
+ * The only permissions an owner may hand to admins (Settings > Profile & Security).
+ * A closed list on purpose: settings are user-editable JSONB, so a stray key must
+ * never be able to invent a grant. Everything else stays role-decided forever —
+ * in particular `settings:edit`, or an admin could grant themselves the rest.
+ */
+export const ADMIN_GRANTABLE_PERMISSIONS = [
+  'team:view-rates',
+  'financial:view-details',
+  'analytics:view',
+  'payments:view',
+] as const
+
+export type AdminGrantablePermission = (typeof ADMIN_GRANTABLE_PERMISSIONS)[number]
+
+/** Which grantable permissions this organization has turned on for admins. */
+export type AdminGrants = Partial<Record<AdminGrantablePermission, boolean>>
+
+export function isAdminGrantable(permission: Permission): permission is AdminGrantablePermission {
+  return (ADMIN_GRANTABLE_PERMISSIONS as readonly Permission[]).includes(permission)
+}
+
+/**
+ * `can()` plus the organization's admin grants. Only the `admin` role is ever
+ * elevated — contractors are never affected, and owner/developer already pass the
+ * role check — so a grant can widen what an admin sees and nothing else.
+ */
+export function canWithGrants(
+  role: UserRole | null,
+  permission: Permission,
+  grants: AdminGrants | null | undefined
+): boolean {
+  if (can(role, permission)) return true
+  if (role !== 'admin' || !grants) return false
+  return isAdminGrantable(permission) && grants[permission] === true
+}

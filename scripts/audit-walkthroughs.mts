@@ -5,6 +5,11 @@
 //
 //   npx tsx scripts/audit-walkthroughs.mts [outDir]
 //
+// Roles: AUDIT_ROLE picks whose steps to audit; VIEW_AS drives the header's
+// "View As" switcher so one owner/developer login can audit every audience —
+// including the contractor tours. Set both to the same value:
+//   AUDIT_ROLE=contractor VIEW_AS=contractor npx tsx scripts/audit-walkthroughs.mts
+//
 // Writes walkthrough-results.json + per-step screenshots to outDir (default
 // .walkthrough-audit/). Exits 1 if any step fails.
 import { chromium, type Page } from '@playwright/test'
@@ -30,6 +35,26 @@ const AUDIT_ROLE = process.env.AUDIT_ROLE || 'owner'
 const AUDIT_FLAGS = ROLE_FLAGS[AUDIT_ROLE]
 if (!AUDIT_FLAGS) {
   console.error(`AUDIT_ROLE must be one of ${Object.keys(ROLE_FLAGS).join('|')}, got "${AUDIT_ROLE}"`)
+  process.exit(1)
+}
+
+// VIEW_AS drives the header's "View As" switcher after login instead of needing a
+// real account per role — the only way to audit the contractor tours from an
+// owner/developer login. It must agree with AUDIT_ROLE, which decides how the
+// script filters steps; disagreeing would audit one role's steps in another's UI.
+// Set both (e.g. AUDIT_ROLE=contractor VIEW_AS=contractor).
+const VIEW_AS = process.env.VIEW_AS
+const VIEW_AS_MENU: Record<string, RegExp> = {
+  owner: /^Owner$/i,
+  admin: /^Admin$/i,
+  contractor: /^Contractor \(generic\)$/i,
+}
+if (VIEW_AS && !VIEW_AS_MENU[VIEW_AS]) {
+  console.error(`VIEW_AS must be one of ${Object.keys(VIEW_AS_MENU).join('|')}, got "${VIEW_AS}"`)
+  process.exit(1)
+}
+if (VIEW_AS && VIEW_AS !== AUDIT_ROLE) {
+  console.error(`VIEW_AS "${VIEW_AS}" must match AUDIT_ROLE "${AUDIT_ROLE}"`)
   process.exit(1)
 }
 
@@ -109,6 +134,22 @@ if (audEmail && audPassword) {
   console.log(`logged in as ${audEmail}`)
 }
 
+/** Switch the header's "View As" menu to VIEW_AS (no-op when unset). */
+async function applyViewAs() {
+  if (!VIEW_AS) return
+  const pattern = VIEW_AS_MENU[VIEW_AS]
+  await page.locator('header button:has(svg.lucide-eye)').first().click()
+  await page.waitForTimeout(350)
+  for (const item of await page.getByRole('menuitem').all()) {
+    if (pattern.test(((await item.textContent()) || '').trim())) {
+      await item.click()
+      await page.waitForTimeout(800)
+      return
+    }
+  }
+  throw new Error(`View As menu has no item matching ${pattern} (is this login an owner/developer?)`)
+}
+
 // Pre-warm every route the tours visit so on-demand dev compilation doesn't
 // eat into the provider's 2.5s element-ready timeout.
 const warmPaths = new Set<string>(['/dashboard/', '/help/getting-started/'])
@@ -133,9 +174,8 @@ const skipped: string[] = []
 for (const w of ALL_WALKTHROUGHS) {
   if (only && !only.includes(w.id)) continue
   if (!audienceAllows(w.audience, AUDIT_FLAGS)) {
-    // e.g. my-earnings under the default owner role: the page itself redirects
-    // non-contractors — rerun with AUDIT_ROLE=contractor (+ matching account),
-    // or verify by hand on cert.
+    // e.g. my-earnings under the default owner role. Rerun as that audience —
+    // AUDIT_ROLE=contractor VIEW_AS=contractor covers it from this same login.
     skipped.push(w.id)
     console.log(`\n=== ${w.id} — SKIPPED (audience ${w.audience} not auditable as ${AUDIT_ROLE}) ===`)
     continue
@@ -154,6 +194,9 @@ for (const w of ALL_WALKTHROUGHS) {
   }
 
   await page.goto(`${BASE}/help/${article}/`, { waitUntil: 'networkidle' })
+  // "View As" is React context state, so a full page load resets it — re-apply it
+  // on every article load, before reading which tours the page offers.
+  await applyViewAs()
   const startBtn = page.getByRole('button', { name: 'Start Interactive Walkthrough' })
   // Missing button = role/audience mismatch or article gating — record the
   // tour as failed and keep auditing the rest instead of crashing the run.
@@ -251,6 +294,16 @@ const failCount = results.reduce((n, r) => n + r.steps.filter((s) => s.status ==
   results.filter((r) => !r.endedCleanly).length
 writeFileSync(join(OUT, 'walkthrough-results.json'), JSON.stringify({ results, skipped, consoleErrors }, null, 2))
 console.log(`\n${failCount === 0 ? 'ALL PASS' : failCount + ' FAILURES'} across ${results.length} walkthroughs; results in ${OUT}/walkthrough-results.json`)
-if (skipped.length) console.log(`skipped (audience not auditable as owner): ${skipped.join(', ')}`)
+if (skipped.length) {
+  // Name the audiences actually missing, so the hint is a command to run rather
+  // than a generic example (which read as "rerun what you just ran").
+  const missing = [...new Set(
+    skipped.map((id) => ALL_WALKTHROUGHS.find((w) => w.id === id)?.audience).filter(Boolean)
+  )] as string[]
+  console.log(
+    `UNVERIFIED — ${skipped.length} tour(s) whose audience isn't ${AUDIT_ROLE}: ${skipped.join(', ')}\n` +
+    missing.map((a) => `  still to run: AUDIT_ROLE=${a} VIEW_AS=${a}`).join('\n')
+  )
+}
 if (consoleErrors.length) console.log('page errors:', consoleErrors.slice(0, 10))
 process.exit(failCount === 0 ? 0 : 1)

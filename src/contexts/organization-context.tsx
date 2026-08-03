@@ -3,8 +3,8 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Organization, User, UserRole, OrganizationSettings, FeatureFlags } from '@/types/database'
-import { can, type Permission } from '@/lib/auth/permissions'
-import { mergeOrganizationSettings } from '@/lib/organization/settings'
+import { canWithGrants, type Permission } from '@/lib/auth/permissions'
+import { adminGrantsFromSettings, mergeOrganizationSettings } from '@/lib/organization/settings'
 import { updateOrganizationSettings } from '@/app/actions/organization'
 
 type ViewAsRole = 'contractor' | 'admin' | 'owner' | null
@@ -24,6 +24,7 @@ interface OrganizationContextType {
   isDeveloper: boolean
   isOwner: boolean
   isAdmin: boolean
+  isContractor: boolean // Effective role is contractor (so "View As" previews match a real contractor)
   actualRole: string | null // The user's real role (for developers to know their actual permissions)
   viewAsRole: ViewAsRole // The role being simulated (null = use actual role)
   setViewAsRole: (role: ViewAsRole) => void
@@ -64,6 +65,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const isDeveloper = effectiveRole === 'developer' || effectiveRole === 'owner'
   const isOwner = effectiveRole === 'owner' || effectiveRole === 'developer'
   const isAdmin = effectiveRole === 'admin' || effectiveRole === 'owner' || effectiveRole === 'developer'
+  // Contractor-only UI (the Earnings nav link, the quick-log FAB) keys off this rather than
+  // `user.role`, so an owner using "View As" sees the same surfaces the contractor does —
+  // otherwise the contractor tours point at nav links the preview never renders.
+  const isContractor = effectiveRole === 'contractor' || (actualIsDeveloper && !!viewAsContractor)
 
   // Effective user ID for data queries (use simulated contractor if set, otherwise actual user)
   const effectiveUserId = viewAsContractor?.id || user?.id || null
@@ -76,6 +81,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     () => (organization ? mergeOrganizationSettings(organization.settings as OrganizationSettings) : null),
     [organization]
   )
+
+  // What this organization's owner has opted admins into seeing. Memoized on
+  // `settings` so `can` keeps a stable identity between renders.
+  const adminGrants = useMemo(() => adminGrantsFromSettings(settings), [settings])
 
   const loadOrganization = useCallback(async (targetOrgId?: string) => {
     const supabase = createClient()
@@ -240,6 +249,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         isDeveloper,
         isOwner,
         isAdmin,
+        isContractor,
         actualRole,
         viewAsRole,
         setViewAsRole,
@@ -251,7 +261,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         refreshOrganization,
         updateOrganization,
         updateSettings,
-        can: (permission: Permission) => can(effectiveRole as UserRole, permission),
+        can: (permission: Permission) =>
+          canWithGrants(effectiveRole as UserRole, permission, adminGrants),
         feature: (flag: keyof FeatureFlags) => settings?.features?.[flag] ?? true,
       }}
     >

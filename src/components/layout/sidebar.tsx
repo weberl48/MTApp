@@ -58,9 +58,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
-  const { can, user, feature } = useOrganization()
-
-  const isContractor = user?.role === 'contractor'
+  const { can, feature, isContractor } = useOrganization()
 
   // WCAG 2.1.1: the mobile menu behaves as a dialog, so Escape must dismiss it
   useEffect(() => {
@@ -93,14 +91,15 @@ export function Sidebar() {
       return isContractor
     }
     // Owner-only items: show to owner and developer, NOT admin
+    // (hrefs carry a trailing slash — next.config.ts sets trailingSlash: true)
     if (item.ownerOnly) {
-      if (item.href === '/payments') return can('payments:view')
-      if (item.href === '/analytics') return can('analytics:view')
+      if (item.href === '/payments/') return can('payments:view')
+      if (item.href === '/analytics/') return can('analytics:view')
       return can('settings:edit')
     }
     // Admin-only items: show to admin, owner, developer
     if (item.adminOnly) {
-      if (item.href === '/team') return can('team:view')
+      if (item.href === '/team/') return can('team:view')
       return can('session:view-all')
     }
     // Default: show to everyone

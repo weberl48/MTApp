@@ -36,7 +36,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
-import { can } from '@/lib/auth/permissions'
+import { can, canWithGrants } from '@/lib/auth/permissions'
+import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import type { UserRole, InvoiceItem } from '@/types/database'
 import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels } from '@/lib/constants/display'
 import { format } from 'date-fns'
@@ -152,13 +153,18 @@ export default function InvoiceDetailPage() {
       // Get user role
       const { data: userProfile } = await supabase
         .from('users')
-        .select('role')
+        .select('role, organization_id')
         .eq('id', user.id)
-        .single<{ role: string }>()
+        .single<{ role: string; organization_id: string }>()
 
       const admin = can(userProfile?.role as UserRole, 'invoice:bulk-action')
       setIsAdmin(admin)
-      setCanViewMargins(can(userProfile?.role as UserRole, 'financial:view-details'))
+      // The Financial Breakdown (MCA cut + contractor pay) is owner business
+      // unless this organization's owner has granted it to admins.
+      const grants = await fetchAdminGrants(supabase, userProfile?.organization_id)
+      setCanViewMargins(
+        canWithGrants(userProfile?.role as UserRole, 'financial:view-details', grants)
+      )
 
       // Fetch invoice with related data
       const { data: invoiceData, error } = await supabase

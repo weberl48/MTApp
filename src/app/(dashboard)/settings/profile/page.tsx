@@ -16,6 +16,40 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import type { OrganizationSettings } from '@/types/database'
 
+/**
+ * The owner-facing switches, in the order they appear. Each key is a
+ * `settings.permissions` flag; `adminGrantsFromSettings()` maps it to the
+ * permission it grants, so the wording here is the only thing to keep in sync.
+ */
+const ADMIN_VISIBILITY_SWITCHES: {
+  key: keyof OrganizationSettings['permissions']
+  label: string
+  description: string
+}[] = [
+  {
+    key: 'admin_view_contractor_pay',
+    label: 'Contractor pay & rates',
+    description:
+      "What each contractor earns and their pay rates — the Team page's earnings columns and the Rates tab.",
+  },
+  {
+    key: 'admin_view_margins',
+    label: 'Session & invoice margins',
+    description:
+      'Pricing breakdowns on sessions and the Financial Breakdown on invoices (your cut and contractor pay).',
+  },
+  {
+    key: 'admin_view_analytics',
+    label: 'Analytics & revenue',
+    description: 'The Analytics page and the revenue summary on the dashboard.',
+  },
+  {
+    key: 'admin_view_payroll',
+    label: 'Payroll',
+    description: 'The Payroll page, contractor payouts and the tax summary exports.',
+  },
+]
+
 export default function ProfileSettingsPage() {
   const { organization, user, settings, can, updateSettings, refreshOrganization } = useOrganization()
   const isOwner = can('settings:edit')
@@ -58,6 +92,19 @@ export default function ProfileSettingsPage() {
       toast.success('Security settings saved')
     } catch {
       toast.error('Failed to save security settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function saveAdminVisibility() {
+    if (!localSettings) return
+    setSaving(true)
+    try {
+      await updateSettings(localSettings)
+      toast.success('Admin visibility saved')
+    } catch {
+      toast.error('Failed to save admin visibility')
     } finally {
       setSaving(false)
     }
@@ -259,6 +306,56 @@ export default function ProfileSettingsPage() {
                   <Save className="w-4 h-4 mr-2" />
                 )}
                 Save Security Settings
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* What admins can see — owner only. Everything defaults off: contractor pay
+            and margins are owner business unless the owner opts admins in. */}
+        {isOwner && localSettings && (
+          <Card>
+            <CardHeader>
+              <CardTitle>What Admins Can See</CardTitle>
+              <CardDescription>
+                Administrators run sessions, clients and billing. These switches decide how
+                much of the money side they see. All are off by default — contractors and
+                owners are unaffected.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {ADMIN_VISIBILITY_SWITCHES.map(({ key, label, description }, i) => (
+                <div key={key}>
+                  {i > 0 && <Separator className="mb-4" />}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 pr-4">
+                      <Label>{label}</Label>
+                      <p className="text-sm text-gray-500">{description}</p>
+                    </div>
+                    <Switch
+                      aria-label={label}
+                      checked={localSettings.permissions?.[key] ?? false}
+                      onCheckedChange={(checked) =>
+                        setLocalSettings({
+                          ...localSettings,
+                          permissions: {
+                            ...localSettings.permissions,
+                            [key]: checked,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <Button onClick={saveAdminVisibility} disabled={saving}>
+                {saving ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Save Admin Visibility
               </Button>
             </CardContent>
           </Card>

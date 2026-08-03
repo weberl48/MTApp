@@ -30,16 +30,16 @@ export function useWalkthrough() {
 }
 
 /**
- * The current user's tour-audience flags. Admin/owner come from `can()`
- * (effective role), contractor mirrors the Earnings page's effective-role
- * check — so View As shows the same tours the impersonated role would get.
+ * The current user's tour-audience flags — all three read the EFFECTIVE role
+ * (admin/owner via `can()`, contractor via the context's `isContractor`), so
+ * View As offers the same tours, and the same nav, the real role would get.
  */
 export function useWalkthroughAudienceFlags(): AudienceFlags {
-  const { can, actualRole, viewAsRole, viewAsContractor } = useOrganization()
+  const { can, isContractor } = useOrganization()
   return {
     isAdmin: can('session:view-all'),
     isOwner: can('settings:edit'),
-    isContractor: (viewAsRole || actualRole) === 'contractor' || !!viewAsContractor,
+    isContractor,
   }
 }
 

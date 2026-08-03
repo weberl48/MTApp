@@ -15,9 +15,8 @@ import { QuickLogDrawer } from '@/components/forms/quick-log-drawer'
  */
 export function QuickSessionFab() {
   const pathname = usePathname()
-  const { user } = useOrganization()
+  const { isContractor } = useOrganization()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const isContractor = user?.role === 'contractor'
 
   // Don't show on the new session page or edit pages
   if (pathname.includes('/sessions/new') || pathname.includes('/edit')) {

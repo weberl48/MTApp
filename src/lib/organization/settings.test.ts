@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest'
 import {
   ADMIN_WRITABLE_SETTING_SECTIONS,
   DEFAULT_SETTINGS,
+  adminGrantsFromSettings,
   applySettingsUpdate,
   mergeOrganizationSettings,
 } from './settings'
@@ -101,5 +102,82 @@ describe('applySettingsUpdate (settings write authorization boundary)', () => {
     const incoming = mergeOrganizationSettings({ invoice: { due_days: 1 } } as any)
     applySettingsUpdate(stored, incoming, false)
     expect(stored.invoice.due_days).toBe(30)
+  })
+})
+
+describe('adminGrantsFromSettings (settings flag -> permission)', () => {
+  it('grants nothing by default', () => {
+    expect(adminGrantsFromSettings(DEFAULT_SETTINGS)).toEqual({})
+  })
+
+  it('is safe on missing / legacy settings that predate the section', () => {
+    expect(adminGrantsFromSettings(null)).toEqual({})
+    expect(adminGrantsFromSettings(undefined)).toEqual({})
+    expect(adminGrantsFromSettings({} as any)).toEqual({})
+  })
+
+  it('maps each flag to the permission it unlocks', () => {
+    const all = mergeOrganizationSettings({
+      permissions: {
+        admin_view_contractor_pay: true,
+        admin_view_margins: true,
+        admin_view_analytics: true,
+        admin_view_payroll: true,
+      },
+    } as any)
+    expect(adminGrantsFromSettings(all)).toEqual({
+      'team:view-rates': true,
+      'financial:view-details': true,
+      'analytics:view': true,
+      'payments:view': true,
+    })
+  })
+
+  it('turns on only the flags that are set', () => {
+    const one = mergeOrganizationSettings({
+      permissions: { admin_view_contractor_pay: true },
+    } as any)
+    expect(adminGrantsFromSettings(one)).toEqual({ 'team:view-rates': true })
+  })
+
+  it('ignores unknown keys stored in the JSONB', () => {
+    const forged = { permissions: { admin_view_everything: true } } as any
+    expect(adminGrantsFromSettings(forged)).toEqual({})
+  })
+})
+
+describe('admin visibility cannot be self-granted', () => {
+  // The escalation this feature would otherwise create: an admin PATCHing
+  // settings.permissions to hand themselves contractor pay and payroll.
+  it('is absent from the admin-writable allow-list', () => {
+    expect(ADMIN_WRITABLE_SETTING_SECTIONS).not.toContain('permissions')
+  })
+
+  it('drops an admin write to permissions while allowing their own sections', () => {
+    const stored = mergeOrganizationSettings({
+      permissions: { admin_view_contractor_pay: false, admin_view_payroll: false },
+      invoice: { due_days: 30 },
+    } as any)
+    const incoming = mergeOrganizationSettings({
+      permissions: { admin_view_contractor_pay: true, admin_view_payroll: true },
+      invoice: { due_days: 21 },
+    } as any)
+
+    const result = applySettingsUpdate(stored, incoming, false)
+
+    expect(result.permissions.admin_view_contractor_pay).toBe(false)
+    expect(result.permissions.admin_view_payroll).toBe(false)
+    expect(adminGrantsFromSettings(result)).toEqual({})
+    // the admin's legitimate edit still lands
+    expect(result.invoice.due_days).toBe(21)
+  })
+
+  it('lets an owner set them', () => {
+    const stored = mergeOrganizationSettings({} as any)
+    const incoming = mergeOrganizationSettings({
+      permissions: { admin_view_contractor_pay: true },
+    } as any)
+    const result = applySettingsUpdate(stored, incoming, true)
+    expect(adminGrantsFromSettings(result)).toEqual({ 'team:view-rates': true })
   })
 })
