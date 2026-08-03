@@ -100,11 +100,18 @@ export async function POST(
     // of creation. That is the point — a database read must not yield working
     // portal credentials. Re-sending an invite therefore issues a new link;
     // previously-issued links stay valid until they expire or are revoked.
+    const settingsExpiry = Number(
+      (org?.settings as { portal?: { token_expiry_days?: number } } | null)?.portal
+        ?.token_expiry_days
+    )
+    const expiryDays = Number.isFinite(settingsExpiry)
+      ? Math.min(365, Math.max(1, Math.trunc(settingsExpiry)))
+      : 90
     const tokenInfo = await generateAccessToken(
       clientId,
       user.id,
       client.organization_id,
-      90 // 90 days expiry
+      expiryDays
     )
     const portalUrl = tokenInfo.portalUrl
 

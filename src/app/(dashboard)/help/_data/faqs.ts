@@ -94,7 +94,7 @@ This is why the Tax Summaries tab and the annual CSV export are driven off the p
   {
     id: 'portal-link-expired',
     question: "A client's portal link expired — how do I send a new one?",
-    answer: `Open the client's detail page and find the **Portal Access** card. If their link has expired, you won't see an active token anymore — click **Send Portal Invite** to email them a fresh link (if they have an email on file), or **Generate Portal Link** to create one you can copy and share yourself. If a token is still technically active but you want to invalidate the old link, use **Regenerate** instead.
+    answer: `Open the client's detail page and find the **Portal Access** card. If their link has expired, the card won't show an Active badge anymore — click **Send Portal Invite** to email them a fresh link (if they have an email on file), or **Generate Portal Link** to create one that's shown once with a Copy button so you can share it yourself. Issuing a new link doesn't cut off older ones; if you need to invalidate everything previously sent, use **Revoke Access**. Clients with an email can also request a fresh link themselves from the "This Link Has Expired" screen.
 
 How long a new link stays valid is controlled by **Settings > Business Rules > Sessions tab > Portal Link Expiry (days)** (default 90 days).`,
     articleSlug: 'client-portal',
@@ -106,7 +106,7 @@ How long a new link stays valid is controlled by **Settings > Business Rules > S
     question: "Why can't a contractor see other people's sessions?",
     answer: `This is by design. The **contractor** role does not have the \`session:view-all\` permission, so the Sessions page automatically filters to only that contractor's own sessions — they can't browse or search other contractors' work, clients, or earnings.
 
-Only **admin**, **owner**, and **developer** roles can see every session across the organization. If you need to check what a specific contractor sees, use **View As** to simulate their account rather than granting them broader access.`,
+Only **admin**, **owner**, and **developer** roles can see every session across the organization. Owners and developers can use **View As** to simulate a specific contractor's account rather than granting broader access; the View As switcher doesn't appear for admins, so if you're an admin, ask your owner to check.`,
     articleSlug: 'inviting-team-members',
     category: 'team',
     adminOnly: true,
@@ -114,12 +114,22 @@ Only **admin**, **owner**, and **developer** roles can see every session across 
   {
     id: 'turn-off-mfa',
     question: 'How do I turn off two-factor for someone?',
-    answer: `Two-factor (MFA) has two layers. The organization-wide requirement lives at **Settings > Business Rules > Security tab** — the **Require MFA** toggle controls whether the app forces every team member to enroll before they can use the app.
+    answer: `Two-factor (MFA) has two layers, and both live at **Settings > Profile & Security**. The organization-wide **Require Two-Factor Authentication** switch sits in the Session Security card there (owners only). When it's on, **admin and owner accounts** must enroll before they can use the rest of the app — contractor accounts are never blocked by it, though anyone can enroll voluntarily.
 
-An individual person's own MFA factors (their authenticator app enrollment) are managed on **Settings > Profile > Profile & Security** — that's where a user resets or removes their own second factor. If MFA is org-required, turning it off for one person isn't possible without disabling the org-wide requirement, since enforcement applies to everyone.`,
+A person's own MFA factors (their authenticator app enrollment) are managed on that same page, in the **Two-Factor Authentication** card — that's where each user enables or disables their own second factor. If MFA is org-required, an individual admin or owner can't be exempted: the requirement applies to every admin and owner account until the org-wide switch is turned off.`,
     articleSlug: 'profile-and-security',
     category: 'settings',
     adminOnly: true,
+  },
+  {
+    id: 'change-password',
+    question: 'How do I change or reset my password?',
+    answer: `Use the password reset flow: from the login page, click **Forgot password?**, enter your account email, and you'll receive a reset link — follow it to choose a new password. If you're currently signed in, sign out first (avatar menu > Sign out). The same flow covers both a forgotten password and a routine change, and it works for accounts with two-factor authentication enabled.
+
+If the email doesn't arrive, check your spam folder and confirm you used the address your account is registered under (shown at **Settings > Profile & Security** in the Account card). Note that repeated failed login attempts temporarily lock the account — if you've just been locked out, wait for the lockout to pass (15 minutes by default), then reset.`,
+    articleSlug: 'profile-and-security',
+    category: 'settings',
+    adminOnly: false,
   },
   {
     id: 'edit-approved-session',
@@ -254,9 +264,9 @@ Behind the scenes, approving a request sends the client a confirmation email and
   {
     id: 'view-as-testing',
     question: 'How do I see the app the way a contractor sees it?',
-    answer: `Use **View As** mode. Look for the **View As** button in the header bar (available to owners and developers) and choose either a generic role (like Contractor) or a specific team member to simulate exactly what they see — their sessions, earnings, and navigation. An amber indicator stays visible the whole time as a reminder that you're looking at a simulated view, not your own data.
+    answer: `Use **View As** mode. Look for the **View As** button in the header bar (available to owners and developers) and choose either a generic role (like Contractor) or a specific team member to simulate exactly what they see — their sessions, earnings, and navigation. While a simulation is active, the View As button turns amber and shows who you're viewing as, so you can't mistake the simulated view for your own data.
 
-Click **Back to Owner** in the header to exit and return to your normal view. This is the safest way to verify permissions or troubleshoot what a contractor is reporting, without needing their login credentials.`,
+To exit, open the same **View As** menu again and choose **Owner (actual)** at the top — everything returns to your normal view. This is the safest way to verify permissions or troubleshoot what a contractor is reporting, without needing their login credentials.`,
     articleSlug: 'view-as-mode',
     category: 'getting-started',
     adminOnly: true,

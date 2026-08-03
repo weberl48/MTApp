@@ -210,6 +210,7 @@ export function Header({ user }: HeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  data-tour="view-as-switcher"
                   variant={viewAsRole || viewAsContractor ? 'default' : 'outline'}
                   size="sm"
                   className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole || viewAsContractor ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}

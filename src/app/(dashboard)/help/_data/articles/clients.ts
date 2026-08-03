@@ -63,7 +63,8 @@ Once a client is created, click their name from the Clients list to review their
     description: 'How the client portal works and how to enable it for individual clients.',
     adminOnly: true,
     relatedArticles: ['adding-a-client', 'session-requests'],
-    keywords: ['portal', 'client portal', 'access token', 'invite', 'portal link'],
+    walkthrough: 'client-portal',
+    keywords: ['portal', 'client portal', 'access token', 'invite', 'portal link', 'revoke'],
     content: `
 ## Client Portal
 
@@ -75,16 +76,25 @@ The Client Portal must be turned on at the organization level before it can be u
 
 ### Inviting a Client
 
-Once the feature is enabled, the only way to invite a client today is while **adding** them:
+Once the feature is enabled, there are two ways to get a client their portal link:
+
+**While adding the client:**
 
 1. Go to **Clients** and click **Add Client**.
 2. Enter the client's email address.
 3. Check **Send portal invite** (this option only appears if an email is entered).
 4. Save the client. They receive an email with a secure access link.
 
+**Any time after, from the client's detail page:** open the client from the Clients list and find the **Portal Access** card. If the client has an email on file, **Send Portal Invite** emails them a fresh link. **Generate Portal Link** creates a link without emailing it — the link is shown once with a Copy button so you can share it however you like (this is also the option for clients with no email on file).
+
 The link is token-based, meaning no password is required. The client clicks the link and is taken directly to their portal. Links expire after a configurable number of days (set in Settings).
 
-There is currently no way to send or re-send a portal invite for a client that already exists — the invite checkbox only appears on the Add Client form.
+### Managing Access
+
+The **Portal Access** card on the client's detail page also shows the current state of their access — an **Active** badge with the expiry date, and when the portal was last opened. From there you can:
+
+- **Email New Invite** / **New Link** - Issue a fresh link at any time (for example when the old one is about to expire). Links can only be *copied at the moment they're created* — for security the app stores them in a form it can't read back, so an existing link can never be displayed again, only replaced.
+- **Revoke Access** - Immediately invalidates **every** link ever issued to this client. Use this when a link may have been shared or a client should no longer have access. Issuing a new link does *not* cut off old ones — only Revoke Access does.
 
 ### What Clients See
 
@@ -99,7 +109,7 @@ Clients can request a new session from the portal by submitting preferred dates 
 
 ### Token Expiry
 
-Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. When a link expires, the client sees a "This Link Has Expired" screen with a **Get a New Link** button where they can request a fresh link themselves by entering their email — this self-service flow is currently the only way to get a client a new link once their original invite has expired.
+Portal links expire after a set number of days. You can configure the expiry in **Settings > Business Rules > Sessions** tab, under the Client Portal section. When a link expires, the client sees a "This Link Has Expired" screen with a **Get a New Link** button where they can request a fresh link themselves by entering their email. Staff can also issue a new link at any time from the **Portal Access** card on the client's detail page (see Managing Access above).
     `,
   },
   {

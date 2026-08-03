@@ -19,9 +19,11 @@ export const WALKTHROUGHS_CHANGED_EVENT = 'mca:walkthroughs-changed'
  */
 export const RECOMMENDED_WALKTHROUGH_ORDER = [
   'app-overview',
+  'mfa-setup',
   'approve-sessions',
   'log-session',
   'add-client',
+  'client-portal',
   'send-invoice',
   'scholarship-billing',
   'payroll',
@@ -30,8 +32,10 @@ export const RECOMMENDED_WALKTHROUGH_ORDER = [
   'contractor-rates',
   'configure-services',
   'edit-service-type',
+  'view-as',
   'automation',
   'custom-lists',
+  'practice-branding',
   'analytics',
 ] as const
 

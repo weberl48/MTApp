@@ -48,11 +48,32 @@ export function buildOrgContext(
     features: settings.features,
     portal: { token_expiry_days: settings.portal?.token_expiry_days },
     custom_lists: settings.custom_lists,
+    // The user-visible half of the security section only. Lockout tuning
+    // (max attempts, lockout duration) stays out: no help answer needs it,
+    // and it describes the org's brute-force posture.
+    security: {
+      require_mfa: settings.security?.require_mfa,
+      session_timeout_minutes: settings.security?.session_timeout_minutes,
+    },
+    notification: {
+      email_on_session_submit: settings.notification?.email_on_session_submit,
+      email_on_invoice_paid: settings.notification?.email_on_invoice_paid,
+    },
+    // The four "What Admins Can See" switches — lets the assistant tell an
+    // admin whether a money surface is missing by design or by a grant the
+    // owner hasn't turned on. Booleans only, nothing sensitive.
+    permissions: settings.permissions,
   }
   const services = serviceTypes.map(s => ({
     name: s.name,
     base_rate: s.base_rate,
     per_person_rate: s.per_person_rate,
+    location: s.location,
+    is_active: s.is_active,
+    is_scholarship: s.is_scholarship,
+    scholarship_rate: s.scholarship_rate,
+    requires_classroom: s.requires_classroom,
+    requires_client: s.requires_client,
     ...(showFinancials
       ? {
           mca_percentage: s.mca_percentage,
@@ -77,6 +98,7 @@ Rules:
 - End every answer that used the documentation with a final line: Sources: [[slug]] [[slug]] — using the slug values of the articles you relied on. Omit the line only when you could not answer.
 - Politely decline questions unrelated to using MCA Manager, and ALL medical or clinical questions.
 - The asking user's role is given in the configuration block. Do not describe admin-only capabilities to contractors.
+- Money surfaces (contractor pay, margins, analytics, payroll) are owner-only for admins unless the matching switch in the configuration's \`permissions\` block is true (admin_view_contractor_pay, admin_view_margins, admin_view_analytics, admin_view_payroll). When an admin asks about one of these, use those switches to say whether they have access or their owner would need to grant it.
 - Keep answers short and practical. Use markdown. Refer to UI elements in bold, e.g. **Settings > Business Rules**.
 - Never ask the user for client names or health information; if they include any, answer generally without repeating those details.`
 

@@ -155,7 +155,7 @@ export default function PracticeSettingsPage() {
 
       <div className="space-y-6 max-w-2xl">
         {/* Organization Details */}
-        <Card>
+        <Card data-tour="practice-org-details">
           <CardHeader>
             <CardTitle>Organization Details</CardTitle>
             <CardDescription>Your practice information that appears on invoices</CardDescription>
@@ -192,7 +192,7 @@ export default function PracticeSettingsPage() {
         </Card>
 
         {/* Live Preview */}
-        <Card>
+        <Card data-tour="practice-preview">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5" />
@@ -293,7 +293,7 @@ export default function PracticeSettingsPage() {
         </Card>
 
         {/* Logo Upload */}
-        <Card>
+        <Card data-tour="practice-logo">
           <CardHeader>
             <CardTitle>Logo</CardTitle>
             <CardDescription>Your practice logo appears on invoices and emails</CardDescription>
@@ -318,7 +318,7 @@ export default function PracticeSettingsPage() {
         </Card>
 
         {/* Business Details */}
-        <Card>
+        <Card data-tour="practice-business">
           <CardHeader>
             <CardTitle>Business Details</CardTitle>
             <CardDescription>Additional information shown on invoices</CardDescription>

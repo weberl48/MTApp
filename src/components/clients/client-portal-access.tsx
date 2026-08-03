@@ -1,155 +1,150 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Key, Copy, Check, Loader2, ExternalLink, RefreshCw, Trash2, Eye, Mail } from 'lucide-react'
+import { Key, Copy, Check, Loader2, ExternalLink, Mail, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useOrganization } from '@/contexts/organization-context'
 
 interface ClientPortalAccessProps {
   clientId: string
   clientEmail: string | null
 }
 
-interface TokenInfo {
+/**
+ * Token metadata as returned by the staff listing. Deliberately credential-free:
+ * tokens are stored hashed, so a link's raw value exists only at the moment it
+ * is minted — this card can show that value once, right after generating it,
+ * and never again.
+ */
+interface TokenSummary {
   id: string
-  token: string
   expires_at: string
   last_accessed_at: string | null
-  is_active: boolean
   created_at: string
 }
 
+interface FreshLink {
+  url: string
+  expiresAt: string
+}
+
 export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccessProps) {
-  const [tokens, setTokens] = useState<TokenInfo[]>([])
+  const { settings } = useOrganization()
+  const [tokens, setTokens] = useState<TokenSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
-  const [sendingInvite, setSendingInvite] = useState(false)
+  const [working, setWorking] = useState<'invite' | 'generate' | 'revoke' | null>(null)
+  const [freshLink, setFreshLink] = useState<FreshLink | null>(null)
   const [copied, setCopied] = useState(false)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
 
-  useEffect(() => {
-    async function loadTokens() {
-      try {
-        const response = await fetch(`/api/clients/${clientId}/access-token/`)
-        if (response.ok) {
-          const data = await response.json()
-          setTokens(data.tokens || [])
-        }
-      } catch (error) {
-        console.error('[MCA] Error loading tokens')
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadTokens()
-  }, [clientId])
-
-  async function refreshTokens() {
+  const refreshTokens = useCallback(async () => {
     try {
       const response = await fetch(`/api/clients/${clientId}/access-token/`)
       if (response.ok) {
         const data = await response.json()
-        setTokens(data.tokens || [])
+        // The API already excludes revoked tokens; drop expired ones here so
+        // `tokens` only ever holds usable access.
+        const now = Date.now()
+        setTokens(
+          ((data.tokens || []) as TokenSummary[]).filter(
+            (t) => new Date(t.expires_at).getTime() > now
+          )
+        )
       }
-    } catch (error) {
+    } catch {
       console.error('[MCA] Error loading tokens')
-    }
-  }
-
-  async function generateToken() {
-    setGenerating(true)
-    try {
-      const response = await fetch(`/api/clients/${clientId}/access-token/`, {
-        method: 'POST',
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate token')
-      }
-
-      toast.success('Portal access link generated!')
-      await refreshTokens()
-    } catch (error) {
-      console.error('[MCA] Error generating token')
-      toast.error(error instanceof Error ? error.message : 'Failed to generate token')
     } finally {
-      setGenerating(false)
+      setLoading(false)
     }
-  }
+  }, [clientId])
 
-  function revokeToken(tokenId: string) {
-    openConfirm({
-      title: 'Revoke Portal Access',
-      description: 'Revoke this portal access? The client will no longer be able to use this link.',
-      confirmLabel: 'Revoke',
-      onConfirm: async () => {
-        try {
-          const response = await fetch(`/api/clients/${clientId}/access-token/`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tokenId }),
-          })
-
-          if (!response.ok) {
-            const data = await response.json()
-            throw new Error(data.error || 'Failed to revoke token')
-          }
-
-          toast.success('Portal access revoked')
-          setTokens((prev) => prev.filter((t) => t.id !== tokenId))
-        } catch (error) {
-          console.error('[MCA] Error revoking token')
-          toast.error(error instanceof Error ? error.message : 'Failed to revoke token')
-        }
-      },
-    })
-  }
+  useEffect(() => {
+    refreshTokens()
+  }, [refreshTokens])
 
   async function sendInvite() {
     if (!clientEmail) {
       toast.error('Client does not have an email address on file')
       return
     }
-
-    setSendingInvite(true)
+    setWorking('invite')
     try {
-      const response = await fetch(`/api/clients/${clientId}/send-invite/`, {
-        method: 'POST',
-      })
-
+      const response = await fetch(`/api/clients/${clientId}/send-invite/`, { method: 'POST' })
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send invite')
-      }
-
+      if (!response.ok) throw new Error(data.error || 'Failed to send invite')
       toast.success(`Portal invite sent to ${clientEmail}`)
-      await refreshTokens() // Refresh tokens in case a new one was created
+      await refreshTokens()
     } catch (error) {
       console.error('[MCA] Error sending invite')
       toast.error(error instanceof Error ? error.message : 'Failed to send invite')
     } finally {
-      setSendingInvite(false)
+      setWorking(null)
     }
   }
 
-  function copyPortalLink(token: string) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-    const portalUrl = `${appUrl}/portal/${token}`
-    navigator.clipboard.writeText(portalUrl)
+  async function generateLink() {
+    setWorking('generate')
+    try {
+      const response = await fetch(`/api/clients/${clientId}/access-token/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expiryDays: settings?.portal?.token_expiry_days ?? 90 }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to generate link')
+      setFreshLink({ url: data.portalUrl, expiresAt: data.expiresAt })
+      setCopied(false)
+      toast.success('Portal link generated — copy it now')
+      await refreshTokens()
+    } catch (error) {
+      console.error('[MCA] Error generating token')
+      toast.error(error instanceof Error ? error.message : 'Failed to generate link')
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  function revokeAll() {
+    openConfirm({
+      title: 'Revoke Portal Access',
+      description:
+        'Revoke every portal link issued to this client? They will no longer be able to open their portal until you send a new invite or generate a new link.',
+      confirmLabel: 'Revoke',
+      onConfirm: async () => {
+        setWorking('revoke')
+        try {
+          const response = await fetch(`/api/clients/${clientId}/access-token/`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ all: true }),
+          })
+          if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to revoke access')
+          }
+          toast.success('Portal access revoked')
+          setFreshLink(null)
+          await refreshTokens()
+        } catch (error) {
+          console.error('[MCA] Error revoking tokens')
+          toast.error(error instanceof Error ? error.message : 'Failed to revoke access')
+        } finally {
+          setWorking(null)
+        }
+      },
+    })
+  }
+
+  function copyFreshLink() {
+    if (!freshLink) return
+    navigator.clipboard.writeText(freshLink.url)
     setCopied(true)
     toast.success('Portal link copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
-  }
-
-  function openPortal(token: string) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-    window.open(`${appUrl}/portal/${token}`, '_blank')
   }
 
   function formatDate(dateStr: string) {
@@ -160,17 +155,17 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
     })
   }
 
-  const activeToken = tokens.find((t) => t.is_active)
+  const activeToken = tokens[0]
 
   return (
-    <Card>
+    <Card data-tour="portal-access-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Key className="h-5 w-5" />
           Portal Access
         </CardTitle>
         <CardDescription>
-          Manage client portal access
+          Secure, no-password portal links for this client
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -178,161 +173,138 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
           <div className="py-4 text-center">
             <Loader2 className="h-5 w-5 animate-spin mx-auto" />
           </div>
-        ) : activeToken ? (
-          <>
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
-                Active
-              </Badge>
-              <span className="text-xs text-gray-500">
-                Expires {formatDate(activeToken.expires_at)}
-              </span>
-            </div>
-
-            {activeToken.last_accessed_at && (
-              <p className="text-xs text-gray-500">
-                Last accessed: {formatDate(activeToken.last_accessed_at)}
-              </p>
-            )}
-
-            {/* View as Client - Primary action */}
-            <Button
-              size="sm"
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white"
-              onClick={() => openPortal(activeToken.token)}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              View as Client
-            </Button>
-
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1"
-                onClick={() => copyPortalLink(activeToken.token)}
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 mr-1" />
-                ) : (
-                  <Copy className="h-4 w-4 mr-1" />
-                )}
-                Copy Link
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => openPortal(activeToken.token)}
-                title="Open in new tab"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Send Invite via Email */}
-            {clientEmail && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={sendInvite}
-                disabled={sendingInvite}
-              >
-                {sendingInvite ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Mail className="h-4 w-4 mr-2" />
-                )}
-                {sendingInvite ? 'Sending...' : `Email Invite to ${clientEmail}`}
-              </Button>
-            )}
-
-            <div className="flex gap-2 pt-2 border-t">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={generateToken}
-                disabled={generating}
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Regenerate
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-red-600"
-                onClick={() => revokeToken(activeToken.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Revoke
-              </Button>
-            </div>
-          </>
         ) : (
           <>
-            <p className="text-sm text-gray-500">
-              No active portal access. Generate a link to allow this client to view their sessions, resources, and goals.
-            </p>
-
-            {!clientEmail && (
-              <p className="text-xs text-amber-600">
-                Note: Client has no email on file. They won&apos;t be able to request a new link if this one expires.
-              </p>
+            {freshLink && (
+              <div className="space-y-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <p className="text-xs font-medium text-green-800 dark:text-green-200">
+                  New link — expires {formatDate(freshLink.expiresAt)}
+                </p>
+                <p className="text-xs font-mono break-all text-green-700 dark:text-green-300">
+                  {freshLink.url}
+                </p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={copyFreshLink}>
+                    {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+                    Copy Link
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(freshLink.url, '_blank', 'noopener,noreferrer')}
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-green-700 dark:text-green-400">
+                  Copy it now — for security this link can&apos;t be shown again.
+                </p>
+              </div>
             )}
 
-            {clientEmail ? (
-              <Button
-                onClick={sendInvite}
-                disabled={sendingInvite}
-                className="w-full"
-              >
-                {sendingInvite ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Sending Invite...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-4 w-4 mr-2" />
-                    Send Portal Invite
-                  </>
+            {activeToken ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    Active
+                  </Badge>
+                  <span className="text-xs text-gray-500">
+                    Expires {formatDate(activeToken.expires_at)}
+                  </span>
+                </div>
+
+                {activeToken.last_accessed_at && (
+                  <p className="text-xs text-gray-500">
+                    Last accessed: {formatDate(activeToken.last_accessed_at)}
+                  </p>
                 )}
-              </Button>
+
+                {clientEmail && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={sendInvite}
+                    disabled={working !== null}
+                  >
+                    {working === 'invite' ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Mail className="h-4 w-4 mr-2" />
+                    )}
+                    {working === 'invite' ? 'Sending...' : `Email New Invite to ${clientEmail}`}
+                  </Button>
+                )}
+
+                <div className="flex gap-2 pt-2 border-t">
+                  <Button size="sm" variant="ghost" onClick={generateLink} disabled={working !== null}>
+                    {working === 'generate' ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Key className="h-4 w-4 mr-1" />
+                    )}
+                    New Link
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-600"
+                    onClick={revokeAll}
+                    disabled={working !== null}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Revoke Access
+                  </Button>
+                </div>
+              </>
             ) : (
-              <Button onClick={generateToken} disabled={generating} className="w-full">
-                {generating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Key className="h-4 w-4 mr-2" />
-                    Generate Portal Link
-                  </>
-                )}
-              </Button>
-            )}
+              <>
+                <p className="text-sm text-gray-500">
+                  No active portal access. Send an invite or generate a link so this client can view
+                  their sessions, goals, and resources.
+                </p>
 
-            {clientEmail && (
-              <Button
-                variant="outline"
-                onClick={generateToken}
-                disabled={generating}
-                className="w-full"
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
+                {clientEmail ? (
+                  <Button onClick={sendInvite} disabled={working !== null} className="w-full">
+                    {working === 'invite' ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending Invite...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send Portal Invite
+                      </>
+                    )}
+                  </Button>
                 ) : (
-                  <>
-                    <Key className="h-4 w-4 mr-2" />
-                    Just Generate Link (Don&apos;t Send)
-                  </>
+                  <p className="text-xs text-amber-600">
+                    Note: Client has no email on file. Generate a link and share it with them
+                    directly — they won&apos;t be able to request a new one themselves if it expires.
+                  </p>
                 )}
-              </Button>
+
+                <Button
+                  variant={clientEmail ? 'outline' : 'default'}
+                  onClick={generateLink}
+                  disabled={working !== null}
+                  className="w-full"
+                >
+                  {working === 'generate' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Key className="h-4 w-4 mr-2" />
+                      {clientEmail ? "Generate Link (Don't Email)" : 'Generate Portal Link'}
+                    </>
+                  )}
+                </Button>
+              </>
             )}
           </>
         )}

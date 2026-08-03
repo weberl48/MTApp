@@ -347,7 +347,8 @@ This keeps the interface clean and avoids confusion from options that are not re
     description: 'How to update your profile, set up two-factor authentication, and configure security policies.',
     adminOnly: false,
     relatedArticles: ['getting-started'],
-    keywords: ['mfa', 'two-factor authentication', 'password', 'security', 'lockout', 'session timeout'],
+    walkthrough: 'mfa-setup',
+    keywords: ['mfa', 'two-factor authentication', 'password', 'password reset', 'forgot password', 'change password', 'security', 'lockout', 'session timeout'],
     content: `
 ## Profile & Security Settings
 
@@ -364,6 +365,10 @@ Update your display name and phone number. These are visible to your team member
 ### Account Details
 
 Your email, role, and organization are displayed for reference. These are read-only and can only be changed by an administrator.
+
+### Changing Your Password
+
+Password changes go through the reset flow: sign out (avatar menu > **Sign out**), then click **Forgot password?** on the login page and enter your account email. You'll receive a link to choose a new password. The same flow covers a forgotten password and a routine change alike, and it works for accounts with two-factor authentication enabled.
 
 ### Two-Factor Authentication (MFA)
 
@@ -405,6 +410,7 @@ These only ever affect administrators. Contractors are never granted access this
     description: 'How to customize your logo, brand colors, business details, and regional settings.',
     adminOnly: true,
     relatedArticles: ['getting-started', 'automation-settings'],
+    walkthrough: 'practice-branding',
     keywords: ['logo', 'brand colors', 'timezone', 'currency', 'invoice header', 'tax id'],
     content: `
 ## Practice & Branding

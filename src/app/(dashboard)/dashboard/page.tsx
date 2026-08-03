@@ -14,6 +14,7 @@ import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
 import { WalkthroughNudge } from '@/components/walkthroughs/walkthrough-nudge'
+import { PageHelp } from '@/components/help/page-help'
 import { PendingApprovals } from '@/components/dashboard/pending-approvals'
 import { UnbilledSessions } from '@/components/dashboard/unbilled-sessions'
 import { UnsentInvoices } from '@/components/dashboard/unsent-invoices'
@@ -185,7 +186,10 @@ export default function DashboardPage() {
       <WalkthroughNudge />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <PageHelp article="getting-started" />
+          </div>
           <p className="text-muted-foreground">
             {viewAsContractor
               ? `Viewing ${viewAsContractor.name}'s dashboard`

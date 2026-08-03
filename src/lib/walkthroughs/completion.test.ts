@@ -59,8 +59,9 @@ describe('completed walkthrough storage', () => {
 
 describe('nextRecommendedWalkthrough', () => {
   it('suggests the first not-yet-done tour in recommended order', () => {
-    expect(nextRecommendedWalkthrough('app-overview', [])).toBe('approve-sessions')
-    expect(nextRecommendedWalkthrough('approve-sessions', ['app-overview'])).toBe('log-session')
+    expect(nextRecommendedWalkthrough('app-overview', [])).toBe('mfa-setup')
+    expect(nextRecommendedWalkthrough('mfa-setup', ['app-overview'])).toBe('approve-sessions')
+    expect(nextRecommendedWalkthrough('approve-sessions', ['app-overview', 'mfa-setup'])).toBe('log-session')
   })
 
   it('counts the just-completed tour as done even before storage updates', () => {

@@ -122,7 +122,7 @@ export function MfaSetup() {
 
   return (
     <>
-      <Card>
+      <Card data-tour="mfa-setup">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {hasMfa ? (

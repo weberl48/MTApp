@@ -8,7 +8,7 @@ export const GETTING_STARTED_ARTICLES: HelpArticle[] = [
     description: 'An overview of the app and how to navigate its main features.',
     walkthrough: 'app-overview',
     relatedArticles: ['logging-a-session', 'view-as-mode', 'installing-the-app'],
-    keywords: ['overview', 'navigation', 'dashboard', 'roles', 'mobile', 'help center', 'walkthrough', 'guided tour'],
+    keywords: ['overview', 'navigation', 'dashboard', 'roles', 'mobile', 'help center', 'walkthrough', 'guided tour', 'setup wizard', 'onboarding'],
     content: `
 ## Welcome to MCA Manager
 
@@ -43,6 +43,10 @@ On Android: open the site in Chrome, tap the menu (three dots), then tap "Add to
 
 Once installed, it behaves like a native app with an icon on your home screen.
 
+### The Owner Setup Wizard
+
+New owners see a short **setup wizard** the first time they sign in — six steps that walk through the essentials in order: inviting your team, adding your first client, configuring service types, logging a session, and reviewing the invoices it creates. You can complete it, skip individual steps, or close it and come back: until it's finished or dismissed, a floating **getting started** button stays on screen to reopen it where you left off. Finishing the wizard offers to start the App Overview guided tour described below.
+
 ### Guided Tours
 
 The Help Center includes interactive **guided tours** that walk you through real screens step by step, highlighting each button as you go. The **Guided tours** card on the Help Center home page lists them in the recommended order for new team members and tracks which ones you've finished (checkmarks are per-device). When you complete a tour, the app suggests the next one in the sequence. You can retake any tour at any time.
@@ -59,6 +63,7 @@ You can reach the Help Center at any time by clicking your avatar in the top-rig
     description: 'How to simulate another role or contractor view to verify permissions and data.',
     adminOnly: true,
     relatedArticles: ['getting-started'],
+    walkthrough: 'view-as',
     keywords: ['simulate role', 'impersonate', 'debugging permissions', 'amber banner', 'back to owner'],
     content: `
 ## View As Mode
@@ -80,11 +85,11 @@ Once View As mode is active, all data, statistics, permissions, and navigation i
 
 ### Amber Indicator
 
-When View As mode is active, an amber banner or indicator appears in the header. This reminds you that you are not looking at your own data. The indicator is always visible so you do not accidentally make decisions based on the simulated view.
+When View As mode is active, the **View As** button in the header turns amber and shows who you are viewing as (for example "As Contractor" or "As Jane Doe"). This reminds you that you are not looking at your own data. The indicator stays visible on every page so you do not accidentally make decisions based on the simulated view.
 
 ### Returning to Your Own View
 
-Click the **Back to Owner** button shown in the header or in the View As menu to exit simulation mode and return to your normal view. All data immediately returns to your own account's perspective.
+Open the **View As** menu again and choose **Owner (actual)** at the top (developers see **Developer (actual)**) to exit simulation mode. All data immediately returns to your own account's perspective. The simulation persists across page navigation until you exit it this way.
 
 ### Common Use Cases
 
@@ -203,6 +208,10 @@ For the same reason, **don't include client names or health details in your ques
 - Each person can ask up to 20 questions per hour.
 - Answers come from the documentation — if something isn't documented, the helper says so rather than guessing.
 - Owners can turn the helper off for the whole organization at **Settings > Business Rules > Features** with the **AI help assistant** toggle.
+
+### Your questions improve the docs
+
+The question text you ask (and any Help Center search that finds nothing) is recorded so the practice owner can see what people are looking for and fill documentation gaps — owners see this as the **Help gaps** card on the Help Center page. That's one more reason to keep client names and health details out of your questions: they'd end up in that log.
     `,
   },
 ]

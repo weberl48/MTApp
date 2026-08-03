@@ -9,6 +9,11 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { decryptField } from '@/lib/crypto'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
+import { can } from '@/lib/auth/permissions'
+import { isFeatureEnabled } from '@/lib/features'
+import { ClientPortalAccess } from '@/components/clients/client-portal-access'
+import { PageHelp } from '@/components/help/page-help'
+import type { OrganizationSettings, UserRole } from '@/types/database'
 
 interface ClientDetailPageProps {
   params: Promise<{ id: string }>
@@ -100,6 +105,19 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
   const sessionCount = clientSessions.length
   const pendingInvoiceCount = (clientInvoices || []).filter((inv) => inv.status === 'pending').length
 
+  // Portal access management is for admins+, and only when the org has the
+  // portal feature on (the card's APIs enforce both server-side as well).
+  const isClientManager = can(profile.role as UserRole, 'client:manage')
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('settings')
+    .eq('id', client.organization_id)
+    .single()
+  const portalEnabled = isFeatureEnabled(
+    (org?.settings || {}) as OrganizationSettings,
+    'client_portal'
+  )
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
@@ -108,7 +126,10 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
       ]} />
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">{client.name}</h1>
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-2xl font-bold">{client.name}</h1>
+          {isClientManager && <PageHelp article="client-details" />}
+        </div>
         <p className="text-muted-foreground">Client Details</p>
       </div>
 
@@ -186,6 +207,9 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
           </CardContent>
         </Card>
 
+        {isClientManager && portalEnabled && (
+          <ClientPortalAccess clientId={client.id} clientEmail={client.contact_email} />
+        )}
       </div>
 
       {/* Tabs for Sessions and Invoices */}

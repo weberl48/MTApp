@@ -4,6 +4,7 @@ import { aiRateLimit } from '@/lib/rate-limit'
 import { helpChatSchema } from '@/lib/validation/schemas'
 import { isFeatureEnabled } from '@/lib/features'
 import { can } from '@/lib/auth/permissions'
+import { resolveEffectiveRole, VIEW_AS_COOKIE } from '@/lib/auth/view-as'
 import { buildOrgContext, streamHelpAnswer } from '@/lib/help/ai'
 import { logger } from '@/lib/logger'
 import type { OrganizationSettings, ServiceType, UserRole } from '@/types/database'
@@ -59,7 +60,14 @@ export async function POST(request: NextRequest) {
   }
   const { messages } = parsed.data
 
-  const role = profile.role as UserRole
+  // Honor View As: an owner previewing a contractor should get contractor-level
+  // answers, matching every other role-simulated surface. Only ever de-escalates
+  // (the real role comes from the database, the cookie is just a request).
+  const role =
+    resolveEffectiveRole(
+      profile.role as UserRole,
+      request.cookies.get(VIEW_AS_COOKIE)?.value
+    ) ?? (profile.role as UserRole)
   const { data: serviceTypes } = await supabase
     .from('service_types')
     .select('*')

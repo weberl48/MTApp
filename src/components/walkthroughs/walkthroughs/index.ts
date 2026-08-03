@@ -902,6 +902,196 @@ export const ANALYTICS_WALKTHROUGH: Walkthrough = {
   ],
 }
 
+export const CLIENT_PORTAL_WALKTHROUGH: Walkthrough = {
+  id: 'client-portal',
+  name: 'Set Up Client Portal Access',
+  description: 'Learn how to send portal invites and manage client portal links',
+  audience: 'admin',
+  steps: [
+    {
+      title: 'Go to Clients',
+      description: 'Portal access is managed per client, from the Clients section.',
+      element: 'nav a[href="/clients/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/clients/',
+      mobileNav: true,
+    },
+    {
+      title: 'Open a Client',
+      description: 'Each client\'s detail page has a Portal Access card. Click any client row now to open theirs — or press "Open a Client" below and we\'ll open the first one for you. (If the portal feature is turned off in Settings > Business Rules > Features, the card won\'t appear.)',
+      element: '[data-tour="clients-table"]',
+      popoverSide: 'top',
+      ctaLabel: 'Open a Client',
+      href: '/clients/',
+    },
+    {
+      title: 'The Portal Access Card',
+      description: 'This card manages the client\'s secure, no-password portal links. If the client has an email on file, "Send Portal Invite" emails them a fresh link. "Generate Portal Link" creates one without emailing it — the link is shown once with a Copy button, which is also how you handle clients without an email.',
+      element: '[data-tour="portal-access-card"]',
+      // The card lives on a client's detail page — if the user didn't open one
+      // themselves, click the first row for them. Scoped to the list card so it
+      // no-ops once we're on a detail page (the breadcrumb is outside it).
+      preClick: '[data-tour="clients-table"] a[href^="/clients/"]',
+      popoverSide: 'left',
+      ctaLabel: 'Next',
+      href: '/clients/',
+    },
+    {
+      title: 'Links Are Shown Only Once',
+      description: 'For security, the app stores portal links in a form it can\'t read back — so a link can only be copied at the moment it\'s created. When one is lost or about to expire, don\'t look for the old link: issue a new invite or a new link. Old links keep working until they expire, and "Revoke Access" invalidates all of them at once.',
+      element: '[data-tour="portal-access-card"]',
+      preClick: '[data-tour="clients-table"] a[href^="/clients/"]',
+      popoverSide: 'left',
+      ctaLabel: 'Next',
+      href: '/clients/',
+    },
+    {
+      title: 'What Clients See',
+      description: 'Through their link, clients get a private view of their own sessions, goals, and shared resources, and they can request a session with preferred dates. Link lifetime comes from Settings > Business Rules > Sessions > Portal Link Expiry (90 days by default), and expired links offer clients a self-service "Get a New Link" flow. That\'s portal access!',
+      ctaLabel: 'Finish',
+      href: '/clients/',
+    },
+  ],
+}
+
+export const MFA_SETUP_WALKTHROUGH: Walkthrough = {
+  id: 'mfa-setup',
+  name: 'Secure Your Account',
+  description: 'Learn your Profile & Security page — and set up two-factor authentication',
+  steps: [
+    {
+      title: 'Profile & Security',
+      description: 'Your personal and security settings live under Settings > Profile & Security. You can also get here any time from the avatar menu in the top-right corner.',
+      element: 'nav a[href="/settings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/settings/profile/',
+      mobileNav: true,
+    },
+    {
+      title: 'Your Profile & Account',
+      description: 'Update your display name and phone here — they\'re what teammates see. Below, the Account card shows your email, role, and organization for reference. To change your password, sign out and use "Forgot password?" on the login page.',
+      element: '[data-tour="profile-card"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/profile/',
+    },
+    {
+      title: 'Session Security',
+      // Owner-only: the card renders behind settings:edit.
+      audience: 'owner',
+      description: 'Organization-wide security policy: how long until an idle session is signed out, whether admins and owners must use two-factor authentication, and how many failed logins lock an account (and for how long).',
+      element: '[data-tour="security-policies"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/profile/',
+    },
+    {
+      title: 'What Admins Can See',
+      audience: 'owner',
+      description: 'Four switches controlling how much of the money side your admins see — contractor pay & rates, margins, analytics, and payroll. All off by default; only you can change them.',
+      element: '[data-tour="admin-visibility"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/profile/',
+    },
+    {
+      title: 'Two-Factor Authentication',
+      description: 'This is the important one: click "Enable Two-Factor Authentication", scan the QR code with an authenticator app (Google Authenticator, Authy…), and enter the code to confirm. From then on, logins need your password plus a code. If your organization requires MFA, admins and owners must enroll before using the app.',
+      element: '[data-tour="mfa-setup"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/settings/profile/',
+    },
+  ],
+}
+
+export const VIEW_AS_WALKTHROUGH: Walkthrough = {
+  id: 'view-as',
+  name: 'Preview Other Roles (View As)',
+  description: 'Learn how to see the app exactly as a contractor or admin sees it',
+  // Owner-only: the switcher renders only for owners and developers.
+  audience: 'owner',
+  steps: [
+    {
+      title: 'The View As Switcher',
+      description: 'This header button lets you simulate what another role sees — the safest way to verify permissions or troubleshoot what a contractor reports, without their login.',
+      element: '[data-tour="view-as-switcher"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/dashboard/',
+    },
+    {
+      title: 'Pick a Role or Person',
+      description: 'Open it to choose a generic role (Admin, Contractor) or a specific team member. Everything — data, navigation, permissions — switches to their view, and it stays that way as you move between pages. While active, this button turns amber and shows who you\'re viewing as.',
+      element: '[data-tour="view-as-switcher"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/dashboard/',
+    },
+    {
+      title: 'Coming Back',
+      description: 'To return to your own view, open the same menu and choose "Owner (actual)" at the top. Try it now if you like: switch to Contractor, look at the sidebar, and switch back. That\'s View As!',
+      element: '[data-tour="view-as-switcher"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Finish',
+      href: '/dashboard/',
+    },
+  ],
+}
+
+export const PRACTICE_BRANDING_WALKTHROUGH: Walkthrough = {
+  id: 'practice-branding',
+  name: 'Brand Your Practice',
+  description: 'Learn how your logo, colors, and business details appear to clients',
+  // Owner-only: the page itself is owner-only.
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Practice & Branding',
+      description: 'Everything clients see on invoices, emails, and the portal is configured under Settings > Practice & Branding.',
+      element: 'nav a[href="/settings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/settings/practice/',
+      mobileNav: true,
+    },
+    {
+      title: 'Organization Details',
+      description: 'Your practice name, email, phone, address, and website — these print on invoices and appear in client communications.',
+      element: '[data-tour="practice-org-details"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/practice/',
+    },
+    {
+      title: 'Live Preview',
+      description: 'As you change anything below, this panel shows exactly how it will look in the three places clients meet your brand: invoice headers, emails, and the client portal.',
+      element: '[data-tour="practice-preview"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/practice/',
+    },
+    {
+      title: 'Logo & Brand Colors',
+      description: 'Upload a logo (your initials are used until you do) and pick your primary and secondary colors — they carry through invoices, email templates, and portal buttons.',
+      element: '[data-tour="practice-logo"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/practice/',
+    },
+    {
+      title: 'Business Details & Regional',
+      description: 'A tagline and description for your paperwork, an optional Tax ID/EIN printed on invoices, plus your timezone and currency. Social media links are at the bottom. Remember to save each card after editing. That\'s branding!',
+      element: '[data-tour="practice-business"]',
+      popoverSide: 'top',
+      ctaLabel: 'Finish',
+      href: '/settings/practice/',
+    },
+  ],
+}
+
 export const ALL_WALKTHROUGHS: Walkthrough[] = [
   APP_OVERVIEW_WALKTHROUGH,
   ADD_CLIENT_WALKTHROUGH,
@@ -918,6 +1108,10 @@ export const ALL_WALKTHROUGHS: Walkthrough[] = [
   CUSTOM_LISTS_WALKTHROUGH,
   CONTRACTOR_RATES_WALKTHROUGH,
   ANALYTICS_WALKTHROUGH,
+  CLIENT_PORTAL_WALKTHROUGH,
+  MFA_SETUP_WALKTHROUGH,
+  VIEW_AS_WALKTHROUGH,
+  PRACTICE_BRANDING_WALKTHROUGH,
 ]
 
 export function getWalkthroughById(id: string): Walkthrough | undefined {

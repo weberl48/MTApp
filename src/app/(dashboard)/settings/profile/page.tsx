@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { MfaSetup } from '@/components/forms/mfa-setup'
+import { PageHelp } from '@/components/help/page-help'
 import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -127,14 +128,17 @@ export default function ProfileSettingsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profile & Security</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profile & Security</h1>
+            <PageHelp article="profile-and-security" />
+          </div>
           <p className="text-gray-500 dark:text-gray-400">Your personal information and security settings</p>
         </div>
       </div>
 
       <div className="space-y-6 max-w-2xl">
         {/* Profile Card */}
-        <Card>
+        <Card data-tour="profile-card">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>Your personal information</CardDescription>
@@ -205,7 +209,7 @@ export default function ProfileSettingsPage() {
 
         {/* Security Settings - Owner only */}
         {isOwner && localSettings && (
-          <Card>
+          <Card data-tour="security-policies">
             <CardHeader>
               <CardTitle>Session Security</CardTitle>
               <CardDescription>
@@ -240,7 +244,7 @@ export default function ProfileSettingsPage() {
                 <div className="space-y-0.5">
                   <Label>Require Two-Factor Authentication</Label>
                   <p className="text-sm text-gray-500">
-                    Enforce 2FA for all users in your organization
+                    Admins and owners must set up 2FA before using the app (contractors are not blocked)
                   </p>
                 </div>
                 <Switch
@@ -314,7 +318,7 @@ export default function ProfileSettingsPage() {
         {/* What admins can see — owner only. Everything defaults off: contractor pay
             and margins are owner business unless the owner opts admins in. */}
         {isOwner && localSettings && (
-          <Card>
+          <Card data-tour="admin-visibility">
             <CardHeader>
               <CardTitle>What Admins Can See</CardTitle>
               <CardDescription>
