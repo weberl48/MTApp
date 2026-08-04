@@ -8,7 +8,6 @@ import { Header } from '@/components/layout/header'
 import { Toaster } from '@/components/ui/sonner'
 import { Loader2 } from 'lucide-react'
 import { OrganizationProvider, useOrganization } from '@/contexts/organization-context'
-import { BrandingProvider } from '@/components/providers/branding-provider'
 import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
@@ -73,8 +72,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <BrandingProvider>
-      <ActivityTracker>
+    <ActivityTracker>
         <WalkthroughProvider>
           <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
             <a
@@ -101,8 +99,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             <AiChatBubble />
           </div>
         </WalkthroughProvider>
-      </ActivityTracker>
-    </BrandingProvider>
+    </ActivityTracker>
   )
 }
 
