@@ -22,7 +22,7 @@ export function AiChatBubble() {
         <Button
           size="icon"
           aria-label="Ask the AI helper"
-          className="fixed bottom-32 right-6 lg:bottom-20 z-40 h-12 w-12 rounded-full shadow-lg hover:shadow-xl"
+          className="fixed bottom-32 right-6 lg:bottom-20 z-40 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
         >
           <Sparkles className="h-5 w-5" />
         </Button>

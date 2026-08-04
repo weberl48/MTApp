@@ -168,10 +168,10 @@ export function OwnerOnboardingGate() {
     <>
       {/* Floating "Learn More" button - only shown when wizard hasn't been completed */}
       {showButton && !dismissed && !open && (
-        <div className="fixed bottom-20 right-6 z-50 lg:bottom-6 flex items-center gap-2">
+        <div className="fixed bottom-20 right-6 z-50 lg:bottom-6 flex items-center gap-2 animate-in fade-in-0 slide-in-from-bottom-4 duration-[var(--motion-slow)] ease-out">
           <Button
             onClick={handleOpenWizard}
-            className="animate-bounce shadow-lg hover:shadow-xl transition-shadow rounded-full h-12 px-4 gap-2"
+            className="shadow-lg hover:shadow-xl transition-shadow rounded-full h-12 px-4 gap-2"
             aria-label="Open getting started guide"
           >
             <HelpCircle className="h-5 w-5" />

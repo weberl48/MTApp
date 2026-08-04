@@ -54,6 +54,12 @@ function isMobileViewport(): boolean {
   return window.matchMedia('(max-width: 1023px)').matches
 }
 
+/** Explicit 'smooth' beats the global reduced-motion CSS collapse (CSSOM View), so
+ *  scrollBy callers must resolve this instead of hardcoding 'smooth'. */
+function scrollBehavior(): ScrollBehavior {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
 /**
  * A step target is highlightable if it has layout and isn't parked off-canvas.
  * Elements outside the viewport still count — above/below can be scrolled back
@@ -128,7 +134,7 @@ function scrollElementIntoView(el: Element) {
     const elRect = el.getBoundingClientRect()
     // Scroll so the element is near the top of the scrollable area with some padding
     const scrollOffset = elRect.top - parentRect.top - 20
-    scrollParent.scrollBy({ top: scrollOffset, behavior: 'smooth' })
+    scrollParent.scrollBy({ top: scrollOffset, behavior: scrollBehavior() })
   }
 
   // Also handle horizontally scrollable containers (e.g. the invoices tab bar
@@ -149,7 +155,7 @@ function scrollElementIntoView(el: Element) {
     const parentRect = hScrollParent.getBoundingClientRect()
     const elRect = el.getBoundingClientRect()
     const scrollOffset = elRect.left - parentRect.left - 20
-    hScrollParent.scrollBy({ left: scrollOffset, behavior: 'smooth' })
+    hScrollParent.scrollBy({ left: scrollOffset, behavior: scrollBehavior() })
   }
 }
 
