@@ -308,7 +308,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               onChange={(e) => setFormData({ ...formData, contractor_cap: e.target.value })}
               placeholder="Leave empty for no cap"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Maximum contractor pay per session. Leave empty for no cap.
             </p>
           </div>
@@ -325,7 +325,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               onChange={(e) => setFormData({ ...formData, total_cap: e.target.value })}
               placeholder="Leave empty for no cap"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Maximum total billed amount per session. Leave empty for no cap.
             </p>
           </div>
@@ -343,7 +343,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               onChange={(e) => setFormData({ ...formData, rent_percentage: e.target.value })}
               placeholder="0"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Percentage of session that goes to rent (e.g., for Matt&apos;s Music location)
             </p>
           </div>
@@ -360,7 +360,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               onChange={(e) => setFormData({ ...formData, scholarship_rate: e.target.value })}
               placeholder="Leave empty to use normal rate"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Flat rate charged to scholarship clients. Contractor still gets normal pay; MCA absorbs the discount.
             </p>
           </div>
@@ -368,7 +368,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           {/* Contractor Pay by Duration (hidden for group services — use group matrix instead) */}
           {!(parseFloat(formData.per_person_rate) > 0) && <div className="space-y-2" data-tour="pay-schedule">
             <Label>Contractor Pay by Duration</Label>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Set the default contractor pay for each session duration. Leave empty to calculate automatically from MCA %.
             </p>
             <div className="border rounded-lg divide-y">
@@ -396,12 +396,12 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                   <div key={dur} className="flex items-center justify-between px-3 py-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium w-14">{dur} min</span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground">
                         auto: {formatCurrency(autoCalc.contractorPay)}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-sm text-gray-500">$</span>
+                      <span className="text-sm text-muted-foreground">$</span>
                       <Input
                         type="number"
                         step="0.50"
@@ -427,16 +427,16 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           {parseFloat(formData.per_person_rate) > 0 && (
             <div className="space-y-2" data-tour="group-pay-matrix">
               <Label>Group Contractor Pay by Headcount</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Set contractor pay based on group size and duration. The last row (6+) applies to groups of 6 or more. Leave empty to use the default pay schedule or formula.
               </p>
               <div className="border rounded-lg overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-gray-50 dark:bg-gray-800">
-                      <th className="px-2 py-1.5 text-left font-medium text-gray-600 dark:text-gray-400 w-16">Clients</th>
+                    <tr className="border-b bg-muted">
+                      <th className="px-2 py-1.5 text-left font-medium text-muted-foreground w-16">Clients</th>
                       {durationOptions.map((dur) => (
-                        <th key={dur} className="px-2 py-1.5 text-center font-medium text-gray-600 dark:text-gray-400">
+                        <th key={dur} className="px-2 py-1.5 text-center font-medium text-muted-foreground">
                           {dur}m
                         </th>
                       ))}
@@ -445,7 +445,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                   <tbody className="divide-y">
                     {GROUP_HEADCOUNTS.map((h) => (
                       <tr key={h}>
-                        <td className="px-2 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <td className="px-2 py-1.5 text-sm font-medium text-foreground">
                           {h === 6 ? '6+' : h}
                         </td>
                         {durationOptions.map((dur) => {
@@ -478,10 +478,10 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           )}
 
           {/* Scholarship Toggle */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <div>
               <Label htmlFor="is_scholarship">Scholarship Service</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Sessions are batch-invoiced monthly on the Scholarship tab instead of per-session
               </p>
             </div>
@@ -493,10 +493,10 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           </div>
 
           {/* Requires Client Toggle */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <div>
               <Label htmlFor="requires_client">Requires Client</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Turn off for admin work or tasks that don&apos;t need a client
               </p>
             </div>
@@ -511,7 +511,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="admin_only">Admin Only</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Hide this service from contractors when they log a session. Admins and owners always see it.
               </p>
             </div>
@@ -526,7 +526,7 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="requires_classroom">Requires Classroom</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Sessions of this service must record a classroom (e.g. in-school groups). It prints on the invoice.
               </p>
             </div>
@@ -540,13 +540,13 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
           {/* Contractor Restrictions */}
           <div className="space-y-2" data-tour="contractor-restrictions">
             <Label>Restrict to Contractors</Label>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Only selected contractors can use this service type. Leave all unchecked for no restriction.
             </p>
             {contractors.length > 0 ? (
               <div className="border rounded-lg divide-y max-h-48 overflow-y-auto">
                 {contractors.map((c) => (
-                  <label key={c.id} className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <label key={c.id} className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-muted">
                     <Checkbox
                       checked={formData.allowed_contractor_ids.includes(c.id)}
                       onCheckedChange={(checked) => {
@@ -563,20 +563,20 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-400">Loading contractors...</p>
+              <p className="text-xs text-muted-foreground">Loading contractors...</p>
             )}
             {formData.allowed_contractor_ids.length > 0 && (
-              <p className="text-xs text-blue-600 dark:text-blue-400">
+              <p className="text-xs text-info">
                 Restricted to {formData.allowed_contractor_ids.length} contractor{formData.allowed_contractor_ids.length !== 1 ? 's' : ''}
               </p>
             )}
           </div>
 
           {/* Active Toggle */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <div>
               <Label htmlFor="is_active">Active</Label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Inactive service types won&apos;t appear in session form
               </p>
             </div>
@@ -592,7 +592,10 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Loader2
+                aria-hidden="true"
+                className={`mr-2 h-4 w-4 animate-spin ${loading ? '' : 'invisible'}`}
+              />
               {isEditing ? 'Save Changes' : 'Create Service Type'}
             </Button>
           </DialogFooter>

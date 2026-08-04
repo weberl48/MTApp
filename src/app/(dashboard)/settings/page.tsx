@@ -67,7 +67,7 @@ export default function SettingsPage() {
   if (!organization || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -82,10 +82,10 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           {isOwner && <SquareStatusBadge />}
         </div>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-muted-foreground">
           {isOwner
             ? 'Manage your organization and configure the application'
             : isAdmin
@@ -97,11 +97,11 @@ export default function SettingsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visibleCards.map((card) => (
           <Link key={card.href} href={card.href}>
-            <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer h-full">
+            <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <card.icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <card.icon className="w-5 h-5 text-primary" />
                   </div>
                   <CardTitle className="text-base">{card.title}</CardTitle>
                 </div>

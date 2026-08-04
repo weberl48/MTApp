@@ -129,14 +129,14 @@ export default function BusinessSettingsPage() {
   if (!organization) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!isAdmin) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         You do not have permission to manage business settings.
       </div>
     )
@@ -152,10 +152,10 @@ export default function BusinessSettingsPage() {
         </Link>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Business Rules</h1>
+            <h1 className="text-2xl font-bold text-foreground">Business Rules</h1>
             <PageHelp article="pricing-deep-dive" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">Services, invoicing, sessions, notifications, and features</p>
+          <p className="text-muted-foreground">Services, invoicing, sessions, notifications, and features</p>
         </div>
       </div>
 
@@ -218,7 +218,7 @@ export default function BusinessSettingsPage() {
                     key={st.id}
                     data-tour="service-type-row"
                     className={`flex items-center justify-between p-4 rounded-lg border ${
-                      st.is_active ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800 opacity-60'
+                      st.is_active ? 'bg-card' : 'bg-muted opacity-60'
                     }`}
                   >
                     <div className="flex-1">
@@ -226,7 +226,7 @@ export default function BusinessSettingsPage() {
                         <p className="font-medium">{st.name}</p>
                         {!st.is_active && <Badge variant="secondary">Inactive</Badge>}
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-muted-foreground">
                         ${st.base_rate}
                         {st.per_person_rate > 0 && ` + $${st.per_person_rate}/person`}
                         {st.mca_percentage > 0 && ` | ${st.mca_percentage}% cut`}
@@ -239,14 +239,14 @@ export default function BusinessSettingsPage() {
                       <Button variant="ghost" size="icon" onClick={() => { setEditingServiceType(st); setIsServiceTypeFormOpen(true) }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteServiceType(st)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteServiceType(st)} className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 ))}
                 {serviceTypes.length === 0 && (
-                  <p className="text-center py-8 text-gray-500">
+                  <p className="text-center py-8 text-muted-foreground">
                     No service types configured. Add your first service type to get started.
                   </p>
                 )}
@@ -321,7 +321,7 @@ export default function BusinessSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Send Payment Reminders</Label>
-                    <p className="text-xs text-gray-500">Automatically send email reminders for unpaid invoices</p>
+                    <p className="text-xs text-muted-foreground">Automatically send email reminders for unpaid invoices</p>
                   </div>
                   <Switch
                     checked={localSettings.invoice.send_reminders}
@@ -353,15 +353,15 @@ export default function BusinessSettingsPage() {
                       }
                       placeholder="7, 1"
                     />
-                    <p className="text-xs text-gray-500">Comma-separated list of days before due date to send reminders</p>
+                    <p className="text-xs text-muted-foreground">Comma-separated list of days before due date to send reminders</p>
                   </div>
                 )}
                 <Separator />
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Square Processing Fee</h3>
+                <h3 className="text-sm font-medium text-foreground">Square Processing Fee</h3>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Add Processing Fee to Square Invoices</Label>
-                    <p className="text-xs text-gray-500">Automatically add a service charge to cover Square processing fees</p>
+                    <p className="text-xs text-muted-foreground">Automatically add a service charge to cover Square processing fees</p>
                   </div>
                   <Switch
                     checked={localSettings.pricing?.square_processing_fee_enabled ?? false}
@@ -440,7 +440,7 @@ export default function BusinessSettingsPage() {
                               })
                             }
                           />
-                          <p className="text-xs text-gray-500">e.g., 30 for $0.30 (Square standard is 2.9% + 30 cents)</p>
+                          <p className="text-xs text-muted-foreground">e.g., 30 for $0.30 (Square standard is 2.9% + 30 cents)</p>
                         </div>
                       </>
                     ) : (
@@ -462,14 +462,17 @@ export default function BusinessSettingsPage() {
                             })
                           }
                         />
-                        <p className="text-xs text-gray-500">Fixed dollar amount added as a service charge on each Square invoice</p>
+                        <p className="text-xs text-muted-foreground">Fixed dollar amount added as a service charge on each Square invoice</p>
                       </div>
                     )}
                   </div>
                 )}
 
                 <Button onClick={saveSettings} disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Loader2
+                    aria-hidden="true"
+                    className={`mr-2 h-4 w-4 animate-spin ${saving ? '' : 'invisible'}`}
+                  />
                   <Save className="mr-2 h-4 w-4" />
                   Save Invoice Settings
                 </Button>
@@ -519,13 +522,13 @@ export default function BusinessSettingsPage() {
                     }
                     placeholder="30, 45, 60, 90"
                   />
-                  <p className="text-xs text-gray-500">Comma-separated list of duration options</p>
+                  <p className="text-xs text-muted-foreground">Comma-separated list of duration options</p>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Require Session Notes</Label>
-                    <p className="text-xs text-gray-500">Contractors must add notes before submitting</p>
+                    <p className="text-xs text-muted-foreground">Contractors must add notes before submitting</p>
                   </div>
                   <Switch
                     checked={localSettings.session.require_notes}
@@ -537,7 +540,7 @@ export default function BusinessSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Auto-Submit Sessions</Label>
-                    <p className="text-xs text-gray-500">Sessions are submitted automatically</p>
+                    <p className="text-xs text-muted-foreground">Sessions are submitted automatically</p>
                   </div>
                   <Switch
                     checked={localSettings.session.auto_submit}
@@ -550,7 +553,7 @@ export default function BusinessSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Send Session Reminders</Label>
-                    <p className="text-xs text-gray-500">Email contractors before their sessions</p>
+                    <p className="text-xs text-muted-foreground">Email contractors before their sessions</p>
                   </div>
                   <Switch
                     checked={localSettings.session.send_reminders ?? true}
@@ -575,11 +578,11 @@ export default function BusinessSettingsPage() {
                         })
                       }
                     />
-                    <p className="text-xs text-gray-500">Reminders will be sent this many hours before the session</p>
+                    <p className="text-xs text-muted-foreground">Reminders will be sent this many hours before the session</p>
                   </div>
                 )}
                 <Separator />
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Pricing</h3>
+                <h3 className="text-sm font-medium text-foreground">Pricing</h3>
                 <div className="space-y-2">
                   <Label htmlFor="no_show_fee">No-Show Fee ($)</Label>
                   <Input
@@ -592,7 +595,7 @@ export default function BusinessSettingsPage() {
                       setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, no_show_fee: parseSettingNumber(e.target.value, 60) } })
                     }
                   />
-                  <p className="text-xs text-gray-500">Flat fee charged for no-show sessions</p>
+                  <p className="text-xs text-muted-foreground">Flat fee charged for no-show sessions</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="duration_base_minutes">Base Duration for Rate Scaling (minutes)</Label>
@@ -606,13 +609,13 @@ export default function BusinessSettingsPage() {
                       setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, duration_base_minutes: parseInt(e.target.value) || 30 } })
                     }
                   />
-                  <p className="text-xs text-gray-500">Service type base rates are for this many minutes</p>
+                  <p className="text-xs text-muted-foreground">Service type base rates are for this many minutes</p>
                 </div>
 
                 {feature('client_portal') && (
                   <>
                     <Separator />
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Client Portal</h3>
+                    <h3 className="text-sm font-medium text-foreground">Client Portal</h3>
                     <div className="space-y-2">
                       <Label htmlFor="token_expiry_days">Portal Link Expiry (days)</Label>
                       <Input
@@ -625,12 +628,15 @@ export default function BusinessSettingsPage() {
                           setLocalSettings({ ...localSettings, portal: { ...localSettings.portal, token_expiry_days: parseInt(e.target.value) || 90 } })
                         }
                       />
-                      <p className="text-xs text-gray-500">How many days before client portal access links expire</p>
+                      <p className="text-xs text-muted-foreground">How many days before client portal access links expire</p>
                     </div>
                   </>
                 )}
                 <Button onClick={saveSettings} disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Loader2
+                    aria-hidden="true"
+                    className={`mr-2 h-4 w-4 animate-spin ${saving ? '' : 'invisible'}`}
+                  />
                   <Save className="mr-2 h-4 w-4" />
                   Save Session Settings
                 </Button>
@@ -664,7 +670,7 @@ export default function BusinessSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Email on Session Submit</Label>
-                    <p className="text-xs text-gray-500">Send email when a contractor submits a session</p>
+                    <p className="text-xs text-muted-foreground">Send email when a contractor submits a session</p>
                   </div>
                   <Switch
                     checked={localSettings.notification.email_on_session_submit}
@@ -676,7 +682,7 @@ export default function BusinessSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Email on Invoice Paid</Label>
-                    <p className="text-xs text-gray-500">Send email when an invoice is marked as paid</p>
+                    <p className="text-xs text-muted-foreground">Send email when an invoice is marked as paid</p>
                   </div>
                   <Switch
                     checked={localSettings.notification.email_on_invoice_paid}
@@ -686,7 +692,10 @@ export default function BusinessSettingsPage() {
                   />
                 </div>
                 <Button onClick={saveSettings} disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Loader2
+                    aria-hidden="true"
+                    className={`mr-2 h-4 w-4 animate-spin ${saving ? '' : 'invisible'}`}
+                  />
                   <Save className="mr-2 h-4 w-4" />
                   Save Notification Settings
                 </Button>
@@ -711,7 +720,7 @@ export default function BusinessSettingsPage() {
                     <div key={key} className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>{def.label}</Label>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{def.description}</p>
+                        <p className="text-sm text-muted-foreground">{def.description}</p>
                       </div>
                       <Switch
                         checked={localSettings.features?.[key] ?? true}
@@ -727,7 +736,10 @@ export default function BusinessSettingsPage() {
                 )}
                 <Separator />
                 <Button onClick={saveSettings} disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Loader2
+                    aria-hidden="true"
+                    className={`mr-2 h-4 w-4 animate-spin ${saving ? '' : 'invisible'}`}
+                  />
                   <Save className="mr-2 h-4 w-4" />
                   Save Feature Settings
                 </Button>

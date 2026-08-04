@@ -48,14 +48,14 @@ export default function CustomizeSettingsPage() {
   if (!organization) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!isOwner) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         Only the practice owner can manage customization settings.
       </div>
     )
@@ -71,10 +71,10 @@ export default function CustomizeSettingsPage() {
         </Link>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customize & Automate</h1>
+            <h1 className="text-2xl font-bold text-foreground">Customize & Automate</h1>
             <PageHelp article="custom-lists" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">Custom labels, visibility, and workflow automation</p>
+          <p className="text-muted-foreground">Custom labels, visibility, and workflow automation</p>
         </div>
       </div>
 
@@ -93,9 +93,9 @@ export default function CustomizeSettingsPage() {
         {/* Custom Lists Tab */}
         <TabsContent value="lists">
           <div className="space-y-6 max-w-2xl">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Customize labels and toggle visibility for payment methods and billing methods.
-              Hidden options won&apos;t appear in forms. The internal key (shown in gray) stays the same.
+              Hidden options won&apos;t appear in forms. The system name (shown in gray) stays the same.
             </p>
 
             {localSettings && (
@@ -139,8 +139,11 @@ export default function CustomizeSettingsPage() {
                 </div>
 
                 <Button onClick={handleSave} disabled={saving} className="w-full">
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  <Save className="mr-2 h-4 w-4" />
+                  {saving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   Save Custom Lists
                 </Button>
               </>
@@ -162,7 +165,7 @@ export default function CustomizeSettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>Auto-Approve Sessions</Label>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Automatically approve sessions when contractors submit them
                         </p>
                       </div>
@@ -195,7 +198,7 @@ export default function CustomizeSettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>Auto-Send Invoice on Approval</Label>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Automatically send the invoice when a session is approved
                         </p>
                       </div>
@@ -244,7 +247,7 @@ export default function CustomizeSettingsPage() {
                           <option value="email">Email</option>
                           <option value="square">Square</option>
                         </select>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           Choose how invoices are automatically sent after approval
                         </p>
                       </div>
@@ -261,7 +264,7 @@ export default function CustomizeSettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>Auto-Generate Scholarship Invoices</Label>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Automatically generate batch invoices for scholarship clients each month
                         </p>
                       </div>
@@ -306,7 +309,7 @@ export default function CustomizeSettingsPage() {
                             })
                           }
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           Scholarship invoices will be generated on this day each month (1-28)
                         </p>
                       </div>
@@ -315,8 +318,11 @@ export default function CustomizeSettingsPage() {
                 </Card>
 
                 <Button onClick={handleSave} disabled={saving} className="w-full">
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  <Save className="mr-2 h-4 w-4" />
+                  {saving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   Save Automation Settings
                 </Button>
               </>

@@ -13,6 +13,7 @@ import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { MfaSetup } from '@/components/forms/mfa-setup'
 import { PageHelp } from '@/components/help/page-help'
 import { useOrganization } from '@/contexts/organization-context'
+import { roleLabels } from '@/lib/constants/display'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import type { OrganizationSettings } from '@/types/database'
@@ -22,18 +23,11 @@ import type { OrganizationSettings } from '@/types/database'
  * `settings.permissions` flag; `adminGrantsFromSettings()` maps it to the
  * permission it grants, so the wording here is the only thing to keep in sync.
  */
-// Single source for the Account card's role display — the text row and the
-// badge next to it must never derive the label independently (they used to:
-// the text was a 2-way ternary that silently fell back to "Contractor" for
-// any role it didn't recognize, e.g. "developer", while the badge printed
-// user.role verbatim — so the two visibly disagreed).
-const ROLE_DISPLAY_LABELS: Record<string, string> = {
-  developer: 'Developer',
-  owner: 'Owner',
-  admin: 'Administrator',
-  contractor: 'Contractor',
-}
-
+// The Account card's role text and badge both read from the central
+// `roleLabels` map (never derive the label independently) — they used to
+// disagree: the text was a 2-way ternary that silently fell back to
+// "Contractor" for any role it didn't recognize, e.g. "developer", while the
+// badge printed user.role verbatim.
 const ADMIN_VISIBILITY_SWITCHES: {
   key: keyof OrganizationSettings['permissions']
   label: string
@@ -126,7 +120,7 @@ export default function ProfileSettingsPage() {
   if (!organization || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -141,10 +135,10 @@ export default function ProfileSettingsPage() {
         </Link>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profile & Security</h1>
+            <h1 className="text-2xl font-bold text-foreground">Profile & Security</h1>
             <PageHelp article="profile-and-security" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">Your personal information and security settings</p>
+          <p className="text-muted-foreground">Your personal information and security settings</p>
         </div>
       </div>
 
@@ -173,11 +167,16 @@ export default function ProfileSettingsPage() {
                 placeholder="(555) 123-4567"
               />
             </div>
-            <Button onClick={saveProfile} disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Save Profile
-            </Button>
+            <div className="flex justify-end">
+              <Button onClick={saveProfile} disabled={saving}>
+                {saving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save Profile
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -191,26 +190,26 @@ export default function ProfileSettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Email</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Role</p>
-                <p className="text-sm text-gray-500">
-                  {ROLE_DISPLAY_LABELS[user.role] ?? user.role}
+                <p className="text-sm text-muted-foreground">
+                  {roleLabels[user.role] ?? user.role}
                 </p>
               </div>
               <Badge variant={user.role === 'owner' ? 'default' : user.role === 'admin' ? 'secondary' : 'outline'}>
-                {ROLE_DISPLAY_LABELS[user.role] ?? user.role}
+                {roleLabels[user.role] ?? user.role}
               </Badge>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Organization</p>
-                <p className="text-sm text-gray-500">{organization.name}</p>
+                <p className="text-sm text-muted-foreground">{organization.name}</p>
               </div>
             </div>
           </CardContent>
@@ -247,7 +246,7 @@ export default function ProfileSettingsPage() {
                     })
                   }
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Users will be logged out after this many minutes of inactivity
                 </p>
               </div>
@@ -255,7 +254,7 @@ export default function ProfileSettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Require Two-Factor Authentication</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Admins and owners must set up 2FA before using the app (contractors are not blocked)
                   </p>
                 </div>
@@ -315,14 +314,16 @@ export default function ProfileSettingsPage() {
                 />
               </div>
 
-              <Button onClick={saveSecuritySettings} disabled={saving}>
-                {saving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Save Security Settings
-              </Button>
+              <div className="flex justify-end">
+                <Button onClick={saveSecuritySettings} disabled={saving}>
+                  {saving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save Security Settings
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -346,7 +347,7 @@ export default function ProfileSettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5 pr-4">
                       <Label>{label}</Label>
-                      <p className="text-sm text-gray-500">{description}</p>
+                      <p className="text-sm text-muted-foreground">{description}</p>
                     </div>
                     <Switch
                       aria-label={label}
@@ -365,14 +366,16 @@ export default function ProfileSettingsPage() {
                 </div>
               ))}
 
-              <Button onClick={saveAdminVisibility} disabled={saving}>
-                {saving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Save Admin Visibility
-              </Button>
+              <div className="flex justify-end">
+                <Button onClick={saveAdminVisibility} disabled={saving}>
+                  {saving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save Admin Visibility
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}

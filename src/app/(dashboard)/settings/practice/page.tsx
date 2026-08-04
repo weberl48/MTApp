@@ -123,14 +123,14 @@ export default function PracticeSettingsPage() {
   if (!organization || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!isOwner) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         Only the practice owner can manage these settings.
       </div>
     )
@@ -146,10 +146,10 @@ export default function PracticeSettingsPage() {
         </Link>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Practice & Branding</h1>
+            <h1 className="text-2xl font-bold text-foreground">Practice & Branding</h1>
             <PageHelp article="practice-branding" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">Organization info, logo, colors, and social media</p>
+          <p className="text-muted-foreground">Organization info, logo, colors, and social media</p>
         </div>
       </div>
 
@@ -183,11 +183,16 @@ export default function PracticeSettingsPage() {
               <Label htmlFor="org_website">Website</Label>
               <Input id="org_website" value={orgWebsite} onChange={(e) => setOrgWebsite(e.target.value)} placeholder="https://" />
             </div>
-            <Button onClick={saveOrgInfo} disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Save Organization Info
-            </Button>
+            <div className="flex justify-end">
+              <Button onClick={saveOrgInfo} disabled={saving}>
+                {saving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save Organization Info
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -244,10 +249,13 @@ export default function PracticeSettingsPage() {
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>{tagline || 'Your tagline here'}</p>
                 </div>
                 <div className="bg-white px-4 py-3">
+                  {/* Client-facing mockup (Portal Firewall): the white email canvas is
+                      deliberately theme-independent, so its placeholder bars use
+                      opacity-on-white neutrals rather than dashboard theme tokens. */}
                   <div className="space-y-1.5">
-                    <div className="h-2 w-3/4 rounded bg-gray-200" />
-                    <div className="h-2 w-full rounded bg-gray-100" />
-                    <div className="h-2 w-5/6 rounded bg-gray-100" />
+                    <div className="h-2 w-3/4 rounded bg-black/10" />
+                    <div className="h-2 w-full rounded bg-black/10" />
+                    <div className="h-2 w-5/6 rounded bg-black/5" />
                   </div>
                   <div className="mt-3">
                     <div className="inline-block rounded px-3 py-1.5 text-xs font-medium text-white" style={{ backgroundColor: primaryColor }}>
@@ -335,7 +343,7 @@ export default function PracticeSettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="tax_id">Tax ID / EIN</Label>
               <Input id="tax_id" value={taxId} onChange={(e) => setTaxId(e.target.value)} placeholder="XX-XXXXXXX" />
-              <p className="text-xs text-gray-500">Optional. Shown on invoices if provided.</p>
+              <p className="text-xs text-muted-foreground">Optional. Shown on invoices if provided.</p>
             </div>
           </CardContent>
         </Card>
@@ -424,8 +432,11 @@ export default function PracticeSettingsPage() {
 
         {/* Save Button */}
         <Button onClick={saveBranding} disabled={saving} className="w-full">
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          <Save className="mr-2 h-4 w-4" />
+          {saving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           Save Branding Settings
         </Button>
       </div>

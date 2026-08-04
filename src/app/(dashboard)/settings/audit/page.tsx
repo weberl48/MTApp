@@ -15,14 +15,14 @@ export default function AuditLogPage() {
   if (!organization) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!isOwner) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         You do not have permission to view the audit log.
       </div>
     )
@@ -38,10 +38,10 @@ export default function AuditLogPage() {
         </Link>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Log</h1>
+            <h1 className="text-2xl font-bold text-foreground">Audit Log</h1>
             <PageHelp article="audit-log" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">Track all changes for compliance</p>
+          <p className="text-muted-foreground">Track all changes for compliance</p>
         </div>
       </div>
 

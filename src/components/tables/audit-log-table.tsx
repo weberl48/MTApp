@@ -79,9 +79,9 @@ const ACTION_ICONS = {
 }
 
 const ACTION_COLORS = {
-  INSERT: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  UPDATE: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  INSERT: 'bg-success-soft text-success-soft-foreground',
+  UPDATE: 'bg-info-soft text-info-soft-foreground',
+  DELETE: 'bg-destructive-soft text-destructive-soft-foreground',
 }
 
 export function AuditLogTable() {
@@ -172,7 +172,7 @@ export function AuditLogTable() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by email or record ID..."
             aria-label="Search audit log"
@@ -211,10 +211,10 @@ export function AuditLogTable() {
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : logs.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           No audit logs found
         </div>
       ) : (
@@ -235,7 +235,7 @@ export function AuditLogTable() {
                 const ActionIcon = ACTION_ICONS[log.action]
                 return (
                   <TableRow key={log.id}>
-                    <TableCell className="text-sm text-gray-500">
+                    <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(log.created_at), 'MMM d, h:mm a')}
                     </TableCell>
                     <TableCell>
@@ -273,7 +273,7 @@ export function AuditLogTable() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Showing {page * pageSize + 1} to {Math.min((page + 1) * pageSize, totalCount)} of {totalCount} entries
           </p>
           <div className="flex items-center gap-2">
@@ -319,22 +319,22 @@ export function AuditLogTable() {
               {/* Meta info */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500">Timestamp</p>
+                  <p className="text-muted-foreground">Timestamp</p>
                   <p className="font-medium">
                     {format(new Date(selectedLog.created_at), 'MMM d, yyyy h:mm:ss a')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500">User</p>
+                  <p className="text-muted-foreground">User</p>
                   <p className="font-medium">{selectedLog.user_email || 'System'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Record ID</p>
+                  <p className="text-muted-foreground">Record ID</p>
                   <p className="font-mono text-xs">{selectedLog.record_id}</p>
                 </div>
                 {selectedLog.ip_address && (
                   <div>
-                    <p className="text-gray-500">IP Address</p>
+                    <p className="text-muted-foreground">IP Address</p>
                     <p className="font-mono text-xs">{selectedLog.ip_address}</p>
                   </div>
                 )}
@@ -343,7 +343,7 @@ export function AuditLogTable() {
               {/* Changed fields for updates */}
               {selectedLog.action === 'UPDATE' && selectedLog.changed_fields && selectedLog.changed_fields.length > 0 && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">Changed Fields</p>
+                  <p className="text-sm text-muted-foreground mb-2">Changed Fields</p>
                   <div className="flex flex-wrap gap-2">
                     {selectedLog.changed_fields.map((field) => (
                       <Badge key={field} variant="secondary">{field}</Badge>
@@ -359,17 +359,17 @@ export function AuditLogTable() {
                   <div className="border rounded-lg divide-y">
                     {selectedLog.changed_fields.map((field) => (
                       <div key={field} className="grid grid-cols-3 text-sm">
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800 font-medium">
+                        <div className="p-3 bg-muted font-medium">
                           {field}
                         </div>
-                        <div className="p-3 bg-red-50 dark:bg-red-900/20">
-                          <p className="text-xs text-gray-500 mb-1">Before</p>
+                        <div className="p-3 bg-destructive-soft">
+                          <p className="text-xs text-destructive-soft-foreground mb-1">Before</p>
                           <pre className="whitespace-pre-wrap text-xs">
                             {formatValue(selectedLog.old_data?.[field])}
                           </pre>
                         </div>
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20">
-                          <p className="text-xs text-gray-500 mb-1">After</p>
+                        <div className="p-3 bg-success-soft">
+                          <p className="text-xs text-success-soft-foreground mb-1">After</p>
                           <pre className="whitespace-pre-wrap text-xs">
                             {formatValue(selectedLog.new_data?.[field])}
                           </pre>
@@ -384,7 +384,7 @@ export function AuditLogTable() {
               {selectedLog.action === 'INSERT' && selectedLog.new_data && (
                 <div>
                   <p className="text-sm font-medium mb-2">Created Record</p>
-                  <pre className="text-xs bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto">
+                  <pre className="text-xs bg-muted p-4 rounded-lg overflow-x-auto">
                     {JSON.stringify(selectedLog.new_data, null, 2)}
                   </pre>
                 </div>
@@ -393,7 +393,7 @@ export function AuditLogTable() {
               {selectedLog.action === 'DELETE' && selectedLog.old_data && (
                 <div>
                   <p className="text-sm font-medium mb-2">Deleted Record</p>
-                  <pre className="text-xs bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto">
+                  <pre className="text-xs bg-muted p-4 rounded-lg overflow-x-auto">
                     {JSON.stringify(selectedLog.old_data, null, 2)}
                   </pre>
                 </div>
