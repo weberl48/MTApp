@@ -101,25 +101,40 @@ Open the **View As** menu again and choose **Owner (actual)** at the top (develo
   },
   {
     slug: 'appearance-and-dark-mode',
-    title: 'Appearance & Dark Mode',
+    title: 'Appearance: Themes & Dark Mode',
     category: 'getting-started',
-    description: 'How to switch between light mode, dark mode, and system theme.',
+    description: 'How to pick a color theme and switch between light mode, dark mode, and system.',
     relatedArticles: ['getting-started'],
-    keywords: ['theme', 'light mode', 'dark mode', 'system theme'],
+    keywords: ['theme', 'light mode', 'dark mode', 'system theme', 'appearance', 'colors', 'personalize'],
     content: `
-## Appearance & Dark Mode
+## Appearance: Themes & Dark Mode
 
-MCA Manager supports light and dark color themes so you can work comfortably in any lighting.
+MCA Manager lets you personalize how the app looks. Click the **palette icon** in the top-right corner of the header (next to your avatar) to open the Appearance menu. It has two sections: **Mode** and **Theme**.
 
-### How to Switch Themes
+### Mode: Light, Dark, or System
 
-Click the **sun or moon icon** in the top-right corner of the header (next to your avatar). A dropdown menu appears with three options:
+- **Light** - Always use the light mode.
+- **Dark** - Always use the dark mode.
+- **System** - Automatically match your device's setting. If your phone or computer switches to dark mode at night, MCA Manager follows along.
 
-- **Light** - Always use the light theme.
-- **Dark** - Always use the dark theme.
-- **System** - Automatically match your device's theme setting. If your phone or computer switches to dark mode at night, MCA Manager follows along.
+### Theme: Pick Your Look
 
-The active theme is labeled "Active" in the dropdown. Your preference is saved and persists across sessions.
+Themes change the app's colors, fonts, and overall feel. Every theme works in both light and dark mode, so you can combine any theme with any mode. Choose from:
+
+- **Classic** - The original neutral look (the default).
+- **Ocean** - Calm teal-blue, soft and rounded.
+- **Forest** - Sage and moss greens, easy on the eyes.
+- **Lavender** - Gentle violet, extra round and airy.
+- **Sunset** - Warm terracotta with elegant serif headings.
+- **Slate** - Dark sidebar with an indigo accent, compact and sharp.
+- **Blossom** - Soft rose, warm and nurturing.
+- **Sonata** - Sheet-music inspired: paper, ink, and classical type.
+
+### Good to Know
+
+- Your theme is a **personal preference** - it only changes what you see, not what your teammates see.
+- It's saved in your browser, so each device remembers its own choice.
+- Clients always see your practice's branding in the client portal and on invoices, no matter which theme you pick.
     `,
   },
   {
