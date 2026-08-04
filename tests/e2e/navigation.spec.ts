@@ -96,13 +96,14 @@ test.describe('Clients Page', () => {
   test('can add new client', async ({ page }) => {
     await page.goto('/clients')
 
-    // Look for add client button
-    const addButton = page.getByRole('button', { name: /add|new|create/i })
-    if (await addButton.isVisible()) {
-      await addButton.click()
-      // Should show a dialog or navigate to form
-      await expect(page.getByText(/client|name/i)).toBeVisible()
-    }
+    // This spec used to pass vacuously: isVisible() doesn't auto-wait, so on a
+    // still-loading page the if-branch skipped the whole body — and its broad
+    // getByText(/client|name/i) assertion was a guaranteed strict-mode
+    // violation whenever the branch DID run. Assert the real flow instead.
+    const addButton = page.getByRole('button', { name: /add client/i })
+    await expect(addButton).toBeVisible({ timeout: 10000 })
+    await addButton.click()
+    await expect(page.getByRole('heading', { name: /add new client/i })).toBeVisible()
   })
 })
 

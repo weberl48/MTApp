@@ -70,15 +70,18 @@ test.describe('Session Creation', () => {
     // clicking during that redirect raced the async service-type fetch below.
     await page.goto('/sessions/new/')
 
-    // Wait for the form to actually finish loading its service types before
-    // opening the select; otherwise the dropdown opens empty and the click on
-    // the first option times out.
+    // The trigger renders before its options finish loading (visibility is not
+    // data-readiness), so a single early click opens an empty listbox and the
+    // option wait times out under parallel-worker load. Retry the open until
+    // options actually exist; Escape first so a stale empty listbox closes.
     const trigger = page.locator('[data-tour="session-form-service-type"] button[role="combobox"]')
     await trigger.waitFor({ state: 'visible', timeout: 10000 })
-    await trigger.click()
-    const firstOption = page.getByRole('option').first()
-    await firstOption.waitFor({ state: 'visible', timeout: 10000 })
-    await firstOption.click()
+    await expect(async () => {
+      await page.keyboard.press('Escape')
+      await trigger.click()
+      await expect(page.getByRole('option').first()).toBeVisible({ timeout: 1500 })
+    }).toPass({ timeout: 20000 })
+    await page.getByRole('option').first().click()
 
     // Pricing hint appears once a service type is selected (nothing renders before that)
     await expect(page.getByText(/rate: \$/i).first()).toBeVisible({ timeout: 10000 })
