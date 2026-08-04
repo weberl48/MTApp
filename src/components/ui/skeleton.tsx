@@ -29,7 +29,7 @@ export function SkeletonCard() {
 
 export function SkeletonListItem() {
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+    <div className="flex items-center justify-between p-4 bg-skeleton rounded-lg">
       <div className="flex-1 space-y-2">
         <div className="flex items-center gap-3">
           <Skeleton className="h-5 w-32" />

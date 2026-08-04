@@ -45,21 +45,21 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <div
         role="status"
         aria-live="polite"
-        className="flex flex-col items-center justify-center gap-3 min-h-screen bg-gray-50 dark:bg-gray-950"
+        className="flex flex-col items-center justify-center gap-3 min-h-screen bg-(--canvas)"
       >
-        <Loader2 aria-hidden="true" className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="text-sm text-gray-600 dark:text-gray-400">Loading your workspace…</p>
+        <Loader2 aria-hidden="true" className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your workspace…</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
-        <p className="text-red-600 mb-4">{error}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-(--canvas)">
+        <p className="text-destructive mb-4">{error}</p>
         <button
           onClick={() => router.push('/login/')}
-          className="text-blue-600 hover:underline"
+          className="text-primary hover:underline"
         >
           Return to login
         </button>
@@ -77,7 +77,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col h-screen bg-(--canvas)">
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
             >
               Skip to main content
             </a>

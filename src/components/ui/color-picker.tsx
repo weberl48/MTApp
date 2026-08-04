@@ -75,7 +75,7 @@ export function ColorPicker({
             className="flex items-center gap-2 w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <div
-              className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+              className="w-6 h-6 rounded border border-border"
               style={{ backgroundColor: localValue }}
             />
             <span className="text-muted-foreground font-mono">{localValue}</span>
@@ -96,7 +96,7 @@ export function ColorPicker({
                       'w-7 h-7 rounded border-2 transition-all hover:scale-110',
                       localValue === color
                         ? 'border-primary ring-2 ring-primary/30'
-                        : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                        : 'border-transparent hover:border-border'
                     )}
                     style={{ backgroundColor: color }}
                     aria-label={`Select ${color}`}
