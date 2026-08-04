@@ -30,6 +30,7 @@ The shell is healthy; the drift is systemic and fixable at the token/primitive l
 | p0-tab-strips-clip | Settings/business + payments tab rows clip on mobile with no scroll affordance | both pages' tab strips | Fade/scroll cue or wrap triggers | adapt |
 | p0-a11y-names | ≥6 search inputs placeholder-only (sessions:404, help:198, clients-table:100, client-multi-select:73, audit-log-table:177, contractor-payments-table:233); header Client Portal trigger (:322) + avatar menu (:356) unnamed on mobile; mobile nav drawer has Escape but no dialog role/focus trap (sidebar.tsx:63-71, 226-239) | see refs | `aria-label`s; dialog semantics + focus trap (or Radix Sheet) | harden |
 | p0-walkthrough-reduced-motion | Explicit `behavior:'smooth'` beats the global reduced-motion collapse — tours still glide for users who opted out | `walkthrough-provider.tsx:131,152` | Motion plan 006 (matchMedia branch) | — |
+| p0-session-form-silent-empty | Found 2026-08-04 via e2e: `sessions/new/page.tsx` (and the edit page) discard the server-side reference-data fetch errors (`{ data }` + `\|\| []`), so a failed/empty service-types query renders a permanently unusable empty select with no error surface — same swallowed-error family as p0-invoices-error-state | `sessions/new/page.tsx:17`, edit equivalent | Capture query errors → shared ErrorState; inline note in the form when the list is genuinely empty | harden |
 
 ## P1 — Consistency & system integrity
 
@@ -100,6 +101,7 @@ No font or palette swaps (the 8-theme token system IS the identity) · no nested
 
 ## Deferred / investigate separately
 
+- **Dropdown stays open behind confirm dialogs** (found 2026-08-04 during the session-detail distill): the `onSelect`+`preventDefault` pattern shared by `invoice-actions.tsx`, `team-member-actions.tsx`, and now `sessions/[id]/page.tsx` leaves the menu open (inert, behind the scrim) until a second dismissal. Pre-existing; fix once across all three when touched.
 - **First-visit WalkthroughNudge toast covers the FAB corner** (found during p0-fab-occlusion, 2026-08-04): the one-shot "New here?" sonner toast renders bottom-right above the quick-log FAB (z-40) until dismissed or its 15s timeout. Any toast shares that corner — a fix is a toast-positioning decision, not a FAB fix. Consider alongside p2-toast-promise.
 - **Contractor `/invoices/` local fetch bug** (CORS/ERR_FAILED against local Supabase, this role+route only) — investigate as a bug, not polish; the error-state work above is correct regardless.
 - `sessions-full-table-fetch` — add `.range()` when the dataset grows (P3, performance).

@@ -133,8 +133,11 @@ test.describe('P0 regression: draft submitted later still gets an invoice', () =
     await draftRow.click()
     await page.waitForURL(`**/sessions/${sessionId}/`, { timeout: 10000 })
 
-    // Edit → switch to Submit for approval → save
-    await page.getByRole('link', { name: /edit/i }).or(page.getByRole('button', { name: /edit/i })).first().click()
+    // Edit → switch to Submit for approval → save. Edit lives in the "More
+    // actions" menu since the 2026-08-04 session-detail distill (the old
+    // six-button header wall was reduced to Approve/Request Revision + menu).
+    await page.getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: /edit/i }).click()
     await page.waitForSelector('[data-tour="session-form-service-type"]', { timeout: 10000 })
     await setSessionStatus(page, 'submitted')
     await page.locator('[data-tour="session-form-submit"]').click()

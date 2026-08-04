@@ -8,6 +8,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { decryptField } from '@/lib/crypto'
 import { can } from '@/lib/auth/permissions'
 import type { UserRole } from '@/types/database'
+import { ErrorState } from '@/components/ui/error-state'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface EditSessionPageProps {
   params: Promise<{ id: string }>
@@ -72,10 +74,47 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
   }
 
   // Fetch service types and clients for the form
-  const [{ data: serviceTypes }, { data: clients }] = await Promise.all([
+  const [
+    { data: serviceTypes, error: serviceTypesError },
+    { data: clients, error: clientsError },
+  ] = await Promise.all([
     supabase.from('service_types').select('*').order('name'),
     supabase.from('clients').select('id, name, payment_method, requires_location').order('name'),
   ])
+
+  if (serviceTypesError || clientsError) {
+    return (
+      <div>
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-2">
+            <Link href={`/sessions/${id}/`}>
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <h1 className="text-2xl font-bold text-foreground">Edit Session</h1>
+          </div>
+          <p className="text-muted-foreground ml-12">
+            Update session details. Changes take effect when you save.
+          </p>
+        </div>
+
+        <Card className="max-w-2xl">
+          <CardContent className="space-y-4">
+            <ErrorState
+              title="Couldn't load the session form"
+              description="Check your connection and try again. Your data is safe."
+            />
+            <div className="flex justify-center">
+              <Link href="/sessions/">
+                <Button variant="outline">Back to Sessions</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   // Decrypt PHI fields
   const decryptedNotes = session.notes ? await decryptField(session.notes) : null
@@ -98,7 +137,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-2">
           <Link href={`/sessions/${id}/`}>
@@ -106,18 +145,19 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Session</h1>
+          <h1 className="text-2xl font-bold text-foreground">Edit Session</h1>
         </div>
-        <p className="text-gray-500 dark:text-gray-400 ml-12">
-          Update session details. Changes will be saved immediately.
+        <p className="text-muted-foreground ml-12">
+          Update session details. Changes take effect when you save.
         </p>
       </div>
 
+      <div className="max-w-2xl">
       {session.rejection_reason && (
-        <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/30">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800 dark:text-amber-200">Revision Requested</AlertTitle>
-          <AlertDescription className="text-amber-700 dark:text-amber-300">
+        <Alert className="mb-6 border-warning/30 bg-warning-soft">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          <AlertTitle className="text-warning-soft-foreground">Revision Requested</AlertTitle>
+          <AlertDescription className="text-warning-soft-foreground">
             {session.rejection_reason}
           </AlertDescription>
         </Alert>
@@ -129,6 +169,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
         contractorId={session.contractor_id}
         existingSession={existingSession}
       />
+      </div>
     </div>
   )
 }

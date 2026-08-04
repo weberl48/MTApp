@@ -699,15 +699,15 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
   // Show success state with options after submission
   if (showSuccess) {
     return (
-      <Card className="border-green-200 dark:border-green-800">
+      <Card className="border-success/30">
         <CardContent className="pt-8 pb-8">
           <div className="text-center space-y-6">
-            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+            <div className="mx-auto w-16 h-16 bg-success-soft rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-success" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Session Logged!</h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-2">
+              <h2 className="text-2xl font-bold text-foreground">Session Logged!</h2>
+              <p className="text-muted-foreground mt-2">
                 {wasScholarshipRef.current
                   ? 'This scholarship session will appear on the Invoices \u203A Scholarship tab for monthly batch invoicing.'
                   : 'Your session has been saved and submitted for approval.'}
@@ -751,16 +751,16 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             <button
               type="button"
               onClick={() => setSetupExpanded(true)}
-              className="w-full text-left p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 lg:hidden"
+              className="w-full text-left p-3 bg-muted rounded-lg border border-border lg:hidden"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 space-y-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {date === todayLocal() ? 'Today' : parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     {', '}{new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                     {' \u00B7 '}{duration} min
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                  <p className="text-sm text-muted-foreground truncate">
                     {selectedServiceType?.name || 'Unknown Service'}
                     {' \u00B7 '}
                     {isGroupService
@@ -768,12 +768,12 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                       : selectedClients.map(id => getClientName(id)).join(', ')}
                   </p>
                   {pricing && (
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                    <p className="text-sm font-medium text-foreground">
                       Your Earnings: {formatCurrency(pricing.contractorPay)}
                     </p>
                   )}
                 </div>
-                <Pencil className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                <Pencil className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               </div>
             </button>
           )}
@@ -786,7 +786,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <Label htmlFor="date" className="flex items-center gap-2">
                 Date *
                 {date === todayLocal() && (
-                  <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
+                  <span className="text-xs font-normal text-info">Today</span>
                 )}
               </Label>
               <Input
@@ -811,6 +811,8 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </div>
           </div>
 
+          {/* Duration + Service Type share a row on desktop; stack on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Duration */}
           <div data-tour="session-form-duration" className="space-y-2">
             <Label htmlFor="duration">Duration (minutes) *</Label>
@@ -831,51 +833,59 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           {/* Service Type */}
           <div data-tour="session-form-service-type" className="space-y-2">
             <Label htmlFor="serviceType">Service Type *</Label>
-            <Select
-              value={serviceTypeId}
-              onValueChange={(val) => {
-                setServiceTypeId(val)
-                clearFieldError('serviceType')
-                // Clear client selection when switching to a group service
-                const st = serviceTypes.find((s) => s.id === val)
-                if (st && st.per_person_rate > 0) {
-                  setSelectedClients([])
-                }
-              }}
-            >
-              <SelectTrigger
-                id="serviceType"
-                className={errors.serviceType ? 'border-red-500' : ''}
-                aria-invalid={!!errors.serviceType}
-                aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
+            {visibleServiceTypes.length > 0 ? (
+              <Select
+                value={serviceTypeId}
+                onValueChange={(val) => {
+                  setServiceTypeId(val)
+                  clearFieldError('serviceType')
+                  // Clear client selection when switching to a group service
+                  const st = serviceTypes.find((s) => s.id === val)
+                  if (st && st.per_person_rate > 0) {
+                    setSelectedClients([])
+                  }
+                }}
               >
-                <SelectValue placeholder="Select service type" />
-              </SelectTrigger>
-              <SelectContent>
-                {visibleServiceTypes.map((st) => (
-                  <SelectItem key={st.id} value={st.id}>
-                    {st.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  id="serviceType"
+                  aria-invalid={!!errors.serviceType}
+                  aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
+                >
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {visibleServiceTypes.map((st) => (
+                    <SelectItem key={st.id} value={st.id}>
+                      {st.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {can('session:view-all')
+                  ? <>No service types are set up yet — add them in Settings &gt; Business Rules.</>
+                  : 'No service types are available yet. Contact your admin to get set up.'}
+              </p>
+            )}
             {errors.serviceType && (
-              <p id="serviceType-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <p id="serviceType-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.serviceType}
               </p>
             )}
             {missingCustomRate && !errors.serviceType && (
-              <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <p className="text-sm text-warning flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 No custom rate set for this service type. Set one in Team &gt; Rates.
               </p>
             )}
             {selectedServiceType && showFinancialDetails && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Rate: {getPricingDescription(selectedServiceType)}
               </p>
             )}
+          </div>
           </div>
 
           {/* Clients - Only for individual (non-group) sessions that require a client */}
@@ -893,7 +903,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   <button
                     type="button"
                     onClick={() => removeClient(clientId)}
-                    className="ml-0.5 -my-1 -mr-2 flex items-center justify-center rounded-full p-1.5 hover:bg-red-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    className="ml-0.5 -my-1 -mr-2 flex items-center justify-center rounded-full p-1.5 hover:bg-destructive-soft hover:text-destructive-soft-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     aria-label={`Remove ${getClientName(clientId)}`}
                   >
                     <X aria-hidden="true" className="w-3.5 h-3.5" />
@@ -912,13 +922,13 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               />
             )}
             {errors.clients && (
-              <p id="clients-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <p id="clients-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.clients}
               </p>
             )}
             {clients.length === 0 && (
-              <p className="text-sm text-amber-600 dark:text-amber-400">
+              <p className="text-sm text-warning">
                 No clients found. Please add clients first.
               </p>
             )}
@@ -932,7 +942,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               <Select value={selectedAdminUserId} onValueChange={setSelectedAdminUserId}>
                 <SelectTrigger
                   id="adminUser"
-                  className={errors.adminUser ? 'border-red-500' : ''}
                   aria-invalid={!!errors.adminUser}
                   aria-describedby={errors.adminUser ? 'adminUser-error' : undefined}
                 >
@@ -947,7 +956,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 </SelectContent>
               </Select>
               {errors.adminUser && (
-                <p id="adminUser-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p id="adminUser-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                   <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.adminUser}
                 </p>
@@ -957,9 +966,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Scholarship info banner */}
           {selectedPaymentMethod === 'scholarship' && (
-            <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
-              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <AlertDescription className="text-blue-700 dark:text-blue-300">
+            <Alert className="border-info/30 bg-info-soft">
+              <Info className="h-4 w-4 text-info" />
+              <AlertDescription className="text-info-soft-foreground">
                 Scholarship sessions are invoiced monthly in batch — no per-session invoice will be created.
               </AlertDescription>
             </Alert>
@@ -980,12 +989,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                   if (e.target.value) clearFieldError('groupHeadcount')
                 }}
                 placeholder="Enter headcount"
-                className={errors.groupHeadcount ? 'border-red-500' : ''}
                 aria-invalid={!!errors.groupHeadcount}
                 aria-describedby={errors.groupHeadcount ? 'groupHeadcount-error' : undefined}
               />
               {errors.groupHeadcount && (
-                <p id="groupHeadcount-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p id="groupHeadcount-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                   <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.groupHeadcount}
                 </p>
@@ -1006,7 +1014,6 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
               >
                 <SelectTrigger
                   id="groupBillingClient"
-                  className={errors.groupBillingClient ? 'border-red-500' : ''}
                   aria-invalid={!!errors.groupBillingClient}
                   aria-describedby={errors.groupBillingClient ? 'groupBillingClient-error' : undefined}
                 >
@@ -1021,7 +1028,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 </SelectContent>
               </Select>
               {errors.groupBillingClient && (
-                <p id="groupBillingClient-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p id="groupBillingClient-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                   <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.groupBillingClient}
                 </p>
@@ -1040,7 +1047,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 onChange={(e) => setGroupMemberNames(e.target.value)}
                 rows={2}
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 These names will appear on Square invoices
               </p>
             </div>
@@ -1056,12 +1063,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 value={classroom}
                 onChange={(e) => { setClassroom(e.target.value); clearFieldError('classroom') }}
                 placeholder={`Enter ${locationField.label.toLowerCase()}`}
-                className={errors.classroom ? 'border-red-500' : ''}
                 aria-invalid={!!errors.classroom}
                 aria-describedby={errors.classroom ? 'classroom-error' : undefined}
               />
               {errors.classroom && (
-                <p id="classroom-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p id="classroom-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                   <AlertCircle aria-hidden="true" className="w-4 h-4" />
                   {errors.classroom}
                 </p>
@@ -1071,31 +1077,31 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Pricing Preview */}
           {pricing && showFinancialDetails && (
-            <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <Card className="bg-info-soft border-info/20 animate-in fade-in-0 slide-in-from-top-1 duration-[var(--motion-base)] ease-out">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-900 dark:text-blue-100">Pricing Breakdown</span>
+                  <Calculator className="w-4 h-4 text-info" />
+                  <span className="font-medium text-foreground">Pricing Breakdown</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
+                  <span className="text-muted-foreground">Total Amount:</span>
                   <span className="font-medium">{formatCurrency(pricing.totalAmount)}</span>
 
-                  <span className="text-gray-600 dark:text-gray-400">Per Person:</span>
+                  <span className="text-muted-foreground">Per Person:</span>
                   <span className="font-medium">{formatCurrency(pricing.perPersonCost)}</span>
 
-                  <span className="text-gray-600 dark:text-gray-400">MCA Cut:</span>
+                  <span className="text-muted-foreground">MCA Cut:</span>
                   <span className="font-medium">{formatCurrency(pricing.mcaCut)}</span>
 
                   {pricing.rentAmount > 0 && (
                     <>
-                      <span className="text-gray-600 dark:text-gray-400">Rent:</span>
+                      <span className="text-muted-foreground">Rent:</span>
                       <span className="font-medium">{formatCurrency(pricing.rentAmount)}</span>
                     </>
                   )}
 
-                  <span className="text-gray-600 dark:text-gray-400">Contractor Pay:</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">
+                  <span className="text-muted-foreground">Contractor Pay:</span>
+                  <span className="font-medium">
                     {formatCurrency(pricing.contractorPay)}
                   </span>
                 </div>
@@ -1103,9 +1109,9 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
             </Card>
           )}
           {pricing && !showFinancialDetails && (
-            <div className="flex items-center justify-between py-2 px-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Your Earnings</span>
-              <span className="font-semibold text-green-600 dark:text-green-400">
+            <div className="flex items-center justify-between py-2 px-3 bg-muted rounded-lg text-sm animate-in fade-in-0 slide-in-from-top-1 duration-[var(--motion-base)] ease-out">
+              <span className="text-muted-foreground">Your Earnings</span>
+              <span className="font-semibold text-foreground">
                 {formatCurrency(pricing.contractorPay)}
               </span>
             </div>
@@ -1125,12 +1131,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 if (e.target.value.trim()) clearFieldError('notes')
               }}
               rows={2}
-              className={errors.notes ? 'border-red-500' : ''}
               aria-invalid={!!errors.notes}
               aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
             {errors.notes && (
-              <p id="notes-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <p id="notes-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.notes}
               </p>
@@ -1151,12 +1156,11 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 if (e.target.value.trim()) clearFieldError('clientNotes')
               }}
               rows={2}
-              className={errors.clientNotes ? 'border-red-500' : ''}
               aria-invalid={!!errors.clientNotes}
               aria-describedby={errors.clientNotes ? 'clientNotes-error' : undefined}
             />
             {errors.clientNotes && (
-              <p id="clientNotes-error" role="alert" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <p id="clientNotes-error" role="alert" className="text-sm text-destructive flex items-center gap-1">
                 <AlertCircle aria-hidden="true" className="w-4 h-4" />
                 {errors.clientNotes}
               </p>
@@ -1196,13 +1200,13 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           ) : (
             status === 'draft' ? (
               <div className="flex items-center justify-between text-sm py-1">
-                <span className="text-amber-600 dark:text-amber-400">Saving as draft (not submitted)</span>
-                <button type="button" onClick={() => setStatus('submitted')} className="text-blue-600 dark:text-blue-400 underline">
+                <span className="text-warning">Saving as draft (not submitted)</span>
+                <button type="button" onClick={() => setStatus('submitted')} className="text-primary underline">
                   Submit instead
                 </button>
               </div>
             ) : (
-              <button type="button" onClick={() => setStatus('draft')} className="text-xs text-gray-500 dark:text-gray-400 underline">
+              <button type="button" onClick={() => setStatus('draft')} className="text-xs text-muted-foreground underline">
                 Save as draft instead?
               </button>
             )
@@ -1210,10 +1214,10 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
 
           {/* Duplicate Warning */}
           {duplicateWarning && (
-            <Alert variant="destructive" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30">
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
-              <AlertTitle className="text-yellow-800 dark:text-yellow-200">Potential Duplicate Session</AlertTitle>
-              <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            <Alert className="border-warning/30 bg-warning-soft">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <AlertTitle className="text-warning-soft-foreground">Potential Duplicate Session</AlertTitle>
+              <AlertDescription className="text-warning-soft-foreground">
                 <strong>{duplicateWarning.clientName}</strong> already has a <strong>{duplicateWarning.serviceTypeName}</strong> session
                 on <strong>{parseLocalDate(duplicateWarning.date).toLocaleDateString()}</strong>.
                 <br />
@@ -1244,7 +1248,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 justify-start px-2 text-gray-500"
+                className="h-8 justify-start px-2 text-muted-foreground"
                 disabled={loading}
                 onClick={() => {
                   clearSessionFormDefaults(storageKey)

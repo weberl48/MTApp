@@ -355,10 +355,10 @@ export default function SessionsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
+            <h1 className="text-2xl font-bold">Sessions</h1>
             <PageHelp article="session-workflow" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground">
             {isAdmin ? 'View and manage all sessions' : 'Your session history'}
           </p>
         </div>
@@ -399,7 +399,7 @@ export default function SessionsPage() {
               {/* Search and filter toggle */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <div className="relative w-full flex-1 min-w-[200px] sm:w-auto sm:max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by service, client, or contractor..."
                     aria-label="Search sessions"
@@ -444,7 +444,7 @@ export default function SessionsPage() {
 
               {/* Expanded filters */}
               {showFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t animate-in fade-in-0 slide-in-from-top-2 duration-[var(--motion-fast)] ease-out">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Status</label>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -546,7 +546,7 @@ export default function SessionsPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card data-tour="sessions-bulk-actions" className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card data-tour="sessions-bulk-actions" className="sticky top-0 z-10 border-info/30 bg-info-soft animate-in fade-in-0 slide-in-from-top-2 duration-[var(--motion-fast)] ease-out">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
@@ -605,7 +605,7 @@ export default function SessionsPage() {
                     }}
                     aria-label="Select all submitted sessions"
                   />
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     Select all submitted ({submittedInView.length})
                   </span>
                 </div>
@@ -624,10 +624,13 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className={`p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <div className={`p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-info-soft' : 'bg-muted/50'}`}>
                         <div className="flex items-start gap-3">
-                          {isAdmin && session.status === 'submitted' && (
-                            <div className="shrink-0 pt-0.5" onClick={(e) => e.preventDefault()}>
+                          {/* Fixed-width gutter reserved on every row (checkbox is w-4) so the
+                              title column's left edge stays straight whether or not this row
+                              can show a checkbox. */}
+                          {isAdmin && session.status === 'submitted' ? (
+                            <div className="shrink-0 w-4 pt-0.5" onClick={(e) => e.preventDefault()}>
                               <Checkbox
                                 checked={selectedIds.has(session.id)}
                                 onCheckedChange={(checked) => {
@@ -641,6 +644,8 @@ export default function SessionsPage() {
                                 aria-label={`Select ${session.service_type?.name || 'session'} on ${parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                               />
                             </div>
+                          ) : (
+                            <div className="shrink-0 w-4 pt-0.5" aria-hidden="true" />
                           )}
                           <div className="flex-1 min-w-0">
                             {/* Row 1: Service type + status badge + amount */}
@@ -651,7 +656,7 @@ export default function SessionsPage() {
                                 </span>
                                 <Badge className={`shrink-0 ${
                                   session.status === 'draft' && session.rejection_reason
-                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                    ? 'bg-warning-soft text-warning-soft-foreground'
                                     : sessionStatusColors[session.status]
                                 }`}>
                                   {session.status === 'draft' && session.rejection_reason
@@ -666,7 +671,7 @@ export default function SessionsPage() {
                               )}
                             </div>
                             {/* Row 2: Date · duration · attendees · contractor */}
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {parseLocalDate(session.date).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 month: 'short',
@@ -681,7 +686,7 @@ export default function SessionsPage() {
                             </p>
                             {/* Row 3: Client names */}
                             {session.attendees?.length > 0 && (
-                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                              <p className="text-sm text-muted-foreground truncate">
                                 {session.attendees
                                   .map((a) => a.client?.name)
                                   .filter(Boolean)
@@ -696,7 +701,7 @@ export default function SessionsPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-7 px-3 text-xs text-green-700 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-950"
+                                  className="h-7 px-3 text-xs text-success border-success/30 hover:bg-success-soft"
                                   disabled={approvingId === session.id}
                                   onClick={(e) => handleInlineApprove(e, session.id)}
                                 >
@@ -712,7 +717,7 @@ export default function SessionsPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-7 px-3 text-xs text-amber-700 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-amber-950"
+                                  className="h-7 px-3 text-xs text-warning border-warning/30 hover:bg-warning-soft"
                                   onClick={(e) => handleInlineReject(e, session.id)}
                                 >
                                   Revise
@@ -736,7 +741,7 @@ export default function SessionsPage() {
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-12 text-muted-foreground">
                 <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 {hasActiveFilters ? (
                   <>

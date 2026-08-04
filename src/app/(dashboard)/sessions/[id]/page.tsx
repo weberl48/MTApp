@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle, MapPin } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle, MapPin, MoreHorizontal } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { sessionDisplayTotal } from '@/lib/sessions/total'
 import { parseLocalDate } from '@/lib/dates'
@@ -26,6 +26,13 @@ import {
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useOrganization } from '@/contexts/organization-context'
 import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
 
@@ -288,6 +295,7 @@ export default function SessionDetailPage() {
     !hasInvoice &&
     !session.service_type?.is_scholarship &&
     (session.attendees?.length ?? 0) > 0
+  const hasMoreActions = canEdit || canMarkNoShow || canCancel || canDelete
 
   return (
     <div className="space-y-6">
@@ -296,10 +304,10 @@ export default function SessionDetailPage() {
         { label: session.service_type?.name || 'Session Details' },
       ]} />
       {session.status === 'draft' && session.rejection_reason && (
-        <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/30">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800 dark:text-amber-200">Revision Requested</AlertTitle>
-          <AlertDescription className="text-amber-700 dark:text-amber-300">
+        <Alert className="border-warning/20 bg-warning-soft">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          <AlertTitle className="text-warning-soft-foreground">Revision Requested</AlertTitle>
+          <AlertDescription className="text-warning-soft-foreground">
             {session.rejection_reason}
           </AlertDescription>
         </Alert>
@@ -319,7 +327,10 @@ export default function SessionDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Badge className={sessionStatusColors[session.status]}>
+          <Badge
+            key={session.status}
+            className={`${sessionStatusColors[session.status]} animate-in fade-in-0 zoom-in-95 duration-[var(--motion-base)] ease-out`}
+          >
             {sessionStatusLabels[session.status] || session.status}
           </Badge>
           {canApprove && (
@@ -331,7 +342,7 @@ export default function SessionDetailPage() {
             <Button
               onClick={() => setRejectDialogOpen(true)}
               variant="outline"
-              className="w-full sm:w-auto text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-700 dark:hover:bg-amber-950"
+              className="w-full sm:w-auto text-warning border-warning/30 hover:bg-warning-soft"
             >
               Request Revision
             </Button>
@@ -342,39 +353,61 @@ export default function SessionDetailPage() {
               Create Invoice
             </Button>
           )}
-          {canMarkNoShow && (
-            <Button
-              onClick={handleMarkNoShow}
-              variant="outline"
-              className="w-full sm:w-auto text-orange-600 border-orange-300 hover:bg-orange-50"
-            >
-              <UserX className="w-4 h-4 mr-2" />
-              No Show
-            </Button>
-          )}
-          {canCancel && (
-            <Button
-              onClick={handleCancel}
-              variant="outline"
-              className="w-full sm:w-auto text-red-600 border-red-300 hover:bg-red-50"
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          )}
-          {canEdit && (
-            <Link href={`/sessions/${session.id}/edit/`}>
-              <Button variant="outline">
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </Link>
-          )}
-          {canDelete && (
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
+          {hasMoreActions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="More actions" disabled={isPending}>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {canEdit && (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/sessions/${session.id}/edit/`} className="flex items-center">
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {canMarkNoShow && (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      handleMarkNoShow()
+                    }}
+                  >
+                    <UserX className="mr-2 h-4 w-4" />
+                    No Show
+                  </DropdownMenuItem>
+                )}
+                {canCancel && (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      handleCancel()
+                    }}
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Cancel
+                  </DropdownMenuItem>
+                )}
+                {canDelete && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={(e) => {
+                        e.preventDefault()
+                        handleDelete()
+                      }}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
@@ -480,7 +513,7 @@ export default function SessionDetailPage() {
                 <DollarSign className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Total Amount</p>
-                  <p className="text-xl font-bold text-green-600">
+                  <p className="text-xl font-bold">
                     {totalCost === null ? '—' : formatCurrency(totalCost)}
                   </p>
                 </div>
@@ -514,8 +547,8 @@ export default function SessionDetailPage() {
 
               {/* Group session indicator */}
               {session.group_headcount && (
-                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                <div className="pt-2 border-t border-border">
+                  <p className="text-sm font-medium">
                     Group Session - {session.group_headcount} participants
                   </p>
                 </div>
@@ -527,14 +560,14 @@ export default function SessionDetailPage() {
 
       {/* Group Session Details */}
       {session.group_headcount && (
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-purple-900 dark:text-purple-100">Group Session Details</CardTitle>
+            <CardTitle>Group Session Details</CardTitle>
             <CardDescription>Participant information for this group session</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-purple-500" />
+              <Users className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Total Participants</p>
                 <p className="font-medium">{session.group_headcount} people</p>
@@ -543,7 +576,7 @@ export default function SessionDetailPage() {
 
             {session.group_member_names && (
               <div className="flex items-start gap-3">
-                <Users className="w-5 h-5 text-purple-500 mt-0.5" />
+                <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Attendee Names</p>
                   <p className="font-medium">{session.group_member_names}</p>
@@ -566,7 +599,7 @@ export default function SessionDetailPage() {
               {session.attendees.map((attendee) => (
                 <div
                   key={attendee.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
                     <p className="font-medium">{attendee.client?.name || 'Unknown Client'}</p>
@@ -583,7 +616,7 @@ export default function SessionDetailPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center py-4 text-gray-500">No attendees recorded</p>
+            <p className="text-center py-4 text-muted-foreground">No attendees recorded</p>
           )}
         </CardContent>
       </Card>

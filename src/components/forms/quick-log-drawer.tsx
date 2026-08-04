@@ -185,11 +185,11 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         <div className="px-4 space-y-4 overflow-y-auto">
           {dataLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : !hasValidDefaults ? (
             <div className="text-center py-6 space-y-3">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Log your first session to enable quick logging.
               </p>
               <Link href="/sessions/new/" onClick={() => onOpenChange(false)}>
@@ -202,17 +202,17 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
           ) : (
             <>
               {/* Session summary from defaults */}
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <div className="p-3 bg-muted rounded-lg space-y-1">
+                <p className="text-sm font-medium text-foreground">
                   {serviceType?.name}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {defaults?.duration || 30} min
                   {' \u00B7 '}
                   {new Date(`2000-01-01T${defaults?.time || '09:00'}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 </p>
                 {pricing && (
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                  <p className="text-sm font-medium text-foreground">
                     Your Earnings: {formatCurrency(pricing.contractorPay)}
                   </p>
                 )}
@@ -223,7 +223,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
                 <Label htmlFor="quick-date" className="flex items-center gap-2">
                   Date
                   {date === todayLocal() && (
-                    <span className="text-xs font-normal text-green-600 dark:text-green-400">Today</span>
+                    <span className="text-xs font-normal text-info">Today</span>
                   )}
                 </Label>
                 <Input
@@ -277,7 +277,10 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         <DrawerFooter>
           {hasValidDefaults && !dataLoading && (
             <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <Loader2
+                aria-hidden="true"
+                className={`w-4 h-4 animate-spin ${submitting ? '' : 'invisible'}`}
+              />
               Submit Session
             </Button>
           )}
