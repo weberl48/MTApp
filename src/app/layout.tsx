@@ -93,10 +93,16 @@ export default async function RootLayout({
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${themeFontVariables} antialiased`}
-      >
+    // Font variable classes live on <html>, not <body>: themes.css resolves
+    // var(--font-nunito) etc. inside html[data-theme] blocks, and an
+    // unregistered custom property substitutes var() on the element where it
+    // is DECLARED — declared on html, the font vars must exist there too.
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${themeFontVariables}`}
+    >
+      <body className="antialiased">
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <ServiceWorkerProvider />
