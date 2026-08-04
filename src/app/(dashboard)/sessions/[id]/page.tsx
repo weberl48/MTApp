@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, User, Users, DollarSign, FileText, Loader2, Pencil, Trash2, XCircle, UserX, AlertTriangle, MapPin } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { sessionDisplayTotal } from '@/lib/sessions/total'
 import { parseLocalDate } from '@/lib/dates'
 import { decryptPHI } from '@/lib/crypto/actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -273,9 +274,7 @@ export default function SessionDetailPage() {
     return null
   }
 
-  const totalCost = session.total_amount
-    ?? session.attendees?.reduce((sum, a) => sum + (a.individual_cost || 0), 0)
-    ?? 0
+  const totalCost = sessionDisplayTotal(session)
   const isActiveSession = !['no_show', 'cancelled'].includes(session.status)
   const isOwnDraft = session.contractor?.id === currentUserId && session.status === 'draft'
   const canEdit = isActiveSession && (can('session:approve') || isOwnDraft)
@@ -481,11 +480,13 @@ export default function SessionDetailPage() {
                 <DollarSign className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Total Amount</p>
-                  <p className="text-xl font-bold text-green-600">{formatCurrency(totalCost)}</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {totalCost === null ? '—' : formatCurrency(totalCost)}
+                  </p>
                 </div>
               </div>
 
-              {session.group_headcount && session.group_headcount > 1 && totalCost > 0 && (
+              {session.group_headcount && session.group_headcount > 1 && totalCost !== null && totalCost > 0 && (
                 <div className="text-sm text-muted-foreground">
                   {formatCurrency(totalCost / session.group_headcount)} per person
                 </div>

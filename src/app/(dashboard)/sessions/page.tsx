@@ -19,6 +19,7 @@ import {
 import Link from 'next/link'
 import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
+import { sessionDisplayTotal } from '@/lib/sessions/total'
 import { parseLocalDate } from '@/lib/dates'
 import { Checkbox } from '@/components/ui/checkbox'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
@@ -614,12 +615,7 @@ export default function SessionsPage() {
             {paginatedSessions.length > 0 ? (
               <div className="space-y-2">
                 {paginatedSessions.map((session) => {
-                  const totalCost = session.total_amount
-                    ?? session.attendees?.reduce(
-                      (sum, a) => sum + (a.individual_cost || 0),
-                      0
-                    )
-                    ?? 0
+                  const totalCost = sessionDisplayTotal(session)
 
                   return (
                     <Link
@@ -663,7 +659,9 @@ export default function SessionsPage() {
                                 </Badge>
                               </div>
                               {showFinancialDetails && (
-                                <span className="font-medium shrink-0">{formatCurrency(totalCost)}</span>
+                                <span className="font-medium shrink-0">
+                                  {totalCost === null ? '—' : formatCurrency(totalCost)}
+                                </span>
                               )}
                             </div>
                             {/* Row 2: Date · duration · attendees · contractor */}

@@ -11,15 +11,18 @@ import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog
 import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import { parseLocalDate } from '@/lib/dates'
+import { formatCurrency } from '@/lib/pricing'
+import { sessionDisplayTotal } from '@/lib/sessions/total'
 import Link from 'next/link'
 
 interface SubmittedSession {
   id: string
   date: string
   duration_minutes: number
+  total_amount: number | null
   contractor: { id: string; name: string } | null
   service_type: { name: string } | null
-  attendees: { client: { name: string } | null }[]
+  attendees: { individual_cost: number | null; client: { name: string } | null }[]
 }
 
 export function PendingApprovals() {
@@ -32,6 +35,8 @@ export function PendingApprovals() {
   const [isPending, startTransition] = useTransition()
   const { can } = useOrganization()
   const canApprove = can('session:approve')
+  // Context `can` is grant-aware, so an admin given "see margins" passes here too.
+  const showFinancialDetails = can('financial:view-details')
 
   useEffect(() => {
     async function load() {
@@ -39,10 +44,10 @@ export function PendingApprovals() {
       const { data, error: queryError } = await supabase
         .from('sessions')
         .select(`
-          id, date, duration_minutes,
+          id, date, duration_minutes, total_amount,
           contractor:users!sessions_contractor_id_fkey(id, name),
           service_type:service_types(name),
-          attendees:session_attendees(client:clients(name))
+          attendees:session_attendees(individual_cost, client:clients(name))
         `)
         .eq('status', 'submitted')
         .order('date', { ascending: false })
@@ -163,6 +168,7 @@ export function PendingApprovals() {
                 .filter(Boolean)
                 .join(', ')
               const extraClients = session.attendees?.length > 2 ? ` +${session.attendees.length - 2}` : ''
+              const total = sessionDisplayTotal(session)
 
               return (
                 <div
@@ -181,9 +187,16 @@ export function PendingApprovals() {
                       aria-label={`Select ${session.service_type?.name || 'session'} on ${parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                     />
                     <Link href={`/sessions/${session.id}/`} className="flex-1 min-w-0">
-                      <span className="font-medium text-sm">
-                        {session.service_type?.name || 'Unknown'}
-                      </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-sm truncate">
+                          {session.service_type?.name || 'Unknown'}
+                        </span>
+                        {showFinancialDetails && (
+                          <span className="font-medium text-sm shrink-0">
+                            {total === null ? '—' : formatCurrency(total)}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {parseLocalDate(session.date).toLocaleDateString('en-US', {
                           month: 'short',

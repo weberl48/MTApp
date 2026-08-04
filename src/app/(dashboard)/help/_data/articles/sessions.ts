@@ -115,7 +115,7 @@ Even though it is one session, a separate invoice is generated for each client w
     walkthrough: 'approve-sessions',
     adminOnly: true,
     relatedArticles: ['logging-a-session', 'generating-invoices', 'session-workflow'],
-    keywords: ['approve', 'revision', 'bulk approve', 'reject', 'review queue'],
+    keywords: ['approve', 'revision', 'bulk approve', 'reject', 'review queue', 'dashboard', 'amount'],
     content: `
 ## Approving and Managing Sessions
 
@@ -123,7 +123,12 @@ After a contractor submits a session, it enters a review queue. As an admin or o
 
 ### Where to Find Submitted Sessions
 
-Go to the **Sessions** page and filter by status "Submitted." All sessions waiting for review will appear here.
+Two places, and both let you approve without opening the session:
+
+- The **Pending Approvals** card on your Dashboard lists everything awaiting review, newest first.
+- The **Sessions** page filtered by status "Submitted" shows the same queue with the full set of filters and search.
+
+Each row shows the service, date, duration, contractor, clients, and the session total, so you can check the amount is right and approve straight from the list. The total is visible to owners; admins see it only if the owner has enabled **Session & invoice margins** under Settings > Profile & Security > What Admins Can See. A total shown as "—" means the session has no recorded amount yet - open it to check.
 
 ### Available Actions
 
@@ -140,6 +145,8 @@ To approve multiple sessions at once:
 1. On the Sessions list, tick the checkboxes on individual session cards, or use **Select all submitted** at the top of the list.
 2. A blue bar appears showing how many sessions are selected.
 3. Click **Approve (N)** in that bar to approve them all at once.
+
+The Dashboard's Pending Approvals card works the same way: tick rows or use **Select all**, then click **Approve (N)** in the card header.
 
 This is useful at the end of a pay period when all submissions are ready to process at once.
 
