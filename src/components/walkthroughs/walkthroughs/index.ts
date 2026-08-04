@@ -398,7 +398,7 @@ export const SCHOLARSHIP_BILLING_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Open the Scholarship Tab',
-      description: 'The purple "Scholarship" tab shows unbilled scholarship sessions grouped by client and month. Click it now — or press "Open the Tab" below and we\'ll switch for you. This tab only appears for admins.',
+      description: 'The "Scholarship" tab shows unbilled scholarship sessions grouped by client and month. Click it now — or press "Open the Tab" below and we\'ll switch for you. This tab only appears for admins.',
       element: '[data-tour="invoices-tab-scholarship"]',
       popoverSide: 'bottom',
       ctaLabel: 'Open the Tab',

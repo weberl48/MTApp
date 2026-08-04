@@ -97,9 +97,9 @@ const ACTION_ICONS = {
 }
 
 const ACTION_COLORS = {
-  INSERT: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  UPDATE: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  INSERT: 'bg-success-soft text-success-soft-foreground',
+  UPDATE: 'bg-info-soft text-info-soft-foreground',
+  DELETE: 'bg-destructive-soft text-destructive-soft-foreground',
 }
 
 function getActivityDescription(log: AuditLog): string {
@@ -267,16 +267,16 @@ export default function InvoiceDetailPage() {
                 })}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <div className="flex flex-col items-end gap-1">
-            <Badge className={isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : invoiceStatusColors[invoice.status]}>
+            <Badge className={invoiceStatusColors[isOverdue ? 'overdue' : invoice.status]}>
               {isOverdue ? 'Overdue' : invoiceStatusLabels[invoice.status] || invoice.status}
             </Badge>
             {isOverdue && (
-              <span className="text-xs text-red-600">{daysOverdue} days late</span>
+              <span className="text-xs text-destructive">{daysOverdue} days late</span>
             )}
           </div>
-          {isAdmin && <InvoiceActions invoice={invoice} canDelete={isAdmin} onStatusChange={() => router.push('/invoices/')} />}
+          {isAdmin && <InvoiceActions invoice={invoice} canDelete={isAdmin} promoteActions onStatusChange={() => router.push('/invoices/')} />}
         </div>
       </div>
 
@@ -298,37 +298,37 @@ export default function InvoiceDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-400" />
+              <User className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Client</p>
+                <p className="text-sm text-muted-foreground">Client</p>
                 <p className="font-medium">{invoice.client?.name}</p>
                 {invoice.client?.contact_email && (
-                  <p className="text-sm text-gray-500">{invoice.client.contact_email}</p>
+                  <p className="text-sm text-muted-foreground">{invoice.client.contact_email}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <DollarSign className="w-5 h-5 text-gray-400" />
+              <DollarSign className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">{isAdmin ? 'Amount' : 'Your Pay'}</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(isAdmin ? invoice.amount : invoice.contractor_pay)}</p>
+                <p className="text-sm text-muted-foreground">{isAdmin ? 'Amount' : 'Your Pay'}</p>
+                <p className={`text-xl font-bold ${invoice.status === 'paid' ? 'text-success' : ''}`}>{formatCurrency(isAdmin ? invoice.amount : invoice.contractor_pay)}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-gray-400" />
+              <FileText className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Payment Method</p>
+                <p className="text-sm text-muted-foreground">Payment Method</p>
                 <p className="font-medium">{paymentMethodLabels[invoice.payment_method] || invoice.payment_method}</p>
               </div>
             </div>
 
             {invoice.due_date && (
               <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-gray-400" />
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-gray-500">Due Date</p>
+                  <p className="text-sm text-muted-foreground">Due Date</p>
                   <p className="font-medium">{parseLocalDate(invoice.due_date).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -336,10 +336,10 @@ export default function InvoiceDetailPage() {
 
             {invoice.paid_date && (
               <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-green-500" />
+                <Calendar className="w-5 h-5 text-success" />
                 <div>
-                  <p className="text-sm text-gray-500">Paid Date</p>
-                  <p className="font-medium text-green-600">{parseLocalDate(invoice.paid_date).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">Paid Date</p>
+                  <p className="font-medium text-success">{parseLocalDate(invoice.paid_date).toLocaleDateString()}</p>
                 </div>
               </div>
             )}
@@ -347,10 +347,10 @@ export default function InvoiceDetailPage() {
             {/* Square processing fee — editable until the Square invoice exists */}
             {isAdmin && !invoice.square_invoice_id && invoice.status !== 'paid' && (
               <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-gray-400 shrink-0" />
+                <CreditCard className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-500">Square Processing Fee</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm text-muted-foreground">Square Processing Fee</p>
+                  <p className="text-xs text-muted-foreground">
                     {(invoice.apply_square_fee ?? settings?.pricing?.square_processing_fee_enabled)
                       ? 'Will be added when this invoice is sent via Square'
                       : 'Not applied to this invoice'}
@@ -396,21 +396,21 @@ export default function InvoiceDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between py-2">
-                <span className="text-gray-500">Total Amount</span>
+                <span className="text-muted-foreground">Total Amount</span>
                 <span className="font-medium">{formatCurrency(invoice.amount)}</span>
               </div>
               <Separator />
               <div className="flex justify-between py-2">
-                <span className="text-gray-500">MCA Cut</span>
+                <span className="text-muted-foreground">MCA Cut</span>
                 <span className="font-medium">{formatCurrency(invoice.mca_cut)}</span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-500">Contractor Pay</span>
-                <span className="font-medium text-green-600">{formatCurrency(invoice.contractor_pay)}</span>
+                <span className="text-muted-foreground">Contractor Pay</span>
+                <span className="font-medium">{formatCurrency(invoice.contractor_pay)}</span>
               </div>
               {invoice.rent_amount > 0 && (
                 <div className="flex justify-between py-2">
-                  <span className="text-gray-500">Rent</span>
+                  <span className="text-muted-foreground">Rent</span>
                   <span className="font-medium">{formatCurrency(invoice.rent_amount)}</span>
                 </div>
               )}
@@ -472,10 +472,10 @@ export default function InvoiceDetailPage() {
             <CardDescription>Session details for this invoice</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
               <div>
                 <p className="font-medium">{invoice.session.service_type?.name}</p>
-                <div className="flex flex-wrap gap-x-4 text-sm text-gray-500">
+                <div className="flex flex-wrap gap-x-4 text-sm text-muted-foreground">
                   <span>
                     {parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
                       weekday: 'short',
@@ -519,7 +519,7 @@ export default function InvoiceDetailPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{getActivityDescription(log)}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span>{format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}</span>
                         {log.user_email && (
@@ -535,7 +535,7 @@ export default function InvoiceDetailPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>No activity recorded yet</p>
             </div>
@@ -545,7 +545,7 @@ export default function InvoiceDetailPage() {
 
       <Separator />
 
-      <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-sm text-muted-foreground">
         <p>Created: {new Date(invoice.created_at).toLocaleString()}</p>
         <p>Last updated: {new Date(invoice.updated_at).toLocaleString()}</p>
       </div>

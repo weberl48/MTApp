@@ -65,7 +65,7 @@ export function InvoiceClientPreview({
       {open && (
         <CardContent className="space-y-3">
           {squareInvoiceId && (
-            <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 p-3 text-sm text-blue-800 dark:text-blue-300">
+            <div className="flex items-start gap-2 rounded-lg bg-info-soft p-3 text-sm text-info-soft-foreground">
               <Info className="w-4 h-4 mt-0.5 shrink-0" />
               <p>
                 This invoice is billed through Square — the client receives Square&apos;s hosted

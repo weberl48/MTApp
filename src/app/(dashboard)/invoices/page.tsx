@@ -33,7 +33,7 @@ import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { logger } from '@/lib/logger'
-import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels } from '@/lib/constants/display'
+import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels, getPaymentMethodOptions } from '@/lib/constants/display'
 import {
   fetchUnbilledScholarshipSessions,
   groupUnbilledByClientMonth,
@@ -107,7 +107,7 @@ function InvoiceTable({
 
   if (invoices.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-12 text-muted-foreground">
         <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <p>No invoices in this category</p>
       </div>
@@ -148,7 +148,7 @@ function InvoiceTable({
           return (
             <TableRow
               key={invoice.id}
-              className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${selectedIds?.has(invoice.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+              className={`cursor-pointer hover:bg-muted transition-colors ${selectedIds?.has(invoice.id) ? 'bg-info-soft' : 'bg-muted/50'}`}
               tabIndex={0}
               role="link"
               aria-label={`Open invoice for ${invoice.client?.name ?? 'client'}`}
@@ -200,7 +200,7 @@ function InvoiceTable({
                     {isOverdue ? 'Overdue' : invoiceStatusLabels[invoice.status] || invoice.status}
                   </Badge>
                   {isOverdue && (
-                    <span className="text-xs text-red-600 dark:text-red-400">
+                    <span className="text-xs text-destructive">
                       {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} late
                     </span>
                   )}
@@ -214,14 +214,16 @@ function InvoiceTable({
                         size="sm"
                         variant="outline"
                         className="h-7 px-2 text-xs"
-                        onClick={async () => {
-                          const result = await updateInvoiceStatus(invoice.id, 'sent')
-                          if (result.success) {
-                            toast.success('Marked as sent')
+                        onClick={() => {
+                          const promise = updateInvoiceStatus(invoice.id, 'sent').then((result) => {
+                            if (!result.success) throw new Error('error' in result ? result.error : 'Failed')
                             onRefresh?.()
-                          } else {
-                            toast.error('error' in result ? result.error : 'Failed')
-                          }
+                          })
+                          toast.promise(promise, {
+                            loading: 'Marking as sent…',
+                            success: 'Marked as sent',
+                            error: (err) => (err instanceof Error ? err.message : 'Failed'),
+                          })
                         }}
                       >
                         <Send className="w-3 h-3 mr-1" />
@@ -232,19 +234,21 @@ function InvoiceTable({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 px-2 text-xs"
-                        onClick={async () => {
-                          const result = await updateInvoiceStatus(invoice.id, 'paid')
-                          if (result.success) {
-                            toast.success('Marked as paid')
+                        className="h-7 px-2 text-xs text-success border-success/30 hover:bg-success-soft"
+                        onClick={() => {
+                          const promise = updateInvoiceStatus(invoice.id, 'paid').then((result) => {
+                            if (!result.success) throw new Error('error' in result ? result.error : 'Failed')
                             onRefresh?.()
-                          } else {
-                            toast.error('error' in result ? result.error : 'Failed')
-                          }
+                          })
+                          toast.promise(promise, {
+                            loading: 'Marking as paid…',
+                            success: 'Marked as paid',
+                            error: (err) => (err instanceof Error ? err.message : 'Failed'),
+                          })
                         }}
                       >
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Paid
+                        Mark Paid
                       </Button>
                     )}
                     <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
@@ -265,7 +269,18 @@ export default function InvoicesPage() {
   const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
   const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
   const [generatingAll, setGeneratingAll] = useState(false)
+  // Two-phase card removal for a generated scholarship group (mirrors PendingApprovals'
+  // handleRowTransitionEnd): the key lands in leavingGroupKeys on success and the card
+  // animates grid-rows/opacity to zero; handleGroupTransitionEnd then hides it for good
+  // (dismissedGroupKeys) and pulls fresh data, so the eye follows to the Batch Invoices
+  // table instead of the card vanishing mid-click.
+  const [leavingGroupKeys, setLeavingGroupKeys] = useState<Set<string>>(new Set())
+  const [dismissedGroupKeys, setDismissedGroupKeys] = useState<Set<string>>(new Set())
+  const handledGroupExitsRef = useRef<Set<string>>(new Set())
   const [invoiceSort, setInvoiceSort] = useState<InvoiceSortKey>('created_desc')
+  // Payment-method filter (Select next to Sort) — replaces the old standalone
+  // Self-Directed / Group Home tabs; narrows whichever status view is currently showing.
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('all')
   // Controlled so post-generate toasts can jump to the All tab; null = default tab.
   // Seeded from ?tab= so links like /invoices/?tab=scholarship (dashboard widget)
   // actually land on that tab. window is read in the initializer (not
@@ -326,30 +341,42 @@ export default function InvoicesPage() {
   const handleBulkMarkPaid = () => {
     if (selectedIds.size === 0) return
     const ids = Array.from(selectedIds)
+    const label = `${ids.length} invoice${ids.length !== 1 ? 's' : ''}`
     const rollback = applyBulkStatusOptimistically(ids, 'paid')
-    startTransition(async () => {
-      const result = await bulkUpdateInvoiceStatus(ids, 'paid')
-      if (result.success) {
-        toast.success(`Marked ${ids.length} invoice(s) as paid`)
-      } else {
+    const promise = bulkUpdateInvoiceStatus(ids, 'paid').then((result) => {
+      if (!result.success) {
         rollback()
-        toast.error(result.error || 'Failed to mark invoices as paid')
+        throw new Error(result.error || 'Failed to mark invoices as paid')
       }
+    })
+    toast.promise(promise, {
+      loading: `Marking ${label} as paid…`,
+      success: `Marked ${label} as paid`,
+      error: (err) => (err instanceof Error ? err.message : 'Failed to mark invoices as paid'),
+    })
+    startTransition(async () => {
+      await promise.catch(() => {})
     })
   }
 
   const handleBulkMarkSent = () => {
     if (selectedIds.size === 0) return
     const ids = Array.from(selectedIds)
+    const label = `${ids.length} invoice${ids.length !== 1 ? 's' : ''}`
     const rollback = applyBulkStatusOptimistically(ids, 'sent')
-    startTransition(async () => {
-      const result = await bulkUpdateInvoiceStatus(ids, 'sent')
-      if (result.success) {
-        toast.success(`Marked ${ids.length} invoice(s) as sent`)
-      } else {
+    const promise = bulkUpdateInvoiceStatus(ids, 'sent').then((result) => {
+      if (!result.success) {
         rollback()
-        toast.error(result.error || 'Failed to mark invoices as sent')
+        throw new Error(result.error || 'Failed to mark invoices as sent')
       }
+    })
+    toast.promise(promise, {
+      loading: `Marking ${label} as sent…`,
+      success: `Marked ${label} as sent`,
+      error: (err) => (err instanceof Error ? err.message : 'Failed to mark invoices as sent'),
+    })
+    startTransition(async () => {
+      await promise.catch(() => {})
     })
   }
 
@@ -375,6 +402,23 @@ export default function InvoicesPage() {
     )
 
     toast.success(`Exported ${selectedIds.size} invoice(s)`)
+  }
+
+  // Fires when a leaving Scholarship "Generate" card's grid-rows/opacity transition
+  // completes — only then do we drop it from the list for good and pull fresh data
+  // (mirrors PendingApprovals' handleRowTransitionEnd).
+  const handleGroupTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>, groupKey: string) => {
+    if (e.target !== e.currentTarget) return
+    if (e.propertyName !== 'grid-template-rows' && e.propertyName !== 'opacity') return
+    if (handledGroupExitsRef.current.has(groupKey)) return
+    handledGroupExitsRef.current.add(groupKey)
+    setDismissedGroupKeys((prev) => new Set(prev).add(groupKey))
+    setLeavingGroupKeys((prev) => {
+      const next = new Set(prev)
+      next.delete(groupKey)
+      return next
+    })
+    handleRefresh()
   }
 
   // Get context values for view-as filtering
@@ -444,6 +488,10 @@ export default function InvoicesPage() {
           setInvoices((data as unknown as Invoice[]) || [])
           setUnbilledScholarshipSessions(unbilled)
           setLoadError(false)
+          // Fresh server data supersedes any in-flight generate-card exit tracking.
+          setDismissedGroupKeys(new Set())
+          setLeavingGroupKeys(new Set())
+          handledGroupExitsRef.current.clear()
         }
       } catch (err) {
         logger.error('Error loading invoices', err)
@@ -467,28 +515,41 @@ export default function InvoicesPage() {
   // Sort, then group — every tab inherits the chosen order
   const sortedInvoices = sortInvoices(invoices || [], invoiceSort)
 
+  // Payment-method filter narrows whichever status view is showing — same predicate the
+  // old Self-Directed/Group Home tabs used, now applied uniformly via the Select instead
+  // of living as a standalone "unpaid only" tab.
+  const methodFilteredInvoices = paymentMethodFilter === 'all'
+    ? sortedInvoices
+    : sortedInvoices.filter((inv) => inv.payment_method === paymentMethodFilter)
+
+  // Payment-method options for the filter Select — org-visible methods only; Scholarship
+  // keeps its own dedicated tab below, so it's excluded here.
+  const paymentMethodOptions = getPaymentMethodOptions(organization?.settings).filter(
+    (opt) => opt.value !== 'scholarship'
+  )
+
   // Group invoices by status
-  const pendingInvoices = sortedInvoices.filter((inv) => inv.status === 'pending')
-  const sentInvoices = sortedInvoices.filter((inv) => inv.status === 'sent')
-  const paidInvoices = sortedInvoices.filter((inv) => inv.status === 'paid')
+  const pendingInvoices = methodFilteredInvoices.filter((inv) => inv.status === 'pending')
+  const sentInvoices = methodFilteredInvoices.filter((inv) => inv.status === 'sent')
+  const paidInvoices = methodFilteredInvoices.filter((inv) => inv.status === 'paid')
   const overdueInvoices = sentInvoices.filter((inv) => getInvoiceStatus(inv).isOverdue)
 
-  // Group by payment method (unpaid only - most useful for follow-up)
-  const selfDirectedUnpaid = sortedInvoices.filter(
-    (inv) => inv.payment_method === 'self_directed' && inv.status !== 'paid'
-  )
-  const groupHomeUnpaid = sortedInvoices.filter(
-    (inv) => inv.payment_method === 'group_home' && inv.status !== 'paid'
-  )
+  // Scholarship invoices already invoiced but unpaid (legacy per-session + reference for
+  // the batch table below) — the Scholarship tab is independent of the payment-method
+  // filter above (that filter excludes 'scholarship' from its options).
   const scholarshipUnpaid = sortedInvoices.filter(
     (inv) => inv.payment_method === 'scholarship' && inv.status !== 'paid'
   )
 
-  // Group unbilled scholarship sessions by client and month
-  const unbilledByClientMonth = useMemo(
-    () => groupUnbilledByClientMonth(unbilledScholarshipSessions),
-    [unbilledScholarshipSessions]
-  )
+  // Group unbilled scholarship sessions by client and month; dismissedGroupKeys drops a
+  // group immediately once its generate-card exit animation finishes (see
+  // handleGroupTransitionEnd) so it can't flash back before the refetch lands.
+  const unbilledByClientMonth = useMemo(() => {
+    const groups = groupUnbilledByClientMonth(unbilledScholarshipSessions)
+    return dismissedGroupKeys.size === 0
+      ? groups
+      : groups.filter((g) => !dismissedGroupKeys.has(`${g.clientId}::${g.month}`))
+  }, [unbilledScholarshipSessions, dismissedGroupKeys])
 
   // Existing batch scholarship invoices (already generated)
   const scholarshipBatchInvoices = invoices?.filter(
@@ -508,15 +569,31 @@ export default function InvoicesPage() {
 
   if (loadError) {
     return (
-      <ErrorState
-        title="Couldn't load invoices"
-        description="Something went wrong while loading your invoices. Your data is safe."
-        onRetry={() => {
-          setLoadError(false)
-          setLoading(true)
-          setRefreshTrigger((t) => t + 1)
-        }}
-      />
+      <div className="space-y-6">
+        <div>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold">Invoices</h1>
+            <PageHelp article="invoice-lifecycle" />
+          </div>
+          <p className="text-muted-foreground">
+            {contextIsAdmin ? 'Manage and track all invoices' : 'View invoice status for your sessions'}
+          </p>
+        </div>
+
+        <Card data-tour="invoices-card">
+          <CardContent>
+            <ErrorState
+              title="Couldn't load invoices"
+              description="Check your connection and try again. Your data is safe."
+              onRetry={() => {
+                setLoadError(false)
+                setLoading(true)
+                handleRefresh()
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -524,10 +601,10 @@ export default function InvoicesPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-1.5">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
+          <h1 className="text-2xl font-bold">Invoices</h1>
           <PageHelp article="invoice-lifecycle" />
         </div>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-muted-foreground">
           {isAdmin ? 'Manage and track all invoices' : 'View invoice status for your sessions'}
         </p>
       </div>
@@ -536,14 +613,14 @@ export default function InvoicesPage() {
       <div data-tour="invoices-stats" className={`grid gap-4 ${overdueInvoices.length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending Review
             </CardTitle>
-            <Clock className="w-4 h-4 text-yellow-500" />
+            <Clock className="w-4 h-4 text-warning" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(pendingTotal)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {pendingInvoices.length} invoice{pendingInvoices.length !== 1 ? 's' : ''}
             </p>
           </CardContent>
@@ -551,30 +628,30 @@ export default function InvoicesPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Awaiting Payment
             </CardTitle>
-            <FileText className="w-4 h-4 text-blue-500" />
+            <FileText className="w-4 h-4 text-info" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(sentTotal)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {sentInvoices.length} invoice{sentInvoices.length !== 1 ? 's' : ''}
             </p>
           </CardContent>
         </Card>
 
         {overdueInvoices.length > 0 && (
-          <Card className="border-red-200 dark:border-red-800">
+          <Card className="border-destructive/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-red-600 dark:text-red-400">
+              <CardTitle className="text-sm font-medium text-destructive">
                 Overdue
               </CardTitle>
-              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <AlertTriangle className="w-4 h-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{formatCurrency(overdueTotal)}</div>
-              <p className="text-xs text-red-500 dark:text-red-400">
+              <div className="text-2xl font-bold text-destructive">{formatCurrency(overdueTotal)}</div>
+              <p className="text-xs text-destructive">
                 {overdueInvoices.length} invoice{overdueInvoices.length !== 1 ? 's' : ''} past due
               </p>
             </CardContent>
@@ -584,14 +661,14 @@ export default function InvoicesPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="sticky top-0 z-10 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Card className="sticky top-0 z-10 border-info/30 bg-info-soft animate-in fade-in-0 slide-in-from-top-2 duration-[var(--motion-fast)] ease-out">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium">
                   {selectedIds.size} invoice{selectedIds.size !== 1 ? 's' : ''} selected
                 </span>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   Total: {formatCurrency(selectedTotal)}
                 </span>
               </div>
@@ -651,18 +728,33 @@ export default function InvoicesPage() {
                 {isAdmin && <span className="ml-2 text-xs">Select rows to send or update in bulk</span>}
               </CardDescription>
             </div>
-            <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
-              <SelectTrigger className="w-full sm:w-60" aria-label="Sort invoices">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {INVOICE_SORT_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
+                <SelectTrigger className="w-full sm:w-48" aria-label="Filter by payment method">
+                  <SelectValue placeholder="All methods" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All methods</SelectItem>
+                  {paymentMethodOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
+                <SelectTrigger className="w-full sm:w-60" aria-label="Sort invoices">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INVOICE_SORT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -672,7 +764,7 @@ export default function InvoicesPage() {
           >
             <TabsList className="mb-4">
               {overdueInvoices.length > 0 && (
-                <TabsTrigger value="overdue" className="text-red-600 dark:text-red-400">
+                <TabsTrigger value="overdue">
                   Overdue ({overdueInvoices.length})
                 </TabsTrigger>
               )}
@@ -686,20 +778,10 @@ export default function InvoicesPage() {
                 Paid ({paidInvoices.length})
               </TabsTrigger>
               <TabsTrigger value="all">
-                All ({invoices?.length || 0})
+                All ({methodFilteredInvoices.length})
               </TabsTrigger>
-              {selfDirectedUnpaid.length > 0 && (
-                <TabsTrigger value="self-directed" className="text-orange-600 dark:text-orange-400">
-                  Self-Directed ({selfDirectedUnpaid.length})
-                </TabsTrigger>
-              )}
-              {groupHomeUnpaid.length > 0 && (
-                <TabsTrigger value="group-home">
-                  Group Home ({groupHomeUnpaid.length})
-                </TabsTrigger>
-              )}
               {isAdmin && (
-                <TabsTrigger value="scholarship" data-tour="invoices-tab-scholarship" className="text-purple-600 dark:text-purple-400">
+                <TabsTrigger value="scholarship" data-tour="invoices-tab-scholarship">
                   Scholarship{unbilledByClientMonth.length > 0 ? ` (${unbilledScholarshipSessions.length} unbilled)` : ''}
                 </TabsTrigger>
               )}
@@ -719,22 +801,12 @@ export default function InvoicesPage() {
               <InvoiceTable invoices={paidInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
             <TabsContent value="all">
-              <InvoiceTable invoices={sortedInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
+              <InvoiceTable invoices={methodFilteredInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
             </TabsContent>
-            {selfDirectedUnpaid.length > 0 && (
-              <TabsContent value="self-directed">
-                <InvoiceTable invoices={selfDirectedUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
-              </TabsContent>
-            )}
-            {groupHomeUnpaid.length > 0 && (
-              <TabsContent value="group-home">
-                <InvoiceTable invoices={groupHomeUnpaid} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
-              </TabsContent>
-            )}
             {isAdmin && (
               <TabsContent value="scholarship" data-tour="invoices-scholarship-content">
                 {!hasScholarshipContent ? (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <div className="text-center py-12 text-muted-foreground">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>No scholarship or monthly-billed sessions logged yet</p>
                     <p className="text-sm mt-1">Sessions for scholarship clients, scholarship service types, or clients set to monthly batch invoicing will appear here.</p>
@@ -742,7 +814,7 @@ export default function InvoicesPage() {
                 ) : (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Scholarship and monthly-billed clients are invoiced once per month. Generate a batch invoice for each client per month.
                     </p>
                     {isAdmin && unbilledByClientMonth.length > 0 && (
@@ -786,88 +858,102 @@ export default function InvoicesPage() {
                   {/* Unbilled sessions grouped by client + month */}
                   {unbilledByClientMonth.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Unbilled Sessions</h3>
+                      <h3 className="text-sm font-semibold text-foreground">Unbilled Sessions</h3>
                       {unbilledByClientMonth.map((group) => {
                         const monthLabel = parseLocalDate(group.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
                         const groupKey = `${group.clientId}::${group.month}`
                         const isGenerating = generatingBatch === groupKey
+                        const isLeaving = leavingGroupKeys.has(groupKey)
 
                         return (
-                          <Card key={groupKey} className="border-amber-200 dark:border-amber-900/30 bg-amber-50/30 dark:bg-amber-950/10">
-                            <CardHeader className="py-3 px-4">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium">{group.clientName}</p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">{monthLabel}</p>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <p className="text-xs text-gray-500">
-                                    {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
-                                  </p>
-                                  {isAdmin && (
-                                    <Button
-                                      size="sm"
-                                      disabled={isGenerating}
-                                      onClick={async () => {
-                                        setGeneratingBatch(groupKey)
-                                        const result = await generateScholarshipBatchInvoice({
-                                          clientId: group.clientId,
-                                          billingPeriod: group.month,
-                                          organizationId: organization?.id || '',
-                                        })
-                                        setGeneratingBatch(null)
-                                        if (result.success) {
-                                          const invoiceId = result.invoiceId
-                                          toast.success('Monthly invoice generated', {
-                                            action: {
-                                              label: 'View',
-                                              onClick: () => router.push(`/invoices/${invoiceId}/`),
-                                            },
-                                          })
-                                          handleRefresh()
-                                        } else {
-                                          toast.error(result.error || 'Failed to generate invoice')
-                                        }
-                                      }}
-                                    >
-                                      {isGenerating ? (
-                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                                      ) : (
-                                        <Plus className="w-4 h-4 mr-1" />
+                          <div
+                            key={groupKey}
+                            className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-base)] ease-in ${
+                              isLeaving ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
+                            }`}
+                            onTransitionEnd={(e) => handleGroupTransitionEnd(e, groupKey)}
+                          >
+                            <div className="overflow-hidden min-h-0">
+                              <Card className="border-warning/30 bg-warning-soft">
+                                <CardHeader className="py-3 px-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium">{group.clientName}</p>
+                                      <p className="text-sm text-muted-foreground">{monthLabel}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                      <p className="text-xs text-muted-foreground">
+                                        {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
+                                      </p>
+                                      {isAdmin && (
+                                        <Button
+                                          size="sm"
+                                          disabled={isGenerating || isLeaving}
+                                          onClick={() => {
+                                            setGeneratingBatch(groupKey)
+                                            const promise = generateScholarshipBatchInvoice({
+                                              clientId: group.clientId,
+                                              billingPeriod: group.month,
+                                              organizationId: organization?.id || '',
+                                            }).then((result) => {
+                                              setGeneratingBatch(null)
+                                              if (!result.success) throw new Error(result.error || 'Failed to generate invoice')
+                                              setLeavingGroupKeys((prev) => new Set(prev).add(groupKey))
+                                              return result
+                                            })
+                                            toast.promise(promise, {
+                                              loading: 'Generating invoice…',
+                                              success: (result) => ({
+                                                message: 'Monthly invoice generated',
+                                                action: {
+                                                  label: 'View',
+                                                  onClick: () => router.push(`/invoices/${result.invoiceId}/`),
+                                                },
+                                              }),
+                                              error: (err) => (err instanceof Error ? err.message : 'Failed to generate invoice'),
+                                            })
+                                          }}
+                                        >
+                                          {isGenerating ? (
+                                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                          ) : (
+                                            <Plus className="w-4 h-4 mr-1" />
+                                          )}
+                                          Generate Invoice
+                                        </Button>
                                       )}
-                                      Generate Invoice
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="px-4 pb-3 pt-0">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Service</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Contractor</TableHead>
-                                    <TableHead className="text-right">Duration</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {group.sessions
-                                    .sort((a, b) => a.date.localeCompare(b.date))
-                                    .map((s) => (
-                                      <TableRow key={s.sessionId}>
-                                        <TableCell>{s.serviceTypeName}</TableCell>
-                                        <TableCell>
-                                          {parseLocalDate(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        </TableCell>
-                                        <TableCell>{s.contractorName}</TableCell>
-                                        <TableCell className="text-right">{s.durationMinutes} min</TableCell>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="px-4 pb-3 pt-0">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Contractor</TableHead>
+                                        <TableHead className="text-right">Duration</TableHead>
                                       </TableRow>
-                                    ))}
-                                </TableBody>
-                              </Table>
-                            </CardContent>
-                          </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {group.sessions
+                                        .sort((a, b) => a.date.localeCompare(b.date))
+                                        .map((s) => (
+                                          <TableRow key={s.sessionId}>
+                                            <TableCell>{s.serviceTypeName}</TableCell>
+                                            <TableCell>
+                                              {parseLocalDate(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </TableCell>
+                                            <TableCell>{s.contractorName}</TableCell>
+                                            <TableCell className="text-right">{s.durationMinutes} min</TableCell>
+                                          </TableRow>
+                                        ))}
+                                    </TableBody>
+                                  </Table>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </div>
                         )
                       })}
                     </div>
@@ -876,7 +962,7 @@ export default function InvoicesPage() {
                   {/* Existing batch invoices */}
                   {scholarshipBatchInvoices.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Batch Invoices</h3>
+                      <h3 className="text-sm font-semibold text-foreground">Batch Invoices</h3>
                       <InvoiceTable invoices={scholarshipBatchInvoices} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
                     </div>
                   )}
@@ -884,7 +970,7 @@ export default function InvoicesPage() {
                   {/* Legacy per-session scholarship invoices (backward compat) */}
                   {scholarshipUnpaid.filter(inv => inv.invoice_type !== 'batch').length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Per-Session Invoices (Legacy)</h3>
+                      <h3 className="text-sm font-semibold text-foreground">Per-Session Invoices (Legacy)</h3>
                       <InvoiceTable invoices={scholarshipUnpaid.filter(inv => inv.invoice_type !== 'batch')} showActions isAdmin={isAdmin} onRefresh={handleRefresh} showSelection selectedIds={selectedIds} onSelectChange={handleSelectChange} />
                     </div>
                   )}

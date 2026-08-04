@@ -34,13 +34,17 @@ interface InvoiceActionsProps {
   }
   onStatusChange?: () => void
   canDelete?: boolean
+  /** Promote Mark as Paid / Send out of the kebab. Detail page only — table
+   *  rows render their own inline actions, so promotion there duplicates them. */
+  promoteActions?: boolean
 }
 
-export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: InvoiceActionsProps) {
+export function InvoiceActions({ invoice, onStatusChange, canDelete = false, promoteActions = false }: InvoiceActionsProps) {
   useRouter() // Router available for navigation if needed
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   async function downloadPdf() {
     setLoading(true)
@@ -66,21 +70,26 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
     }
 
     setLoading(true)
-    try {
-      const response = await fetch(`/api/invoices/${invoice.id}/send/`, {
-        method: 'POST',
-      })
-
+    const request = fetch(`/api/invoices/${invoice.id}/send/`, {
+      method: 'POST',
+    }).then(async (response) => {
       if (!response.ok) {
         const data = await response.json()
         throw new Error(data.error || 'Failed to send email')
       }
-
-      toast.success('Invoice sent successfully')
       onStatusChange?.()
-    } catch (error) {
+    })
+
+    toast.promise(request, {
+      loading: 'Sending invoice…',
+      success: 'Invoice sent successfully',
+      error: (error) => (error instanceof Error ? error.message : 'Failed to send invoice'),
+    })
+
+    try {
+      await request
+    } catch {
       console.error('[MCA] Error sending invoice')
-      toast.error(error instanceof Error ? error.message : 'Failed to send invoice')
     } finally {
       setLoading(false)
     }
@@ -93,22 +102,26 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
     }
 
     setLoading(true)
-    try {
-      const response = await fetch(`/api/invoices/${invoice.id}/square/`, {
-        method: 'POST',
-      })
-
+    const request = fetch(`/api/invoices/${invoice.id}/square/`, {
+      method: 'POST',
+    }).then(async (response) => {
       const data = await response.json()
-
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create Square invoice')
       }
-
-      toast.success('Square invoice created and sent to client!')
       onStatusChange?.()
-    } catch (error) {
+    })
+
+    toast.promise(request, {
+      loading: 'Creating Square invoice…',
+      success: 'Square invoice created and sent to client!',
+      error: (error) => (error instanceof Error ? error.message : 'Failed to create Square invoice'),
+    })
+
+    try {
+      await request
+    } catch {
       console.error('[MCA] Error creating Square invoice')
-      toast.error(error instanceof Error ? error.message : 'Failed to create Square invoice')
     } finally {
       setLoading(false)
     }
@@ -122,12 +135,21 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
 
   function handleUpdateStatus(status: 'sent' | 'paid' | 'pending') {
     startTransition(async () => {
-      const result = await updateInvoiceStatus(invoice.id, status)
-      if (result.success) {
-        toast.success(`Invoice marked as ${status}`)
+      const request = updateInvoiceStatus(invoice.id, status).then((result) => {
+        if (!result.success) throw new Error(result.error || 'Failed to update invoice')
         onStatusChange?.()
-      } else {
-        toast.error(result.error || 'Failed to update invoice')
+      })
+
+      toast.promise(request, {
+        loading: `Marking as ${status}…`,
+        success: `Invoice marked as ${status}`,
+        error: (error) => (error instanceof Error ? error.message : 'Failed to update invoice'),
+      })
+
+      try {
+        await request
+      } catch {
+        // toast.promise already surfaced the failure
       }
     })
   }
@@ -145,80 +167,110 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
     })
   }
 
+  // "Send via Email" (kebab) and the promoted "Send" button share this gate — the
+  // only send-flavored action whose availability doesn't also depend on Square state.
+  const canSendEmail = Boolean(invoice.client?.contact_email) && invoice.status !== 'paid'
+
   return (
     <>
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={loading || isPending} aria-label="Invoice actions menu">
-          <MoreHorizontal className="h-4 w-4" />
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      {promoteActions && invoice.status !== 'paid' && (
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-success border-success/30 hover:bg-success-soft"
+          onClick={() => handleUpdateStatus('paid')}
+          disabled={loading || isPending}
+        >
+          <CheckCircle className="mr-2 h-4 w-4" />
+          Mark as Paid
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {invoice.status === 'pending' && (
-          <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
-            <Send className="mr-2 h-4 w-4" />
-            Mark as Sent
-          </DropdownMenuItem>
-        )}
-        {invoice.status !== 'paid' && (
-          <>
-            <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Mark as Paid
+      )}
+      {promoteActions && canSendEmail && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={sendEmail}
+          disabled={loading || isPending}
+        >
+          <Mail className="mr-2 h-4 w-4" />
+          Send
+        </Button>
+      )}
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={loading || isPending} aria-label="Invoice actions menu">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {invoice.status === 'pending' && (
+            <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
+              <Send className="mr-2 h-4 w-4" />
+              Mark as Sent
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
-              <Smartphone className="mr-2 h-4 w-4" />
-              Mark Paid (Venmo)
+          )}
+          {invoice.status !== 'paid' && (
+            <>
+              <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Mark as Paid
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleUpdateStatus('paid')}>
+                <Smartphone className="mr-2 h-4 w-4" />
+                Mark Paid (Venmo)
+              </DropdownMenuItem>
+            </>
+          )}
+          {invoice.status === 'paid' && (
+            <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
+              <XCircle className="mr-2 h-4 w-4" />
+              Mark as Unpaid
             </DropdownMenuItem>
-          </>
-        )}
-        {invoice.status === 'paid' && (
-          <DropdownMenuItem onClick={() => handleUpdateStatus('sent')}>
-            <XCircle className="mr-2 h-4 w-4" />
-            Mark as Unpaid
+          )}
+          <DropdownMenuItem onClick={downloadPdf}>
+            <Download className="mr-2 h-4 w-4" />
+            Download PDF
           </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onClick={downloadPdf}>
-          <Download className="mr-2 h-4 w-4" />
-          Download PDF
-        </DropdownMenuItem>
-        {invoice.client?.contact_email && invoice.status !== 'paid' && (
-          <DropdownMenuItem onClick={sendEmail}>
-            <Mail className="mr-2 h-4 w-4" />
-            Send via Email
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        {/* Square Integration */}
-        {!invoice.square_invoice_id && invoice.client?.contact_email && invoice.status !== 'paid' && (
-          <DropdownMenuItem onClick={sendViaSquare}>
-            <CreditCard className="mr-2 h-4 w-4" />
-            Send via Square
-          </DropdownMenuItem>
-        )}
-        {invoice.square_payment_url && (
-          <DropdownMenuItem onClick={openSquarePaymentLink}>
-            <ExternalLink className="mr-2 h-4 w-4" />
-            View Square Invoice
-          </DropdownMenuItem>
-        )}
-        {canDelete && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-600"
-              onSelect={(e) => {
-                e.preventDefault()
-                setDeleteOpen(true)
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Invoice
+          {canSendEmail && (
+            <DropdownMenuItem onClick={sendEmail}>
+              <Mail className="mr-2 h-4 w-4" />
+              Send via Email
             </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          )}
+          <DropdownMenuSeparator />
+          {/* Square Integration */}
+          {!invoice.square_invoice_id && canSendEmail && (
+            <DropdownMenuItem onClick={sendViaSquare}>
+              <CreditCard className="mr-2 h-4 w-4" />
+              Send via Square
+            </DropdownMenuItem>
+          )}
+          {invoice.square_payment_url && (
+            <DropdownMenuItem onClick={openSquarePaymentLink}>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View Square Invoice
+            </DropdownMenuItem>
+          )}
+          {canDelete && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={(e) => {
+                  e.preventDefault()
+                  setMenuOpen(false)
+                  setDeleteOpen(true)
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Invoice
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
 
     <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
       <AlertDialogContent>
@@ -234,7 +286,7 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false }: I
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {isPending ? 'Deleting...' : 'Delete'}
           </AlertDialogAction>
