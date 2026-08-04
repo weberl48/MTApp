@@ -1,5 +1,19 @@
 # Dashboard UI Polish Campaign — ranked backlog (Phase 1 output)
 
+> **Status — 2026-08-04: SHIPPED.** Phase 2 foundation (status tokens, motion vocabulary,
+> primitive sweep, ErrorState, P0 hardening) and all nine Phase 3 batches
+> (home → sessions → invoices → clients → team → payroll → analytics → settings → help)
+> are committed to main, each gated on 605/605 unit tests, tsc, the 88/0 lint baseline,
+> three-audience walkthrough audits, and local e2e. Cross-check riders (tabular-nums,
+> toast tone) shipped too. **Resolved by design:** p1-banner-jump (the 2FA banner
+> intentionally yields on /settings). **Closed:** the dropdown-behind-dialog quirk (all
+> three sites). **Still deferred** (see Deferred section + these): help AI panel expand /
+> search-swap masking, AI chat streaming polish, toast.promise on the reconciliation
+> single-invoice path and PDF/delete flows, per-page skeleton adoption beyond the decided
+> policy, desktop-vs-mobile save-as-draft convergence, sessions list `.range()` pagination.
+> Known local e2e caveat: the session-creation specs are contention-flaky under parallel
+> workers (each passes isolated); the underlying silent-empty defect they exposed WAS fixed.
+
 **Date:** 2026-08-04 · **Baseline commit:** 565e7fe (+ c3cf2e1 design context)
 **Inputs:** four parallel audit lenses over all dashboard routes — impeccable technical audit (14/20; Theming 2/4 is the drag), impeccable UX critique in Operate mode (29/40; Consistency 2, Error Recovery 2), improve-animations survey (6 implementation plans), find-animation-opportunities (6 proposals, 7 rejections) — plus a taste-pack cross-check (high-end-visual-design / redesign-existing-projects checklists; its 2 misses and 3 pushback verdicts are folded in below). Screenshot baseline: 172 shots (route × light/dark × desktop/mobile × owner/admin/contractor), session scratchpad only — regenerate with the baseline script if needed; never commit screenshots (CI rejects them).
 **Companion doc:** `2026-08-04-ui-polish-motion-plans.md` (verbatim motion implementation packets 001–006).
