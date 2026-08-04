@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -57,6 +58,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 formatter={(value, name) => [`$${Number(value ?? 0).toFixed(2)}`, name]}
                 isAnimationActive={false}
               />
+              <Legend />
               <Area
                 type="monotone"
                 dataKey="revenue"

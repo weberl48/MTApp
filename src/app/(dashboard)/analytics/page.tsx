@@ -270,7 +270,7 @@ export default function AnalyticsPage() {
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalMcaCut)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalMcaCut)}</div>
             <p className="text-xs text-muted-foreground">Total commission</p>
           </CardContent>
         </Card>
@@ -319,15 +319,15 @@ export default function AnalyticsPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Collected</span>
-              <span className="font-medium text-green-600">{formatCurrency(paidRevenue)}</span>
+              <span className="font-medium text-success">{formatCurrency(paidRevenue)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Awaiting Payment</span>
-              <span className="font-medium text-blue-600">{formatCurrency(sentRevenue)}</span>
+              <span className="font-medium text-info">{formatCurrency(sentRevenue)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Pending Review</span>
-              <span className="font-medium text-amber-600">{formatCurrency(pendingRevenue)}</span>
+              <span className="font-medium text-warning">{formatCurrency(pendingRevenue)}</span>
             </div>
             <div className="border-t pt-4 flex items-center justify-between">
               <span className="font-medium">Total Outstanding</span>
