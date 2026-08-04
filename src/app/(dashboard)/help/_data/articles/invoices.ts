@@ -95,7 +95,7 @@ You can add an automatic processing fee to every Square invoice to cover online 
 
 ### Sorting the Invoice List
 
-Use the **sort dropdown** at the top of the invoices list to order by newest/oldest, **date submitted** (when the contractor submitted the session), **date approved** (when an admin approved it), or amount. The sort applies to every tab. Monthly batch invoices sort by their generation date for the submitted/approved options.
+Use the **sort dropdown** at the top of the invoices list to order by newest/oldest, **date submitted** (when the contractor submitted the session), **date approved** (when an admin approved it), or amount. The sort applies to every tab. Use the **payment method** filter beside it to narrow any tab to a single method, like Self-Directed or Group Home. Monthly batch invoices sort by their generation date for the submitted/approved options.
 
 ### Bulk Actions
 

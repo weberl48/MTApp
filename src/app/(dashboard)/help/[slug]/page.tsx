@@ -19,7 +19,7 @@ const markdownComponents: Components = {
     <h1 className="text-2xl font-bold text-foreground mt-8 mb-4 first:mt-0">{children}</h1>
   ),
   h2: ({ children }) => (
-    <h2 className="text-xl font-semibold text-foreground mt-8 mb-4 pb-2 border-b">{children}</h2>
+    <h2 className="text-xl font-semibold text-foreground mt-8 mb-4 pb-2 border-b first:mt-0">{children}</h2>
   ),
   h3: ({ children }) => (
     <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">{children}</h3>
@@ -99,7 +99,7 @@ export default function HelpArticlePage({
           <Badge variant="outline">{categoryName}</Badge>
           {article.adminOnly && <Badge variant="secondary">Admin</Badge>}
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-foreground">
           {article.title}
         </h1>
         <p className="text-lg text-muted-foreground">{article.description}</p>

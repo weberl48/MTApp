@@ -70,7 +70,7 @@ function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
     <>
       {parts.map((part, i) =>
         regex.test(part) ? (
-          <mark key={i} className="bg-yellow-200 dark:bg-yellow-800/60 text-inherit rounded px-0.5">{part}</mark>
+          <mark key={i} className="bg-warning-soft text-inherit rounded px-0.5">{part}</mark>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -162,7 +162,7 @@ export default function HelpPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Help Center</h1>
+        <h1 className="text-2xl font-bold text-foreground">Help Center</h1>
         <p className="text-muted-foreground mt-1">
           Learn how to use MCA Manager with guides and tutorials
         </p>
@@ -173,14 +173,15 @@ export default function HelpPage() {
         <Card className="border-primary/30">
           <CardContent className="py-4">
             {!aiOpen ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2"
+              <button
+                type="button"
                 onClick={() => setAiOpen(true)}
+                aria-label="Ask the AI helper — get an answer instead of searching"
+                className="flex w-full items-center gap-2 rounded-md border bg-muted px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/80"
               >
-                <Sparkles className="h-4 w-4 text-primary" />
-                Ask the AI helper — get an answer instead of searching
-              </Button>
+                <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                Ask a question about the app…
+              </button>
             ) : (
               <div className="h-96">
                 <AiChat />
@@ -206,8 +207,11 @@ export default function HelpPage() {
         />
       </div>
 
-      {/* Category Filter */}
-      {!searchQuery && (
+      {/* Category Filter — chips are the in-category switcher (jump between
+          categories without backing out to the grid), not a second copy of
+          the Category Cards below. Cards already cover the "browse all"
+          moment, so the chip row only renders once a category is selected. */}
+      {!searchQuery && selectedCategory && (
         <div className="flex flex-wrap gap-2">
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
