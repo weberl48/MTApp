@@ -37,11 +37,11 @@ export function EarningsChart({ data }: EarningsChartProps) {
               data={data}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
                 dataKey="month"
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickFormatter={(value) => {
                   // Shorten "February 2026" to "Feb '26"
                   const parts = value.split(' ')
@@ -53,12 +53,13 @@ export function EarningsChart({ data }: EarningsChartProps) {
               />
               <YAxis
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickFormatter={(value) => `$${value}`}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--background)',
+                  backgroundColor: 'var(--popover)',
+                  color: 'var(--popover-foreground)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
@@ -66,12 +67,14 @@ export function EarningsChart({ data }: EarningsChartProps) {
                   name === 'earnings' ? `$${Number(value ?? 0).toFixed(2)}` : value,
                   name === 'earnings' ? 'Earnings' : 'Sessions',
                 ]}
+                isAnimationActive={false}
               />
               <Bar
                 dataKey="earnings"
-                fill="#3b82f6"
+                fill="var(--chart-1)"
                 name="earnings"
                 radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
               />
             </BarChart>
           </ResponsiveContainer>

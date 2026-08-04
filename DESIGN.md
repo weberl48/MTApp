@@ -17,6 +17,12 @@ colors:
   ring: "oklch(0.708 0 0)"
   sidebar: "oklch(0.985 0 0)"
   skeleton: "oklch(0.928 0.006 264.5)"
+  success: "oklch(0.52 0.13 150)"
+  success-soft: "oklch(0.95 0.04 150)"
+  warning: "oklch(0.66 0.13 80)"
+  warning-soft: "oklch(0.96 0.06 85)"
+  info: "oklch(0.53 0.12 240)"
+  info-soft: "oklch(0.95 0.03 240)"
 typography:
   body:
     fontFamily: "var(--font-app) (Geist Sans in Classic)"
@@ -97,6 +103,10 @@ The palette is a role system, not a color list: components speak `bg-primary`, `
 - **Sidebar family** (`--sidebar*`): a parallel role set so a theme can restyle navigation independently (Slate ships a dark sidebar over a light app).
 - **Skeleton** (`--skeleton`): the one approved loading-placeholder fill.
 - **Charts** (`--chart-1..5`): per-theme categorical ramp for analytics.
+
+### Status (added 2026-08-04)
+- **Success / Warning / Info / Destructive** (`--success`, `--warning`, `--info`, `--destructive` — each with a `-foreground` and a `-soft`/`-soft-foreground` surface pair): the only approved status channel. Values are identical across all eight themes (the `--destructive` precedent), and AA contrast for both solid and soft pairs is test-enforced in both modes. Badges and banners use the soft pairs; solid is for emphasis controls (e.g. the active View As state).
+- **Money semantics:** green (`success`) = money received/paid out · amber (`warning`) = pending · ink = neutral figure. One meaning per hue, everywhere.
 
 ### Named Rules
 **The Token Law Rule.** No raw hex, no Tailwind palette classes (`gray-*`, `zinc-*`) in dashboard UI. If a needed role is missing, extend the token set in `globals.css` + all eight `themes.css` blocks (the completeness test will force you to).

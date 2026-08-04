@@ -3,11 +3,11 @@
 // --- Session status ---
 
 export const sessionStatusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  no_show: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  draft: 'bg-muted text-muted-foreground',
+  submitted: 'bg-info-soft text-info-soft-foreground',
+  approved: 'bg-success-soft text-success-soft-foreground',
+  no_show: 'bg-warning-soft text-warning-soft-foreground',
+  cancelled: 'bg-destructive-soft text-destructive-soft-foreground',
 }
 
 export const sessionStatusLabels: Record<string, string> = {
@@ -21,10 +21,10 @@ export const sessionStatusLabels: Record<string, string> = {
 // --- Invoice status ---
 
 export const invoiceStatusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  pending: 'bg-warning-soft text-warning-soft-foreground',
+  sent: 'bg-info-soft text-info-soft-foreground',
+  paid: 'bg-success-soft text-success-soft-foreground',
+  overdue: 'bg-destructive-soft text-destructive-soft-foreground',
 }
 
 export const invoiceStatusLabels: Record<string, string> = {

@@ -36,42 +36,46 @@ export function RevenueChart({ data }: RevenueChartProps) {
               data={data}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
                 dataKey="month"
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
               />
               <YAxis
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickFormatter={(value) => `$${value}`}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--background)',
+                  backgroundColor: 'var(--popover)',
+                  color: 'var(--popover-foreground)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
                 formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`, '']}
+                isAnimationActive={false}
               />
               <Area
                 type="monotone"
                 dataKey="revenue"
                 stackId="1"
-                stroke="#3b82f6"
-                fill="#3b82f6"
+                stroke="var(--chart-1)"
+                fill="var(--chart-1)"
                 fillOpacity={0.6}
                 name="Total Revenue"
+                isAnimationActive={false}
               />
               <Area
                 type="monotone"
                 dataKey="mcaCut"
                 stackId="2"
-                stroke="#10b981"
-                fill="#10b981"
+                stroke="var(--chart-2)"
+                fill="var(--chart-2)"
                 fillOpacity={0.6}
                 name="MCA Cut"
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

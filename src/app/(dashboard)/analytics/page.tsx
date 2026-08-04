@@ -205,9 +205,9 @@ export default function AnalyticsPage() {
 
   // Payment status data for pie chart
   const paymentStatusData: PaymentStatusDataPoint[] = [
-    { name: 'Paid', value: paidRevenue, color: '#10b981' },
-    { name: 'Sent', value: sentRevenue, color: '#3b82f6' },
-    { name: 'Pending', value: pendingRevenue, color: '#f59e0b' },
+    { name: 'Paid', value: paidRevenue, color: 'var(--chart-1)' },
+    { name: 'Sent', value: sentRevenue, color: 'var(--chart-2)' },
+    { name: 'Pending', value: pendingRevenue, color: 'var(--chart-3)' },
   ].filter(d => d.value > 0)
 
   const rangeLabel = dateRange === 'ytd' ? 'Year to date' : `Last ${dateRange === '3m' ? '3' : dateRange === '6m' ? '6' : '12'} months`

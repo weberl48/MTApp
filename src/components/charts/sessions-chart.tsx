@@ -36,26 +36,28 @@ export function SessionsChart({ data }: SessionsChartProps) {
               data={data}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
                 dataKey="month"
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
               />
               <YAxis
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--background)',
+                  backgroundColor: 'var(--popover)',
+                  color: 'var(--popover-foreground)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
+                isAnimationActive={false}
               />
               <Legend />
-              <Bar dataKey="individual" fill="#6366f1" name="Individual" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="group" fill="#f59e0b" name="Group" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="individual" fill="var(--chart-1)" name="Individual" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+              <Bar dataKey="group" fill="var(--chart-2)" name="Group" radius={[4, 4, 0, 0]} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

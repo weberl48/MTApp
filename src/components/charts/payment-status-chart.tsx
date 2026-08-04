@@ -44,6 +44,7 @@ export function PaymentStatusChart({ data }: PaymentStatusChartProps) {
                   `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
                 }
                 labelLine={false}
+                isAnimationActive={false}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -51,11 +52,13 @@ export function PaymentStatusChart({ data }: PaymentStatusChartProps) {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--background)',
+                  backgroundColor: 'var(--popover)',
+                  color: 'var(--popover-foreground)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
                 formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`, '']}
+                isAnimationActive={false}
               />
               <Legend />
             </PieChart>

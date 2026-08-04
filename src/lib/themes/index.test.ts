@@ -91,6 +91,16 @@ describe('themes.css contrast (WCAG AA)', () => {
     // Dropdown hover/current rows and the avatar-fallback initials.
     ['accent', 'accent-foreground'],
     ['secondary', 'secondary-foreground'],
+    // Status tokens: solid (badge-on-color) and soft (tinted chip) pairs for
+    // success/warning/info, plus the soft destructive pair (solid
+    // destructive/white-text is covered by the button, not a token pair).
+    ['success', 'success-foreground'],
+    ['success-soft', 'success-soft-foreground'],
+    ['warning', 'warning-foreground'],
+    ['warning-soft', 'warning-soft-foreground'],
+    ['info', 'info-foreground'],
+    ['info-soft', 'info-soft-foreground'],
+    ['destructive-soft', 'destructive-soft-foreground'],
   ]
   for (const id of NON_DEFAULT_THEME_IDS) {
     for (const sel of [lightSel(id), darkSel(id)]) {
