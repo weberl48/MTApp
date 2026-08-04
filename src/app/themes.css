@@ -13,6 +13,13 @@
  * in globals.css and needs no attribute.
  */
 
+/* Themed palettes already use a tinted --background as the canvas with white
+   cards on top, so the dashboard canvas token just follows --background.
+   (Classic instead pins --canvas to gray-50 in globals.css — see there.) */
+html[data-theme] {
+  --canvas: var(--background);
+}
+
 /* ── Ocean — calm teal-blue · Nunito · 10px radius ─────────────────────── */
 html[data-theme="ocean"] {
   --font-app: var(--font-nunito);

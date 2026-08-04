@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle } from 'lucide-react'
+import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import { AppearanceMenu } from '@/components/ui/appearance-menu'
 import type { User } from '@/types/database'
@@ -197,6 +197,7 @@ export function Header({ user }: HeaderProps) {
                         <span className="font-medium">{org.name}</span>
                         <span className="text-xs text-gray-500">{org.slug}</span>
                       </div>
+                      {org.id === organization?.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
                     </DropdownMenuItem>
                   ))}
                 </div>
@@ -244,6 +245,7 @@ export function Header({ user }: HeaderProps) {
                   className={!viewAsRole && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
+                  {!viewAsRole && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
                 </DropdownMenuItem>
                 {actualRole === 'developer' && (
                   <DropdownMenuItem
@@ -254,6 +256,7 @@ export function Header({ user }: HeaderProps) {
                     className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-accent' : ''}
                   >
                     <span className="font-medium">Owner</span>
+                    {viewAsRole === 'owner' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
@@ -264,6 +267,7 @@ export function Header({ user }: HeaderProps) {
                   className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">Admin</span>
+                  {viewAsRole === 'admin' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -273,6 +277,7 @@ export function Header({ user }: HeaderProps) {
                   className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">Contractor (generic)</span>
+                  {viewAsRole === 'contractor' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
                 </DropdownMenuItem>
 
                 {contractors.length > 0 && (
@@ -298,6 +303,7 @@ export function Header({ user }: HeaderProps) {
                                 <span className="font-medium">{contractor.name}</span>
                                 <span className="text-xs text-gray-500">{contractor.email}</span>
                               </div>
+                              {viewAsContractor?.id === contractor.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
                             </DropdownMenuItem>
                           ))}
                         </DropdownMenuSubContent>
@@ -349,7 +355,7 @@ export function Header({ user }: HeaderProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-primary/15 text-primary">
+              <AvatarFallback className="bg-secondary text-secondary-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>

@@ -88,6 +88,9 @@ describe('themes.css contrast (WCAG AA)', () => {
     // sidebar-primary-foreground on sidebar-primary.
     ['sidebar-accent', 'sidebar-accent-foreground'],
     ['sidebar-primary', 'sidebar-primary-foreground'],
+    // Dropdown hover/current rows and the avatar-fallback initials.
+    ['accent', 'accent-foreground'],
+    ['secondary', 'secondary-foreground'],
   ]
   for (const id of NON_DEFAULT_THEME_IDS) {
     for (const sel of [lightSel(id), darkSel(id)]) {
