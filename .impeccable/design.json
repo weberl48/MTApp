@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-04T18:30:00Z",
+  "title": "Design System: MCA App Dashboard",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Ink (theme-owned accent)",
+        "canonical": "var(--primary)",
+        "tonalRamp": ["oklch(0.15 0 0)", "oklch(0.25 0 0)", "oklch(0.37 0 0)", "oklch(0.49 0 0)", "oklch(0.61 0 0)", "oklch(0.73 0 0)", "oklch(0.85 0 0)", "oklch(0.95 0 0)"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Dashboard Canvas",
+        "canonical": "var(--canvas)",
+        "tonalRamp": ["oklch(0.15 0.002 247.8)", "oklch(0.28 0.002 247.8)", "oklch(0.42 0.002 247.8)", "oklch(0.56 0.002 247.8)", "oklch(0.7 0.002 247.8)", "oklch(0.84 0.002 247.8)", "oklch(0.94 0.002 247.8)", "oklch(0.985 0.002 247.8)"]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Quiet Text",
+        "canonical": "var(--muted-foreground)",
+        "tonalRamp": ["oklch(0.15 0 0)", "oklch(0.26 0 0)", "oklch(0.37 0 0)", "oklch(0.48 0 0)", "oklch(0.556 0 0)", "oklch(0.7 0 0)", "oklch(0.84 0 0)", "oklch(0.95 0 0)"]
+      },
+      "destructive": {
+        "role": "primary",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": ["oklch(0.2 0.12 27)", "oklch(0.3 0.16 27)", "oklch(0.4 0.2 27)", "oklch(0.5 0.23 27)", "oklch(0.577 0.245 27.325)", "oklch(0.7 0.19 22)", "oklch(0.82 0.1 22)", "oklch(0.93 0.04 22)"]
+      }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "App Body", "purpose": "Dominant 14px UI type; family is theme-owned via --font-app." },
+      "heading": { "displayName": "Headings", "purpose": "h1-h6 and card titles via --font-heading; themes may pair a serif (Lora, EB Garamond)." },
+      "label": { "displayName": "Labels & Badges", "purpose": "Form labels, table headers, status chips." }
+    },
+    "shadows": [
+      { "name": "shadow-xs", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Outline buttons and inputs at rest." },
+      { "name": "shadow-sm", "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)", "purpose": "Cards. The ceiling for resting surfaces; floating layers (popover/dialog/drawer) may go deeper." }
+    ],
+    "motion": [
+      { "name": "motion-fast", "value": "150ms", "purpose": "Hover/state flips." },
+      { "name": "motion-base", "value": "200ms", "purpose": "Default transitions." },
+      { "name": "motion-slow", "value": "250ms", "purpose": "Larger surface movement." },
+      { "name": "easing-rule", "value": "entrances ease-out; exits ease-in", "purpose": "House easing doctrine; all motion collapses under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action button; theme accent fill, 90% hover fade, 3px focus ring.",
+      "html": "<button class=\"ds-btn-primary\">Log session</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: var(--primary, oklch(0.205 0 0)); color: var(--primary-foreground, oklch(0.985 0 0)); border: none; border-radius: calc(var(--radius, 0.625rem) - 2px); font-family: var(--font-app, ui-sans-serif); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 150ms ease-out; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: none; border-color: var(--ring, oklch(0.708 0 0)); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action; bordered surface that fills with accent on hover.",
+      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: var(--background, #fff); color: var(--foreground, oklch(0.145 0 0)); border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) - 2px); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); font-family: var(--font-app, ui-sans-serif); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 150ms ease-out; } .ds-btn-outline:hover { background: var(--accent, oklch(0.97 0 0)); color: var(--accent-foreground, oklch(0.205 0 0)); } .ds-btn-outline:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The standard content surface: hairline border, whisper shadow, heading-font title.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Today's Sessions</div><div class=\"ds-card-body\">3 submitted, 1 awaiting approval.</div></div>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 12px; padding: 24px; background: var(--card, #fff); color: var(--card-foreground, oklch(0.145 0 0)); border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) + 4px); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-card-title { font-family: var(--font-heading, var(--font-app, ui-sans-serif)); font-size: 1rem; font-weight: 600; line-height: 1; } .ds-card-body { font-family: var(--font-app, ui-sans-serif); font-size: 0.875rem; color: var(--muted-foreground, oklch(0.556 0 0)); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Transparent field with hairline border; universal 3px focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Client name\" />",
+      "css": ".ds-input { height: 36px; width: 100%; padding: 4px 12px; background: transparent; color: var(--foreground, oklch(0.145 0 0)); border: 1px solid var(--input, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) - 2px); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); font-family: var(--font-app, ui-sans-serif); font-size: 0.875rem; transition: color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.556 0 0)); } .ds-input:focus-visible { outline: none; border-color: var(--ring, oklch(0.708 0 0)); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Pill status chip (session/invoice states).",
+      "html": "<span class=\"ds-badge\">Approved</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 2px 8px; background: var(--secondary, oklch(0.97 0 0)); color: var(--secondary-foreground, oklch(0.205 0 0)); border: 1px solid transparent; border-radius: 9999px; font-family: var(--font-app, ui-sans-serif); font-size: 0.75rem; font-weight: 500; white-space: nowrap; }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "sidebar",
+      "description": "Quiet nav row using the parallel sidebar token family; accent fill when active.",
+      "html": "<nav class=\"ds-sidebar\"><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\">Sessions</a><a class=\"ds-nav-item\" href=\"#\">Invoices</a></nav>",
+      "css": ".ds-sidebar { display: flex; flex-direction: column; gap: 4px; padding: 8px; width: 200px; background: var(--sidebar, oklch(0.985 0 0)); border-right: 1px solid var(--sidebar-border, oklch(0.922 0 0)); } .ds-nav-item { display: block; padding: 8px 12px; border-radius: calc(var(--radius, 0.625rem) - 2px); color: var(--sidebar-foreground, oklch(0.145 0 0)); font-family: var(--font-app, ui-sans-serif); font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: background 150ms ease-out; } .ds-nav-item:hover { background: var(--sidebar-accent, oklch(0.97 0 0)); color: var(--sidebar-accent-foreground, oklch(0.205 0 0)); } .ds-nav-item--active { background: var(--sidebar-accent, oklch(0.97 0 0)); color: var(--sidebar-accent-foreground, oklch(0.205 0 0)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Practice Room",
+    "overview": "A calm, well-tuned instrument for running a therapy practice. The system is shadcn/ui discipline applied through one semantic token layer, so the entire look — palette, font pairing, corner radius, even density — swaps per user via eight registered themes while every component stays byte-identical. The identity is carried by tokens, not by any single palette: a hardcoded gray or a one-off hex is a break in the system that all eight themes will expose.",
+    "keyCharacteristics": [
+      "Semantic token vocabulary (shadcn names + --canvas, --skeleton) as the only color channel",
+      "Eight complete light+dark palettes; theme also selects font pairing, radius (2px–14px), and density",
+      "Flat, bordered surfaces; shadows are whispers; dark mode swaps them for translucent borders",
+      "Dominant 14px UI type; headings differentiated per theme",
+      "Motion is brief and token-timed (150/200/250ms), fully collapsed under prefers-reduced-motion"
+    ],
+    "rules": [
+      { "name": "The Token Law Rule", "body": "No raw hex, no Tailwind palette classes in dashboard UI. If a needed role is missing, extend the token set in globals.css + all eight themes.css blocks.", "section": "colors" },
+      { "name": "The Portal Firewall Rule", "body": "Org primary/secondary colors are client-portal branding only. Dashboard themes never read them; the portal never reads data-theme.", "section": "colors" },
+      { "name": "The Eight-Theme Proof Rule", "body": "A visual change is done when it holds in Classic and at least two alternate themes, light and dark.", "section": "colors" },
+      { "name": "The One-Scale Rule", "body": "Stay on the Tailwind type scale; hierarchy comes from weight and muted color, not new sizes.", "section": "typography" },
+      { "name": "The Whisper Shadow Rule", "body": "Nothing deeper than shadow-sm at rest; depth beyond that is reserved for genuinely floating layers.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do route every color through the semantic tokens; extend the token set when a role is genuinely missing.",
+      "Do verify changes in Classic + ≥2 alternate themes, both modes, before calling them done.",
+      "Do time transitions with --motion-fast/base/slow, entrances ease-out, exits ease-in.",
+      "Do keep spacing utility-based so theme density (--spacing) scales it.",
+      "Do use --canvas for shell backgrounds and --skeleton for loading fills."
+    ],
+    "donts": [
+      "Don't hardcode hex/oklch values, Tailwind gray classes, radii, or font families in dashboard components.",
+      "Don't exceed shadow-sm on resting surfaces or add glows.",
+      "Don't let dashboard theming touch client-facing surfaces (portal, emailed invoices/PDFs).",
+      "Don't add motion outside the prefers-reduced-motion collapse, or one-off easings/durations per component.",
+      "Don't move or remove elements that walkthrough tours highlight without re-running the walkthrough audit for every audience."
+    ]
+  }
+}

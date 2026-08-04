@@ -92,6 +92,7 @@ backup-failures.log
 
 # Local agent tooling — machine-specific, not project content.
 /.claude/settings.local.json
+/.impeccable/config.local.json
 /skill-observations/
 # Brainstorming visual-companion session files (superpowers plugin).
 /.superpowers/
