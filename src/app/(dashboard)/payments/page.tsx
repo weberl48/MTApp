@@ -274,7 +274,7 @@ export default function PaymentsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -291,10 +291,10 @@ export default function PaymentsPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-1.5">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll</h1>
+          <h1 className="text-2xl font-bold">Payroll</h1>
           <PageHelp article="payroll-and-payments" />
         </div>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-muted-foreground">
           Manage contractor payouts and view payment history
         </p>
       </div>
@@ -303,31 +303,31 @@ export default function PaymentsPage() {
       <div className="grid gap-4 md:grid-cols-2" data-tour="payroll-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Contractor Earnings
             </CardTitle>
-            <DollarSign className="w-4 h-4 text-gray-400" />
+            <DollarSign className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalContractorPay)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">All time</p>
+            <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
 
-        <Card className={totalPending > 0 ? 'border-amber-200 dark:border-amber-800' : ''}>
+        <Card className={totalPending > 0 ? 'border-warning/30' : ''}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending Payouts
             </CardTitle>
             {totalPending > 0 ? (
-              <AlertCircle className="w-4 h-4 text-amber-500" />
+              <AlertCircle className="w-4 h-4 text-warning" />
             ) : (
-              <Calendar className="w-4 h-4 text-gray-400" />
+              <Calendar className="w-4 h-4 text-muted-foreground" />
             )}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-2xl font-bold text-warning">{formatCurrency(totalPending)}</div>
+            <p className="text-xs text-muted-foreground">
               {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)} sessions awaiting payment
             </p>
           </CardContent>
@@ -342,7 +342,7 @@ export default function PaymentsPage() {
               <DollarSign className="w-4 h-4" />
               Payroll Hub
               {unpaidContractors.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-warning-soft text-warning-soft-foreground rounded-full">
                   {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)}
                 </span>
               )}
@@ -387,7 +387,7 @@ export default function PaymentsPage() {
                 {/* Date Range Filter */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-gray-400" />
+                    <Filter className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Filter by Date</span>
                     <Button
                       variant={showAllDates ? 'default' : 'outline'}
@@ -405,7 +405,7 @@ export default function PaymentsPage() {
                     </Button>
                   </div>
                   {!showAllDates && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 animate-in fade-in-0 slide-in-from-top-1 duration-[var(--motion-fast)] ease-out">
                       <div className="flex items-center gap-1">
                         <Label htmlFor="fromDate" className="text-xs">From:</Label>
                         <Input

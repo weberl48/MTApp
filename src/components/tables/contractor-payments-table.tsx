@@ -79,7 +79,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.name}</div>
-          <div className="text-sm text-gray-500">{row.original.email}</div>
+          <div className="text-sm text-muted-foreground">{row.original.email}</div>
         </div>
       ),
     },
@@ -127,7 +127,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-right text-green-600 font-medium">
+        <div className="text-right text-success font-medium">
           {formatCurrency(row.original.totalPaid)}
         </div>
       ),
@@ -146,11 +146,11 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
       cell: ({ row }) => (
         <div className="text-right">
           {row.original.totalPending > 0 ? (
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <Badge variant="outline" className="bg-warning-soft text-warning-soft-foreground border-warning/30">
               {formatCurrency(row.original.totalPending)}
             </Badge>
           ) : (
-            <span className="text-gray-400">-</span>
+            <span className="text-muted-foreground">-</span>
           )}
         </div>
       ),
@@ -228,7 +228,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search contractors..."
             aria-label="Search payments"

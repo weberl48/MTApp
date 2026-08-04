@@ -102,32 +102,37 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
     setPayoutDate(todayLocal())
   }
 
-  async function handleMarkPaid() {
+  function handleMarkPaid() {
     if (!markPaidDialog.contractor) return
+
+    const contractor = markPaidDialog.contractor
+    const sessionIds = contractor.unpaidSessions.map((s) => s.id)
 
     setIsProcessing(true)
 
-    try {
-      const sessionIds = markPaidDialog.contractor.unpaidSessions.map((s) => s.id)
-      // Atomic server action: marks all not-yet-paid sessions in one statement (no mixed state
-      // on partial failure, no double-pay) and returns how many were actually marked.
-      const result = await markSessionsPaid(sessionIds, payoutDate)
-
+    // Atomic server action: marks all not-yet-paid sessions in one statement (no mixed state
+    // on partial failure, no double-pay) and returns how many were actually marked.
+    const promise = markSessionsPaid(sessionIds, payoutDate).then((result) => {
       if (!result.success) {
-        toast.error('error' in result ? result.error : 'Failed to mark sessions as paid')
-        return
+        throw new Error('error' in result ? result.error : 'Failed to mark sessions as paid')
       }
+      return result
+    })
 
-      toast.success(
-        `Marked ${result.count} session${result.count !== 1 ? 's' : ''} as paid for ${markPaidDialog.contractor.name}`
-      )
-      setMarkPaidDialog({ isOpen: false, contractor: null })
-      onPayoutComplete()
-    } catch {
-      toast.error('Failed to mark sessions as paid')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.promise(promise, {
+      loading: 'Marking sessions as paid…',
+      success: (result) =>
+        `Marked ${result.count} session${result.count !== 1 ? 's' : ''} as paid for ${contractor.name}`,
+      error: (err) => (err instanceof Error ? err.message : 'Failed to mark sessions as paid'),
+    })
+
+    promise
+      .then(() => {
+        setMarkPaidDialog({ isOpen: false, contractor: null })
+        onPayoutComplete()
+      })
+      .catch(() => {})
+      .finally(() => setIsProcessing(false))
   }
 
   async function handleDeleteSession() {
@@ -203,7 +208,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 min-w-0">
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search contractors..."
               value={searchQuery}
@@ -211,9 +216,9 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
               className="pl-10"
             />
           </div>
-          <div className="text-sm text-gray-500 break-words">
+          <div className="text-sm text-muted-foreground break-words">
             {totalSessions} unpaid session{totalSessions !== 1 ? 's' : ''} •{' '}
-            <span className="font-medium text-amber-600">{formatCurrency(totalUnpaid)}</span> total
+            <span className="font-medium text-warning">{formatCurrency(totalUnpaid)}</span> total
           </div>
         </div>
         <Button onClick={exportToExcel} variant="outline" className="w-full sm:w-auto">
@@ -237,7 +242,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
           <TableBody>
             {filteredContractors.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-gray-500">
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                   {contractors.length === 0
                     ? 'No unpaid sessions found - all contractors are paid up!'
                     : 'No contractors match your search'}
@@ -248,7 +253,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                 <Fragment key={contractor.id}>
                   {/* Contractor row */}
                   <TableRow
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                    className="cursor-pointer hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                     onClick={() => toggleExpand(contractor.id)}
                     role="button"
                     tabIndex={0}
@@ -263,20 +268,20 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                   >
                     <TableCell className="w-8">
                       {expandedContractors.has(contractor.id) ? (
-                        <ChevronDown aria-hidden="true" className="h-4 w-4 text-gray-400" />
+                        <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <ChevronRight aria-hidden="true" className="h-4 w-4 text-gray-400" />
+                        <ChevronRight aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
                       )}
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{contractor.name}</div>
-                      <div className="text-sm text-gray-500">{contractor.email}</div>
+                      <div className="text-sm text-muted-foreground">{contractor.email}</div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="secondary">{contractor.sessionCount}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="font-medium text-amber-600">
+                      <span className="font-medium text-warning">
                         {formatCurrency(contractor.totalPending)}
                       </span>
                     </TableCell>
@@ -297,25 +302,25 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                   {/* Expanded sessions */}
                   {expandedContractors.has(contractor.id) && (
                     <TableRow>
-                      <TableCell colSpan={5} className="bg-gray-50 dark:bg-gray-900 p-0">
+                      <TableCell colSpan={5} className="bg-muted p-0">
                         <div className="p-4">
                           {/* Mobile: stacked cards — the 5-column table is unreadable at 375px */}
                           <ul className="space-y-2 sm:hidden">
                             {contractor.unpaidSessions.map((session) => (
                               <li
                                 key={session.id}
-                                className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3"
+                                className="rounded-lg border bg-card p-3"
                               >
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
                                     <div className="font-medium">
                                       {format(parseLocalDate(session.date), 'MMM d, yyyy')}
                                     </div>
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    <div className="text-sm text-muted-foreground">
                                       {session.service_type?.name || '-'}
                                     </div>
                                     {session.clients.length > 0 && (
-                                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                      <div className="text-sm text-muted-foreground truncate">
                                         {session.clients.join(', ')}
                                       </div>
                                     )}
@@ -326,7 +331,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                                        className="h-9 w-9 text-destructive hover:bg-destructive-soft hover:text-destructive-soft-foreground"
                                         aria-label={`Delete session on ${format(parseLocalDate(session.date), 'MMM d, yyyy')} for ${contractor.name}`}
                                         onClick={(e) => {
                                           e.stopPropagation()
@@ -347,7 +352,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                           </ul>
                           <table className="w-full text-sm hidden sm:table">
                             <thead>
-                              <tr className="text-gray-500">
+                              <tr className="text-muted-foreground">
                                 <th className="text-left pb-2 font-medium">Date</th>
                                 <th className="text-left pb-2 font-medium">Service</th>
                                 <th className="text-left pb-2 font-medium">Clients</th>
@@ -357,7 +362,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                             </thead>
                             <tbody>
                               {contractor.unpaidSessions.map((session) => (
-                                <tr key={session.id} className="border-t border-gray-100 dark:border-gray-800">
+                                <tr key={session.id} className="border-t">
                                   <td className="py-2">
                                     {format(parseLocalDate(session.date), 'MMM d, yyyy')}
                                   </td>
@@ -371,7 +376,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                                      className="h-7 w-7 text-destructive hover:bg-destructive-soft hover:text-destructive-soft-foreground"
                                       aria-label={`Delete session on ${format(parseLocalDate(session.date), 'MMM d, yyyy')} for ${contractor.name}`}
                                       onClick={(e) => {
                                         e.stopPropagation()
@@ -417,7 +422,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
             <AlertDialogAction
               onClick={handleDeleteSession}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
@@ -436,12 +441,12 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <span className="text-gray-500">Sessions:</span>
+                <span className="text-muted-foreground">Sessions:</span>
                 <span className="font-medium">{markPaidDialog.contractor?.sessionCount}</span>
-                <span className="text-gray-500">Total Amount:</span>
-                <span className="font-medium text-green-600">
+                <span className="text-muted-foreground">Total Amount:</span>
+                <span className="font-medium text-warning">
                   {formatCurrency(markPaidDialog.contractor?.totalPending || 0)}
                 </span>
               </div>

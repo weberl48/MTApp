@@ -80,17 +80,17 @@ interface ReconciliationSummary {
 const STATUS_CONFIG = {
   pending: {
     icon: Clock,
-    color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    color: 'bg-warning-soft text-warning-soft-foreground',
     label: 'Pending',
   },
   sent: {
     icon: ExternalLink,
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    color: 'bg-info-soft text-info-soft-foreground',
     label: 'Sent',
   },
   paid: {
     icon: CheckCircle,
-    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    color: 'bg-success-soft text-success-soft-foreground',
     label: 'Paid',
   },
 }
@@ -241,35 +241,35 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400">Total Invoices</div>
+          <div className="bg-muted rounded-lg p-4">
+            <div className="text-sm text-muted-foreground">Total Invoices</div>
             <div className="text-2xl font-bold">{summary.totalInvoices}</div>
-            <div className="text-sm text-gray-500">{formatCurrency(summary.totalAmount)}</div>
+            <div className="text-sm text-muted-foreground">{formatCurrency(summary.totalAmount)}</div>
           </div>
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-            <div className="text-sm text-green-600 dark:text-green-400">Paid</div>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="bg-success-soft rounded-lg p-4">
+            <div className="text-sm text-success-soft-foreground">Paid</div>
+            <div className="text-2xl font-bold text-success-soft-foreground">
               {summary.paidInvoices}
             </div>
-            <div className="text-sm text-green-600 dark:text-green-400">
+            <div className="text-sm text-success-soft-foreground">
               {formatCurrency(summary.paidAmount)}
             </div>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
-            <div className="text-sm text-amber-600 dark:text-amber-400">Outstanding</div>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+          <div className="bg-warning-soft rounded-lg p-4">
+            <div className="text-sm text-warning-soft-foreground">Outstanding</div>
+            <div className="text-2xl font-bold text-warning-soft-foreground">
               {summary.pendingInvoices + summary.sentInvoices}
             </div>
-            <div className="text-sm text-amber-600 dark:text-amber-400">
+            <div className="text-sm text-warning-soft-foreground">
               {formatCurrency(summary.pendingAmount)}
             </div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-            <div className="text-sm text-blue-600 dark:text-blue-400">Square Linked</div>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="bg-info-soft rounded-lg p-4">
+            <div className="text-sm text-info-soft-foreground">Square Linked</div>
+            <div className="text-2xl font-bold text-info-soft-foreground">
               {summary.squareLinked}
             </div>
-            <div className="text-sm text-blue-600 dark:text-blue-400">
+            <div className="text-sm text-info-soft-foreground">
               {Math.round((summary.squareLinked / summary.totalInvoices) * 100) || 0}% of total
             </div>
           </div>
@@ -279,7 +279,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by client name..."
             value={searchTerm}
@@ -320,10 +320,10 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : invoices.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           No invoices found
         </div>
       ) : (
@@ -354,11 +354,11 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{invoice.client?.name || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {invoice.session?.contractor?.name}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-500">
+                    <TableCell className="text-sm text-muted-foreground">
                       {invoice.session?.service_type?.name || '-'}
                     </TableCell>
                     <TableCell className="text-right font-medium">
@@ -373,20 +373,20 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                     <TableCell>
                       {invoice.square_invoice_id ? (
                         <div className="flex items-center gap-1">
-                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <CheckCircle className="w-4 h-4 text-info" />
                           {invoice.square_payment_url && (
                             <a
                               href={invoice.square_payment_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-500 hover:underline text-xs"
+                              className="text-primary hover:underline text-xs"
                             >
                               View
                             </a>
                           )}
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-sm">-</span>
+                        <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -404,7 +404,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
                         </Button>
                       )}
                       {invoice.status === 'paid' && invoice.paid_date && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {format(parseLocalDate(invoice.paid_date), 'MMM d')}
                         </span>
                       )}
@@ -420,7 +420,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Showing {page * pageSize + 1} to {Math.min((page + 1) * pageSize, totalCount)} of {totalCount} invoices
           </p>
           <div className="flex items-center gap-2">
@@ -458,12 +458,12 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <span className="text-gray-500">Client:</span>
+                <span className="text-muted-foreground">Client:</span>
                 <span className="font-medium">{markPaidDialog.invoice?.client?.name}</span>
-                <span className="text-gray-500">Amount:</span>
-                <span className="font-medium text-green-600">
+                <span className="text-muted-foreground">Amount:</span>
+                <span className="font-medium text-warning">
                   {formatCurrency(markPaidDialog.invoice?.amount || 0)}
                 </span>
               </div>
