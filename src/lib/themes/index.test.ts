@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { contrastRatio } from './contrast'
 import {
   DEFAULT_THEME_ID,
   isThemeId,
   NON_DEFAULT_THEME_IDS,
+  REQUIRED_THEME_TOKENS,
   THEMES,
   THEME_STORAGE_KEY,
 } from './index'
@@ -38,4 +42,54 @@ describe('theme registry', () => {
       for (const hex of theme.swatch) expect(hex).toMatch(/^#[0-9a-f]{6}$/i)
     }
   })
+})
+
+const css = readFileSync(join(process.cwd(), 'src/app/themes.css'), 'utf8')
+
+function block(selector: string): string {
+  const start = css.indexOf(selector)
+  expect(start, `missing block ${selector}`).toBeGreaterThan(-1)
+  const open = css.indexOf('{', start)
+  const close = css.indexOf('}', open)
+  return css.slice(open + 1, close)
+}
+
+function token(body: string, name: string): string | undefined {
+  return body.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim()
+}
+
+describe('themes.css completeness', () => {
+  for (const id of NON_DEFAULT_THEME_IDS) {
+    it(`${id} defines every token in both modes`, () => {
+      for (const sel of [`[data-theme="${id}"]`, `.dark[data-theme="${id}"]`]) {
+        const body = block(sel)
+        for (const t of REQUIRED_THEME_TOKENS) {
+          expect(token(body, `--${t}`), `${sel} missing --${t}`).toBeTruthy()
+        }
+      }
+    })
+  }
+})
+
+describe('themes.css contrast (WCAG AA)', () => {
+  const pairs: Array<[string, string]> = [
+    ['primary', 'primary-foreground'],
+    ['background', 'foreground'],
+    ['card', 'card-foreground'],
+    ['sidebar', 'sidebar-foreground'],
+  ]
+  for (const id of NON_DEFAULT_THEME_IDS) {
+    for (const sel of [`[data-theme="${id}"]`, `.dark[data-theme="${id}"]`]) {
+      it(`${sel} key pairs >= 4.5:1`, () => {
+        const body = block(sel)
+        for (const [bg, fg] of pairs) {
+          const ratio = contrastRatio(token(body, `--${bg}`)!, token(body, `--${fg}`)!)
+          expect(
+            ratio,
+            `${sel} ${bg}/${fg} = ${ratio.toFixed(2)}`,
+          ).toBeGreaterThanOrEqual(4.5)
+        }
+      })
+    }
+  }
 })

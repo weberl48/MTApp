@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./themes.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,6 +46,10 @@
 }
 
 :root {
+  /* Active app font — themes.css overrides these per theme (see the theme
+     registry in src/lib/themes). Headings fall back to the body font. */
+  --font-app: var(--font-geist-sans);
+  --font-heading: var(--font-app);
   --radius: 0.625rem;
   /* Motion tokens — entrances use ease-out, exits use ease-in.
      Use via duration-[var(--motion-fast)] etc. so all transitions share one scale. */
@@ -127,6 +132,16 @@
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+    font-family: var(--font-app);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  [data-slot="card-title"] {
+    font-family: var(--font-heading);
   }
   img,
   video,
