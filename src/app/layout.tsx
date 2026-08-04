@@ -1,7 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  EB_Garamond,
+  Geist,
+  Geist_Mono,
+  Lora,
+  Nunito,
+  Quicksand,
+  Source_Sans_3,
+} from "next/font/google";
 import "./globals.css";
+import { NON_DEFAULT_THEME_IDS, THEME_STORAGE_KEY } from "@/lib/themes";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
 import { PWAInstallPrompt } from "@/components/pwa/install-prompt";
 import { DevErrorReporter } from "@/components/dev/dev-error-reporter";
@@ -19,6 +28,30 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Theme fonts (see src/app/themes.css). Declaring them all is cheap: the
+// browser only downloads a font file when rendered text actually uses it,
+// so only the active theme's font ever transfers.
+const nunito = Nunito({ variable: "--font-nunito", subsets: ["latin"] });
+const sourceSans = Source_Sans_3({ variable: "--font-source-sans", subsets: ["latin"] });
+const quicksand = Quicksand({ variable: "--font-quicksand", subsets: ["latin"] });
+const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
+const ebGaramond = EB_Garamond({ variable: "--font-eb-garamond", subsets: ["latin"] });
+
+const themeFontVariables = [
+  nunito.variable,
+  sourceSans.variable,
+  quicksand.variable,
+  lora.variable,
+  ebGaramond.variable,
+].join(" ");
+
+// Stamps data-theme on <html> before first paint so there is no flash of the
+// default theme — same trick next-themes uses for dark mode. Portal routes
+// are excluded: clients see org branding, never a staff member's theme.
+const themeScript = `try{if(!location.pathname.startsWith('/portal')){var t=localStorage.getItem(${JSON.stringify(
+  THEME_STORAGE_KEY,
+)});if(t&&${JSON.stringify(NON_DEFAULT_THEME_IDS)}.indexOf(t)>-1)document.documentElement.setAttribute('data-theme',t)}}catch(e){}`;
 
 export const metadata: Metadata = {
   title: "May Creative Arts",
@@ -62,8 +95,9 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${themeFontVariables} antialiased`}
       >
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <ServiceWorkerProvider />
           <PWAInstallPrompt />
