@@ -196,6 +196,7 @@ export default function HelpPage() {
         <Input
           type="search"
           placeholder="Search help articles..."
+          aria-label="Search help articles"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value)

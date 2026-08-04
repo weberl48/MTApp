@@ -22,6 +22,18 @@ import type { OrganizationSettings } from '@/types/database'
  * `settings.permissions` flag; `adminGrantsFromSettings()` maps it to the
  * permission it grants, so the wording here is the only thing to keep in sync.
  */
+// Single source for the Account card's role display — the text row and the
+// badge next to it must never derive the label independently (they used to:
+// the text was a 2-way ternary that silently fell back to "Contractor" for
+// any role it didn't recognize, e.g. "developer", while the badge printed
+// user.role verbatim — so the two visibly disagreed).
+const ROLE_DISPLAY_LABELS: Record<string, string> = {
+  developer: 'Developer',
+  owner: 'Owner',
+  admin: 'Administrator',
+  contractor: 'Contractor',
+}
+
 const ADMIN_VISIBILITY_SWITCHES: {
   key: keyof OrganizationSettings['permissions']
   label: string
@@ -187,11 +199,11 @@ export default function ProfileSettingsPage() {
               <div>
                 <p className="text-sm font-medium">Role</p>
                 <p className="text-sm text-gray-500">
-                  {user.role === 'owner' ? 'Owner' : user.role === 'admin' ? 'Administrator' : 'Contractor'}
+                  {ROLE_DISPLAY_LABELS[user.role] ?? user.role}
                 </p>
               </div>
               <Badge variant={user.role === 'owner' ? 'default' : user.role === 'admin' ? 'secondary' : 'outline'}>
-                {user.role}
+                {ROLE_DISPLAY_LABELS[user.role] ?? user.role}
               </Badge>
             </div>
             <Separator />

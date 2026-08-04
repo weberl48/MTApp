@@ -10,7 +10,8 @@ import { QuickLogDrawer } from '@/components/forms/quick-log-drawer'
 
 /**
  * Floating Action Button for quick session logging.
- * Shows on mobile when not already on the new session page.
+ * Shows on mobile, only on session-relevant routes (dashboard + sessions),
+ * when not already on the new session page or an edit page.
  * Contractors get a bottom-sheet drawer; admins/owners get a link to the full form.
  */
 export function QuickSessionFab() {
@@ -18,7 +19,17 @@ export function QuickSessionFab() {
   const { isContractor } = useOrganization()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  // Don't show on the new session page or edit pages
+  // Quick-logging only has context on the dashboard and within the sessions
+  // section — everywhere else (invoices, settings, clients, team, etc.) the
+  // FAB has nothing relevant to jump to. Matches the sidebar's own
+  // pathname.startsWith(href) convention.
+  const isSessionRelevantRoute =
+    pathname.startsWith('/dashboard/') || pathname.startsWith('/sessions/')
+  if (!isSessionRelevantRoute) {
+    return null
+  }
+
+  // Don't show on the new session page or edit pages — you're already there
   if (pathname.includes('/sessions/new') || pathname.includes('/edit')) {
     return null
   }

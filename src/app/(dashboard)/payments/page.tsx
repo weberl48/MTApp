@@ -336,29 +336,38 @@ export default function PaymentsPage() {
 
       {/* Tabs for Payroll Hub vs History */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full">
-          <TabsTrigger value="payroll" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            Payroll Hub
-            {unpaidContractors.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
-                {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="history" data-tour="payroll-tab-history" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Payment History
-          </TabsTrigger>
-          <TabsTrigger value="reconciliation" data-tour="payroll-tab-reconciliation" className="flex items-center gap-2">
-            <Receipt className="w-4 h-4" />
-            Invoice Reconciliation
-          </TabsTrigger>
-          <TabsTrigger value="tax" data-tour="payroll-tab-tax" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Tax Summaries
-          </TabsTrigger>
-        </TabsList>
+        <div className="relative">
+          <TabsList className="w-full">
+            <TabsTrigger value="payroll" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Payroll Hub
+              {unpaidContractors.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                  {unpaidContractors.reduce((sum, c) => sum + c.sessionCount, 0)}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="history" data-tour="payroll-tab-history" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Payment History
+            </TabsTrigger>
+            <TabsTrigger value="reconciliation" data-tour="payroll-tab-reconciliation" className="flex items-center gap-2">
+              <Receipt className="w-4 h-4" />
+              Invoice Reconciliation
+            </TabsTrigger>
+            <TabsTrigger value="tax" data-tour="payroll-tab-tax" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Tax Summaries
+            </TabsTrigger>
+          </TabsList>
+          {/* Scroll affordance: fades the trailing edge so a clipped tab reads as
+              "more to scroll to" instead of "cut off". Mobile only — desktop
+              always has room for every trigger. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-(--canvas) to-transparent sm:hidden"
+          />
+        </div>
 
         <TabsContent value="payroll" className="mt-4">
           <Card data-tour="payroll-hub">

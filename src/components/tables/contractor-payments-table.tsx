@@ -231,6 +231,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search contractors..."
+            aria-label="Search payments"
             value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
             onChange={(event) =>
               table.getColumn('name')?.setFilterValue(event.target.value)

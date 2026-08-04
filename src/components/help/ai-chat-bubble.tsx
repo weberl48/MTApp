@@ -6,10 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AiChat, useAiHelpVisible } from '@/components/help/ai-chat'
 
-/** Floating "Ask the AI helper" bubble. The bottom-right corner is shared with
- *  the QuickSessionFab (mobile, bottom-6) and the owner-onboarding prompt
- *  (bottom-20, lg:bottom-6, z-50) — these offsets keep the bubble clear of
- *  both so it stays clickable even while onboarding is showing. */
+/** Floating "Ask the AI helper" bubble. Top slot of the mobile fixed-element
+ *  stack: quick-log FAB (bottom-6, spans to 80px) → owner-onboarding prompt
+ *  (bottom-20, spans to 128px, owner-only until dismissed) → this bubble
+ *  (bottom-32, spans to 176px). The three never overlap; the dashboard main
+ *  content's bottom padding is sized to clear the full stack (see
+ *  (dashboard)/layout.tsx). Desktop (lg:bottom-20) is unchanged: the FAB is
+ *  lg:hidden there, so only the onboarding prompt (lg:bottom-6) sits below
+ *  the bubble, with headroom. */
 export function AiChatBubble() {
   const visible = useAiHelpVisible()
   const [open, setOpen] = useState(false)

@@ -86,7 +86,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
                 <PilotModeBanner />
-                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none">
+                {/* Mobile bottom padding clears the fixed bottom-right stack: the
+                    AI helper bubble is the tallest element (bottom-32 + h-12 =
+                    11rem top edge; see ai-chat-bubble.tsx), so 12rem leaves ~1rem
+                    of breathing room below the last interactive control. Desktop
+                    (lg:pb-6) is untouched — the quick-log FAB is lg:hidden and
+                    the bubble/onboarding prompt sit low with headroom there. */}
+                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+12rem)] lg:pb-6 focus:outline-none">
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
                     {children}

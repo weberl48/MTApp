@@ -18,7 +18,7 @@ import {
   ChevronRight,
   HelpCircle,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOrganization } from '@/contexts/organization-context'
 import type { FeatureFlags } from '@/types/database'
@@ -54,11 +54,43 @@ const navigation: NavItem[] = [
   { name: 'Settings', href: '/settings/', icon: Settings },
 ]
 
+// Elements a focus trap should consider "tabbable" inside the drawer.
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+// Below Tailwind's lg breakpoint the aside is an off-canvas drawer; at/above
+// it, lg:translate-x-0 lg:static makes it always-visible nav (see the aside's
+// className below). useSyncExternalStore (not useEffect+useState, per the
+// house pattern in src/components/pwa/install-prompt.tsx) avoids a setState-
+// in-effect lint warning and a hydration flash.
+function getIsNarrowViewport(): boolean {
+  return window.matchMedia('(max-width: 1023px)').matches
+}
+function subscribeToViewport(callback: () => void) {
+  const mql = window.matchMedia('(max-width: 1023px)')
+  mql.addEventListener('change', callback)
+  return () => mql.removeEventListener('change', callback)
+}
+
 export function Sidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const { can, feature, isContractor } = useOrganization()
+  const asideRef = useRef<HTMLElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  // mobileMenuOpen can only be set true from the (lg:hidden) hamburger button
+  // or a viewport-gated walkthrough sync, but it can go stale if the window
+  // is resized wider without closing the drawer first — so dialog semantics
+  // and the focus trap key off isDrawerOpen, not mobileMenuOpen alone, to
+  // keep desktop static nav from ever being announced or trapped as a modal.
+  const isNarrowViewport = useSyncExternalStore(
+    subscribeToViewport,
+    getIsNarrowViewport,
+    () => false // server snapshot: mobileMenuOpen starts false, so this never affects first paint
+  )
+  const isDrawerOpen = mobileMenuOpen && isNarrowViewport
 
   // WCAG 2.1.1: the mobile menu behaves as a dialog, so Escape must dismiss it
   useEffect(() => {
@@ -69,6 +101,56 @@ export function Sidebar() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [mobileMenuOpen])
+
+  // Focus management for the mobile drawer: move focus in on open, trap Tab
+  // inside while open, return focus to the hamburger button on close.
+  useEffect(() => {
+    if (!isDrawerOpen) return
+    const aside = asideRef.current
+    if (!aside) return
+
+    function getFocusable(): HTMLElement[] {
+      // Exclude anything inside a collapsed (inert) Billing submenu — inert
+      // elements can't actually receive focus, so leaving them in would let
+      // the trap's wraparound call .focus() on a dead end.
+      return Array.from(aside!.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (el) => el.offsetParent !== null && !el.closest('[inert]')
+      )
+    }
+
+    const focusable = getFocusable()
+    ;(focusable[0] ?? aside).focus()
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return
+      const items = getFocusable()
+      if (items.length === 0) {
+        e.preventDefault()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey) {
+        if (active === first || !aside!.contains(active)) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else if (active === last || !aside!.contains(active)) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    // Snapshot the trigger button now — by the time cleanup runs the ref
+    // could in principle point elsewhere.
+    const triggerToRestore = menuButtonRef.current
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      triggerToRestore?.focus()
+    }
+  }, [isDrawerOpen])
 
   // Walkthroughs highlight nav links; on mobile those live in this off-canvas
   // drawer, so the walkthrough provider asks us to open/close it per step.
@@ -159,30 +241,37 @@ export function Sidebar() {
               )}
             />
           </button>
-          {isExpanded && (
-            <div id={submenuId} className="ml-4 mt-1 space-y-1">
-              {item.children!.filter(shouldShowItem).map((child) => {
-                const childActive = pathname.startsWith(child.href)
-                return (
-                  <Link
-                    key={child.name}
-                    href={child.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    aria-current={childActive ? 'page' : undefined}
-                    className={cn(
-                      'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
-                      childActive
-                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    )}
-                  >
-                    <child.icon className="w-4 h-4 mr-3" />
-                    {child.name}
-                  </Link>
-                )
-              })}
+          <div
+            className={cn(
+              'grid transition-[grid-template-rows] duration-[var(--motion-base)]',
+              isExpanded ? 'grid-rows-[1fr] ease-out' : 'grid-rows-[0fr] ease-in'
+            )}
+          >
+            <div id={submenuId} className="overflow-hidden">
+              <div className="ml-4 mt-1 space-y-1" inert={!isExpanded}>
+                {item.children!.filter(shouldShowItem).map((child) => {
+                  const childActive = pathname.startsWith(child.href)
+                  return (
+                    <Link
+                      key={child.name}
+                      href={child.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-current={childActive ? 'page' : undefined}
+                      className={cn(
+                        'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
+                        childActive
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                      )}
+                    >
+                      <child.icon className="w-4 h-4 mr-3" />
+                      {child.name}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )
     }
@@ -209,9 +298,21 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-[calc(env(safe-area-inset-top)+1rem)] left-[calc(env(safe-area-inset-left)+1rem)] z-50">
+      {/* Mobile menu button. Same z-50 as the aside normally (matches every
+          other z-50 overlay in the app, e.g. ui/dialog.tsx's overlay) so it
+          doesn't leak above unrelated dialogs; bumped to z-[60] only while
+          the drawer itself is open, since the aside — same left edge, same
+          top offset — would otherwise paint over its own close affordance.
+          Nothing inside the drawer opens another dialog, so this never runs
+          concurrently with one. */}
+      <div
+        className={cn(
+          'lg:hidden fixed top-[calc(env(safe-area-inset-top)+1rem)] left-[calc(env(safe-area-inset-left)+1rem)] z-50',
+          mobileMenuOpen && 'z-[60]'
+        )}
+      >
         <Button
+          ref={menuButtonRef}
           variant="outline"
           size="icon"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -223,19 +324,25 @@ export function Sidebar() {
       </div>
 
       {/* Mobile menu backdrop */}
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={cn(
+          'lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-[var(--motion-base)]',
+          mobileMenuOpen ? 'opacity-100 ease-out' : 'opacity-0 pointer-events-none ease-in'
+        )}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
       <aside
+        ref={asideRef}
+        tabIndex={-1}
+        role={isDrawerOpen ? 'dialog' : undefined}
+        aria-modal={isDrawerOpen ? true : undefined}
+        aria-label={isDrawerOpen ? 'Navigation menu' : undefined}
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transform transition-transform duration-[var(--motion-base)] lg:translate-x-0 lg:static lg:inset-auto',
+          mobileMenuOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
         )}
       >
         <div className="flex flex-col h-full">

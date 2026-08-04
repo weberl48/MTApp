@@ -160,33 +160,42 @@ export default function BusinessSettingsPage() {
       </div>
 
       <Tabs defaultValue={isOwner ? 'services' : 'invoices'} className="space-y-4">
-        <TabsList className="h-auto w-full justify-start overflow-x-auto">
-          {/* Service pricing carries contractor pay (schedule, cap, MCA cut) — owner only. */}
-          {isOwner && (
-            <TabsTrigger value="services" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Services
+        <div className="relative">
+          <TabsList className="h-auto w-full justify-start overflow-x-auto">
+            {/* Service pricing carries contractor pay (schedule, cap, MCA cut) — owner only. */}
+            {isOwner && (
+              <TabsTrigger value="services" className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Services
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="invoices" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Invoices
             </TabsTrigger>
-          )}
-          <TabsTrigger value="invoices" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Invoices
-          </TabsTrigger>
-          <TabsTrigger value="sessions" data-tour="business-tab-sessions" className="flex items-center gap-2">
-            <Settings2 className="w-4 h-4" />
-            Sessions
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="w-4 h-4" />
-            Notifications
-          </TabsTrigger>
-          {isOwner && (
-            <TabsTrigger value="features" className="flex items-center gap-2">
-              <ToggleLeft className="w-4 h-4" />
-              Features
+            <TabsTrigger value="sessions" data-tour="business-tab-sessions" className="flex items-center gap-2">
+              <Settings2 className="w-4 h-4" />
+              Sessions
             </TabsTrigger>
-          )}
-        </TabsList>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notifications
+            </TabsTrigger>
+            {isOwner && (
+              <TabsTrigger value="features" className="flex items-center gap-2">
+                <ToggleLeft className="w-4 h-4" />
+                Features
+              </TabsTrigger>
+            )}
+          </TabsList>
+          {/* Scroll affordance: fades the trailing edge so a clipped tab reads as
+              "more to scroll to" instead of "cut off". Mobile only — desktop
+              always has room for every trigger. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-(--canvas) to-transparent sm:hidden"
+          />
+        </div>
 
         {/* Services Tab — owner only, see the trigger above */}
         {isOwner && (
