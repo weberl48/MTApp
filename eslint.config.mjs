@@ -32,6 +32,14 @@ const eslintConfig = defineConfig([
     "supabase/.temp/**",
     // Nested app folder (separate project copy)
     "mca-app/**",
+    // Test-runner outputs (created on failing runs) and walkthrough-audit results.
+    "playwright-report/**",
+    "test-results/**",
+    ".walkthrough-audit/**",
+    // Vendored agent tooling (skills ship their own minified scripts) — not app source.
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
   ]),
 ]);
 
