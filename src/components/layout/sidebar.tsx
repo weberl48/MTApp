@@ -146,8 +146,8 @@ export function Sidebar() {
             className={cn(
               'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
               isActive
-                ? 'text-blue-700 dark:text-blue-400'
-                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                ? 'text-sidebar-primary'
+                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
             <item.icon className="w-5 h-5 mr-3" />
@@ -172,8 +172,8 @@ export function Sidebar() {
                     className={cn(
                       'flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors',
                       childActive
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     )}
                   >
                     <child.icon className="w-4 h-4 mr-3" />
@@ -197,8 +197,8 @@ export function Sidebar() {
         className={cn(
           'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
           isActive
-            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+            ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
         )}
       >
         <item.icon className="w-5 h-5 mr-3" />
@@ -234,18 +234,18 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
+          'fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center h-16 px-6 border-b border-sidebar-border">
             <Link href="/dashboard/" className="flex items-center">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold text-sidebar-foreground">
                 MCA
               </span>
-              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+              <span className="ml-2 text-sm text-sidebar-foreground/60">
                 Manager
               </span>
             </Link>
@@ -257,7 +257,7 @@ export function Sidebar() {
           </nav>
 
           {/* Help link */}
-          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
+          <div className="px-4 py-3 border-t border-sidebar-border">
             <Link
               href="/help/"
               onClick={() => setMobileMenuOpen(false)}
@@ -265,8 +265,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
                 pathname.startsWith('/help')
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
             >
               <HelpCircle className="w-5 h-5 mr-3" />

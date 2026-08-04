@@ -150,7 +150,7 @@ export function Header({ user }: HeaderProps) {
     : '?'
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-800 lg:pl-6">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-6 bg-card/95 backdrop-blur border-b border-border lg:pl-6">
       {/* Spacer for mobile menu button */}
       <div className="w-12 lg:hidden" />
 
