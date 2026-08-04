@@ -76,7 +76,7 @@ The Client Portal must be turned on at the organization level before it can be u
 
 ### Inviting a Client
 
-Once the feature is enabled, there are two ways to get a client their portal link:
+Once the feature is enabled, there are two ways to get a client their portal link. Issuing, emailing, and revoking portal links is limited to **owners and admins** — a portal link grants access to that client's records, so contractors don't manage portal access.
 
 **While adding the client:**
 

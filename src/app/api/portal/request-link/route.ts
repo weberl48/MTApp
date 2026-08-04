@@ -5,6 +5,13 @@ import { sendMagicLinkEmail } from '@/lib/email'
 import { portalRequestLinkSchema } from '@/lib/validation/schemas'
 import { isFeatureEnabled } from '@/lib/features'
 
+// This endpoint is unauthenticated and mints a fresh token + sends an email on
+// every call (tokens are stored hashed, so there is no reuse path). Without a
+// throttle, a known/guessed client email could flood that client's inbox and
+// grow client_access_tokens without bound. Cap re-issues to at most one per this
+// window; the per-IP API rate limit is the other layer (and only if configured).
+const PORTAL_LINK_RESEND_COOLDOWN_MS = 3 * 60 * 1000
+
 /**
  * POST /api/portal/request-link
  *
@@ -52,6 +59,29 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'If an account exists with this email, a portal link will be sent.',
       })
+    }
+
+    // Anti-flood cooldown: if a link was issued to this client very recently,
+    // skip re-minting and return the same generic message (never reveal the
+    // skip). Not applied in development so the dev flow can request links freely.
+    if (process.env.NODE_ENV !== 'development') {
+      const { data: recentToken } = await supabaseCheck
+        .from('client_access_tokens')
+        .select('created_at')
+        .eq('client_id', clientInfo.clientId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (
+        recentToken?.created_at &&
+        Date.now() - new Date(recentToken.created_at).getTime() < PORTAL_LINK_RESEND_COOLDOWN_MS
+      ) {
+        return NextResponse.json({
+          success: true,
+          message: 'If an account exists with this email, a portal link will be sent.',
+        })
+      }
     }
 
     // Get or create a token for this client

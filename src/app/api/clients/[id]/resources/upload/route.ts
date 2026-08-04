@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { isAllowedUploadMimeType, hasAllowedFileSignature } from '@/lib/files/upload-validation'
 
 /**
  * POST /api/clients/[id]/resources/upload
@@ -85,21 +86,8 @@ export async function POST(
       )
     }
 
-    // Validate file type
-    const allowedTypes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'audio/mpeg',
-      'audio/wav',
-      'audio/mp3',
-      'video/mp4',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ]
-
-    if (!allowedTypes.includes(file.type)) {
+    // Validate the DECLARED file type (first gate; the browser controls this).
+    if (!isAllowedUploadMimeType(file.type)) {
       return NextResponse.json(
         { error: 'File type not allowed. Supported: PDF, images, audio, video, Word docs' },
         { status: 400 }
@@ -114,6 +102,19 @@ export async function POST(
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
+
+    // Sniff the actual bytes: the declared MIME above can be spoofed (e.g. an
+    // .html/.svg payload sent as image/png). Reject content whose signature isn't
+    // an allowed binary type.
+    if (!hasAllowedFileSignature(buffer)) {
+      return NextResponse.json(
+        {
+          error:
+            'File content does not match its type. Upload a valid PDF, image, audio, video, or Word document.',
+        },
+        { status: 400 }
+      )
+    }
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage

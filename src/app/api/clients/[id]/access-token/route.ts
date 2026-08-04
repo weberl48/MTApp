@@ -8,6 +8,8 @@ import {
 } from '@/lib/portal/token'
 import { isFeatureEnabled } from '@/lib/features'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 /**
  * GET /api/clients/[id]/access-token
@@ -48,9 +50,12 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // All staff can view tokens
-    const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
-    if (!allowedRoles.includes(profile.role)) {
+    // Managing portal access (view/create/revoke) is admin+ (`client:manage`).
+    // A contractor could otherwise mint a 90-day portal token for ANY client in
+    // the org (every member can read all client rows) and then read that client's
+    // portal PHI — including client_notes for sessions run by other contractors,
+    // via the service-client portal endpoints that bypass the sessions RLS.
+    if (!can(profile.role as UserRole, 'client:manage')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -132,9 +137,9 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // All staff can create tokens
-    const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
-    if (!allowedRoles.includes(profile.role)) {
+    // Admin+ only (`client:manage`) — minting a portal token is a privileged
+    // action; see the GET handler for the contractor-escalation rationale.
+    if (!can(profile.role as UserRole, 'client:manage')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -239,9 +244,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Only admins+ can revoke tokens
-    const allowedRoles = ['developer', 'owner', 'admin']
-    if (!allowedRoles.includes(profile.role)) {
+    // Admin+ only (`client:manage`) — same gate as view/create above.
+    if (!can(profile.role as UserRole, 'client:manage')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

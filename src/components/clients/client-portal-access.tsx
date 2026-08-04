@@ -33,7 +33,12 @@ interface FreshLink {
 }
 
 export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccessProps) {
-  const { settings } = useOrganization()
+  const { settings, can } = useOrganization()
+  // Managing portal access (issuing/revoking links) is an admin+ action
+  // (`client:manage`), now enforced server-side on every token route. Hide the
+  // card from anyone who can't act on it (contractors) rather than showing
+  // buttons that would 403.
+  const canManage = can('client:manage')
   const [tokens, setTokens] = useState<TokenSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState<'invite' | 'generate' | 'revoke' | null>(null)
@@ -63,8 +68,12 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   }, [clientId])
 
   useEffect(() => {
+    if (!canManage) {
+      setLoading(false)
+      return
+    }
     refreshTokens()
-  }, [refreshTokens])
+  }, [refreshTokens, canManage])
 
   async function sendInvite() {
     if (!clientEmail) {
@@ -156,6 +165,8 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
   }
 
   const activeToken = tokens[0]
+
+  if (!canManage) return null
 
   return (
     <Card data-tour="portal-access-card">
