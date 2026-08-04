@@ -56,7 +56,10 @@
   --motion-fast: 150ms;
   --motion-base: 200ms;
   --motion-slow: 250ms;
-  --background: oklch(1 0 0);
+  /* Slightly-gray canvas (Tailwind gray-50), NOT pure white: the dashboard
+     shell paints bg-background behind white bg-card surfaces, and the
+     pre-theme look this preserves was bg-gray-50 behind white cards. */
+  --background: oklch(0.985 0.002 247.8);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);

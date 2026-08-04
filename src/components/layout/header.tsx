@@ -191,7 +191,7 @@ export function Header({ user }: HeaderProps) {
                     <DropdownMenuItem
                       key={org.id}
                       onClick={() => switchOrganization(org.id)}
-                      className={org.id === organization?.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                      className={org.id === organization?.id ? 'bg-accent' : ''}
                     >
                       <div className="flex flex-col">
                         <span className="font-medium">{org.name}</span>
@@ -241,7 +241,7 @@ export function Header({ user }: HeaderProps) {
                     setViewAsRole(null)
                     setViewAsContractor(null)
                   }}
-                  className={!viewAsRole && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  className={!viewAsRole && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
                 </DropdownMenuItem>
@@ -251,7 +251,7 @@ export function Header({ user }: HeaderProps) {
                       setViewAsRole('owner')
                       setViewAsContractor(null)
                     }}
-                    className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                    className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-accent' : ''}
                   >
                     <span className="font-medium">Owner</span>
                   </DropdownMenuItem>
@@ -261,7 +261,7 @@ export function Header({ user }: HeaderProps) {
                     setViewAsRole('admin')
                     setViewAsContractor(null)
                   }}
-                  className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">Admin</span>
                 </DropdownMenuItem>
@@ -270,7 +270,7 @@ export function Header({ user }: HeaderProps) {
                     setViewAsRole('contractor')
                     setViewAsContractor(null)
                   }}
-                  className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-accent' : ''}
                 >
                   <span className="font-medium">Contractor (generic)</span>
                 </DropdownMenuItem>
@@ -292,7 +292,7 @@ export function Header({ user }: HeaderProps) {
                                 setViewAsRole('contractor')
                                 setViewAsContractor(contractor)
                               }}
-                              className={viewAsContractor?.id === contractor.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                              className={viewAsContractor?.id === contractor.id ? 'bg-accent' : ''}
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium">{contractor.name}</span>
@@ -349,7 +349,7 @@ export function Header({ user }: HeaderProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              <AvatarFallback className="bg-primary/15 text-primary">
                 {initials}
               </AvatarFallback>
             </Avatar>

@@ -58,10 +58,16 @@ function token(body: string, name: string): string | undefined {
   return body.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim()
 }
 
+// Exact selector spellings, not substrings: '[data-theme="x"]' is a substring
+// of 'html.dark[data-theme="x"]', so a bare-substring lookup would silently
+// depend on light-before-dark authoring order in themes.css.
+const lightSel = (id: string) => `html[data-theme="${id}"]`
+const darkSel = (id: string) => `html.dark[data-theme="${id}"]`
+
 describe('themes.css completeness', () => {
   for (const id of NON_DEFAULT_THEME_IDS) {
     it(`${id} defines every token in both modes`, () => {
-      for (const sel of [`[data-theme="${id}"]`, `.dark[data-theme="${id}"]`]) {
+      for (const sel of [lightSel(id), darkSel(id)]) {
         const body = block(sel)
         for (const t of REQUIRED_THEME_TOKENS) {
           expect(token(body, `--${t}`), `${sel} missing --${t}`).toBeTruthy()
@@ -77,9 +83,14 @@ describe('themes.css contrast (WCAG AA)', () => {
     ['background', 'foreground'],
     ['card', 'card-foreground'],
     ['sidebar', 'sidebar-foreground'],
+    // Sidebar nav states: active/hover items render sidebar-accent-foreground
+    // on sidebar-accent, and the active leaf pill renders
+    // sidebar-primary-foreground on sidebar-primary.
+    ['sidebar-accent', 'sidebar-accent-foreground'],
+    ['sidebar-primary', 'sidebar-primary-foreground'],
   ]
   for (const id of NON_DEFAULT_THEME_IDS) {
-    for (const sel of [`[data-theme="${id}"]`, `.dark[data-theme="${id}"]`]) {
+    for (const sel of [lightSel(id), darkSel(id)]) {
       it(`${sel} key pairs >= 4.5:1`, () => {
         const body = block(sel)
         for (const [bg, fg] of pairs) {

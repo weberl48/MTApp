@@ -134,7 +134,7 @@ Themes change the app's colors, fonts, and overall feel. Every theme works in bo
 
 - Your theme is a **personal preference** - it only changes what you see, not what your teammates see.
 - It's saved in your browser, so each device remembers its own choice.
-- Clients always see your practice's branding in the client portal and on invoices, no matter which theme you pick.
+- Clients always see your practice's branding in the client portal, no matter which theme you pick.
     `,
   },
   {

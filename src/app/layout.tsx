@@ -29,14 +29,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Theme fonts (see src/app/themes.css). Declaring them all is cheap: the
-// browser only downloads a font file when rendered text actually uses it,
-// so only the active theme's font ever transfers.
-const nunito = Nunito({ variable: "--font-nunito", subsets: ["latin"] });
-const sourceSans = Source_Sans_3({ variable: "--font-source-sans", subsets: ["latin"] });
-const quicksand = Quicksand({ variable: "--font-quicksand", subsets: ["latin"] });
-const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
-const ebGaramond = EB_Garamond({ variable: "--font-eb-garamond", subsets: ["latin"] });
+// Theme fonts (see src/app/themes.css). preload: false is load-bearing —
+// next/font preloads by default, which would push all five font files onto
+// every route; without preload the browser only fetches the file the active
+// theme's CSS actually renders with.
+const nunito = Nunito({ variable: "--font-nunito", subsets: ["latin"], preload: false });
+const sourceSans = Source_Sans_3({ variable: "--font-source-sans", subsets: ["latin"], preload: false });
+const quicksand = Quicksand({ variable: "--font-quicksand", subsets: ["latin"], preload: false });
+const lora = Lora({ variable: "--font-lora", subsets: ["latin"], preload: false });
+const ebGaramond = EB_Garamond({ variable: "--font-eb-garamond", subsets: ["latin"], preload: false });
 
 const themeFontVariables = [
   nunito.variable,

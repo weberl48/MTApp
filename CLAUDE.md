@@ -76,10 +76,11 @@ npm run health:prod    # Check production (NOTE: script has a placeholder URL �
 **Context Providers** (files live in `src/contexts/`):
 - `OrganizationContext` (`src/contexts/organization-context.tsx`) - Current user + organization data (dashboard)
 - `PortalContext` (`src/contexts/portal-context.tsx`) - Client data for portal (token-based)
-- `BrandingProvider` - Organization branding (colors, logo)
 
 **Dashboard Provider Stack** (outermost → innermost in `(dashboard)/layout.tsx`):
-`OrganizationProvider → BrandingProvider → ActivityTracker → WalkthroughProvider → MfaEnforcementGuard → OwnerOnboardingGate → {children}`
+`OrganizationProvider → ActivityTracker → WalkthroughProvider → MfaEnforcementGuard → OwnerOnboardingGate → {children}`
+
+**Theming vs branding**: the dashboard's look is a per-user theme (registry in `src/lib/themes/`, palettes in `src/app/themes.css`, `data-theme` stamped on `<html>` pre-paint by an inline script in the root layout, picked via the header's Appearance popover; light/dark mode stays next-themes'). Org `primary_color`/`secondary_color` are client-facing only — today consumed solely by the portal layout's logo badge. Spec: `docs/superpowers/specs/2026-08-04-user-themes-design.md`.
 
 **Pricing Logic** (`src/lib/pricing/index.ts`):
 - `calculateSessionPricing()` - Computes total, MCA cut, contractor pay, rent

@@ -307,7 +307,7 @@ export default function PracticeSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Brand Colors</CardTitle>
-            <CardDescription>Customize colors used on client-facing surfaces — invoices, emails, and the client portal. Staff pick their own dashboard look via the Appearance menu in the header.</CardDescription>
+            <CardDescription>Customize the colors clients see in the client portal. Staff pick their own dashboard look via the Appearance menu in the header.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

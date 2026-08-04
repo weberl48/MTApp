@@ -146,7 +146,7 @@ export function Sidebar() {
             className={cn(
               'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
               isActive
-                ? 'text-sidebar-primary'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
@@ -240,7 +240,9 @@ export function Sidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center h-16 px-6 border-b border-sidebar-border">
+          {/* h-[4rem], not h-16: h-16 is calc(var(--spacing)*16) and would drift
+              from the header's fixed 4rem under compact/airy theme densities */}
+          <div className="flex items-center h-[4rem] px-6 border-b border-sidebar-border">
             <Link href="/dashboard/" className="flex items-center">
               <span className="text-xl font-bold text-sidebar-foreground">
                 MCA

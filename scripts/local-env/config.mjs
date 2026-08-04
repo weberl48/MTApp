@@ -12,10 +12,15 @@
 /** Refs this toolset must NEVER address. Used as a substring blocklist. */
 export const FORBIDDEN_REFS = ['ysmwowzxkgisshaormmf', 'gzrukevymmguqxuoynqk']
 
-/** Default `supabase start` endpoints. */
+/**
+ * Default `supabase start` endpoints. 563xx, not the CLI's 543xx defaults:
+ * supabase/config.toml moves every port because Windows' dynamic excluded
+ * port ranges swallow the 543xx block on this machine (see the [api] note
+ * there). Keep these in sync with config.toml and .env.local.
+ */
 export const LOCAL = {
-  db: process.env.LOCAL_DB_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-  api: process.env.LOCAL_API_URL || 'http://127.0.0.1:54321',
+  db: process.env.LOCAL_DB_URL || 'postgresql://postgres:postgres@127.0.0.1:56322/postgres',
+  api: process.env.LOCAL_API_URL || 'http://127.0.0.1:56321',
 }
 
 /**

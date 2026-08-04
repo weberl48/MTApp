@@ -62,6 +62,7 @@ export function AppearanceMenu() {
                   variant={mode === value ? 'secondary' : 'ghost'}
                   size="sm"
                   className="h-8"
+                  aria-pressed={mode === value}
                   onClick={() => setMode(value)}
                 >
                   <Icon className="h-3.5 w-3.5 mr-1" />
