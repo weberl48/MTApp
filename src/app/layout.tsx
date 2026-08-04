@@ -103,7 +103,14 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${themeFontVariables}`}
     >
       <body className="antialiased">
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* suppressHydrationWarning: browsers move a script's nonce into an
+            internal slot, so the client-side attribute reads "" and React
+            would flag a false mismatch against the server-rendered value. */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <ServiceWorkerProvider />
           <PWAInstallPrompt />
