@@ -38,6 +38,7 @@ interface TeamMemberActionsProps {
 export function TeamMemberActions({ member, currentUserId, currentUserRole }: TeamMemberActionsProps) {
   const router = useRouter()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   // Check if current user can remove this member
@@ -71,7 +72,7 @@ export function TeamMemberActions({ member, currentUserId, currentUserRole }: Te
 
   return (
     <div className="flex items-center gap-1">
-      <DropdownMenu>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
@@ -88,9 +89,10 @@ export function TeamMemberActions({ member, currentUserId, currentUserRole }: Te
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-red-600 focus:text-red-600"
+                variant="destructive"
                 onSelect={(e) => {
                   e.preventDefault()
+                  setMenuOpen(false)
                   setDeleteOpen(true)
                 }}
               >
@@ -116,7 +118,7 @@ export function TeamMemberActions({ member, currentUserId, currentUserRole }: Te
             <AlertDialogAction
               onClick={handleRemove}
               disabled={isPending}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isPending ? 'Removing...' : 'Remove'}
             </AlertDialogAction>

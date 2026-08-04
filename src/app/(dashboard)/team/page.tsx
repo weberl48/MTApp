@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
+import { roleLabels } from '@/lib/constants/display'
 import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
 import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import { resolveEffectiveRole, VIEW_AS_COOKIE } from '@/lib/auth/view-as'
@@ -132,10 +133,10 @@ export default async function TeamPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+            <h1 className="text-2xl font-bold">Team Management</h1>
             <PageHelp article="inviting-team-members" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Manage contractors and view their performance
           </p>
         </div>
@@ -150,14 +151,14 @@ export default async function TeamPage() {
       <div data-tour="team-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Team Members
             </CardTitle>
-            <Users className="w-4 h-4 text-gray-400" />
+            <Users className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{users?.length || 0}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {totalAdmins} admin{totalAdmins !== 1 ? 's' : ''}, {totalContractors} contractor{totalContractors !== 1 ? 's' : ''}
             </p>
           </CardContent>
@@ -165,14 +166,14 @@ export default async function TeamPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Sessions
             </CardTitle>
-            <Calendar className="w-4 h-4 text-gray-400" />
+            <Calendar className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalSessions}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               All time
             </p>
           </CardContent>
@@ -181,14 +182,14 @@ export default async function TeamPage() {
         {canViewRates && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Pending Contractor Pay
               </CardTitle>
-              <DollarSign className="w-4 h-4 text-amber-500" />
+              <DollarSign className="w-4 h-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPendingPay)}</div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-2xl font-bold text-warning">{formatCurrency(totalPendingPay)}</div>
+              <p className="text-xs text-muted-foreground">
                 Awaiting payment
               </p>
             </CardContent>
@@ -197,14 +198,14 @@ export default async function TeamPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Active Contractors
             </CardTitle>
-            <Users className="w-4 h-4 text-green-500" />
+            <Users className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{totalContractors}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-2xl font-bold">{totalContractors}</div>
+            <p className="text-xs text-muted-foreground">
               Currently active
             </p>
           </CardContent>
@@ -242,18 +243,17 @@ export default async function TeamPage() {
                         <TableRow key={member.id}>
                           <TableCell>
                             <div className="font-medium">{member.name || 'Unnamed'}</div>
-                            <div className="text-sm text-gray-500">{member.email}</div>
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
                               {member.email && (
-                                <div className="flex items-center text-sm text-gray-500">
+                                <div className="flex items-center text-sm text-muted-foreground">
                                   <Mail className="w-3 h-3 mr-1" />
                                   {member.email}
                                 </div>
                               )}
                               {member.phone && (
-                                <div className="flex items-center text-sm text-gray-500">
+                                <div className="flex items-center text-sm text-muted-foreground">
                                   <Phone className="w-3 h-3 mr-1" />
                                   {member.phone}
                                 </div>
@@ -265,13 +265,13 @@ export default async function TeamPage() {
                               variant={member.role === 'contractor' ? 'secondary' : 'default'}
                               className={
                                 member.role === 'developer'
-                                  ? 'bg-purple-600 text-white dark:bg-purple-500'
+                                  ? 'bg-info text-info-foreground'
                                   : member.role === 'owner'
-                                    ? 'bg-amber-600 text-white dark:bg-amber-500'
+                                    ? 'bg-info-soft text-info-soft-foreground'
                                     : undefined
                               }
                             >
-                              {member.role}
+                              {roleLabels[member.role] || member.role}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
@@ -285,11 +285,11 @@ export default async function TeamPage() {
                           {canViewRates && (
                             <TableCell className="text-right">
                               {stats.pendingPay > 0 ? (
-                                <span className="text-amber-600 font-medium">
+                                <span className="text-warning font-medium">
                                   {formatCurrency(stats.pendingPay)}
                                 </span>
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-muted-foreground">-</span>
                               )}
                             </TableCell>
                           )}
@@ -310,7 +310,7 @@ export default async function TeamPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>No team members found</p>
                 </div>
@@ -328,7 +328,7 @@ export default async function TeamPage() {
                     </div>
                   )
                   : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div className="text-center py-8 text-muted-foreground">
                       No team members found
                     </div>
                   )

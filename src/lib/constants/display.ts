@@ -34,6 +34,15 @@ export const invoiceStatusLabels: Record<string, string> = {
   overdue: 'Overdue',
 }
 
+// --- User roles ---
+
+export const roleLabels: Record<string, string> = {
+  developer: 'Developer',
+  owner: 'Owner',
+  admin: 'Administrator',
+  contractor: 'Contractor',
+}
+
 // --- Payment methods ---
 
 export const paymentMethodLabels: Record<string, string> = {

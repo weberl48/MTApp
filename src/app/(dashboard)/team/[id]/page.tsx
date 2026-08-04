@@ -20,7 +20,7 @@ import { formatCurrency } from '@/lib/pricing'
 import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
 import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import { updateUserRole } from '@/app/actions/team'
-import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
+import { sessionStatusColors, sessionStatusLabels, invoiceStatusColors, invoiceStatusLabels, roleLabels } from '@/lib/constants/display'
 import type { UserRole } from '@/types/database'
 import { Calendar, DollarSign, Mail, Phone, User, Loader2, Pencil, Check, X, Settings2 } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -265,7 +265,7 @@ export default function TeamMemberPage() {
                   onClick={handleSaveRole}
                   disabled={savingRole}
                 >
-                  {savingRole ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-green-600" />}
+                  {savingRole ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-success" />}
                 </Button>
                 <Button
                   size="icon"
@@ -273,13 +273,13 @@ export default function TeamMemberPage() {
                   onClick={cancelEditingRole}
                   disabled={savingRole}
                 >
-                  <X className="w-4 h-4 text-red-600" />
+                  <X className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Badge variant={member.role === 'admin' || member.role === 'owner' ? 'default' : 'secondary'}>
-                  {member.role}
+                  {roleLabels[member.role] || member.role}
                 </Badge>
                 {canManageTeam && (
                   <Button
@@ -294,7 +294,7 @@ export default function TeamMemberPage() {
               </div>
             )}
           </div>
-          <p className="text-gray-500 dark:text-gray-400">{member.email}</p>
+          <p className="text-muted-foreground">{member.email}</p>
         </div>
       </div>
 
@@ -302,10 +302,10 @@ export default function TeamMemberPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Sessions
             </CardTitle>
-            <Calendar className="w-4 h-4 text-gray-400" />
+            <Calendar className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalSessions}</div>
@@ -316,10 +316,10 @@ export default function TeamMemberPage() {
           <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Earnings
                 </CardTitle>
-                <DollarSign className="w-4 h-4 text-gray-400" />
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(totalEarnings)}</div>
@@ -328,25 +328,25 @@ export default function TeamMemberPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Paid Out
                 </CardTitle>
-                <DollarSign className="w-4 h-4 text-green-500" />
+                <DollarSign className="w-4 h-4 text-success" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{formatCurrency(paidEarnings)}</div>
+                <div className="text-2xl font-bold text-success">{formatCurrency(paidEarnings)}</div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Pending Pay
                 </CardTitle>
-                <DollarSign className="w-4 h-4 text-amber-500" />
+                <DollarSign className="w-4 h-4 text-warning" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{formatCurrency(pendingEarnings)}</div>
+                <div className="text-2xl font-bold text-warning">{formatCurrency(pendingEarnings)}</div>
               </CardContent>
             </Card>
           </>
@@ -364,16 +364,16 @@ export default function TeamMemberPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-gray-400" />
+              <Mail className="w-4 h-4 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-sm text-muted-foreground">Email</p>
                 <p className="font-medium">{member.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-gray-400" />
+              <Phone className="w-4 h-4 text-muted-foreground" />
               <div>
-                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-sm text-muted-foreground">Phone</p>
                 <p className="font-medium">{member.phone || 'Not provided'}</p>
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function TeamMemberPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   No sessions found
                 </div>
               )}
@@ -498,7 +498,7 @@ export default function TeamMemberPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   No invoices found
                 </div>
               )}

@@ -363,14 +363,14 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (contractors.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-8 text-muted-foreground">
         No contractors found
       </div>
     )
@@ -378,7 +378,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
 
   if (serviceTypes.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-8 text-muted-foreground">
         No active service types found. Add service types in Settings first.
       </div>
     )
@@ -387,7 +387,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
   return (
     <div className="space-y-3" data-tour="pay-rate-matrix">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           {isBaseDuration
             ? 'Base pay rates (30 min). Click to edit.'
             : `Pay at ${selectedDuration} min. Editing updates the per-15-min increment.`}
@@ -413,7 +413,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 bg-white dark:bg-gray-950 z-10 min-w-[140px]">
+              <TableHead className="sticky left-0 bg-card z-10 min-w-[140px]">
                 Contractor
               </TableHead>
               {serviceTypes.map((st) => {
@@ -421,7 +421,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                 return (
                 <TableHead key={st.id} className="text-center min-w-[120px]">
                   <div className="text-xs font-medium">{st.name}</div>
-                  <div className="text-[10px] text-gray-400 font-normal">
+                  <div className="text-xs text-muted-foreground font-normal">
                     default: {formatCurrency(defaultPayAtDuration)}
                   </div>
                   {canEdit && contractors.length > 1 && (
@@ -444,7 +444,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-5 px-1.5 text-[10px] font-normal text-gray-400 hover:text-gray-600"
+                          className="h-6 px-1.5 text-xs font-normal text-muted-foreground hover:text-foreground"
                         >
                           <Users className="w-3 h-3 mr-0.5" />
                           Set all
@@ -452,7 +452,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                       </PopoverTrigger>
                       <PopoverContent className="w-56 p-3" align="center">
                         <div className="space-y-2">
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             Set {selectedDuration}-min rate for all {contractors.length} contractors
                           </p>
                           <div className="flex items-center gap-1">
@@ -494,7 +494,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
           <TableBody>
             {contractors.map((contractor) => (
               <TableRow key={contractor.id}>
-                <TableCell className="sticky left-0 bg-white dark:bg-gray-950 z-10">
+                <TableCell className="sticky left-0 bg-card z-10">
                   <Link
                     href={`/team/${contractor.id}/`}
                     className="hover:underline"
@@ -549,7 +549,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                               {saving ? (
                                 <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
-                                <Check className="w-3 h-3 text-green-600" />
+                                <Check className="w-3 h-3 text-success" />
                               )}
                             </Button>
                             <Button
@@ -559,7 +559,7 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                               onClick={cancelEditing}
                               disabled={saving}
                             >
-                              <X className="w-3 h-3 text-red-600" />
+                              <X className="w-3 h-3 text-muted-foreground" />
                             </Button>
                           </div>
                         </div>
@@ -567,11 +567,11 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                         <div className="flex flex-col items-center group">
                           <div className="flex items-center gap-0.5">
                             {rateEntry ? (
-                              <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                              <span className="text-sm font-medium text-info">
                                 {formatCurrency(payAtDuration)}
                               </span>
                             ) : (
-                              <span className="text-sm text-amber-500 dark:text-amber-400">
+                              <span className="text-sm text-foreground">
                                 {formatCurrency(payAtDuration)}
                               </span>
                             )}
@@ -598,14 +598,14 @@ export function PayRateMatrix({ organizationId, canEdit }: PayRateMatrixProps) {
                                     disabled={saving}
                                     title="Reset to default"
                                   >
-                                    <RotateCcw className="w-3 h-3 text-gray-400" />
+                                    <RotateCcw className="w-3 h-3 text-muted-foreground" />
                                   </Button>
                                 )}
                               </div>
                             )}
                           </div>
                           {rateEntry && increment != null && (
-                            <span className={`text-[10px] ${rateEntry.duration_increment != null ? 'text-green-500' : 'text-gray-400'}`}>
+                            <span className={`text-xs ${rateEntry.duration_increment != null ? 'text-info' : 'text-muted-foreground'}`}>
                               +{formatCurrency(increment)}/15m
                             </span>
                           )}

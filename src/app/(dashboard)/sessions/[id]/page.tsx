@@ -76,6 +76,7 @@ export default function SessionDetailPage() {
   const [hasInvoice, setHasInvoice] = useState(true)
   const [isPending, startTransition] = useTransition()
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
   const currentUserId = effectiveUserId || user?.id || null
 
@@ -354,7 +355,7 @@ export default function SessionDetailPage() {
             </Button>
           )}
           {hasMoreActions && (
-            <DropdownMenu>
+            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="More actions" disabled={isPending}>
                   <MoreHorizontal className="h-4 w-4" />
@@ -373,6 +374,7 @@ export default function SessionDetailPage() {
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault()
+                      setMenuOpen(false)
                       handleMarkNoShow()
                     }}
                   >
@@ -384,6 +386,7 @@ export default function SessionDetailPage() {
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault()
+                      setMenuOpen(false)
                       handleCancel()
                     }}
                   >
@@ -398,6 +401,7 @@ export default function SessionDetailPage() {
                       variant="destructive"
                       onSelect={(e) => {
                         e.preventDefault()
+                        setMenuOpen(false)
                         handleDelete()
                       }}
                     >
