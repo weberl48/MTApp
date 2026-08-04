@@ -84,15 +84,15 @@ export default async function ClientsPage() {
               <div className="text-2xl font-bold">{allClients.length}</div>
             </CardContent>
           </Card>
-          <Card className="h-full border-amber-200 dark:border-amber-800">
+          <Card className="h-full border-warning/20">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Missing Contact Info
               </CardTitle>
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <AlertCircle className="w-4 h-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">{noContactCount}</div>
+              <div className="text-2xl font-bold text-warning">{noContactCount}</div>
             </CardContent>
           </Card>
         </div>

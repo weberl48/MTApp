@@ -19,7 +19,7 @@ interface ClientDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-import { paymentMethodLabels, billingMethodLabels, sessionStatusColors, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
+import { paymentMethodLabels, billingMethodLabels, sessionStatusColors, sessionStatusLabels, invoiceStatusColors, invoiceStatusLabels } from '@/lib/constants/display'
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params
@@ -140,42 +140,56 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {client.contact_email && (
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-gray-400" />
-                <a href={`mailto:${client.contact_email}`} className="text-blue-600 hover:underline">
-                  {client.contact_email}
-                </a>
-              </div>
-            )}
-
-            {client.contact_phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-gray-400" />
-                <a href={`tel:${client.contact_phone}`} className="text-blue-600 hover:underline">
-                  {client.contact_phone}
-                </a>
-              </div>
-            )}
-
             <div className="flex items-center gap-3">
-              <CreditCard className="h-4 w-4 text-gray-400" />
-              <Badge variant="outline">
-                {paymentMethodLabels[client.payment_method] || client.payment_method}
-              </Badge>
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                {client.contact_email ? (
+                  <a href={`mailto:${client.contact_email}`} className="font-medium text-primary hover:underline">
+                    {client.contact_email}
+                  </a>
+                ) : (
+                  <p className="font-medium text-muted-foreground">Not provided</p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <FileText className="h-4 w-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Billing:</span>
-              <Badge variant="secondary">
-                {billingMethodLabels[client.billing_method] || 'Square'}
-              </Badge>
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Phone</p>
+                {client.contact_phone ? (
+                  <a href={`tel:${client.contact_phone}`} className="font-medium text-primary hover:underline">
+                    {client.contact_phone}
+                  </a>
+                ) : (
+                  <p className="font-medium text-muted-foreground">Not provided</p>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t space-y-3">
+              <p className="text-sm font-semibold">Billing</p>
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Payment Method:</span>
+                <Badge variant="outline">
+                  {paymentMethodLabels[client.payment_method] || client.payment_method}
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Billing Method:</span>
+                <Badge variant="secondary">
+                  {billingMethodLabels[client.billing_method] || 'Square'}
+                </Badge>
+              </div>
             </div>
 
             {decryptedNotes && (
               <div className="pt-2 border-t">
-                <p className="text-sm text-gray-500">{decryptedNotes}</p>
+                <p className="text-sm text-muted-foreground">{decryptedNotes}</p>
               </div>
             )}
           </CardContent>
@@ -188,7 +202,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>Total Sessions</span>
               </div>
@@ -196,13 +210,13 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <FileText className="h-4 w-4" />
                 <span>Pending Invoices</span>
               </div>
-              <Badge variant={pendingInvoiceCount > 0 ? 'destructive' : 'secondary'}>
+              <span className={`font-semibold ${pendingInvoiceCount > 0 ? 'text-warning' : ''}`}>
                 {pendingInvoiceCount}
-              </Badge>
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -232,7 +246,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                     <Link
                       key={session.id}
                       href={`/sessions/${session.id}/`}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -240,10 +254,10 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                             {session.service_type?.name || 'Unknown Service'}
                           </span>
                           <span className={`px-2 py-0.5 text-xs rounded-full ${sessionStatusColors[session.status] || sessionStatusColors.draft}`}>
-                            {session.status}
+                            {sessionStatusLabels[session.status] || session.status}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {parseLocalDate(session.date).toLocaleDateString('en-US', {
                             weekday: 'short',
                             month: 'short',
@@ -258,7 +272,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-muted-foreground text-center py-8">
                   No sessions found for this client.
                 </p>
               )}
@@ -279,7 +293,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                     <Link
                       key={invoice.id}
                       href={`/invoices/${invoice.id}/`}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -293,7 +307,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                             {paymentMethodLabels[invoice.payment_method] || invoice.payment_method}
                           </Badge>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(invoice.created_at).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -306,7 +320,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-muted-foreground text-center py-8">
                   No invoices found for this client.
                 </p>
               )}
