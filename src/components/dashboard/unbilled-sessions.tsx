@@ -96,10 +96,10 @@ export function UnbilledSessions({ organizationId }: Props) {
   }
 
   return (
-    <Card className="border-purple-200 dark:border-purple-800">
+    <Card className="border-info/20">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <Receipt className="w-5 h-5 text-purple-600 shrink-0" />
+          <Receipt className="w-5 h-5 text-info shrink-0" />
           <CardTitle>Unbilled Scholarship Sessions</CardTitle>
         </div>
         <CardDescription>
@@ -138,11 +138,11 @@ export function UnbilledSessions({ organizationId }: Props) {
             return (
               <div
                 key={key}
-                className="flex items-center justify-between p-3 bg-purple-50/50 dark:bg-purple-950/10 rounded-lg"
+                className="flex items-center justify-between p-3 bg-info-soft/50 rounded-lg"
               >
                 <div>
                   <p className="font-medium text-sm">{group.clientName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {monthLabel} &middot; {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
                   </p>
                 </div>

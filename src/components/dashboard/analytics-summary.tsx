@@ -5,14 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/contexts/organization-context'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, Calendar, BarChart3 } from 'lucide-react'
+import { DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import Link from 'next/link'
 
 interface MonthlyStats {
   revenue: number
   mcaEarnings: number
-  sessionCount: number
 }
 
 export function AnalyticsSummary() {
@@ -39,13 +38,7 @@ export function AnalyticsSummary() {
         .select('amount, mca_cut')
         .gte('created_at', firstDayOfMonth)
 
-      // Fetch this month's session count
-      const { count: sessionCount, error: sessionError } = await supabase
-        .from('sessions')
-        .select('id', { count: 'exact' })
-        .gte('date', firstDayOfMonth)
-
-      if (invoiceError || sessionError) {
+      if (invoiceError) {
         setLoading(false)
         return
       }
@@ -56,7 +49,6 @@ export function AnalyticsSummary() {
       setStats({
         revenue,
         mcaEarnings,
-        sessionCount: sessionCount || 0,
       })
       setLoading(false)
     }
@@ -71,24 +63,17 @@ export function AnalyticsSummary() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6 sm:gap-8 flex-wrap">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-gray-400" />
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Monthly Revenue</p>
-                <p className="text-lg font-bold">{formatCurrency(stats?.revenue || 0)}</p>
+                <p className="text-xs text-muted-foreground">Monthly Revenue</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(stats?.revenue || 0)}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <TrendingUp className="w-4 h-4 text-success" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">MCA Earnings</p>
-                <p className="text-lg font-bold text-green-600">{formatCurrency(stats?.mcaEarnings || 0)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Sessions</p>
-                <p className="text-lg font-bold">{stats?.sessionCount || 0}</p>
+                <p className="text-xs text-muted-foreground">MCA Earnings</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(stats?.mcaEarnings || 0)}</p>
               </div>
             </div>
           </div>

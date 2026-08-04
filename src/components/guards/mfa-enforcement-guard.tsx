@@ -65,8 +65,8 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
           aria-live="polite"
           className="flex flex-col items-center justify-center gap-3 py-16"
         >
-          <Loader2 aria-hidden="true" className="w-6 h-6 animate-spin text-blue-600" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Verifying security settings…</p>
+          <Loader2 aria-hidden="true" className="w-6 h-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verifying security settings…</p>
         </div>
       )
     }
@@ -77,13 +77,13 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
   if (requireMfa && isPrivilegedUser && mfaEnabled === false && !isSettingsPage) {
     return (
       <div className="p-4 space-y-4">
-        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+        <Card className="border-destructive/20 bg-destructive-soft">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
+            <CardTitle className="flex items-center gap-2 text-destructive-soft-foreground">
               <Shield className="w-5 h-5" />
               Two-Factor Authentication Required
             </CardTitle>
-            <CardDescription className="text-red-600 dark:text-red-400">
+            <CardDescription className="text-destructive-soft-foreground">
               Your organization requires two-factor authentication for admin accounts.
               Please set up 2FA to continue using the application.
             </CardDescription>
@@ -106,9 +106,9 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
     return (
       <>
         <div className="mx-4 mt-2 mb-0">
-          <div className="flex items-center gap-3 p-3 text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span className="text-amber-700 dark:text-amber-300 flex-1">
+          <div className="flex items-center gap-3 p-3 text-sm bg-warning-soft border border-warning/20 rounded-lg">
+            <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
+            <span className="text-warning-soft-foreground flex-1">
               Your account does not have two-factor authentication enabled.
               For better security, we recommend setting up 2FA.
             </span>

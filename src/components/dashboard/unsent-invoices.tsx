@@ -120,11 +120,11 @@ export function UnsentInvoices() {
   }
 
   return (
-    <Card className="border-yellow-200 dark:border-yellow-800">
+    <Card className="border-warning/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-yellow-600" />
+            <FileText className="w-5 h-5 text-warning" />
             <CardTitle>Unsent Invoices</CardTitle>
           </div>
           <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export function UnsentInvoices() {
             }}
             aria-label="Select all"
           />
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             Select all
             {selectedIds.size > 0 && ` (${formatCurrency(selectedTotal)} selected)`}
           </span>
@@ -184,8 +184,8 @@ export function UnsentInvoices() {
               key={invoice.id}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                 selectedIds.has(invoice.id)
-                  ? 'bg-yellow-50 dark:bg-yellow-950/30'
-                  : 'bg-gray-50 dark:bg-gray-800'
+                  ? 'bg-warning-soft'
+                  : 'bg-muted'
               }`}
             >
               <Checkbox
@@ -202,12 +202,12 @@ export function UnsentInvoices() {
                     {paymentMethodLabels[invoice.payment_method] || invoice.payment_method}
                   </Badge>
                   {!invoice.client?.contact_email && (
-                    <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                    <Badge variant="outline" className="text-xs text-warning border-warning/30">
                       No email
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {invoice.invoice_type === 'batch' && invoice.billing_period
                     ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                     : invoice.session?.date

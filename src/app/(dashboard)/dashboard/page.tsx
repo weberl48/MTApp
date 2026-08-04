@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { Calendar, Users, FileText, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { parseLocalDate } from '@/lib/dates'
-import { sessionStatusLabels } from '@/lib/constants/display'
+import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
 import { useOrganization } from '@/contexts/organization-context'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { can } from '@/lib/auth/permissions'
@@ -208,7 +208,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid - Clickable */}
       <div data-tour="dashboard-stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Link href="/sessions/">
+        <Link href="/sessions/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -222,7 +222,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/clients/">
+        <Link href="/clients/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -236,7 +236,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/sessions/">
+        <Link href="/sessions/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -252,7 +252,7 @@ export default function DashboardPage() {
         </Link>
 
         {stats?.isAdmin && (
-          <Link href="/invoices/">
+          <Link href="/invoices/" className="last:odd:col-span-2 lg:col-span-1">
             <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -307,11 +307,7 @@ export default function DashboardPage() {
                       </span>
                       <span
                         className={`px-2 py-0.5 text-xs rounded-full ${
-                          session.status === 'approved'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : session.status === 'submitted'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-muted text-muted-foreground'
+                          sessionStatusColors[session.status] || 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {sessionStatusLabels[session.status] || session.status}

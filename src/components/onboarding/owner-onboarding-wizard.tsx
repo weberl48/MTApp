@@ -83,7 +83,10 @@ export function OwnerOnboardingWizard(props: {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent className="sm:max-w-xl" showCloseButton>
-        <DialogHeader>
+        <DialogHeader
+          key={safeStepIndex}
+          className="animate-in fade-in-0 duration-[var(--motion-fast)] ease-out"
+        >
           <DialogTitle>{step.title}</DialogTitle>
           <DialogDescription>{step.description}</DialogDescription>
         </DialogHeader>
@@ -107,7 +110,7 @@ export function OwnerOnboardingWizard(props: {
               <div
                 key={idx}
                 className={cn(
-                  'h-1.5 flex-1 rounded-full bg-muted',
+                  'h-1.5 flex-1 rounded-full bg-muted transition-colors duration-[var(--motion-base)]',
                   idx <= safeStepIndex && 'bg-primary'
                 )}
               />

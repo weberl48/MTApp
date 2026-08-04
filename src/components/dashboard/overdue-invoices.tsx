@@ -69,20 +69,20 @@ export function OverdueInvoices() {
   }
 
   return (
-    <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20">
+    <Card className="border-destructive/20 bg-destructive-soft">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-            <CardTitle className="text-red-700 dark:text-red-400">Overdue Invoices</CardTitle>
+            <AlertTriangle className="w-5 h-5 text-destructive" />
+            <CardTitle className="text-destructive-soft-foreground">Overdue Invoices</CardTitle>
           </div>
           <Link href="/invoices/">
-            <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950">
+            <Button variant="outline" size="sm" className="border-destructive/30 text-destructive hover:bg-destructive-soft">
               View All
             </Button>
           </Link>
         </div>
-        <CardDescription className="text-red-600 dark:text-red-400">
+        <CardDescription className="text-destructive-soft-foreground">
           {invoices.length} invoice{invoices.length !== 1 ? 's' : ''} past due &middot; {formatCurrency(totalAmount)} outstanding
         </CardDescription>
       </CardHeader>
@@ -96,16 +96,16 @@ export function OverdueInvoices() {
             return (
               <div
                 key={invoice.id}
-                className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg"
+                className="flex items-center justify-between p-3 bg-card rounded-lg"
               >
                 <Link href={`/invoices/${invoice.id}/`} className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{clientName || 'Unknown Client'}</p>
-                  <p className="text-xs text-red-600 dark:text-red-400">
+                  <p className="text-xs text-destructive">
                     {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} overdue
                   </p>
                 </Link>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-bold text-red-700 dark:text-red-400 text-sm">
+                  <span className="font-bold text-destructive text-sm">
                     {formatCurrency(invoice.amount)}
                   </span>
                   {canBulkAction && (

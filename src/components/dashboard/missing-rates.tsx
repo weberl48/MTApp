@@ -96,11 +96,11 @@ export function MissingRates() {
   }
 
   return (
-    <Card className="border-amber-200 dark:border-amber-800">
+    <Card className="border-warning/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <AlertTriangle className="w-5 h-5 text-warning" />
             <CardTitle>Missing Contractor Rates</CardTitle>
           </div>
           <Link href="/team/">
@@ -117,10 +117,10 @@ export function MissingRates() {
             <Link
               key={contractor.id}
               href={`/team/${contractor.id}/`}
-              className="block p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+              className="block p-3 bg-warning-soft/50 rounded-lg hover:bg-warning-soft transition-colors"
             >
               <div className="font-medium text-sm">{contractor.name}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Missing: {contractor.serviceTypes.join(', ')}
               </div>
             </Link>
