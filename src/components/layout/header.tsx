@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AppearanceMenu } from '@/components/ui/appearance-menu'
 import type { User } from '@/types/database'
 
 interface HeaderProps {
@@ -341,8 +341,8 @@ export function Header({ user }: HeaderProps) {
         )}
       </div>
 
-      {/* Theme toggle */}
-      <ThemeToggle />
+      {/* Appearance: light/dark mode + theme picker */}
+      <AppearanceMenu />
 
       {/* User menu */}
       <DropdownMenu>
