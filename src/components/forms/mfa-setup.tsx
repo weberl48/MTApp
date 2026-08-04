@@ -71,7 +71,7 @@ export function MfaSetup() {
     setVerifying(true)
     try {
       await verifyMfaEnrollment(enrollmentData.id, verificationCode)
-      toast.success('Two-factor authentication enabled successfully!')
+      toast.success('Two-factor authentication enabled')
       setShowEnrollDialog(false)
       setEnrollmentData(null)
       setVerificationCode('')

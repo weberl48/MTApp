@@ -36,7 +36,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       if (error) throw error
 
-      toast.success('Profile updated successfully!')
+      toast.success('Profile updated')
       router.refresh()
     } catch (error) {
       console.error('[MCA] Error updating profile')

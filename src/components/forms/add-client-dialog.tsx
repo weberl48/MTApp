@@ -113,7 +113,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
         })
 
         if (!result.success) throw new Error(result.error)
-        toast.success('Client updated successfully!')
+        toast.success('Client updated')
       } else {
         // Create via server action (encrypts PHI notes server-side)
         const result = await addClient({
@@ -146,7 +146,7 @@ export function ClientDialog({ client, trigger, onSuccess }: ClientDialogProps) 
             toast.success('Client added! (Failed to send invite - you can retry from client page)')
           }
         } else {
-          toast.success('Client added successfully!')
+          toast.success('Client added')
         }
       }
 

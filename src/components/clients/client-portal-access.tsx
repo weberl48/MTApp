@@ -143,7 +143,7 @@ export function ClientPortalAccess({ clientId, clientEmail }: ClientPortalAccess
     if (!freshLink) return
     navigator.clipboard.writeText(freshLink.url)
     setCopied(true)
-    toast.success('Portal link copied to clipboard!')
+    toast.success('Portal link copied')
     setTimeout(() => setCopied(false), 2000)
   }
 

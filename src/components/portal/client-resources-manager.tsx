@@ -151,7 +151,7 @@ export function ClientResourcesManager({ clientId, clientName }: ClientResources
           throw new Error(data.error || 'Failed to upload file')
         }
 
-        toast.success('File uploaded!')
+        toast.success('File uploaded')
         setResources((prev) => [data.resource, ...prev])
       } else {
         // Handle homework or link

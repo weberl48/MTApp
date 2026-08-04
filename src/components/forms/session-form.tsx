@@ -607,7 +607,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
         } else if (ensured && ensured.created > 0) {
           toast.success(ensured.created > 1 ? 'Session updated and invoices created.' : 'Session updated and invoice created.')
         } else {
-          toast.success('Session updated successfully!')
+          toast.success('Session updated')
         }
         router.push(`/sessions/${existingSession.id}/`)
         router.refresh()
@@ -663,7 +663,7 @@ export function SessionForm({ serviceTypes, clients, contractorId, existingSessi
           })
         }
 
-        toast.success('Session logged successfully!')
+        toast.success('Session logged')
         wasScholarshipRef.current = selectedPaymentMethod === 'scholarship'
         setShowSuccess(true)
       }

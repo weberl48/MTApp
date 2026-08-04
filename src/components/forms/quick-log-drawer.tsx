@@ -165,7 +165,7 @@ export function QuickLogDrawer({ open, onOpenChange }: QuickLogDrawerProps) {
         })
       }
 
-      toast.success('Session logged!')
+      toast.success('Session logged')
       onOpenChange(false)
     } catch {
       toast.error('Failed to log session')

@@ -193,7 +193,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">
             {viewAsContractor
               ? `Viewing ${viewAsContractor.name}'s dashboard`
-              : "Welcome back! Here's an overview of your practice."}
+              : "Welcome back — here's an overview of your practice."}
           </p>
         </div>
         <div className="flex gap-2">
