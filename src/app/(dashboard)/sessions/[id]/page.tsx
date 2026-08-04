@@ -195,7 +195,7 @@ export default function SessionDetailPage() {
         startTransition(async () => {
           const result = await markSessionNoShow(session.id)
           if (result.success) {
-            setSession({ ...session, status: 'no_show' })
+            setSession({ ...session, status: 'no_show', ...(result.pricing ?? {}) })
             toast.success('Session marked as no-show')
           } else {
             toast.error(result.error || 'Failed to update session')

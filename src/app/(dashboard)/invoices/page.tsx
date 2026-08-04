@@ -31,6 +31,8 @@ import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
+import { logger } from '@/lib/logger'
 import { invoiceStatusColors, invoiceStatusLabels, paymentMethodLabels } from '@/lib/constants/display'
 import {
   fetchUnbilledScholarshipSessions,
@@ -274,6 +276,7 @@ export default function InvoicesPage() {
   )
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
@@ -384,76 +387,73 @@ export default function InvoicesPage() {
     async function loadInvoices() {
       const supabase = supabaseRef.current
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-      if (!user || cancelled) {
-        if (!cancelled) setLoading(false)
-        return
-      }
-
-      // Use context isAdmin (which respects viewAsRole)
-      const admin = contextIsAdmin
-
-      // Fetch invoices with related data
-      // For contractors (or when viewing as a specific contractor), only fetch their invoices
-      let query = supabase
-        .from('invoices')
-        .select(`
-          *,
-          client:clients(id, name, contact_email),
-          session:sessions(
-            id,
-            date,
-            submitted_at,
-            approved_at,
-            contractor_id,
-            contractor:users(id, name),
-            service_type:service_types(name)
-          )
-        `)
-        .order('created_at', { ascending: false })
-
-      // If not admin OR viewing as a specific contractor, filter invoices
-      const shouldFilterByContractor = !admin || viewAsContractor
-      const contractorIdToFilter = viewAsContractor?.id || (admin ? null : effectiveUserId)
-
-      if (shouldFilterByContractor && contractorIdToFilter) {
-        // Get invoice IDs for sessions where this contractor is assigned
-        const { data: contractorSessions } = await supabase
-          .from('sessions')
-          .select('id')
-          .eq('contractor_id', contractorIdToFilter)
-
-        const sessionIds = contractorSessions?.map((s) => s.id) || []
-
-        if (sessionIds.length === 0) {
-          // No sessions, return empty array
-          if (!cancelled) {
-            setIsAdmin(admin && !viewAsContractor)
-            setInvoices([])
-            setLoading(false)
-          }
+        if (!user || cancelled) {
           return
         }
 
-        query = query.in('session_id', sessionIds)
-      }
+        // Use context isAdmin (which respects viewAsRole)
+        const admin = contextIsAdmin
 
-      const { data } = await query
+        // If not admin OR viewing as a specific contractor, filter invoices.
+        // The filter rides the embedded session join (!inner) rather than an
+        // `.in('session_id', [...])` list — a contractor with hundreds of
+        // sessions used to blow past the gateway's URL limit (HTTP 414) and
+        // strand the page on its loading skeleton.
+        const shouldFilterByContractor = !admin || viewAsContractor
+        const contractorIdToFilter = viewAsContractor?.id || (admin ? null : effectiveUserId)
+        const filterByContractor = Boolean(shouldFilterByContractor && contractorIdToFilter)
 
-      // Fetch unbilled scholarship sessions (admin only)
-      let unbilled: UnbilledScholarshipSession[] = []
-      if (admin && !viewAsContractor && organization) {
-        unbilled = await fetchUnbilledScholarshipSessions(supabase, organization.id)
-      }
+        // Fetch invoices with related data
+        let query = supabase
+          .from('invoices')
+          .select(`
+            *,
+            client:clients(id, name, contact_email),
+            session:sessions${filterByContractor ? '!inner' : ''}(
+              id,
+              date,
+              submitted_at,
+              approved_at,
+              contractor_id,
+              contractor:users(id, name),
+              service_type:service_types(name)
+            )
+          `)
+          .order('created_at', { ascending: false })
 
-      if (!cancelled) {
-        setIsAdmin(admin && !viewAsContractor)
-        setInvoices((data as unknown as Invoice[]) || [])
-        setUnbilledScholarshipSessions(unbilled)
-        setLoading(false)
+        if (filterByContractor) {
+          query = query.eq('session.contractor_id', contractorIdToFilter as string)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+
+        // Fetch unbilled scholarship sessions (admin only)
+        let unbilled: UnbilledScholarshipSession[] = []
+        if (admin && !viewAsContractor && organization) {
+          unbilled = await fetchUnbilledScholarshipSessions(supabase, organization.id)
+        }
+
+        if (!cancelled) {
+          setIsAdmin(admin && !viewAsContractor)
+          setInvoices((data as unknown as Invoice[]) || [])
+          setUnbilledScholarshipSessions(unbilled)
+          setLoadError(false)
+        }
+      } catch (err) {
+        logger.error('Error loading invoices', err)
+        if (!cancelled) {
+          setLoadError(true)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
@@ -504,6 +504,20 @@ export default function InvoicesPage() {
 
   if (loading) {
     return <InvoicesListSkeleton />
+  }
+
+  if (loadError) {
+    return (
+      <ErrorState
+        title="Couldn't load invoices"
+        description="Something went wrong while loading your invoices. Your data is safe."
+        onRetry={() => {
+          setLoadError(false)
+          setLoading(true)
+          setRefreshTrigger((t) => t + 1)
+        }}
+      />
+    )
   }
 
   return (

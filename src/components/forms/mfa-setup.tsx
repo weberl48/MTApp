@@ -43,7 +43,8 @@ export function MfaSetup() {
     setLoading(true)
     try {
       const data = await getMfaFactors()
-      setFactors(data)
+      // null = the check failed; keep the current list rather than clearing it
+      if (data !== null) setFactors(data)
     } catch (error) {
       console.error('[MCA] Error loading MFA factors')
     } finally {

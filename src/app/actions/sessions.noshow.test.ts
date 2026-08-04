@@ -120,7 +120,12 @@ describe('markSessionNoShow (regression for #5 — no-show reprices to the fee)'
 
   it("sets status='no_show' and reprices the session to the no-show fee (contractor keeps normal pay)", async () => {
     const result = await markSessionNoShow('s1')
-    expect(result).toEqual({ success: true })
+    // Repriced amounts ride the return so the detail page can refresh its Billing
+    // Summary in place (regression: UI showed stale pre-no-show figures until reload).
+    expect(result).toEqual({
+      success: true,
+      pricing: { total_amount: 60, contractor_pay: 42, mca_cut: 18 },
+    })
     expect(captured.sessionUpdate.status).toBe('no_show')
     expect(captured.sessionUpdate.total_amount).toBe(60) // flat no-show fee
     expect(captured.sessionUpdate.contractor_pay).toBe(42) // normal 30-min pay

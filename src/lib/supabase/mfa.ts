@@ -20,25 +20,38 @@ export interface EnrollMfaResponse {
 }
 
 /**
- * Get the user's current MFA factors
+ * Get the user's current MFA factors.
+ *
+ * Returns `null` when the check itself failed (transient auth/network error), which is
+ * NOT the same as "no factors": collapsing an error into an empty list made
+ * MfaEnforcementGuard render the blocking "Set Up Two-Factor Authentication" screen for
+ * an enrolled user whenever `listFactors()` hiccuped. Retries once before giving up.
  */
-export async function getMfaFactors(): Promise<MfaFactor[]> {
+export async function getMfaFactors(): Promise<MfaFactor[] | null> {
   const supabase = createClient()
-  const { data, error } = await supabase.auth.mfa.listFactors()
 
-  if (error) {
-    console.error('[MCA] Error listing MFA factors')
-    return []
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data, error } = await supabase.auth.mfa.listFactors()
+    if (!error) {
+      return data?.totp || []
+    }
+    if (attempt === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
   }
 
-  return data?.totp || []
+  console.error('[MCA] Error listing MFA factors')
+  return null
 }
 
 /**
- * Check if user has MFA enabled (has at least one verified TOTP factor)
+ * Check if user has MFA enabled (has at least one verified TOTP factor).
+ * Returns `null` when the status could not be determined — callers must treat that as
+ * "unknown", never as "not enrolled".
  */
-export async function hasMfaEnabled(): Promise<boolean> {
+export async function hasMfaEnabled(): Promise<boolean | null> {
   const factors = await getMfaFactors()
+  if (factors === null) return null
   return factors.some((f) => f.status === 'verified')
 }
 
@@ -193,9 +206,10 @@ export async function needsMfaVerification(): Promise<{ needsVerification: boole
 
   // If current level is aal1 but next level is aal2, user needs to verify MFA
   if (aalData.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
-    // Get the first verified factor
+    // Get the first verified factor (fail open on an indeterminate check, matching the
+    // aalError handling above)
     const factors = await getMfaFactors()
-    const verifiedFactor = factors.find((f) => f.status === 'verified')
+    const verifiedFactor = factors?.find((f) => f.status === 'verified')
 
     if (verifiedFactor) {
       return { needsVerification: true, factorId: verifiedFactor.id }

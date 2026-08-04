@@ -320,7 +320,7 @@ export default async function TeamPage() {
               canViewRates
                 ? users?.[0]?.organization_id
                   ? (
-                    <div data-tour="pay-rate-matrix">
+                    <div>
                       <PayRateMatrix
                         organizationId={users[0].organization_id}
                         canEdit={canManage}

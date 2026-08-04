@@ -94,7 +94,6 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 </main>
               </div>
             </div>
-            <Toaster />
             <QuickSessionFab />
             <AiChatBubble />
           </div>
@@ -111,6 +110,10 @@ export default function DashboardLayout({
   return (
     <OrganizationProvider>
       <DashboardContent>{children}</DashboardContent>
+      {/* Outside DashboardContent's loading/error early returns: refreshOrganization()
+          flips `loading`, and a Toaster inside the conditional tree unmounts right as a
+          post-save success toast is queued — the save works but the toast never shows. */}
+      <Toaster />
     </OrganizationProvider>
   )
 }

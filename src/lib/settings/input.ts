@@ -11,6 +11,18 @@ export function parseSettingNumber(value: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback
 }
 
+/**
+ * Parse a bounded numeric settings input: parseSettingNumber, then clamp into [min, max].
+ *
+ * The native min/max attributes on a number input only constrain form submission and the
+ * spinner arrows — typed or pasted values flow straight through onChange, which is how a
+ * negative Default Due Days could be saved and skew every subsequent due-date calculation.
+ */
+export function clampSettingNumber(value: string, fallback: number, min: number, max: number): number {
+  const n = parseSettingNumber(value, fallback)
+  return Math.min(max, Math.max(min, n))
+}
+
 const DEFAULT_DURATION_OPTIONS = [30, 45, 60, 90]
 
 /**

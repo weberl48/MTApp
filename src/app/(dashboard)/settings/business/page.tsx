@@ -45,7 +45,7 @@ import type {
   FeatureFlags,
 } from '@/types/database'
 import { FEATURE_DEFINITIONS } from '@/lib/features'
-import { parseSettingNumber } from '@/lib/settings/input'
+import { clampSettingNumber, parseSettingNumber } from '@/lib/settings/input'
 
 export default function BusinessSettingsPage() {
   const { organization, can, settings, feature, updateSettings } = useOrganization()
@@ -275,7 +275,7 @@ export default function BusinessSettingsPage() {
                     onChange={(e) =>
                       setLocalSettings({
                         ...localSettings,
-                        invoice: { ...localSettings.invoice, due_days: parseInt(e.target.value) || 30 },
+                        invoice: { ...localSettings.invoice, due_days: clampSettingNumber(e.target.value, 30, 1, 90) },
                       })
                     }
                   />

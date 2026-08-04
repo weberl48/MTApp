@@ -35,11 +35,14 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
       }
 
       try {
+        // `null` means the check itself failed (transient error) — keep mfaEnabled null
+        // so we neither nag nor block. Treating "unknown" as "not enrolled" used to show
+        // an enrolled user the blocking 2FA screen until they refreshed.
         const enabled = await hasMfaEnabled()
         setMfaEnabled(enabled)
       } catch (error) {
         console.error('[MCA] Error checking MFA status')
-        setMfaEnabled(false)
+        setMfaEnabled(null)
       } finally {
         setChecking(false)
       }

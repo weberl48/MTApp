@@ -95,6 +95,9 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
   if (error || !isValid) {
     const isPortalDisabled = error?.includes('currently unavailable')
+    // A revoked link is a deliberate staff action, not an expiry — the headline used to
+    // say "Expired" over a "revoked" subtext, sending clients to support with the wrong story.
+    const isRevoked = error?.toLowerCase().includes('revoked')
 
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
@@ -103,12 +106,18 @@ function PortalContent({ children }: { children: React.ReactNode }) {
             <AlertCircle aria-hidden="true" className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <h1 className="text-xl font-semibold text-foreground mb-2">
-            {isPortalDisabled ? 'Portal Unavailable' : 'This Link Has Expired'}
+            {isPortalDisabled
+              ? 'Portal Unavailable'
+              : isRevoked
+                ? 'This Link Is No Longer Active'
+                : 'This Link Has Expired'}
           </h1>
           <p className="text-muted-foreground mb-6">
             {isPortalDisabled
               ? 'The client portal is not currently available. Please contact your provider for assistance.'
-              : error || 'For your privacy, portal links only work for a limited time. Nothing is wrong with your account — you just need a fresh link.'}
+              : isRevoked
+                ? 'This portal link was turned off by your practice. Request a new link below, or contact your therapist.'
+                : error || 'For your privacy, portal links only work for a limited time. Nothing is wrong with your account — you just need a fresh link.'}
           </p>
           {!isPortalDisabled && (
             <>

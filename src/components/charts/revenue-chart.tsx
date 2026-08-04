@@ -54,7 +54,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                   border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
-                formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`, '']}
+                formatter={(value, name) => [`$${Number(value ?? 0).toFixed(2)}`, name]}
                 isAnimationActive={false}
               />
               <Area

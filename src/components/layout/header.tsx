@@ -319,7 +319,14 @@ export function Header({ user }: HeaderProps) {
         {showDevOnlyTools && clients.length > 0 && feature('client_portal') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2 px-2 sm:px-3">
+              {/* aria-label: the text span is display-hidden below `sm`, which left an
+                  unnamed icon button for screen readers on mobile */}
+              <Button
+                variant="outline"
+                size="sm"
+                aria-label="Client Portal"
+                className="flex items-center gap-2 px-2 sm:px-3"
+              >
                 <ExternalLink className="w-4 h-4" />
                 <span className="hidden sm:inline">Client Portal</span>
                 <ChevronDown className="hidden sm:inline w-4 h-4" />

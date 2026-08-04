@@ -276,7 +276,18 @@ export async function markSessionNoShow(sessionId: string) {
 
   revalidateSessionPaths(sessionId)
 
-  return { success: true as const }
+  // Return the repriced amounts so the detail page can update its Billing Summary in
+  // place — patching only `status` left the stale pre-no-show figures on screen.
+  return {
+    success: true as const,
+    pricing: pricing
+      ? {
+          total_amount: pricing.totalAmount,
+          contractor_pay: pricing.contractorPay,
+          mca_cut: pricing.mcaCut,
+        }
+      : null,
+  }
 }
 
 /**
