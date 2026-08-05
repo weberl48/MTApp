@@ -18,6 +18,17 @@ export const sessionStatusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
+// Card left-edge accents (sessions list). Same hue family as the badge
+// colors above, but solid tokens — a 3px edge needs more saturation than
+// a soft badge background to read at a glance.
+export const sessionStatusAccents: Record<string, string> = {
+  draft: 'border-l-muted-foreground/40',
+  submitted: 'border-l-info',
+  approved: 'border-l-success',
+  no_show: 'border-l-warning',
+  cancelled: 'border-l-destructive',
+}
+
 // --- Invoice status ---
 
 export const invoiceStatusColors: Record<string, string> = {

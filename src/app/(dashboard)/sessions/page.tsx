@@ -30,7 +30,7 @@ import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
 import { SessionExportDialog } from '@/components/sessions/export-dialog'
 import { SessionsListSkeleton } from '@/components/ui/skeleton'
 import { useOrganization } from '@/contexts/organization-context'
-import { sessionStatusColors, sessionStatusLabels } from '@/lib/constants/display'
+import { sessionStatusColors, sessionStatusLabels, sessionStatusAccents } from '@/lib/constants/display'
 
 interface Session {
   id: string
@@ -626,7 +626,13 @@ export default function SessionsPage() {
                       href={`/sessions/${session.id}/`}
                       className="block"
                     >
-                      <div className={`p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-info-soft' : 'bg-muted/50'}`}>
+                      {/* Left edge mirrors the status badge hue — scannable status
+                          spine down the list without reordering it */}
+                      <div className={`p-3 rounded-lg border-l-[3px] hover:bg-muted transition-colors cursor-pointer ${
+                        session.status === 'draft' && session.rejection_reason
+                          ? 'border-l-warning'
+                          : sessionStatusAccents[session.status] || 'border-l-transparent'
+                      } ${selectedIds.has(session.id) ? 'bg-info-soft' : 'bg-muted/50'}`}>
                         <div className="flex items-start gap-3">
                           {/* Fixed-width gutter reserved at lg+ (checkbox is w-4) so the title
                               column's left edge stays straight whether or not this row can show
