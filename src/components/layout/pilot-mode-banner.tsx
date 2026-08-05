@@ -42,12 +42,13 @@ export function PilotModeBanner() {
   return (
     <div
       role="status"
-      className="flex items-start gap-3 px-4 py-3 sm:px-6 bg-amber-50 dark:bg-amber-950 border-b border-amber-300 dark:border-amber-800"
+      className="flex items-start gap-2.5 px-4 py-2 sm:gap-3 sm:px-6 sm:py-3 bg-amber-50 dark:bg-amber-950 border-b border-amber-300 dark:border-amber-800"
     >
-      <AlertTriangle aria-hidden="true" className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-      <div className="text-sm text-amber-900 dark:text-amber-200">
+      <AlertTriangle aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+      <div className="text-xs sm:text-sm text-amber-900 dark:text-amber-200">
         <p className="font-semibold">Pilot mode — clients are not receiving email.</p>
-        <p className="mt-0.5">
+        {/* Detail is desktop-only; on phones the headline carries the safety message */}
+        <p className="mt-0.5 hidden sm:block">
           Invoices and reminders are being redirected to the testing inboxes.
           {status.recipients.length > 0 && (
             <> Recipients: {status.recipients.join(', ')}.</>
