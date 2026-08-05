@@ -59,6 +59,13 @@ interface Contractor {
 
 const ITEMS_PER_PAGE = 50
 
+// List/Calendar switcher segments: quiet outline at rest, solid primary when
+// active. Shared by both triggers so the pair can't drift apart.
+const VIEW_TAB_TRIGGER_CLASS =
+  'rounded-md text-muted-foreground transition-colors ' +
+  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none ' +
+  'dark:data-[state=active]:border-transparent dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground'
+
 export default function SessionsPage() {
   useRouter() // Used for navigation context
   const { can, effectiveUserId, viewAsContractor, organization } = useOrganization()
@@ -364,15 +371,19 @@ export default function SessionsPage() {
         </div>
         <div className="flex items-center gap-3">
           {/* w-fit + 1fr columns: both segments equal width, sized to the wider
-              label — a fixed 200px left "Calendar" clipped flush to the edge */}
+              label — a fixed 200px left "Calendar" clipped flush to the edge.
+              Restyled from the stock muted pill to a bordered container with a
+              solid-primary active segment (this instance only — base styles set
+              their own dark: active classes, which outrank a plain override, so
+              the dark variants are repeated here). */}
           <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
-            <TabsList className="grid w-fit grid-cols-2">
-              <TabsTrigger value="list">
-                <List className="w-4 h-4 mr-2" />
+            <TabsList className="grid w-fit grid-cols-2 gap-1 rounded-lg border border-border bg-transparent p-1">
+              <TabsTrigger value="list" className={VIEW_TAB_TRIGGER_CLASS}>
+                <List className="w-4 h-4" />
                 List
               </TabsTrigger>
-              <TabsTrigger value="calendar">
-                <Calendar className="w-4 h-4 mr-2" />
+              <TabsTrigger value="calendar" className={VIEW_TAB_TRIGGER_CLASS}>
+                <Calendar className="w-4 h-4" />
                 Calendar
               </TabsTrigger>
             </TabsList>
