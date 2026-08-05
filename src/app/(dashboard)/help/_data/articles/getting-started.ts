@@ -21,7 +21,7 @@ As a contractor, your workspace is focused on logging your work and tracking you
 - **Dashboard** - Your home base showing recent sessions, pending submissions, and an earnings summary for the current period.
 - **Sessions** - Log new sessions, check the status of submitted sessions, and edit drafts.
 - **Earnings** - View your pay history broken down by pay period, with a per-session detail.
-- **Mobile floating button** - On mobile, a quick-log button appears at the bottom of the screen so you can start a session entry in seconds without navigating through menus.
+- **Bottom tabs on your phone** - On mobile, the center tab is a quick-log button so you can start a session entry in seconds without navigating through menus.
 
 ### For Admins and Owners
 
@@ -42,6 +42,8 @@ On iPhone: open the site in Safari, tap the Share button, then tap "Add to Home 
 On Android: open the site in Chrome, tap the menu (three dots), then tap "Add to Home Screen."
 
 Once installed, it behaves like a native app with an icon on your home screen.
+
+Below a certain screen width the whole app switches to a phone-native layout. Navigation moves to a row of **bottom tabs**: Home, Sessions, a raised center button to quickly log a session, then Billing or Earnings depending on your role, and **More** for everything else — Clients, Team, Analytics, Payroll, Settings, and Help open in a sheet from the More tab.
 
 ### The Owner Setup Wizard
 

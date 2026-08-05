@@ -2,6 +2,15 @@
 @import "tw-animate-css";
 @import "./themes.css";
 
+/* Tailwind v4's automatic content detection scans the whole project (minus
+ * .gitignore), including prose docs. docs/superpowers/plans/2026-08-05-
+ * mobile-experience.md quotes `duration-[var(--motion-*)]` as documentation
+ * shorthand for "any of the three motion tokens" — Tailwind reads that as a
+ * real arbitrary-value utility and tries to emit CSS for `var(--motion-*)`,
+ * which isn't valid CSS and fails PostCSS for the whole stylesheet (every
+ * page 500s). Docs were never meant to be scanned for utility classes. */
+@source not "../../docs";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

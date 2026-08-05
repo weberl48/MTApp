@@ -11,10 +11,11 @@ import { OrganizationProvider, useOrganization } from '@/contexts/organization-c
 import { ActivityTracker } from '@/components/providers/activity-tracker'
 import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-gate'
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
-import { QuickSessionFab } from '@/components/layout/quick-session-fab'
 import { PilotModeBanner } from '@/components/layout/pilot-mode-banner'
 import { AiChatBubble } from '@/components/help/ai-chat-bubble'
 import { WalkthroughProvider } from '@/components/walkthroughs/walkthrough-provider'
+import { MobileTabBar } from '@/components/mobile/tab-bar'
+import { MoreSheet } from '@/components/mobile/more-sheet'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -86,13 +87,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <div className="flex flex-col flex-1 overflow-hidden">
                 <Header user={user} />
                 <PilotModeBanner />
-                {/* Mobile bottom padding clears the fixed bottom-right stack: the
-                    AI helper bubble is the tallest element (bottom-32 + h-12 =
-                    11rem top edge; see ai-chat-bubble.tsx), so 12rem leaves ~1rem
-                    of breathing room below the last interactive control. Desktop
-                    (lg:pb-6) is untouched — the quick-log FAB is lg:hidden and
-                    the bubble/onboarding prompt sit low with headroom there. */}
-                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+12rem)] lg:pb-6 focus:outline-none">
+                {/* Mobile bottom padding clears the fixed tab bar: 4rem bar height
+                    + env(safe-area-inset-bottom) for the home-indicator area, plus
+                    ~2rem breathing room below the last piece of content. Desktop
+                    (lg:pb-6) is untouched — the tab bar is lg:hidden there, and the
+                    sidebar/header replace it entirely. */}
+                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none">
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
                     {children}
@@ -100,7 +100,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 </main>
               </div>
             </div>
-            <QuickSessionFab />
+            <MobileTabBar />
+            <MoreSheet />
             <AiChatBubble />
           </div>
         </WalkthroughProvider>

@@ -91,13 +91,18 @@ function resolveStepElement(selector: string): Element | undefined {
   return undefined
 }
 
-/** Ask the sidebar to open/close its mobile drawer (no-op state on desktop). */
-function syncMobileNavDrawer(step: WalkthroughStep | undefined) {
-  window.dispatchEvent(
-    new CustomEvent('mca:walkthrough-nav', {
-      detail: { open: !!step?.mobileNav && isMobileViewport() },
-    })
-  )
+/**
+ * A `mobileNav: true` step's target may already be visible on mobile (the
+ * tab bar renders Home/Sessions/Billing-or-Earnings as real links — nothing
+ * to open) or it may live behind the More sheet (Clients/Team/Analytics/
+ * Payroll/Settings, not in the DOM until the sheet opens). Open the sheet
+ * only when the target isn't already resolvable; close it for steps that
+ * don't need it, and on tour end (`step` undefined).
+ */
+function syncMoreSheetForStep(step: WalkthroughStep | undefined) {
+  const alreadyVisible = !!step?.element && !!resolveStepElement(step.element)
+  const shouldOpen = isMobileViewport() && !!step?.mobileNav && !alreadyVisible
+  window.dispatchEvent(new CustomEvent('mca:open-more-sheet', { detail: { open: shouldOpen } }))
 }
 
 /** Does the current URL already satisfy this step's href? */
@@ -242,9 +247,9 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
       tick()
     }
 
-    // Prepare the first step: sync the mobile drawer and navigate if needed
+    // Prepare the first step: open the More sheet if its target needs it, and navigate if needed
     const firstStep = steps[0]
-    syncMobileNavDrawer(firstStep)
+    syncMoreSheetForStep(firstStep)
     if (firstStep.href && !pathname.startsWith(hrefPathname(firstStep.href))) {
       router.push(firstStep.href)
     }
@@ -277,7 +282,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         return
       }
       const nextStep = steps[nextIndex]
-      syncMobileNavDrawer(nextStep)
+      syncMoreSheetForStep(nextStep)
       if (stepNeedsNavigation(nextStep)) {
         router.push(nextStep.href)
       }
@@ -364,7 +369,7 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
             },
           })),
           onDestroyed: () => {
-            syncMobileNavDrawer(undefined)
+            syncMoreSheetForStep(undefined)
             setActiveWalkthrough(null)
             setStepIndex(0)
             driverRef.current = null

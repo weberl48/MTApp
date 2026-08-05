@@ -661,7 +661,7 @@ export default function InvoicesPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && selectedIds.size > 0 && (
-        <Card className="sticky top-0 z-10 border-info/30 bg-info-soft animate-in fade-in-0 slide-in-from-top-2 duration-[var(--motion-fast)] ease-out">
+        <Card className="sticky bottom-24 lg:bottom-auto lg:top-0 z-10 border-info/30 bg-info-soft animate-in fade-in-0 slide-in-from-top-2 duration-[var(--motion-fast)] ease-out">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

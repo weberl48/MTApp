@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,9 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle } from 'lucide-react'
+import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle, Palette } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
-import { AppearanceMenu } from '@/components/ui/appearance-menu'
+import { useHydrated, useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { AppearanceMenu, AppearanceMenuContent } from '@/components/ui/appearance-menu'
+import { cn } from '@/lib/utils'
 import type { User } from '@/types/database'
 
 interface HeaderProps {
@@ -45,8 +47,33 @@ const roleLabels: Record<string, string> = {
   contractor: 'Contractor',
 }
 
+// Mobile header title, longest-prefix match against the current pathname.
+// Home is special-cased to the logo instead of a title (see JSX below).
+const ROUTE_TITLES: Array<[prefix: string, title: string]> = [
+  ['/sessions', 'Sessions'],
+  ['/invoices', 'Invoices'],
+  ['/clients', 'Clients'],
+  ['/team', 'Team'],
+  ['/payments', 'Payroll'],
+  ['/analytics', 'Analytics'],
+  ['/settings', 'Settings'],
+  ['/earnings', 'Earnings'],
+  ['/help', 'Help'],
+]
+
+function routeTitle(pathname: string): string {
+  let best: [string, string] | null = null
+  for (const entry of ROUTE_TITLES) {
+    if (pathname.startsWith(entry[0]) && (!best || entry[0].length > best[0].length)) {
+      best = entry
+    }
+  }
+  return best?.[1] ?? 'MCA'
+}
+
 export function Header({ user }: HeaderProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
   const {
     organization,
@@ -94,6 +121,7 @@ export function Header({ user }: HeaderProps) {
   const showViewAsTools = actualRole === 'developer' || actualRole === 'owner'
   // Only developers can switch organizations and preview client portals
   const showDevOnlyTools = actualRole === 'developer'
+  const viewingAsSomeoneElse = !!viewAsRole || !!viewAsContractor
 
   // Fetch contractors and clients for view-as tools
   useEffect(() => {
@@ -149,16 +177,31 @@ export function Header({ user }: HeaderProps) {
         .slice(0, 2)
     : '?'
 
+  // Post-hydration gate for the mobile-only title block: lg:hidden keeps the
+  // pre-hydration paint right, but a CSS-hidden <h1> still resolves in the
+  // DOM and collides with strict-mode test locators on desktop.
+  const isMobile = useIsMobile()
+  const hydrated = useHydrated()
+  const showMobileChrome = !hydrated || isMobile
+
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-6 bg-card/95 backdrop-blur border-b border-border lg:pl-6">
-      {/* Spacer for mobile menu button */}
-      <div className="w-12 lg:hidden" />
-
-      {/* Developer badge and tools */}
+      {/* Mobile: page title (logo on Home). Desktop: dev badge, org switcher,
+          View As, and Client Portal preview — unchanged from before. */}
       <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-4">
+        {showMobileChrome && (
+          <div className="lg:hidden min-w-0">
+            {pathname.startsWith('/dashboard/') ? (
+              <span className="text-base font-bold text-foreground">MCA</span>
+            ) : (
+              <h1 className="truncate text-base font-semibold text-foreground">{routeTitle(pathname)}</h1>
+            )}
+          </div>
+        )}
+
         {/* Developer-only badge and org switcher */}
         {showDevOnlyTools && (
-          <>
+          <div className="hidden lg:flex items-center gap-2 sm:gap-4">
             <Badge
               variant="outline"
               className="shrink-0 bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
@@ -203,7 +246,7 @@ export function Header({ user }: HeaderProps) {
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-          </>
+          </div>
         )}
 
         {/* View As Role Switcher - available to developers and owners */}
@@ -214,7 +257,7 @@ export function Header({ user }: HeaderProps) {
                   data-tour="view-as-switcher"
                   variant={viewAsRole || viewAsContractor ? 'default' : 'outline'}
                   size="sm"
-                  className={`flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole || viewAsContractor ? 'bg-warning text-warning-foreground hover:bg-warning/90' : ''}`}
+                  className={`hidden lg:flex items-center gap-2 px-2 sm:px-3 min-w-0 ${viewAsRole || viewAsContractor ? 'bg-warning text-warning-foreground hover:bg-warning/90' : ''}`}
                   aria-label={
                     viewAsContractor
                       ? `Viewing as ${viewAsContractor.name} — change role view`
@@ -325,7 +368,7 @@ export function Header({ user }: HeaderProps) {
                 variant="outline"
                 size="sm"
                 aria-label="Client Portal"
-                className="flex items-center gap-2 px-2 sm:px-3"
+                className="hidden lg:flex items-center gap-2 px-2 sm:px-3"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span className="hidden sm:inline">Client Portal</span>
@@ -354,14 +397,26 @@ export function Header({ user }: HeaderProps) {
         )}
       </div>
 
-      {/* Appearance: light/dark mode + theme picker */}
-      <AppearanceMenu />
+      {/* Appearance: light/dark mode + theme picker — desktop only; mobile
+          reaches it through the avatar menu's Appearance submenu below. */}
+      <div className="hidden lg:flex">
+        <AppearanceMenu />
+      </div>
 
       {/* User menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full" aria-label="Account menu">
-            <Avatar className="h-10 w-10">
+            <Avatar
+              className={cn(
+                'h-10 w-10',
+                // View As has no button of its own on mobile (it moves into this
+                // menu below), so the ring is how simulation stays visible there.
+                // lg:ring-0 cancels it on desktop, where the header's own View As
+                // button already shows the state — keeps desktop byte-identical.
+                viewingAsSomeoneElse && 'ring-2 ring-warning ring-offset-2 ring-offset-background lg:ring-0 lg:ring-offset-0'
+              )}
+            >
               <AvatarFallback className="bg-secondary text-secondary-foreground">
                 {initials}
               </AvatarFallback>
@@ -380,6 +435,173 @@ export function Header({ user }: HeaderProps) {
               </p>
             </div>
           </DropdownMenuLabel>
+
+          {/* Mobile-only: everything the desktop header row carries next to the
+              avatar (org switcher, View As, Client Portal preview, Appearance)
+              moves in here below `lg`, where that row doesn't render. */}
+          {(showDevOnlyTools || showViewAsTools) && <DropdownMenuSeparator className="lg:hidden" />}
+
+          {showDevOnlyTools && allOrganizations.length > 1 && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="lg:hidden">
+                <Building2 className="w-4 h-4 mr-2" />
+                <span className="truncate">{organization?.name || 'Switch Organization'}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                  {allOrganizations.map((org) => (
+                    <DropdownMenuItem
+                      key={org.id}
+                      onClick={() => switchOrganization(org.id)}
+                      className={org.id === organization?.id ? 'bg-accent' : ''}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">{org.name}</span>
+                        <span className="text-xs text-muted-foreground">{org.slug}</span>
+                      </div>
+                      {org.id === organization?.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
+
+          {showViewAsTools && (
+            <DropdownMenuSub>
+              {/* data-tour matches the desktop button's id too (comma-fallback
+                  selector in the View As walkthrough): the mobile equivalent
+                  entry point, revealed once the account menu is opened via
+                  that step's preClick. */}
+              <DropdownMenuSubTrigger data-tour="view-as-switcher" className="lg:hidden">
+                <Eye className="w-4 h-4 mr-2" />
+                <span className="truncate">
+                  {viewAsContractor
+                    ? `As ${viewAsContractor.name}`
+                    : viewAsRole
+                      ? `As ${roleLabels[viewAsRole]}`
+                      : 'View As'}
+                </span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setViewAsRole(null)
+                      setViewAsContractor(null)
+                    }}
+                    className={!viewAsRole && !viewAsContractor ? 'bg-accent' : ''}
+                  >
+                    <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
+                    {!viewAsRole && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                  </DropdownMenuItem>
+                  {actualRole === 'developer' && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setViewAsRole('owner')
+                        setViewAsContractor(null)
+                      }}
+                      className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-accent' : ''}
+                    >
+                      <span className="font-medium">Owner</span>
+                      {viewAsRole === 'owner' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setViewAsRole('admin')
+                      setViewAsContractor(null)
+                    }}
+                    className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-accent' : ''}
+                  >
+                    <span className="font-medium">Admin</span>
+                    {viewAsRole === 'admin' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setViewAsRole('contractor')
+                      setViewAsContractor(null)
+                    }}
+                    className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-accent' : ''}
+                  >
+                    <span className="font-medium">Contractor (generic)</span>
+                    {viewAsRole === 'contractor' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                  </DropdownMenuItem>
+                  {contractors.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <Users className="w-4 h-4 mr-2" />
+                          <span>Specific Contractor</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                            {contractors.map((contractor) => (
+                              <DropdownMenuItem
+                                key={contractor.id}
+                                onClick={() => {
+                                  setViewAsRole('contractor')
+                                  setViewAsContractor(contractor)
+                                }}
+                                className={viewAsContractor?.id === contractor.id ? 'bg-accent' : ''}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{contractor.name}</span>
+                                  <span className="text-xs text-muted-foreground">{contractor.email}</span>
+                                </div>
+                                {viewAsContractor?.id === contractor.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                    </>
+                  )}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
+
+          {showDevOnlyTools && clients.length > 0 && feature('client_portal') && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="lg:hidden">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                <span>Client Portal</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                  {clients.map((client) => (
+                    <DropdownMenuItem
+                      key={client.id}
+                      disabled={openingPortalFor === client.id}
+                      onClick={() => openClientPortal(client.id)}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium truncate">{client.name}</span>
+                        {openingPortalFor === client.id && (
+                          <Badge variant="secondary" className="ml-2 text-xs">Opening…</Badge>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="lg:hidden">
+              <Palette className="w-4 h-4 mr-2" />
+              <span>Appearance</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent className="w-72 p-3">
+                <AppearanceMenuContent />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push('/settings/')}>
             <Settings className="mr-2 h-4 w-4" />

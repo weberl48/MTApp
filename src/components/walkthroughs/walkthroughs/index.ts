@@ -1017,7 +1017,12 @@ export const VIEW_AS_WALKTHROUGH: Walkthrough = {
     {
       title: 'The View As Switcher',
       description: 'This header button lets you simulate what another role sees — the safest way to verify permissions or troubleshoot what a contractor reports, without their login.',
+      mobileDescription: 'On your phone, View As lives in the avatar menu (top-right) instead of its own header button — open it to find View As.',
       element: '[data-tour="view-as-switcher"]',
+      // Mobile has no standalone View As button — it's a submenu inside the
+      // avatar menu, so open that first. No-op on desktop: the button there
+      // is already visible before this ever fires.
+      preClick: '[aria-label="Account menu"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -1026,6 +1031,7 @@ export const VIEW_AS_WALKTHROUGH: Walkthrough = {
       title: 'Pick a Role or Person',
       description: 'Open it to choose a generic role (Admin, Contractor) or a specific team member. Everything — data, navigation, permissions — switches to their view, and it stays that way as you move between pages. While active, this button turns amber and shows who you\'re viewing as.',
       element: '[data-tour="view-as-switcher"]',
+      preClick: '[aria-label="Account menu"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
       href: '/dashboard/',
@@ -1034,6 +1040,7 @@ export const VIEW_AS_WALKTHROUGH: Walkthrough = {
       title: 'Coming Back',
       description: 'To return to your own view, open the same menu and choose "Owner (actual)" at the top. Try it now if you like: switch to Contractor, look at the sidebar, and switch back. That\'s View As!',
       element: '[data-tour="view-as-switcher"]',
+      preClick: '[aria-label="Account menu"]',
       popoverSide: 'bottom',
       ctaLabel: 'Finish',
       href: '/dashboard/',

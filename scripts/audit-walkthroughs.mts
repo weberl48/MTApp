@@ -138,7 +138,17 @@ if (audEmail && audPassword) {
 async function applyViewAs() {
   if (!VIEW_AS) return
   const pattern = VIEW_AS_MENU[VIEW_AS]
-  await page.locator('header button:has(svg.lucide-eye)').first().click()
+  // Desktop: the header's View As button. Mobile (2026-08-05 shell): the
+  // switcher lives inside the avatar "Account menu" as a submenu — open the
+  // menu, then hover/click the View As sub-trigger to reveal the role items.
+  const desktopTrigger = page.locator('header button:has(svg.lucide-eye)').first()
+  if (await desktopTrigger.isVisible().catch(() => false)) {
+    await desktopTrigger.click()
+  } else {
+    await page.locator('header [aria-label="Account menu"]').click()
+    await page.waitForTimeout(250)
+    await page.locator('[data-tour="view-as-switcher"]:visible').first().click()
+  }
   await page.waitForTimeout(350)
   for (const item of await page.getByRole('menuitem').all()) {
     if (pattern.test(((await item.textContent()) || '').trim())) {

@@ -9,7 +9,8 @@ test.describe('Invoices Page', () => {
 
   test('invoices page loads with summary cards', async ({ page }) => {
     await page.goto('/invoices')
-    await expect(page.getByText(/invoices/i)).toBeVisible()
+    // Scoped to main: nav chrome (sidebar/tab bar) also says "Invoices".
+    await expect(page.locator('main').getByText(/invoices/i).first()).toBeVisible()
 
     // Should show summary cards ("Pending Review" / "Awaiting Payment")
     await expect(page.getByText('Pending Review')).toBeVisible()

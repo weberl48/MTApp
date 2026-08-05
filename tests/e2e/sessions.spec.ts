@@ -17,7 +17,8 @@ test.describe('Sessions Page', () => {
 
   test('sessions page loads with list view', async ({ page }) => {
     await page.goto('/sessions')
-    await expect(page.getByText(/sessions/i)).toBeVisible()
+    // Scoped to main: nav chrome (sidebar/tab bar) also says "Sessions".
+    await expect(page.locator('main').getByText(/sessions/i).first()).toBeVisible()
     // Should have view toggle (List/Calendar)
     await expect(page.getByRole('tab', { name: /list/i })).toBeVisible()
     await expect(page.getByRole('tab', { name: /calendar/i })).toBeVisible()

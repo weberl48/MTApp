@@ -78,8 +78,12 @@ test.describe('Dashboard', () => {
   test('dashboard shows recent activity', async ({ page }) => {
     await page.goto('/dashboard')
 
-    // Should have some content about sessions or activity
-    await expect(page.getByText(/session|recent|activity/i)).toBeVisible()
+    // Should have some content about sessions or activity. Scoped to <main>:
+    // the mobile tab bar and its "Sessions" label are always in the DOM (CSS-
+    // hidden at desktop widths, not unmounted — see tab-bar.tsx), so the
+    // unscoped locator now resolves to it too and trips Playwright's
+    // strict-mode "must match exactly one element" check.
+    await expect(page.locator('main').getByText(/session|recent|activity/i).first()).toBeVisible()
   })
 })
 
@@ -108,7 +112,13 @@ test.describe('Clients Page', () => {
 })
 
 test.describe('Responsive Design', () => {
-  test('mobile viewport shows hamburger menu', async ({ page }) => {
+  // Renamed from "mobile viewport shows hamburger menu" — it never actually
+  // asserted a hamburger (this describe block predates login, so it only
+  // exercised the public /login page); the hamburger it was named for is gone
+  // now anyway (sidebar.tsx dropped the mobile drawer entirely). The real
+  // dashboard nav-chrome assertion this name implied lives in the test below
+  // and in tests/e2e/mobile-shell.spec.ts, both against the actual dashboard.
+  test('mobile viewport renders the login page', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/login')
@@ -123,6 +133,15 @@ test.describe('Responsive Design', () => {
     await page.goto('/login')
 
     await expect(page.getByText('Welcome back')).toBeVisible()
+  })
+
+  test('mobile viewport shows the Primary tab bar, not the desktop sidebar', async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 })
+    await login(page)
+    await page.goto('/dashboard')
+
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeHidden()
   })
 })
 
