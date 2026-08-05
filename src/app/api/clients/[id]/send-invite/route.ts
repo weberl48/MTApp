@@ -4,6 +4,8 @@ import { generateAccessToken } from '@/lib/portal/token'
 import { sendMagicLinkEmail } from '@/lib/email'
 import { isFeatureEnabled } from '@/lib/features'
 import { uuidSchema } from '@/lib/validation/schemas'
+import { can } from '@/lib/auth/permissions'
+import type { UserRole } from '@/types/database'
 
 /**
  * POST /api/clients/[id]/send-invite
@@ -44,9 +46,10 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // All staff can send invites
-    const allowedRoles = ['developer', 'owner', 'admin', 'contractor']
-    if (!allowedRoles.includes(profile.role)) {
+    // Admin+ only (`client:manage`) — this mints and emails a portal token, the
+    // same privileged action gated in /api/clients/[id]/access-token. Leaving it
+    // open to contractors was a second path to mint credentials for any client.
+    if (!can(profile.role as UserRole, 'client:manage')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
