@@ -363,8 +363,10 @@ export default function SessionsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-[200px]">
-            <TabsList className="grid w-full grid-cols-2">
+          {/* w-fit + 1fr columns: both segments equal width, sized to the wider
+              label — a fixed 200px left "Calendar" clipped flush to the edge */}
+          <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
+            <TabsList className="grid w-fit grid-cols-2">
               <TabsTrigger value="list">
                 <List className="w-4 h-4 mr-2" />
                 List
