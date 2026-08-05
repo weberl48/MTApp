@@ -117,7 +117,7 @@ No font or palette swaps (the 8-theme token system IS the identity) · no nested
 
 - **Dropdown stays open behind confirm dialogs** (found 2026-08-04 during the session-detail distill): the `onSelect`+`preventDefault` pattern shared by `invoice-actions.tsx`, `team-member-actions.tsx`, and now `sessions/[id]/page.tsx` leaves the menu open (inert, behind the scrim) until a second dismissal. Pre-existing; fix once across all three when touched.
 - **First-visit WalkthroughNudge toast covers the FAB corner** (found during p0-fab-occlusion, 2026-08-04): the one-shot "New here?" sonner toast renders bottom-right above the quick-log FAB (z-40) until dismissed or its 15s timeout. Any toast shares that corner — a fix is a toast-positioning decision, not a FAB fix. Consider alongside p2-toast-promise.
-- **Contractor `/invoices/` local fetch bug** (CORS/ERR_FAILED against local Supabase, this role+route only) — investigate as a bug, not polish; the error-state work above is correct regardless.
+- ~~**Contractor `/invoices/` local fetch bug**~~ **RESOLVED upstream (dcf86fd, 2026-08-04):** root cause was HTTP 414 — an unbounded `.in('session_id', […])` built an ~11KB GET the gateway rejected; fixed with a `sessions!inner` join. (The "CORS" reading was the browser's opaque presentation of the rejected preflight.) The ErrorState work remains the safety net.
 - `sessions-full-table-fetch` — add `.range()` when the dataset grows (P3, performance).
 - AI chat streaming polish (message entrances, scroll behavior) — feel-dependent, needs live testing.
 - driver.js 400ms + popover growth — third-party, accepted.
