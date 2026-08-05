@@ -211,8 +211,9 @@ export default function DashboardPage() {
         <Link href="/sessions/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Sessions This Month
+              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                <span className="sm:hidden">Sessions</span>
+                <span className="hidden sm:inline">Sessions This Month</span>
               </CardTitle>
               <Calendar className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
@@ -225,8 +226,9 @@ export default function DashboardPage() {
         <Link href="/clients/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Clients
+              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                <span className="sm:hidden">Clients</span>
+                <span className="hidden sm:inline">Total Clients</span>
               </CardTitle>
               <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
@@ -239,8 +241,9 @@ export default function DashboardPage() {
         <Link href="/sessions/" className="last:odd:col-span-2 lg:col-span-1">
           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Recently Approved
+              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                <span className="sm:hidden">Approved (30d)</span>
+                <span className="hidden sm:inline">Recently Approved</span>
               </CardTitle>
               <CheckCircle className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
@@ -255,8 +258,9 @@ export default function DashboardPage() {
           <Link href="/invoices/" className="last:odd:col-span-2 lg:col-span-1">
             <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Pending Invoices
+                <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                  <span className="sm:hidden">Pending Invoices</span>
+                  <span className="hidden sm:inline">Pending Invoices</span>
                 </CardTitle>
                 <FileText className="w-4 h-4 text-muted-foreground" />
               </CardHeader>

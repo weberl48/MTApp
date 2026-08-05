@@ -109,8 +109,11 @@ export function MfaEnforcementGuard({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3 p-3 text-sm bg-warning-soft border border-warning/20 rounded-lg">
             <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
             <span className="text-warning-soft-foreground flex-1">
-              Your account does not have two-factor authentication enabled.
-              For better security, we recommend setting up 2FA.
+              <span className="sm:hidden">Add two-factor authentication.</span>
+              <span className="hidden sm:inline">
+                Your account does not have two-factor authentication enabled.
+                For better security, we recommend setting up 2FA.
+              </span>
             </span>
             <Link href="/settings/?tab=security">
               <Button variant="outline" size="sm" className="flex-shrink-0">

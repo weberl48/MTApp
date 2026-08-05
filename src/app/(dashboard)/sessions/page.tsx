@@ -626,9 +626,12 @@ export default function SessionsPage() {
                     >
                       <div className={`p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer ${selectedIds.has(session.id) ? 'bg-info-soft' : 'bg-muted/50'}`}>
                         <div className="flex items-start gap-3">
-                          {/* Fixed-width gutter reserved on every row (checkbox is w-4) so the
-                              title column's left edge stays straight whether or not this row
-                              can show a checkbox. */}
+                          {/* Fixed-width gutter reserved at lg+ (checkbox is w-4) so the title
+                              column's left edge stays straight whether or not this row can show
+                              a checkbox. Below lg the placeholder is hidden entirely — rows
+                              without a checkbox go flush-left (ragged edge is expected on
+                              phones); the checkbox itself still renders inline at every width
+                              for eligible rows. */}
                           {isAdmin && session.status === 'submitted' ? (
                             <div className="shrink-0 w-4 pt-0.5" onClick={(e) => e.preventDefault()}>
                               <Checkbox
@@ -645,7 +648,7 @@ export default function SessionsPage() {
                               />
                             </div>
                           ) : (
-                            <div className="shrink-0 w-4 pt-0.5" aria-hidden="true" />
+                            <div className="hidden lg:block shrink-0 w-4 pt-0.5" aria-hidden="true" />
                           )}
                           <div className="flex-1 min-w-0">
                             {/* Row 1: Service type + status badge + amount */}
