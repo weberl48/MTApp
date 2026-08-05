@@ -300,7 +300,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2" data-tour="payroll-stats">
+      <div className="grid grid-cols-2 gap-4" data-tour="payroll-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">

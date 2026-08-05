@@ -45,6 +45,8 @@ import { formatCurrency } from '@/lib/pricing'
 import { format } from 'date-fns'
 import { parseLocalDate, todayLocal } from '@/lib/dates'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 
 interface InvoiceWithDetails {
   id: string
@@ -100,6 +102,7 @@ interface PaymentReconciliationTableProps {
 }
 
 export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationTableProps) {
+  const isMobile = useIsMobile()
   const { organization } = useOrganization()
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([])
   const [loading, setLoading] = useState(true)
@@ -240,7 +243,7 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
     <div className="space-y-6">
       {/* Summary Cards */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-muted rounded-lg p-4">
             <div className="text-sm text-muted-foreground">Total Invoices</div>
             <div className="text-2xl font-bold">{summary.totalInvoices}</div>
@@ -325,6 +328,75 @@ export function PaymentReconciliationTable({ onRefresh }: PaymentReconciliationT
       ) : invoices.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           No invoices found
+        </div>
+      ) : isMobile ? (
+        <div className="space-y-2">
+          {invoices.map((invoice) => {
+            const config = STATUS_CONFIG[invoice.status]
+            const StatusIcon = config.icon
+            return (
+              <MobileListItem
+                key={invoice.id}
+                title={invoice.client?.name || 'Unknown'}
+                trailing={formatCurrency(invoice.amount)}
+                meta={
+                  <>
+                    <span>
+                      {invoice.session?.date
+                        ? format(parseLocalDate(invoice.session.date), 'MMM d, yyyy')
+                        : format(new Date(invoice.created_at), 'MMM d, yyyy')}
+                    </span>
+                    <span>{invoice.session?.service_type?.name || '-'}</span>
+                    {invoice.session?.contractor?.name && <span>{invoice.session.contractor.name}</span>}
+                  </>
+                }
+                footer={
+                  <div className="flex w-full flex-wrap items-center gap-2">
+                    <Badge variant="outline" className={config.color}>
+                      <StatusIcon className="w-3 h-3 mr-1" />
+                      {config.label}
+                    </Badge>
+                    {invoice.square_invoice_id && (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-info" />
+                        {invoice.square_payment_url && (
+                          <a
+                            href={invoice.square_payment_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-xs"
+                          >
+                            View
+                          </a>
+                        )}
+                      </span>
+                    )}
+                    <span className="ml-auto">
+                      {invoice.status !== 'paid' ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setMarkPaidDialog({ isOpen: true, invoice })
+                            setPaidDate(todayLocal())
+                          }}
+                        >
+                          <DollarSign className="w-3 h-3 mr-1" />
+                          Mark Paid
+                        </Button>
+                      ) : (
+                        invoice.paid_date && (
+                          <span className="text-xs text-muted-foreground">
+                            {format(parseLocalDate(invoice.paid_date), 'MMM d')}
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </div>
+                }
+              />
+            )
+          })}
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">

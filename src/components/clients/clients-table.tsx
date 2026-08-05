@@ -30,6 +30,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 
 type SortField = 'name' | 'payment_method' | 'billing_method'
 type SortDir = 'asc' | 'desc'
@@ -40,6 +42,7 @@ interface ClientsTableProps {
 }
 
 export function ClientsTable({ clients, canManageClients }: ClientsTableProps) {
+  const isMobile = useIsMobile()
   const [search, setSearch] = useState('')
   const [paymentFilter, setPaymentFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<SortField>('name')
@@ -124,8 +127,32 @@ export function ClientsTable({ clients, canManageClients }: ClientsTableProps) {
         {filtered.length} of {clients.length} client{clients.length !== 1 ? 's' : ''}
       </p>
 
-      {/* Table */}
+      {/* List: card stack on mobile (same `filtered` array, same
+          canManageClients gate), <Table> on desktop — exactly one branch
+          renders per useIsMobile(), desktop markup below is untouched. */}
       {filtered.length > 0 ? (
+        isMobile ? (
+          <div className="space-y-2">
+            {filtered.map((client) => (
+              <MobileListItem
+                key={client.id}
+                href={`/clients/${client.id}/`}
+                title={client.name}
+                meta={
+                  <>
+                    <Badge variant="outline">
+                      {paymentMethodLabels[client.payment_method] || client.payment_method}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {billingMethodLabels[client.billing_method] || 'Square'}
+                    </Badge>
+                  </>
+                }
+                footer={canManageClients ? <ClientActions client={client} /> : undefined}
+              />
+            ))}
+          </div>
+        ) : (
         <TooltipProvider>
           <Table>
             <TableHeader>
@@ -218,6 +245,7 @@ export function ClientsTable({ clients, canManageClients }: ClientsTableProps) {
             </TableBody>
           </Table>
         </TooltipProvider>
+        )
       ) : (
         <div className="text-center py-12 text-muted-foreground">
           <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />

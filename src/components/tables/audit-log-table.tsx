@@ -39,6 +39,8 @@ import {
   Trash2,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 
 interface AuditLog {
   id: string
@@ -85,6 +87,7 @@ const ACTION_COLORS = {
 }
 
 export function AuditLogTable() {
+  const isMobile = useIsMobile()
   const { organization } = useOrganization()
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
@@ -208,7 +211,10 @@ export function AuditLogTable() {
         </Select>
       </div>
 
-      {/* Table */}
+      {/* List: card stack on mobile (same `logs` array, same viewDetails
+          handler that opens the Details dialog below), <Table> on desktop —
+          exactly one branch renders per useIsMobile(), desktop markup below
+          is untouched. */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -216,6 +222,42 @@ export function AuditLogTable() {
       ) : logs.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           No audit logs found
+        </div>
+      ) : isMobile ? (
+        <div className="space-y-2">
+          {logs.map((log) => {
+            const ActionIcon = ACTION_ICONS[log.action]
+            const actionLabel =
+              log.action === 'INSERT' ? 'Created' : log.action === 'UPDATE' ? 'Updated' : 'Deleted'
+            return (
+              // A native <button> wrapping the card (rather than passing
+              // MobileListItem an href) — this row opens the SAME Details
+              // dialog the desktop row's Eye button opens (viewDetails), not
+              // a navigation. MobileListItem has no onClick slot by design
+              // (it's Link-or-static), so the tap target is built here.
+              <button
+                key={log.id}
+                type="button"
+                onClick={() => viewDetails(log)}
+                className="block w-full text-left"
+              >
+                <MobileListItem
+                  title={getRecordLabel(log)}
+                  trailing={format(new Date(log.created_at), 'MMM d, h:mm a')}
+                  meta={
+                    <>
+                      <Badge variant="outline" className={ACTION_COLORS[log.action]}>
+                        <ActionIcon className="w-3 h-3 mr-1" />
+                        {actionLabel}
+                      </Badge>
+                      <span>{TABLE_LABELS[log.table_name] || log.table_name}</span>
+                      <span>{log.user_email || 'System'}</span>
+                    </>
+                  }
+                />
+              </button>
+            )
+          })}
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">

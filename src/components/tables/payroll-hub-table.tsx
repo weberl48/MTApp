@@ -39,6 +39,8 @@ import ExcelJS from 'exceljs'
 import { format } from 'date-fns'
 import { parseLocalDate, todayLocal } from '@/lib/dates'
 import { downloadBlob } from '@/lib/download'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 
 export interface UnpaidSession {
   id: string
@@ -65,6 +67,7 @@ interface PayrollHubTableProps {
 }
 
 export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = false }: PayrollHubTableProps) {
+  const isMobile = useIsMobile()
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedContractors, setExpandedContractors] = useState<Set<string>>(new Set())
   const [markPaidDialog, setMarkPaidDialog] = useState<{
@@ -228,6 +231,106 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
       </div>
 
       {/* Table */}
+      {isMobile ? (
+        <div className="space-y-2">
+          {filteredContractors.length === 0 ? (
+            <div className="rounded-md border p-8 text-center text-sm text-muted-foreground">
+              {contractors.length === 0
+                ? 'No unpaid sessions found - all contractors are paid up!'
+                : 'No contractors match your search'}
+            </div>
+          ) : (
+            filteredContractors.map((contractor) => {
+              const isExpanded = expandedContractors.has(contractor.id)
+              return (
+                <MobileListItem
+                  key={contractor.id}
+                  title={contractor.name}
+                  trailing={<span className="text-warning">{formatCurrency(contractor.totalPending)}</span>}
+                  meta={
+                    <span>
+                      {contractor.sessionCount} session{contractor.sessionCount !== 1 ? 's' : ''}
+                    </span>
+                  }
+                  footer={
+                    <div className="flex w-full flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => toggleExpand(contractor.id)}
+                          aria-expanded={isExpanded}
+                          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} unpaid sessions for ${contractor.name}`}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown aria-hidden="true" className="mr-1 h-4 w-4" />
+                          ) : (
+                            <ChevronRight aria-hidden="true" className="mr-1 h-4 w-4" />
+                          )}
+                          Sessions
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => openMarkPaidDialog(contractor)}
+                        >
+                          <DollarSign className="mr-1 h-4 w-4" />
+                          Mark Paid
+                        </Button>
+                      </div>
+                      {isExpanded && (
+                        <div className="space-y-1.5">
+                          {contractor.unpaidSessions.map((session) => (
+                            <div key={session.id} className="bg-muted/50 rounded-md p-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium">
+                                    {format(parseLocalDate(session.date), 'MMM d, yyyy')}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {session.service_type?.name || '-'}
+                                  </div>
+                                  {session.clients.length > 0 && (
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {session.clients.join(', ')}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <span className="text-sm font-medium tabular-nums">
+                                    {formatCurrency(session.contractor_pay)}
+                                  </span>
+                                  {canDelete && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-9 w-9 text-destructive hover:bg-destructive-soft hover:text-destructive-soft-foreground"
+                                      aria-label={`Delete session on ${format(parseLocalDate(session.date), 'MMM d, yyyy')} for ${contractor.name}`}
+                                      onClick={() =>
+                                        setDeleteDialog({
+                                          isOpen: true,
+                                          session,
+                                          contractorName: contractor.name,
+                                        })
+                                      }
+                                    >
+                                      <Trash2 aria-hidden="true" className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  }
+                />
+              )
+            })
+          )}
+        </div>
+      ) : (
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -405,6 +508,7 @@ export function PayrollHubTable({ contractors, onPayoutComplete, canDelete = fal
           </TableBody>
         </Table>
       </div>
+      )}
 
       {/* Delete Session Dialog */}
       <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, session: null, contractorName: '' })}>

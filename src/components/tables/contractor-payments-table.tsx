@@ -27,6 +27,8 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowUpDown, Search, FileSpreadsheet } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import ExcelJS from 'exceljs'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 
 interface ContractorData {
   id: string
@@ -61,6 +63,7 @@ interface ContractorPaymentsTableProps {
 }
 
 export function ContractorPaymentsTable({ contractors, invoices }: ContractorPaymentsTableProps) {
+  const isMobile = useIsMobile()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -245,6 +248,48 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
         </Button>
       </div>
 
+      {isMobile ? (
+        <div className="space-y-2">
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => {
+              const contractor = row.original
+              return (
+                <MobileListItem
+                  key={contractor.id}
+                  title={contractor.name}
+                  trailing={<span className="text-success">{formatCurrency(contractor.totalPaid)}</span>}
+                  meta={
+                    <>
+                      <span>{contractor.email}</span>
+                      <span>
+                        {contractor.sessionCount} session{contractor.sessionCount !== 1 ? 's' : ''}
+                      </span>
+                    </>
+                  }
+                  footer={
+                    <div className="flex w-full items-center justify-between gap-2 text-sm">
+                      <span className="text-muted-foreground">
+                        Earned {formatCurrency(contractor.totalEarned)}
+                      </span>
+                      {contractor.totalPending > 0 ? (
+                        <Badge variant="outline" className="bg-warning-soft text-warning-soft-foreground border-warning/30">
+                          {formatCurrency(contractor.totalPending)} pending
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </div>
+                  }
+                />
+              )
+            })
+          ) : (
+            <div className="rounded-md border p-8 text-center text-sm text-muted-foreground">
+              No payment records found
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -290,6 +335,7 @@ export function ContractorPaymentsTable({ contractors, invoices }: ContractorPay
           </TableBody>
         </Table>
       </div>
+      )}
     </div>
   )
 }

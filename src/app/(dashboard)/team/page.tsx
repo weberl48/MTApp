@@ -3,24 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { PageHelp } from '@/components/help/page-help'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { formatCurrency } from '@/lib/pricing'
-import { roleLabels } from '@/lib/constants/display'
 import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
 import { fetchAdminGrants } from '@/lib/auth/admin-grants'
 import { resolveEffectiveRole, VIEW_AS_COOKIE } from '@/lib/auth/view-as'
 import type { UserRole } from '@/types/database'
-import { Users, Calendar, DollarSign, Mail, Phone } from 'lucide-react'
+import { Users, Calendar, DollarSign } from 'lucide-react'
 import { AdminGuard } from '@/components/guards/admin-guard'
-import { TeamMemberActions } from '@/components/team/team-member-actions'
+import { TeamMembersList } from '@/components/team/team-members-list'
 import { TeamPageTabs } from '@/components/team/team-page-tabs'
 import { PayRateMatrix } from '@/components/team/pay-rate-matrix'
 import { InviteTeamMemberDialog } from '@/components/team/invite-team-member-dialog'
@@ -148,7 +138,7 @@ export default async function TeamPage() {
       </div>
 
       {/* Summary Cards */}
-      <div data-tour="team-stats" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="team-stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -224,91 +214,13 @@ export default async function TeamPage() {
           <TeamPageTabs
             overviewContent={
               users && users.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead className="text-center">Sessions</TableHead>
-                      {canViewRates && <TableHead className="text-right">Total Earned</TableHead>}
-                      {canViewRates && <TableHead className="text-right">Pending Pay</TableHead>}
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((member) => {
-                      const stats = userStats[member.id] || { sessionCount: 0, totalEarnings: 0, pendingPay: 0 }
-                      return (
-                        <TableRow key={member.id}>
-                          <TableCell>
-                            <div className="font-medium">{member.name || 'Unnamed'}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {member.email && (
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Mail className="w-3 h-3 mr-1" />
-                                  {member.email}
-                                </div>
-                              )}
-                              {member.phone && (
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Phone className="w-3 h-3 mr-1" />
-                                  {member.phone}
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={member.role === 'contractor' ? 'secondary' : 'default'}
-                              className={
-                                member.role === 'developer'
-                                  ? 'bg-info text-info-foreground'
-                                  : member.role === 'owner'
-                                    ? 'bg-info-soft text-info-soft-foreground'
-                                    : undefined
-                              }
-                            >
-                              {roleLabels[member.role] || member.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {stats.sessionCount}
-                          </TableCell>
-                          {canViewRates && (
-                            <TableCell className="text-right font-medium">
-                              {formatCurrency(stats.totalEarnings)}
-                            </TableCell>
-                          )}
-                          {canViewRates && (
-                            <TableCell className="text-right">
-                              {stats.pendingPay > 0 ? (
-                                <span className="text-warning font-medium">
-                                  {formatCurrency(stats.pendingPay)}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                          )}
-                          <TableCell>
-                            <TeamMemberActions
-                              member={{
-                                id: member.id,
-                                name: member.name,
-                                role: member.role,
-                              }}
-                              currentUserId={user?.id || ''}
-                              currentUserRole={currentUserRole}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
+                <TeamMembersList
+                  members={users}
+                  userStats={userStats}
+                  canViewRates={canViewRates}
+                  currentUserId={user?.id || ''}
+                  currentUserRole={currentUserRole}
+                />
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
