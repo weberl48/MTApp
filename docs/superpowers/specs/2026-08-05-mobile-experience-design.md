@@ -1,6 +1,6 @@
 # Mobile Experience Redesign — design spec
 
-**Date:** 2026-08-05 · **Status:** approved (brainstormed with the user; scope and build strategy chosen explicitly)
+**Date:** 2026-08-05 · **Status:** SHIPPED (all four batches on main same day; every batch gated on unit/tsc/lint 88-0, six walkthrough-audit runs, e2e, and the closing S20+ sweep showed zero overflow with both original worst offenders resolved)
 **Trigger:** on a Galaxy S20+ (412×915 CSS px) the dashboard shows clipped badges, sideways-scrolling
 tables with the important columns off-screen, wrapping dates, truncated names, and width-eating
 checkbox gutters. Evidence: S20+ screenshot sweep, 2026-08-05 session scratchpad (`s20-sweep/`).
