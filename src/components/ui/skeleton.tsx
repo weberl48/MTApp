@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
 
 interface SkeletonProps {
   className?: string
@@ -78,6 +79,41 @@ export function DashboardSkeleton() {
   )
 }
 
+/**
+ * One mobile-card-shaped placeholder, three lines: title+trailing row, meta
+ * line, footer (badge/action-width) line — mirrors `MobileListItem`'s row
+ * shape one-for-one.
+ */
+function SkeletonCardListItem() {
+  return (
+    <div className="bg-card border border-border rounded-lg p-3 space-y-1.5">
+      <div className="flex items-center">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="ml-auto h-4 w-16" />
+      </div>
+      <Skeleton className="h-3.5 w-40" />
+      <Skeleton className="h-5 w-20 rounded-full" />
+    </div>
+  )
+}
+
+/**
+ * Card-list loading placeholder — the mobile counterpart to the row-based
+ * skeletons above, matching `MobileListItem`'s card shape (bg-card/border/
+ * rounded-lg/p-3/space-y-1.5) so the skeleton-to-content swap doesn't shift
+ * layout on mobile list pages (invoices, team, payroll, ...).
+ */
+export function SkeletonCardList() {
+  return (
+    <div className="space-y-2">
+      <SkeletonCardListItem />
+      <SkeletonCardListItem />
+      <SkeletonCardListItem />
+      <SkeletonCardListItem />
+    </div>
+  )
+}
+
 export function SessionsListSkeleton() {
   return (
     <div className="space-y-6">
@@ -120,6 +156,11 @@ export function SessionsListSkeleton() {
 }
 
 export function InvoicesListSkeleton() {
+  // Server/first-render snapshot is false (desktop-shaped), same as every
+  // other useIsMobile() consumer — the mobile branch below only takes over
+  // post-hydration, so there's no flash (see use-is-mobile.ts).
+  const isMobile = useIsMobile()
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -145,29 +186,33 @@ export function InvoicesListSkeleton() {
         <SkeletonCard />
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border bg-card">
-        <div className="p-4 border-b">
-          <div className="flex gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-4 w-20" />
+      {/* List — card stack on mobile (matches MobileListItem), table on desktop */}
+      {isMobile ? (
+        <SkeletonCardList />
+      ) : (
+        <div className="rounded-lg border bg-card">
+          <div className="p-4 border-b">
+            <div className="flex gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="h-4 w-20" />
+              ))}
+            </div>
+          </div>
+          <div className="divide-y">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="p-4 flex gap-4">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-20" />
+              </div>
             ))}
           </div>
         </div>
-        <div className="divide-y">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="p-4 flex gap-4">
-              <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

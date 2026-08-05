@@ -23,13 +23,24 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, CheckCircle, Loader2, Plus } from 'lucide-react'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from '@/components/ui/drawer'
+import { Label } from '@/components/ui/label'
+import { FileText, Clock, AlertTriangle, Download, Send, CheckCheck, CheckCircle, Loader2, Plus, SlidersHorizontal } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import { InvoiceActions } from '@/components/forms/invoice-actions'
 import { useOrganization } from '@/contexts/organization-context'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
+import { MobileListItem } from '@/components/mobile/list-item'
 import { InvoicesListSkeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { logger } from '@/lib/logger'
@@ -104,6 +115,7 @@ function InvoiceTable({
   showSelection?: boolean
 }) {
   const router = useRouter()
+  const isMobile = useIsMobile()
 
   if (invoices.length === 0) {
     return (
@@ -116,6 +128,135 @@ function InvoiceTable({
 
   const allSelected = invoices.length > 0 && invoices.every((inv) => selectedIds?.has(inv.id))
   const someSelected = invoices.some((inv) => selectedIds?.has(inv.id))
+
+  // Mobile: a stack of MobileListItem cards over the SAME invoices array,
+  // the SAME selection state/handlers, and the SAME getInvoiceStatus/label
+  // lookups the desktop <Table> below uses — only the container markup
+  // differs. Exactly one of these two return statements renders per
+  // useIsMobile() branch, so the desktop table (below, untouched) stays
+  // byte-identical.
+  if (isMobile) {
+    return (
+      <div className="space-y-2">
+        {showSelection && isAdmin && (
+          <div
+            className="flex items-center gap-2 px-1 py-1"
+            data-tour="invoices-select-all"
+          >
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(checked) => {
+                invoices.forEach((inv) => onSelectChange?.(inv.id, !!checked))
+              }}
+              aria-label="Select all"
+              className={someSelected && !allSelected ? 'opacity-50' : ''}
+            />
+            <span className="text-sm text-muted-foreground">Select all</span>
+          </div>
+        )}
+        {invoices.map((invoice) => {
+          const { status, isOverdue, daysOverdue } = getInvoiceStatus(invoice)
+          return (
+            <MobileListItem
+              key={invoice.id}
+              href={`/invoices/${invoice.id}/`}
+              checkbox={
+                showSelection && isAdmin
+                  ? {
+                      checked: selectedIds?.has(invoice.id) || false,
+                      onChange: (checked) => onSelectChange?.(invoice.id, checked),
+                      label: `Select invoice for ${invoice.client?.name}`,
+                    }
+                  : undefined
+              }
+              title={invoice.client?.name ?? 'Unknown client'}
+              trailing={formatCurrency(isAdmin ? invoice.amount : (invoice.contractor_pay ?? invoice.amount))}
+              meta={
+                <>
+                  <span>
+                    {invoice.invoice_type === 'batch'
+                      ? 'Monthly Statement'
+                      : invoice.session?.service_type?.name}
+                  </span>
+                  <span>
+                    {invoice.invoice_type === 'batch' && invoice.billing_period
+                      ? parseLocalDate(invoice.billing_period + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                      : invoice.session?.date
+                        ? parseLocalDate(invoice.session.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })
+                        : '-'}
+                  </span>
+                  <Badge variant="outline">
+                    {paymentMethodLabels[invoice.payment_method] || invoice.payment_method}
+                  </Badge>
+                </>
+              }
+              footer={
+                <div className="flex flex-1 flex-wrap items-center gap-2" data-tour="invoice-row-actions">
+                  <Badge className={invoiceStatusColors[status]}>
+                    {isOverdue ? 'Overdue' : invoiceStatusLabels[invoice.status] || invoice.status}
+                  </Badge>
+                  {isOverdue && (
+                    <span className="text-xs text-destructive">
+                      {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} late
+                    </span>
+                  )}
+                  {showActions && isAdmin && invoice.status === 'pending' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        const promise = updateInvoiceStatus(invoice.id, 'sent').then((result) => {
+                          if (!result.success) throw new Error('error' in result ? result.error : 'Failed')
+                          onRefresh?.()
+                        })
+                        toast.promise(promise, {
+                          loading: 'Marking as sent…',
+                          success: 'Marked as sent',
+                          error: (err) => (err instanceof Error ? err.message : 'Failed'),
+                        })
+                      }}
+                    >
+                      <Send className="w-3 h-3 mr-1" />
+                      Send
+                    </Button>
+                  )}
+                  {showActions && isAdmin && invoice.status === 'sent' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs text-success border-success/30 hover:bg-success-soft"
+                      onClick={() => {
+                        const promise = updateInvoiceStatus(invoice.id, 'paid').then((result) => {
+                          if (!result.success) throw new Error('error' in result ? result.error : 'Failed')
+                          onRefresh?.()
+                        })
+                        toast.promise(promise, {
+                          loading: 'Marking as paid…',
+                          success: 'Marked as paid',
+                          error: (err) => (err instanceof Error ? err.message : 'Failed'),
+                        })
+                      }}
+                    >
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Mark Paid
+                    </Button>
+                  )}
+                  {showActions && isAdmin && (
+                    <InvoiceActions invoice={invoice} onStatusChange={onRefresh} canDelete={isAdmin} />
+                  )}
+                </div>
+              }
+            />
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <Table>
@@ -265,6 +406,7 @@ function InvoiceTable({
 
 export default function InvoicesPage() {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [unbilledScholarshipSessions, setUnbilledScholarshipSessions] = useState<UnbilledScholarshipSession[]>([])
   const [generatingBatch, setGeneratingBatch] = useState<string | null>(null) // client::month key
@@ -295,6 +437,10 @@ export default function InvoicesPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
+  // Mobile-only: the method + sort Selects below live inside this sheet
+  // instead of inline in the CardHeader — same paymentMethodFilter/
+  // invoiceSort state either way, only where the controls render moves.
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const supabaseRef = useRef(createClient())
 
   const handleRefresh = useCallback(() => {
@@ -728,33 +874,91 @@ export default function InvoicesPage() {
                 {isAdmin && <span className="ml-2 text-xs">Select rows to send or update in bulk</span>}
               </CardDescription>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
-                <SelectTrigger className="w-full sm:w-48" aria-label="Filter by payment method">
-                  <SelectValue placeholder="All methods" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All methods</SelectItem>
-                  {paymentMethodOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
-                <SelectTrigger className="w-full sm:w-60" aria-label="Sort invoices">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INVOICE_SORT_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {isMobile ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setFiltersOpen(true)}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Filters
+                </Button>
+                <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
+                  <DrawerContent className="pb-[env(safe-area-inset-bottom)]">
+                    <DrawerHeader>
+                      <DrawerTitle>Filters</DrawerTitle>
+                      <DrawerDescription>Narrow the list by payment method, or change the sort order.</DrawerDescription>
+                    </DrawerHeader>
+                    <div className="px-4 pb-4 space-y-4">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="mobile-payment-method-filter">Payment method</Label>
+                        <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
+                          <SelectTrigger id="mobile-payment-method-filter" className="w-full" aria-label="Filter by payment method">
+                            <SelectValue placeholder="All methods" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All methods</SelectItem>
+                            {paymentMethodOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="mobile-invoice-sort">Sort by</Label>
+                        <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
+                          <SelectTrigger id="mobile-invoice-sort" className="w-full" aria-label="Sort invoices">
+                            <SelectValue placeholder="Sort by" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {INVOICE_SORT_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DrawerFooter>
+                      <Button onClick={() => setFiltersOpen(false)}>Done</Button>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
+                  <SelectTrigger className="w-full sm:w-48" aria-label="Filter by payment method">
+                    <SelectValue placeholder="All methods" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All methods</SelectItem>
+                    {paymentMethodOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={invoiceSort} onValueChange={(v) => setInvoiceSort(v as InvoiceSortKey)}>
+                  <SelectTrigger className="w-full sm:w-60" aria-label="Sort invoices">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INVOICE_SORT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
