@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, Code2, Eye, Users, ExternalLink, HelpCircle, Palette } from 'lucide-react'
+import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, ChevronLeft, ChevronRight, Code2, Eye, Users, ExternalLink, HelpCircle, Palette } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import { useHydrated, useIsMobile } from '@/lib/hooks/use-is-mobile'
 import { AppearanceMenu, AppearanceMenuContent } from '@/components/ui/appearance-menu'
@@ -90,6 +90,11 @@ export function Header({ user }: HeaderProps) {
   const [contractors, setContractors] = useState<ContractorOption[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
   const [openingPortalFor, setOpeningPortalFor] = useState<string | null>(null)
+  // Mobile avatar menu drill-in: which "page" the panel is showing. Radix
+  // submenus open sideways and clip off-screen on phones, so below lg the
+  // former submenus render as in-place pages instead (reachable only via
+  // lg:hidden rows — desktop never leaves 'root').
+  const [menuPage, setMenuPage] = useState<'root' | 'org' | 'viewAs' | 'portal' | 'appearance'>('root')
 
   /**
    * Mint a fresh portal token for this client and open it.
@@ -404,7 +409,7 @@ export function Header({ user }: HeaderProps) {
       </div>
 
       {/* User menu */}
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => { if (!open) setMenuPage('root') }}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full" aria-label="Account menu">
             <Avatar
@@ -423,203 +428,227 @@ export function Header({ user }: HeaderProps) {
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end">
-          <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">{user?.name || 'User'}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.email}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                {user?.role || 'contractor'}
-              </p>
+        <DropdownMenuContent
+          className={cn('max-w-[calc(100vw-1rem)]', menuPage === 'appearance' ? 'w-72' : 'w-56')}
+          align="end"
+        >
+          {menuPage !== 'root' && (
+            <>
+              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setMenuPage('root') }}>
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+
+          {menuPage === 'org' && (
+            <div className="max-h-[300px] overflow-y-auto">
+              {allOrganizations.map((org) => (
+                <DropdownMenuItem
+                  key={org.id}
+                  onClick={() => switchOrganization(org.id)}
+                  className={org.id === organization?.id ? 'bg-accent' : ''}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{org.name}</span>
+                    <span className="text-xs text-muted-foreground">{org.slug}</span>
+                  </div>
+                  {org.id === organization?.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                </DropdownMenuItem>
+              ))}
             </div>
-          </DropdownMenuLabel>
+          )}
 
-          {/* Mobile-only: everything the desktop header row carries next to the
-              avatar (org switcher, View As, Client Portal preview, Appearance)
-              moves in here below `lg`, where that row doesn't render. */}
-          {(showDevOnlyTools || showViewAsTools) && <DropdownMenuSeparator className="lg:hidden" />}
-
-          {showDevOnlyTools && allOrganizations.length > 1 && (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="lg:hidden">
-                <Building2 className="w-4 h-4 mr-2" />
-                <span className="truncate">{organization?.name || 'Switch Organization'}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
-                  {allOrganizations.map((org) => (
+          {menuPage === 'viewAs' && (
+            <div className="max-h-[300px] overflow-y-auto">
+              <DropdownMenuItem
+                onClick={() => {
+                  setViewAsRole(null)
+                  setViewAsContractor(null)
+                }}
+                className={!viewAsRole && !viewAsContractor ? 'bg-accent' : ''}
+              >
+                <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
+                {!viewAsRole && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+              </DropdownMenuItem>
+              {actualRole === 'developer' && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setViewAsRole('owner')
+                    setViewAsContractor(null)
+                  }}
+                  className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-accent' : ''}
+                >
+                  <span className="font-medium">Owner</span>
+                  {viewAsRole === 'owner' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                onClick={() => {
+                  setViewAsRole('admin')
+                  setViewAsContractor(null)
+                }}
+                className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-accent' : ''}
+              >
+                <span className="font-medium">Admin</span>
+                {viewAsRole === 'admin' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setViewAsRole('contractor')
+                  setViewAsContractor(null)
+                }}
+                className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-accent' : ''}
+              >
+                <span className="font-medium">Contractor (generic)</span>
+                {viewAsRole === 'contractor' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
+              </DropdownMenuItem>
+              {contractors.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    Specific Contractor
+                  </DropdownMenuLabel>
+                  {contractors.map((contractor) => (
                     <DropdownMenuItem
-                      key={org.id}
-                      onClick={() => switchOrganization(org.id)}
-                      className={org.id === organization?.id ? 'bg-accent' : ''}
+                      key={contractor.id}
+                      onClick={() => {
+                        setViewAsRole('contractor')
+                        setViewAsContractor(contractor)
+                      }}
+                      className={viewAsContractor?.id === contractor.id ? 'bg-accent' : ''}
                     >
                       <div className="flex flex-col">
-                        <span className="font-medium">{org.name}</span>
-                        <span className="text-xs text-muted-foreground">{org.slug}</span>
+                        <span className="font-medium">{contractor.name}</span>
+                        <span className="text-xs text-muted-foreground">{contractor.email}</span>
                       </div>
-                      {org.id === organization?.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                      {viewAsContractor?.id === contractor.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
                     </DropdownMenuItem>
                   ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+                </>
+              )}
+            </div>
           )}
 
-          {showViewAsTools && (
-            <DropdownMenuSub>
-              {/* data-tour matches the desktop button's id too (comma-fallback
-                  selector in the View As walkthrough): the mobile equivalent
-                  entry point, revealed once the account menu is opened via
-                  that step's preClick. */}
-              <DropdownMenuSubTrigger data-tour="view-as-switcher" className="lg:hidden">
-                <Eye className="w-4 h-4 mr-2" />
-                <span className="truncate">
-                  {viewAsContractor
-                    ? `As ${viewAsContractor.name}`
-                    : viewAsRole
-                      ? `As ${roleLabels[viewAsRole]}`
-                      : 'View As'}
-                </span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setViewAsRole(null)
-                      setViewAsContractor(null)
-                    }}
-                    className={!viewAsRole && !viewAsContractor ? 'bg-accent' : ''}
-                  >
-                    <span className="font-medium">{actualRole === 'developer' ? 'Developer' : 'Owner'} (actual)</span>
-                    {!viewAsRole && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
-                  </DropdownMenuItem>
-                  {actualRole === 'developer' && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setViewAsRole('owner')
-                        setViewAsContractor(null)
-                      }}
-                      className={viewAsRole === 'owner' && !viewAsContractor ? 'bg-accent' : ''}
-                    >
-                      <span className="font-medium">Owner</span>
-                      {viewAsRole === 'owner' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setViewAsRole('admin')
-                      setViewAsContractor(null)
-                    }}
-                    className={viewAsRole === 'admin' && !viewAsContractor ? 'bg-accent' : ''}
-                  >
-                    <span className="font-medium">Admin</span>
-                    {viewAsRole === 'admin' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setViewAsRole('contractor')
-                      setViewAsContractor(null)
-                    }}
-                    className={viewAsRole === 'contractor' && !viewAsContractor ? 'bg-accent' : ''}
-                  >
-                    <span className="font-medium">Contractor (generic)</span>
-                    {viewAsRole === 'contractor' && !viewAsContractor && <Check className="ml-auto h-4 w-4 shrink-0" />}
-                  </DropdownMenuItem>
-                  {contractors.length > 0 && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <Users className="w-4 h-4 mr-2" />
-                          <span>Specific Contractor</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
-                            {contractors.map((contractor) => (
-                              <DropdownMenuItem
-                                key={contractor.id}
-                                onClick={() => {
-                                  setViewAsRole('contractor')
-                                  setViewAsContractor(contractor)
-                                }}
-                                className={viewAsContractor?.id === contractor.id ? 'bg-accent' : ''}
-                              >
-                                <div className="flex flex-col">
-                                  <span className="font-medium">{contractor.name}</span>
-                                  <span className="text-xs text-muted-foreground">{contractor.email}</span>
-                                </div>
-                                {viewAsContractor?.id === contractor.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                    </>
-                  )}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+          {menuPage === 'portal' && (
+            <div className="max-h-[300px] overflow-y-auto">
+              {clients.map((client) => (
+                <DropdownMenuItem
+                  key={client.id}
+                  disabled={openingPortalFor === client.id}
+                  onClick={() => openClientPortal(client.id)}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-medium truncate">{client.name}</span>
+                    {openingPortalFor === client.id && (
+                      <Badge variant="secondary" className="ml-2 text-xs">Opening…</Badge>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
           )}
 
-          {showDevOnlyTools && clients.length > 0 && feature('client_portal') && (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="lg:hidden">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                <span>Client Portal</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
-                  {clients.map((client) => (
-                    <DropdownMenuItem
-                      key={client.id}
-                      disabled={openingPortalFor === client.id}
-                      onClick={() => openClientPortal(client.id)}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-medium truncate">{client.name}</span>
-                        {openingPortalFor === client.id && (
-                          <Badge variant="secondary" className="ml-2 text-xs">Opening…</Badge>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+          {menuPage === 'appearance' && (
+            <div className="p-2 pt-1">
+              <AppearanceMenuContent />
+            </div>
           )}
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="lg:hidden">
-              <Palette className="w-4 h-4 mr-2" />
-              <span>Appearance</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="w-72 p-3">
-                <AppearanceMenuContent />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {menuPage === 'root' && (
+            <>
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user?.email}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                    {user?.role || 'contractor'}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
 
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/settings/')}>
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/settings/profile/')}>
-            <UserIcon className="mr-2 h-4 w-4" />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/help/')}>
-            <HelpCircle className="mr-2 h-4 w-4" />
-            Help
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </DropdownMenuItem>
+              {/* Mobile-only: everything the desktop header row carries next to the
+                  avatar (org switcher, View As, Client Portal preview, Appearance)
+                  moves in here below `lg`, where that row doesn't render — as
+                  drill-in rows that swap this panel's content in place. */}
+              {(showDevOnlyTools || showViewAsTools) && <DropdownMenuSeparator className="lg:hidden" />}
+
+              {showDevOnlyTools && allOrganizations.length > 1 && (
+                <DropdownMenuItem
+                  className="lg:hidden"
+                  onSelect={(e) => { e.preventDefault(); setMenuPage('org') }}
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  <span className="truncate">{organization?.name || 'Switch Organization'}</span>
+                  <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+                </DropdownMenuItem>
+              )}
+
+              {showViewAsTools && (
+                /* data-tour matches the desktop button's id too (comma-fallback
+                   selector in the View As walkthrough): the mobile equivalent
+                   entry point, revealed once the account menu is opened via
+                   that step's preClick. */
+                <DropdownMenuItem
+                  data-tour="view-as-switcher"
+                  className="lg:hidden"
+                  onSelect={(e) => { e.preventDefault(); setMenuPage('viewAs') }}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  <span className="truncate">
+                    {viewAsContractor
+                      ? `As ${viewAsContractor.name}`
+                      : viewAsRole
+                        ? `As ${roleLabels[viewAsRole]}`
+                        : 'View As'}
+                  </span>
+                  <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+                </DropdownMenuItem>
+              )}
+
+              {showDevOnlyTools && clients.length > 0 && feature('client_portal') && (
+                <DropdownMenuItem
+                  className="lg:hidden"
+                  onSelect={(e) => { e.preventDefault(); setMenuPage('portal') }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  <span>Client Portal</span>
+                  <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+                </DropdownMenuItem>
+              )}
+
+              <DropdownMenuItem
+                className="lg:hidden"
+                onSelect={(e) => { e.preventDefault(); setMenuPage('appearance') }}
+              >
+                <Palette className="w-4 h-4 mr-2" />
+                <span>Appearance</span>
+                <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/settings/')}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/settings/profile/')}>
+                <UserIcon className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/help/')}>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Help
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

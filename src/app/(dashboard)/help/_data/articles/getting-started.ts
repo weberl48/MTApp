@@ -111,7 +111,7 @@ Open the **View As** menu again and choose **Owner (actual)** at the top (develo
     content: `
 ## Appearance: Themes & Dark Mode
 
-MCA Manager lets you personalize how the app looks. Click the **palette icon** in the top-right corner of the header (next to your avatar) to open the Appearance menu. It has two sections: **Mode** and **Theme**.
+MCA Manager lets you personalize how the app looks. Click the **palette icon** in the top-right corner of the header (next to your avatar) to open the Appearance menu. On a phone, tap your **avatar** in the top-right and choose **Appearance** instead. Either way it has two sections: **Mode** and **Theme**.
 
 ### Mode: Light, Dark, or System
 
