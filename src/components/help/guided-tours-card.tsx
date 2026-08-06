@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useWalkthrough, useWalkthroughAudienceFlags } from '@/components/walkthroughs/walkthrough-provider'
 import { canStartWalkthrough, getWalkthroughById } from '@/components/walkthroughs/walkthroughs'
+import { useOrganization } from '@/contexts/organization-context'
 import {
   RECOMMENDED_WALKTHROUGH_ORDER,
   WALKTHROUGHS_CHANGED_EVENT,
@@ -20,6 +21,7 @@ import {
 export function GuidedToursCard() {
   const { startWalkthrough } = useWalkthrough()
   const flags = useWalkthroughAudienceFlags()
+  const { organization } = useOrganization()
   // Read after mount: localStorage isn't available during SSR/hydration.
   const [completed, setCompleted] = useState<string[]>([])
   useEffect(() => {
@@ -31,7 +33,7 @@ export function GuidedToursCard() {
 
   const tours = RECOMMENDED_WALKTHROUGH_ORDER
     .map(id => getWalkthroughById(id))
-    .filter((w): w is NonNullable<typeof w> => !!w && canStartWalkthrough(w.id, flags))
+    .filter((w): w is NonNullable<typeof w> => !!w && canStartWalkthrough(w.id, flags, organization?.settings))
 
   const doneCount = tours.filter(w => completed.includes(w.id)).length
 

@@ -74,6 +74,8 @@ The Client Portal is an optional feature that gives clients a private, read-only
 
 The Client Portal must be turned on at the organization level before it can be used. Go to **Settings > Business Rules > Features** tab and toggle the **Client Portal** switch on.
 
+The interactive walkthrough for this article (and its entry in the Guided Tours list) only appears while the feature is on — with the portal switched off there would be nothing for the tour to show.
+
 ### Inviting a Client
 
 Once the feature is enabled, there are two ways to get a client their portal link:

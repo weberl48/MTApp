@@ -183,12 +183,14 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
     userId: null as string | null,
     flags: audienceFlags,
     viewAsActive: false,
+    orgSettings: null as Record<string, unknown> | null,
   })
   contextRef.current = {
     orgId: organization?.id ?? null,
     userId: user?.id ?? null,
     flags: audienceFlags,
     viewAsActive: !!viewAsRole || !!viewAsContractor,
+    orgSettings: (organization?.settings as Record<string, unknown> | undefined) ?? null,
   }
   const startWalkthroughRef = useRef<(id: string) => void>(() => {})
 
@@ -268,9 +270,9 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
         // Finished the whole tour (not an early X-close): remember it and
         // suggest the next tour in the recommended onboarding order.
         markWalkthroughCompleted(walkthrough!.id)
-        const { flags } = contextRef.current
+        const { flags, orgSettings } = contextRef.current
         const nextId = nextRecommendedWalkthrough(walkthrough!.id, undefined, (id) =>
-          canStartWalkthrough(id, flags)
+          canStartWalkthrough(id, flags, orgSettings)
         )
         const next = nextId ? getWalkthroughById(nextId) : undefined
         toast.success(`${walkthrough!.name} — complete!`, {

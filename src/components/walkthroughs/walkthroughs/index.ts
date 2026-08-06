@@ -1,5 +1,7 @@
 import type { Walkthrough } from '../walkthrough-types'
 import { audienceAllows, type AudienceFlags } from '@/lib/walkthroughs/audience'
+import { isFeatureEnabled } from '@/lib/features'
+import type { OrganizationSettings } from '@/types/database'
 
 export const APP_OVERVIEW_WALKTHROUGH: Walkthrough = {
   id: 'app-overview',
@@ -907,6 +909,10 @@ export const CLIENT_PORTAL_WALKTHROUGH: Walkthrough = {
   name: 'Set Up Client Portal Access',
   description: 'Learn how to send portal invites and manage client portal links',
   audience: 'admin',
+  // The Portal Access card (steps 3–4) only renders when the org has the
+  // portal feature on — without this gate the tour was offered anyway and
+  // those steps could only fall back to centered "can't see a highlight" popovers.
+  requiresFeature: 'client_portal',
   steps: [
     {
       title: 'Go to Clients',
@@ -1129,9 +1135,18 @@ export function getWalkthroughById(id: string): Walkthrough | undefined {
  * THE gate for offering/starting a tour by id — article pages, the Guided
  * Tours card, and next-tour chaining must all use this one predicate so a
  * gating-rule change can't leave one entry point behind.
+ *
+ * `settings` is the org's raw settings (`organization?.settings`), used to
+ * hide tours whose `requiresFeature` flag is off. Omitting it fails open,
+ * matching the feature-flag design.
  */
-export function canStartWalkthrough(id: string | undefined, flags: AudienceFlags): boolean {
+export function canStartWalkthrough(
+  id: string | undefined,
+  flags: AudienceFlags,
+  settings?: OrganizationSettings | Record<string, unknown> | null
+): boolean {
   if (!id) return false
   const walkthrough = getWalkthroughById(id)
-  return !!walkthrough && audienceAllows(walkthrough.audience, flags)
+  if (!walkthrough || !audienceAllows(walkthrough.audience, flags)) return false
+  return !walkthrough.requiresFeature || isFeatureEnabled(settings, walkthrough.requiresFeature)
 }

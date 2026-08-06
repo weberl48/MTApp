@@ -1,4 +1,5 @@
 import type { WalkthroughAudience } from '@/lib/walkthroughs/audience'
+import type { FeatureFlags } from '@/types/database'
 
 export type WalkthroughStep = {
   title: string
@@ -57,5 +58,13 @@ export type Walkthrough = {
    * Tours card, on article pages, and when suggesting the next tour.
    */
   audience?: WalkthroughAudience
+  /**
+   * Org feature flag this tour's targets live behind (e.g. the client-portal
+   * tour highlights the Portal Access card, which only renders when
+   * `client_portal` is on). `canStartWalkthrough` hides the tour when the
+   * feature is off, so it is never offered in a state where its steps can
+   * only fall back to centered popovers.
+   */
+  requiresFeature?: keyof FeatureFlags
   steps: WalkthroughStep[]
 }

@@ -53,7 +53,7 @@ export default function HelpArticlePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = use(params)
-  const { can } = useOrganization()
+  const { can, organization } = useOrganization()
   const { startWalkthrough } = useWalkthrough()
   const audienceFlags = useWalkthroughAudienceFlags()
 
@@ -105,7 +105,7 @@ export default function HelpArticlePage({
         <p className="text-lg text-muted-foreground">{article.description}</p>
 
         {/* Walkthrough Button — only when the tour's audience matches the user */}
-        {canStartWalkthrough(article.walkthrough, audienceFlags) && (
+        {canStartWalkthrough(article.walkthrough, audienceFlags, organization?.settings) && (
           <Button
             onClick={() => startWalkthrough(article.walkthrough!)}
             className="gap-2"

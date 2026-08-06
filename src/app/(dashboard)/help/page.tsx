@@ -375,7 +375,7 @@ export default function HelpPage() {
                           )}
                         </div>
                       </div>
-                      {canStartWalkthrough(article.walkthrough, audienceFlags) && (
+                      {canStartWalkthrough(article.walkthrough, audienceFlags, organization?.settings) && (
                         <Button
                           variant="outline"
                           size="sm"
