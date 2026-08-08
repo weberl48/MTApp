@@ -313,6 +313,8 @@ A session waiting for approval was priced when the contractor saved it. Approvin
 
 ### When You Need It
 
+Rates themselves are edited on **Settings > Pricing** (service rates and the per-contractor overrides matrix) — this article covers only pushing a rate change onto sessions already logged.
+
 - You corrected a service type's base rate, MCA percentage, or pay schedule.
 - You gave a contractor a raise, or fixed a rate that was entered wrong.
 - You discovered a formula was set up incorrectly and sessions were priced from it.

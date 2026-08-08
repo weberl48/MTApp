@@ -26,7 +26,7 @@ const COVERAGE_MATRIX: Record<string, string[]> = {
   '/team': ['inviting-team-members', 'managing-contractor-rates'],
   '/team/[id]': ['inviting-team-members', 'managing-contractor-rates'],
   '/settings': ['profile-and-security'],
-  '/settings/business/services': ['configuring-services', 'editing-service-types', 'pricing-deep-dive'],
+  '/settings/pricing': ['pricing-hub', 'pricing-deep-dive', 'configuring-services', 'editing-service-types', 'managing-contractor-rates'],
   '/settings/business/invoices': ['generating-invoices', 'notifications-and-reminders'],
   '/settings/business/sessions': ['logging-a-session', 'no-shows-and-cancellations'],
   '/settings/business/notifications': ['notifications-and-reminders'],

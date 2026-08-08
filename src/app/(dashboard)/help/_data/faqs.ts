@@ -36,7 +36,7 @@ This "solo exception" keeps a lightly-attended group session from being billed a
     question: "Why does a contractor's pay differ between services?",
     answer: `Contractor pay is resolved through a priority chain, and different services can be configured to use different rules. The app checks, in order: a **custom rate** set for that contractor on that specific service type (Team > Rates), then a **pay schedule** defined on the service type itself (flat amounts per duration), and finally falls back to a **formula** (Total Billed minus the service's MCA percentage, optionally capped).
 
-Because each service type and each contractor can have its own settings at any of these levels, the same contractor can legitimately earn different amounts for different services — it's not an inconsistency, it's whichever rule is most specific for that combination.`,
+Because each service type and each contractor can have its own settings at any of these levels, the same contractor can legitimately earn different amounts for different services — it's not an inconsistency, it's whichever rule is most specific for that combination. If you want to see which rule fired for a specific case, the **Price a session** simulator on **Settings > Pricing** shows a "priced by" badge naming exactly which one produced the number.`,
     articleSlug: 'pricing-deep-dive',
     category: 'team',
     adminOnly: true,
@@ -64,7 +64,7 @@ Because it's computed rather than stored, an overdue invoice returns to normal a
   {
     id: 'change-no-show-fee',
     question: 'How do I change the no-show fee?',
-    answer: `Go to **Settings > Business Rules > Sessions tab** and update the **No-Show Fee ($)** field. This is an organization-wide flat amount (the default is $60) — it's what gets billed to the client whenever a session is marked as a no-show, regardless of which service type or duration the session was scheduled for.
+    answer: `Go to **Settings > Pricing** and update the **No-Show Fee ($)** field in the Policies & fees section. This is an organization-wide flat amount (the default is $60) — it's what gets billed to the client whenever a session is marked as a no-show, regardless of which service type or duration the session was scheduled for.
 
 Changing this setting only affects no-shows recorded after the change; sessions already marked as no-shows keep the fee amount that was in effect when they were recorded.`,
     articleSlug: 'no-shows-and-cancellations',
@@ -282,7 +282,7 @@ To exit, open the same **View As** menu again and choose **Owner (actual)** at t
   {
     id: 'rate-change-not-applied',
     question: "I changed a rate, but my sessions still show the old price. Why?",
-    answer: `Session pricing is written down when the session is saved and then kept, so changing a service rate or a contractor rate only affects sessions logged **after** the change. This includes sessions sitting in your approvals queue — approving one does not re-price it, so it gets approved at the price it was saved with.
+    answer: `Session pricing is written down when the session is saved and then kept, so changing a service rate (Settings > Pricing) or a contractor rate (also Settings > Pricing, or a contractor's own Rates sub-tab) only affects sessions logged **after** the change. This includes sessions sitting in your approvals queue — approving one does not re-price it, so it gets approved at the price it was saved with.
 
 If you were correcting a mistake and want already-logged sessions moved onto the new pricing, go to **Sessions**, tick the ones you want, and click **Recalculate pricing**. You will see every old and new figure before anything is saved. Sessions whose invoice has already been sent or paid are deliberately left alone.`,
     articleSlug: 'recalculating-pricing',

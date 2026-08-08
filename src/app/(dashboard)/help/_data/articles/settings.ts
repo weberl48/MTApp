@@ -17,23 +17,31 @@ Service types define what your organization offers and how each service is price
 
 ### Where to Find It
 
-Navigate to **Settings > Business Rules > Services** tab. The Services tab is owner-only — it sets contractor pay, so admins do not see it. Admins still get the Invoices, Sessions, and Notifications tabs.
+Navigate to **Settings > Pricing**. The page is owner-only — it sets contractor pay, so admins do not see it. Business Rules still has Invoices, Sessions, and Notifications tabs for admins; the old Services tab has moved here.
 
-### Fields When Creating or Editing a Service Type
+### Creating a New Service
+
+The "Add Service" dialog asks for the fields a service needs to be usable right away:
 
 - **Name** - A descriptive label shown on sessions and invoices (e.g., "Individual Music Therapy").
+- **Category** and **Location** - Organize reporting; Location also flags when rent applies.
 - **Base Rate** - The price for a standard 30-minute session.
-- **Per-Person Rate** - Additional amount per attendee for group services. Set to 0 for individual services.
-- **MCA Percentage** - The percentage of the total that stays with the organization.
-- **Contractor Cap** - Optional maximum amount a contractor can earn per session.
-- **Total Cap** - Optional maximum total that can be billed, regardless of headcount.
-- **Rent Percentage** - Percentage withheld for location rent (e.g., Matt's Music).
-- **Location** - The facility where this service is provided.
-- **Requires Client** - Turn this off for administrative tasks that do not involve a specific client.
-- **Restrict to Contractors** - Limit which contractors can select this service type when logging sessions.
-- **Scholarship Service** - Mark this type as a scholarship service and set a flat scholarship rate per session.
-- **Requires Classroom** - When on, any session using this service type shows a required free-text **Classroom** field (for example, an in-school group session). The recorded value prints on the invoice automatically.
-- **Contractor Pay Schedule** - A duration-to-pay mapping (e.g., 30 min = $38.50, 45 min = $54.00) used for precise contractor pay calculations.
+- **Per-Person Rate** - Additional amount per attendee for group services. Set to 0 for individual services (this is the default).
+- **MCA Percentage** - The percentage of the total that stays with the organization. This field is required now, closing an old gap where a new service could silently save with 0% MCA.
+- **Requires Client**, **Restrict to Contractors**, and the other behavior toggles.
+
+Editing an existing service opens the same dialog for those identity and behavior fields — money moved out of it (see below).
+
+### Editing Rates and Pay Afterward
+
+Everything money-related is edited directly in the tables on the **Pricing** page, not in a dialog:
+
+- **Total Cap** and **Scholarship Rate** - Click-to-edit cells in the "What the client pays" table, alongside Base Rate and Per-Person Rate.
+- **MCA Percentage** and **Contractor Cap** - Click-to-edit cells in the "What the business keeps" table, next to a read-only margin preview.
+- **Contractor Pay Schedule** and the **group pay matrix** - Grids in the "What the contractor earns" section, one per duration (and one collapsible grid per group service for headcount-based pay).
+- **Requires Classroom** - Still a toggle on the service dialog. When on, any session using this service type shows a required free-text **Classroom** field (for example, an in-school group session). The recorded value prints on the invoice automatically.
+
+\`rent_percentage\` is a legacy field the engine still reads for older services but it is no longer surfaced anywhere in the UI.
 
 ### Notes on Pricing
 
@@ -62,11 +70,11 @@ Service types are the single most powerful tool you have as an owner to customiz
 
 ### Getting There
 
-1. Go to **Settings** in the sidebar.
-2. Click the **Business Rules** tab, then the **Services** sub-tab (owner-only — these fields set contractor pay).
-3. Click any existing service type to edit it, or click **Add Service Type** to create a new one.
+1. Go to **Settings** in the sidebar, then click **Pricing** (owner-only — this page sets contractor pay).
+2. The page reads top to bottom in the order a dollar flows: what the client pays, what the contractor earns, what the business keeps, and policies & fees. Every rate is a click-to-edit cell in one of these tables — there's no longer one big dialog for money.
+3. The service dialog still exists, but it's slimmed down to identity and behavior: name, category, location, and the toggles below. Click the pencil on any row in the client-pays table to open it, or **Add Service** to create a new one (which also asks for base rate, per-person rate, and MCA % up front, so a new service is priced from the moment it's created).
 
-Changes you make to a service type only affect new sessions going forward. Existing sessions and invoices keep their original pricing.
+Changes you make only affect new sessions going forward. Existing sessions and invoices keep their original pricing.
 
 ---
 
@@ -102,7 +110,7 @@ Where the service takes place. Options are **In-Home**, **Matt's Music**, or **O
 
 ## Pricing Fields
 
-These fields control what clients are billed. All amounts are based on a 30-minute session and scale up proportionally for longer durations.
+These fields control what clients are billed. All amounts are based on a 30-minute session and scale up proportionally for longer durations. Base Rate, Per-Person Rate, and Total Cap are all click-to-edit cells in the "What the client pays" table on the Pricing page.
 
 ### Base Rate
 
@@ -139,6 +147,8 @@ Leave this empty if you do not need a maximum.
 ---
 
 ## Organization and Contractor Pay
+
+All of the fields below are edited on the Pricing page too — MCA Percentage and Contractor Cap in the "What the business keeps" table, Contractor Pay by Duration and the group pay matrix in the "What the contractor earns" section.
 
 ### MCA Percentage
 
@@ -188,15 +198,15 @@ The **6+ row** acts as a cap. If 8 clients attend, the system uses the 6+ amount
 
 This is the most precise way to match contractor agreements that specify different pay rates for different group sizes.
 
-### Rent Percentage
+### Rent Percentage (Legacy)
 
-The percentage of the session total withheld for facility rent. This is subtracted after the MCA cut and before contractor pay.
-
-Common setup: set this to **10%** for services at Matt's Music. Set to **0%** for in-home or other locations where no rent applies.
+Older service types may still have a stored rent percentage from before this feature existed, but it's no longer editable anywhere in the app, and the pricing engine no longer withholds anything for it — contractor pay and MCA's cut are calculated the same regardless of what's stored. If Matt's Music rent needs accounting for, handle it outside the per-session formula.
 
 ---
 
 ## Special Behaviors
+
+These toggles (and Restrict to Contractors) still live in the service dialog — click the pencil on any row in the client-pays table to open it.
 
 ### Requires Client
 
@@ -210,7 +220,7 @@ Sessions logged with "Requires Client" off still flow through the same approval 
 
 When toggled on, two things happen:
 
-1. A **Scholarship Rate** field appears where you set a flat dollar amount per session. This is the amount billed to the scholarship fund, regardless of session duration.
+1. A **Scholarship Rate** column becomes meaningful in the "What the client pays" table on the Pricing page — set a flat dollar amount per session there. This is the amount billed to the scholarship fund, regardless of session duration.
 2. Sessions using this service type are routed to **monthly batch invoicing** on the Invoices > Scholarship tab instead of generating a per-session invoice.
 
 The contractor is still paid based on normal pricing rules. The organization absorbs any difference between the scholarship rate and what the contractor earns. This means switching a client to scholarship does not reduce their therapist's pay.
@@ -288,9 +298,9 @@ Result: When logging a session, the form asks "Who did this work?" instead of as
 ## Tips
 
 - **Start simple**: set the base rate and MCA percentage first. You can always add caps, schedules, and restrictions later.
-- **Use the pricing preview**: when creating or editing a service type, the form shows an "auto" calculation next to each duration in the pay schedule. Use this to verify the numbers make sense before saving.
+- **Use the pricing preview**: on the Pricing page's pay schedule grid, each empty cell shows an "auto" placeholder — the value the formula would produce. Use this to verify the numbers make sense before you type an override.
 - **Changes are forward-only by default**: editing a service type does not automatically change existing sessions or invoices, so you can adjust rates without disturbing past records. If you were correcting a mistake and want already-logged sessions moved onto the new pricing, do it deliberately with **Recalculate pricing** on the Sessions page - sessions whose invoice is already sent or paid are left alone either way. See **Recalculating Session Pricing**.
-- **Combine with custom rates**: service type pricing sets the default. Per-contractor custom rates (Team > Rates) override the default for individual contractors. Both systems work together.
+- **Combine with custom rates**: service type pricing sets the default. Per-contractor custom rates — set in the "Per-contractor overrides" matrix on the Pricing page (Team > Rates shows the same matrix read-only) — override the default for individual contractors. Both systems work together.
 - **Test with View As**: after making changes, use View As mode to simulate a contractor's experience and confirm they see the right service types and pricing.
     `,
   },
@@ -507,7 +517,7 @@ The log shows 20 entries per page. Use the Previous and Next buttons to navigate
     category: 'settings',
     description: 'A full walkthrough of the pricing formula — duration scaling, group pricing, caps, and the contractor pay priority chain.',
     adminOnly: true,
-    relatedArticles: ['configuring-services', 'editing-service-types', 'managing-contractor-rates', 'scholarship-billing', 'group-sessions'],
+    relatedArticles: ['pricing-hub', 'configuring-services', 'editing-service-types', 'managing-contractor-rates', 'scholarship-billing', 'group-sessions'],
     keywords: ['price', 'rate', 'duration', 'multiplier', 'group price', 'contractor pay', 'formula'],
     content: `
 ## Pricing Deep Dive: How Session Amounts Are Calculated
@@ -558,7 +568,9 @@ Contractor pay is calculated separately from the client bill, using the most spe
 3. **Contractor Pay Schedule** — a duration-to-pay mapping set directly on the service type (e.g. 30 min = $38.50, 60 min = $65.00), used when the contractor has no custom rate.
 4. **Percentage Formula** — the fallback: **Contractor Pay = Total Billed - (Total x MCA%)**. If a **Contractor Cap** is set, pay is capped there and the excess goes to MCA instead.
 
-Whichever rule wins, the leftover after contractor pay (and rent, if the location has a rent percentage) stays with the organization as MCA's cut.
+Whichever rule wins, the leftover after contractor pay stays with the organization as MCA's cut.
+
+**See it live:** the "Price a session" simulator on **Settings > Pricing** shows a "priced by" badge naming exactly which rule in this chain produced the contractor pay figure for the service, duration, and headcount you plug in — plus a badge whenever a contractor cap or total cap clamped the number.
 
 ### Scholarship Pricing
 
@@ -566,11 +578,64 @@ Scholarship services (or scholarship-payment-method clients) are billed a **flat
 
 ### Where Each Knob Lives
 
-- Base rate, per-person rate, total cap, MCA percentage, contractor cap, rent percentage, pay schedule, group pay matrix, scholarship rate → **Settings > Business Rules > Services tab > Edit a service type**
-- Duration base minutes and no-show fee → **Settings > Business Rules > Sessions tab**
-- Per-contractor custom rates and increments → **Team > Rates tab** or a contractor's own **Rates** sub-tab
+- Base rate, per-person rate, total cap, scholarship rate → **Settings > Pricing**, "What the client pays" table
+- Pay schedule, group pay matrix → **Settings > Pricing**, "What the contractor earns" section
+- MCA percentage, contractor cap → **Settings > Pricing**, "What the business keeps" table
+- Duration base minutes, no-show fee, and the Square processing fee → **Settings > Pricing**, "Policies & fees"
+- Per-contractor custom rates and increments → the "Per-contractor overrides" matrix on **Settings > Pricing**, or a contractor's own **Rates** sub-tab (**Team > Rates** shows the same matrix read-only)
 
 See **Editing Service Types: A Complete Guide** for a field-by-field walkthrough with more worked examples.
+    `,
+  },
+  {
+    slug: 'pricing-hub',
+    title: 'The Pricing Page: Rates, Pay, and the Price Simulator',
+    category: 'settings',
+    description: 'How the Pricing page turns a session price into contractor pay and business margin, plus the live price simulator.',
+    walkthrough: 'configure-services',
+    adminOnly: true,
+    relatedArticles: ['pricing-deep-dive', 'configuring-services', 'editing-service-types', 'managing-contractor-rates'],
+    keywords: ['pricing', 'rates', 'simulator', 'pay', 'mca'],
+    content: `
+## The Pricing Page: Rates, Pay, and the Price Simulator
+
+Every rate that touches a session — what a client is billed, what a contractor is paid, what the business keeps — is edited from one page: **Settings > Pricing**. It's owner/developer-only, and it reads top to bottom in the order a dollar actually flows.
+
+### Where to Find It
+
+Navigate to **Settings > Pricing**. Admins never see this page, even if an owner has granted them other financial visibility — editing rates is not one of the permissions that can be handed out.
+
+### 1 · What the Client Pays
+
+A table, one row per service type. Base rate, per-person rate, total cap, and scholarship rate are all click-to-edit cells — click a value to open an inline editor, or leave a cap empty for no limit. The header's **Add Service** button opens a small dialog for a brand-new service: name, category, location, base rate, per-person rate, and MCA % (required, so a new service is never accidentally priced at 0%). Each row also has a pencil (opens that same slim dialog for identity and behavior fields) and a trash icon (delete, with confirmation).
+
+### 2 · What the Contractor Earns
+
+Three pieces, stacked in one card:
+
+- **Pay schedule** - for individual services, a grid of duration columns. An empty cell shows the formula's "auto" value as a placeholder; type a number to override it for that duration, or clear it to fall back to auto.
+- **Group pay matrices** - one collapsible grid per group service, headcount (1 through "6+") by duration. Same idea, keyed to how many clients attended.
+- **Per-contractor overrides** - the pay rate matrix, one row per service and one column per contractor. This is the same matrix the Team > Rates tab shows, but here it's editable; Team's copy is view-only.
+
+### 3 · What the Business Keeps
+
+A table of MCA % (now directly editable — closing an old gap where a brand-new service could silently save at 0% MCA), Contractor Cap, and a read-only **Margin @ base** preview showing what the organization keeps on a base-duration session at today's numbers.
+
+### 4 · Policies & Fees
+
+One form for the No-Show Fee, the base duration rates scale from, and the Square processing fee settings. A note at the bottom links back to Business Rules > Sessions, which still owns the list of duration options offered on the session form — those define the columns in the pay grids above.
+
+### The Contractor Pay Priority Chain
+
+Contractor pay is resolved by checking, in order, the most specific rule that applies to a session: a group pay matrix entry (group services only), then a custom contractor rate, then the service's own pay schedule, and finally the MCA % formula as a fallback. See **Pricing Deep Dive** for the full mechanics with worked examples.
+
+### The Simulator
+
+A "Price a session" card sits alongside the tables (sticky on desktop, so it's always visible while you edit). Pick a service, contractor, duration, and headcount, and it computes the total, contractor pay, and MCA cut live — no need to save a test session to see what a change would do. A **"priced by" badge** names exactly which rule in the priority chain produced the contractor pay figure, and separate badges appear whenever a contractor cap or total cap clamped the number. Toggle **Scholarship pricing** or **No-show** to preview those cases too — scholarship pricing locks on automatically for services marked as scholarship services.
+
+### Rate Changes Are Forward-Only
+
+Editing a rate here only affects sessions logged from that point on — it never rewrites a session or invoice that already exists. A banner at the top of the page links to **Re-price existing sessions**, which takes you to the Sessions page's **Recalculate pricing** tool for pulling already-logged sessions onto the new numbers deliberately.
     `,
   },
   {

@@ -73,14 +73,13 @@ MCA Manager supports custom pay rates per contractor per service type. This lets
 
 ### Who Can See Rates
 
-Pay rates are owner-only by default. Admins can review sessions, manage clients, and handle invoicing, but the Rates tabs described below do not appear for them at all — so contractor pay stays between the contractor and the owner. An owner who wants their admins to see pay can turn on **Contractor pay & rates** under Settings > Profile & Security.
+Pay rates are owner-only by default. Admins can review sessions, manage clients, and handle invoicing, but the Rates tabs described below do not appear for them at all — so contractor pay stays between the contractor and the owner. An owner who wants their admins to see pay can turn on **Contractor pay & rates** under Settings > Profile & Security, which grants view access to the Team Rates tabs. Settings > Pricing (where editing happens) stays owner/developer-only no matter what — it isn't one of the permissions an owner can grant.
 
 ### Where to Find It
 
-There are two places to manage contractor rates:
-
-1. **Team > Rates tab** - A Pay Rate Matrix grid showing all contractors across all service types. You can see and edit every rate in one place.
-2. **Team > [Member Name] > Rates tab** - The rates for a single contractor, listed by service type.
+1. **Settings > Pricing** - The "Per-contractor overrides" matrix, inside the "What the contractor earns" section, is where you edit rates across every contractor and service type at once.
+2. **Team > Rates tab** - Shows the same Pay Rate Matrix grid for a quick look, but it's view-only — an "Edit rates in Settings > Pricing" button takes you to where you can actually change something.
+3. **Team > [Member Name] > Rates tab** - The rates for a single contractor, listed by service type. This one is still editable directly.
 
 ### How It Works
 

@@ -19,6 +19,7 @@ export const SYNONYMS: Record<string, string[]> = {
   bill: ['invoice'], billing: ['invoice'], bills: ['invoice'],
   pay: ['earnings', 'payroll'], paycheck: ['earnings'], paystub: ['earnings'], stub: ['earnings'],
   price: ['pricing', 'rate'], cost: ['pricing', 'rate'], charge: ['pricing', 'rate', 'fee'],
+  simulator: ['pricing', 'calculator'], calculator: ['pricing', 'simulator'],
   '2fa': ['mfa'], 'two-factor': ['mfa'], authenticator: ['mfa'],
   cancel: ['cancellation', 'cancelled'], cancelling: ['cancellation'],
   therapist: ['contractor'], staff: ['contractor', 'team'],
