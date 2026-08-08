@@ -13,6 +13,7 @@ import { OwnerOnboardingGate } from '@/components/onboarding/owner-onboarding-ga
 import { MfaEnforcementGuard } from '@/components/guards/mfa-enforcement-guard'
 import { PilotModeBanner } from '@/components/layout/pilot-mode-banner'
 import { AiChatBubble } from '@/components/help/ai-chat-bubble'
+import { useAiHelpVisible } from '@/components/help/ai-chat'
 import { WalkthroughProvider } from '@/components/walkthroughs/walkthrough-provider'
 import { MobileTabBar } from '@/components/mobile/tab-bar'
 import { MoreSheet } from '@/components/mobile/more-sheet'
@@ -20,6 +21,10 @@ import { MoreSheet } from '@/components/mobile/more-sheet'
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user, organization, loading, error } = useOrganization()
+  // Same condition AiChatBubble renders on, so the gutter below is reserved only
+  // when there is actually a bubble to clear. The hook caches its probe, so asking
+  // here as well as in the bubble costs nothing.
+  const aiBubbleVisible = useAiHelpVisible()
 
   useEffect(() => {
     if (!loading && !user) {
@@ -91,8 +96,24 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                     + env(safe-area-inset-bottom) for the home-indicator area, plus
                     ~2rem breathing room below the last piece of content. Desktop
                     (lg:pb-6) is untouched — the tab bar is lg:hidden there, and the
-                    sidebar/header replace it entirely. */}
-                <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none">
+                    sidebar/header replace it entirely.
+
+                    `lg:pr-24` is the same idea on the horizontal axis. The desktop
+                    fixed-element stack (AI bubble, owner-onboarding prompt) sits at
+                    `right-6` and is `w-12`, so it occupies the rightmost 4.5rem of
+                    the viewport — directly over `main`, whose right edge is the
+                    viewport's. Right-aligned content therefore scrolled underneath
+                    it: session rows had their total and MCA/Pay breakdown covered.
+                    6rem clears the 4.5rem stack with a 1.5rem gap, matching the
+                    page's spacing rhythm. Applied only when the bubble is actually
+                    rendered, so an org with AI help off keeps the full width. */}
+                <main
+                  id="main-content"
+                  tabIndex={-1}
+                  className={`flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] lg:pb-6 focus:outline-none ${
+                    aiBubbleVisible ? 'lg:pr-24' : ''
+                  }`}
+                >
                   <MfaEnforcementGuard>
                     <OwnerOnboardingGate />
                     {children}
