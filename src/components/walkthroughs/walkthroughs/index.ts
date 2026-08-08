@@ -538,6 +538,95 @@ export const EDIT_SERVICE_TYPE_WALKTHROUGH: Walkthrough = {
   ],
 }
 
+export const PRICING_HUB_WALKTHROUGH: Walkthrough = {
+  id: 'pricing-hub',
+  name: 'Tour the Pricing Page',
+  description: 'Follow a session dollar through rates, contractor pay, and fees — and meet the price simulator',
+  // Owner-only: every surface on this page carries contractor pay or margins.
+  audience: 'owner',
+  steps: [
+    {
+      title: 'One Home for Pricing',
+      description: 'Everything that decides what a session costs — service rates, contractor pay, the business cut, and fees — now lives on a single page: Settings > Pricing. This tour follows a dollar through it, top to bottom.',
+      element: 'nav a[href="/settings/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Open Pricing',
+      href: '/settings/pricing/',
+      mobileNav: true,
+    },
+    {
+      title: 'What the Client Pays',
+      description: 'Every service’s billing rates in one table: base rate, per-person rate for groups, an optional total cap, and the flat scholarship rate. Click any number to edit it in place — Enter saves, Esc cancels. A dash means the field doesn’t apply.',
+      element: '[data-tour="pricing-billing-table"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Add a Service',
+      description: 'New services start here with just a name, category, location, base rate, and MCA percentage. Everything else — caps, pay schedules, scholarship rates — is filled in on this page’s tables after the service exists.',
+      element: '[data-tour="pricing-add-service"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Contractor Pay by Duration',
+      description: 'Set exact contractor pay for each session length. Empty cells show the "auto" amount the MCA % formula would give — fill in only the durations you want to control by hand, and clear a cell to hand it back to the formula.',
+      element: '[data-tour="pricing-pay-schedule"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Group Pay Grids',
+      description: 'Group services pay by headcount and duration instead. Each group service gets its own grid — the bottom row covers groups of six or more. When a cell here matches a session, it outranks every other pay rule.',
+      element: '[data-tour="pricing-group-pay"], [data-tour="pay-rate-matrix-section"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Per-Contractor Overrides',
+      description: 'The rate matrix sets a negotiated 30-minute rate for one contractor on one service — raises are baked into the number. Blank cells fall back to the pay schedule or formula, and the duration tabs show longer sessions.',
+      element: '[data-tour="pay-rate-matrix"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'What the Business Keeps',
+      description: 'The MCA percentage — now editable right here — is the organization’s cut when no explicit pay rule applies, alongside the optional per-session contractor cap. The margin column previews the business’s share of a base-length solo session.',
+      element: '[data-tour="pricing-cut-table"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Policies & Fees',
+      description: 'The flat no-show fee, the base duration rates scale from, and the optional Square processing fee all live here. These apply organization-wide rather than per service.',
+      element: '[data-tour="pricing-policies"]',
+      popoverSide: 'top',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'Price a Session',
+      description: 'The simulator prices any what-if: pick a service, contractor, duration, and headcount, and it shows the total, the contractor’s pay, and the business’s share — plus a badge naming exactly which rule produced the pay. Rates you edit on the left show up here instantly.',
+      element: '[data-tour="pricing-simulator"]',
+      popoverSide: 'left',
+      ctaLabel: 'Next',
+      href: '/settings/pricing/',
+    },
+    {
+      title: 'When Rates Change',
+      description: 'Rate changes apply to sessions logged from now on — sessions already saved keep their price. To bring existing sessions onto new rates, use "Recalculate pricing" on the Sessions page (it has its own tour).',
+      ctaLabel: 'Finish',
+      href: '/settings/pricing/',
+    },
+  ],
+}
+
 export const SEND_INVOICE_WALKTHROUGH: Walkthrough = {
   id: 'send-invoice',
   name: 'Send & Track Invoices',
@@ -1155,6 +1244,7 @@ export const ALL_WALKTHROUGHS: Walkthrough[] = [
   INVITE_CONTRACTOR_WALKTHROUGH,
   CONFIGURE_SERVICES_WALKTHROUGH,
   EDIT_SERVICE_TYPE_WALKTHROUGH,
+  PRICING_HUB_WALKTHROUGH,
   APPROVE_SESSIONS_WALKTHROUGH,
   SCHOLARSHIP_BILLING_WALKTHROUGH,
   PAYROLL_WALKTHROUGH,

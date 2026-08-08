@@ -592,7 +592,7 @@ See **Editing Service Types: A Complete Guide** for a field-by-field walkthrough
     title: 'The Pricing Page: Rates, Pay, and the Price Simulator',
     category: 'settings',
     description: 'How the Pricing page turns a session price into contractor pay and business margin, plus the live price simulator.',
-    walkthrough: 'configure-services',
+    walkthrough: 'pricing-hub',
     adminOnly: true,
     relatedArticles: ['pricing-deep-dive', 'configuring-services', 'editing-service-types', 'managing-contractor-rates'],
     keywords: ['pricing', 'rates', 'simulator', 'pay', 'mca'],
