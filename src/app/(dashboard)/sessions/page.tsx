@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown } from 'lucide-react'
+import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown, Calculator } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import { sessionDisplayTotal, sessionDisplayBreakdown } from '@/lib/sessions/total'
 import { SessionMoneyBreakdown } from '@/components/sessions/session-money-breakdown'
@@ -25,6 +25,7 @@ import { parseLocalDate } from '@/lib/dates'
 import { Checkbox } from '@/components/ui/checkbox'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
 import { RejectSessionDialog } from '@/components/sessions/reject-session-dialog'
+import { RepriceDialog } from '@/components/sessions/reprice-dialog'
 import { toast } from 'sonner'
 import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns'
 import { SessionsCalendar } from '@/components/sessions/sessions-calendar'
@@ -81,10 +82,14 @@ export default function SessionsPage() {
   const [rejectDialogSession, setRejectDialogSession] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isBulkPending, startBulkTransition] = useTransition()
+  const [repriceOpen, setRepriceOpen] = useState(false)
 
   // Use effective permissions (respects "view as" role)
   const isAdmin = can('session:view-all')
   const showFinancialDetails = can('financial:view-details')
+  // Re-pricing rewrites contractor pay, so it rides on the owner-only `settings:edit` —
+  // deliberately absent from ADMIN_GRANTABLE_PERMISSIONS, so no grant can widen it.
+  const canReprice = can('settings:edit')
   // When viewing as a specific contractor, filter to their sessions even if effective role is still admin
   const shouldFilterByContractor = viewAsContractor || !isAdmin
   const contractorIdToFilter = viewAsContractor?.id || effectiveUserId
@@ -583,6 +588,17 @@ export default function SessionsPage() {
                   )}
                   Approve ({selectedIds.size})
                 </Button>
+                {canReprice && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRepriceOpen(true)}
+                    disabled={isBulkPending}
+                  >
+                    <Calculator className="w-4 h-4 mr-1" />
+                    Recalculate pricing
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -809,6 +825,17 @@ export default function SessionsPage() {
               s.id === rejectDialogSession ? { ...s, status: 'draft', rejection_reason: 'revised' } : s
             ))
             setRejectDialogSession(null)
+          }}
+        />
+      )}
+      {canReprice && (
+        <RepriceDialog
+          open={repriceOpen}
+          onOpenChange={setRepriceOpen}
+          sessionIds={Array.from(selectedIds)}
+          onApplied={() => {
+            setSelectedIds(new Set())
+            setRefreshTrigger((prev) => prev + 1)
           }}
         />
       )}
