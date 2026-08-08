@@ -33,6 +33,26 @@ export const authRateLimit = redis
     })
   : null
 
+/**
+ * Frontend error sink: 40 reports per 60 seconds **per user**.
+ *
+ * Deliberately its own bucket, keyed by user id rather than IP, and excluded
+ * from `apiRateLimit` in the proxy. The shared API bucket is 60/60s per IP, and
+ * a practice's staff sit behind one office NAT — so one person's render loop
+ * emitting errors could burn the whole office's allowance and 429 everybody's
+ * real requests. Telemetry must never be able to take the app down with it.
+ *
+ * 40 leaves headroom above the client-side gate (20/min per tab) for a user
+ * with a couple of tabs open, while still bounding the damage.
+ */
+export const errorRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(40, '60 s'),
+      prefix: 'ratelimit:errors',
+    })
+  : null
+
 /** AI helper rate limit: 20 questions per hour per user (cost control) */
 export const aiRateLimit = redis
   ? new Ratelimit({

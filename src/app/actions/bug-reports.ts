@@ -105,6 +105,21 @@ export async function submitBugReport(formData: FormData): Promise<SubmitBugRepo
     screenshotPath = path
   }
 
+  // Buffered error MESSAGES get the same treatment as the description, and for
+  // the same reason: `console.error('Failed to save ' + clientName)` is
+  // ordinary code, so a message is potential PHI. Encrypting the description
+  // but not these would have been an inconsistency, not a judgement call.
+  // `kind` and `at` stay plaintext — both are machine-generated, and keeping
+  // them queryable is what lets the GitHub summary and any future grouping work
+  // without the key.
+  const recentErrors = await Promise.all(
+    (parsed.data.recentErrors ?? []).map(async (e) => ({
+      kind: e.kind,
+      at: e.at,
+      message: e.message ? await encryptField(e.message) : '',
+    }))
+  )
+
   // --- The row --------------------------------------------------------------
   const { data: row, error: insertError } = await service
     .from('bug_reports')
@@ -119,7 +134,7 @@ export async function submitBugReport(formData: FormData): Promise<SubmitBugRepo
       user_agent: (formData.get('userAgent') as string | null)?.slice(0, 500) ?? null,
       viewport: parsed.data.viewport ?? null,
       app_commit: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
-      recent_errors: parsed.data.recentErrors ?? [],
+      recent_errors: recentErrors,
       screenshot_path: screenshotPath,
     })
     .select('id, created_at, user_role, environment, route_pattern, app_commit, user_agent, viewport')

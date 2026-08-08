@@ -46,8 +46,13 @@ CREATE TABLE IF NOT EXISTS public.bug_reports (
     -- difference between "can't reproduce" and "fixed three commits ago".
     app_commit          TEXT,
 
-    -- Last few client-side errors from the same session, in the PHI-safe
-    -- { kind, message } shape the logger already produces.
+    -- Last few client-side errors from the same session:
+    --   [{ kind, at, message }]
+    -- `message` is ENCRYPTED, element by element. A message is whatever the app
+    -- passed to console.error, and `console.error('Failed to save ' +
+    -- clientName)` is ordinary code — so it is potential PHI and gets exactly
+    -- the same treatment as `description`. `kind` and `at` are machine-generated
+    -- and stay plaintext so they remain queryable without the key.
     recent_errors       JSONB NOT NULL DEFAULT '[]'::jsonb,
 
     screenshot_path     TEXT,
@@ -63,6 +68,12 @@ CREATE TABLE IF NOT EXISTS public.bug_reports (
 -- The portal only ever asks for "most recent N".
 CREATE INDEX IF NOT EXISTS bug_reports_created_at_idx
     ON public.bug_reports (created_at DESC);
+
+-- Durable marker for anyone reading the live schema rather than this file.
+COMMENT ON COLUMN public.bug_reports.description IS
+    'ENCRYPTED (encryptField). User-authored free text — contains client names.';
+COMMENT ON COLUMN public.bug_reports.recent_errors IS
+    'JSONB [{kind, at, message}]. message is ENCRYPTED per element; kind/at are plaintext.';
 
 ALTER TABLE public.bug_reports ENABLE ROW LEVEL SECURITY;
 

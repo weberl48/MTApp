@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { errorRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/errors/ — production sink for browser errors.
@@ -13,9 +14,13 @@ import { createServiceClient } from '@/lib/supabase/service'
  * Requires a signed-in staff session. That is a deliberate limit — errors on the
  * unauthenticated client portal and the login page are NOT captured here,
  * because an anonymous ingest endpoint on a public URL is a spam sink and this
- * feed is only useful while it stays readable. The proxy's apiRateLimit covers
- * the authenticated case, and the client-side gate in ErrorReporter caps each
- * tab at 20 reports/minute before anything reaches the network.
+ * feed is only useful while it stays readable.
+ *
+ * Two layers of throttling: the client-side gate in ErrorReporter (20/min per
+ * tab, before anything reaches the network), then this route's PER-USER bucket.
+ * The proxy deliberately SKIPS its shared per-IP bucket for this path — staff
+ * share an office NAT, and telemetry must never be able to exhaust that
+ * allowance and 429 everyone's real requests.
  *
  * Only the PHI-safe { kind, message } shape is stored, matching what
  * logger.error writes. Stack traces are deliberately dropped: they carry
@@ -51,6 +56,18 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ ok: false }, { status: 401 })
+  }
+
+  // Keyed by user, not IP — see the header comment. Absent Upstash config this
+  // is null and we fall through, matching every other limiter in the app.
+  if (errorRateLimit) {
+    const { success } = await errorRateLimit.limit(user.id)
+    if (!success) {
+      // 204, not 429: the caller is fire-and-forget telemetry that ignores the
+      // response, and a 429 body would only add noise to a tab that is already
+      // erroring in a loop.
+      return new NextResponse(null, { status: 204 })
+    }
   }
 
   // Path only, never the query string — portal tokens and search terms live

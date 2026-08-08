@@ -41,7 +41,14 @@ export async function proxy(request: NextRequest) {
   // handed brute-force 60 attempts a minute instead of 5.
   const authPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/api/auth/']
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
-  const isApiPath = pathname.startsWith('/api/')
+
+  // The frontend error sink carries its own PER-USER bucket (errorRateLimit, in
+  // the route itself) and is deliberately kept OUT of the shared per-IP one.
+  // A practice's staff share one office NAT, so leaving telemetry in the 60/60s
+  // IP bucket meant one person's render loop could exhaust the allowance and
+  // 429 everybody's real requests — telemetry taking the app down with it.
+  const isErrorSink = pathname.startsWith('/api/errors')
+  const isApiPath = pathname.startsWith('/api/') && !isErrorSink
 
   // Only CREDENTIAL SUBMISSIONS get the strict 5/60s bucket — not page views.
   //

@@ -58,6 +58,22 @@ export async function GET(request: Request) {
           description = '[could not decrypt — check ENCRYPTION_KEY]'
         }
 
+        // Buffered error messages are encrypted alongside the description —
+        // same PHI reasoning. `kind`/`at` were never encrypted.
+        const bufferedErrors = await Promise.all(
+          ((row.recent_errors ?? []) as { kind: string; message: string; at: string }[]).map(
+            async (e) => {
+              let message = e.message
+              try {
+                if (isEncrypted(message)) message = await decryptField(message)
+              } catch {
+                message = '[could not decrypt]'
+              }
+              return { ...e, message }
+            }
+          )
+        )
+
         let screenshotUrl: string | null = null
         if (row.screenshot_path) {
           const { data: signed } = await service.storage
@@ -80,7 +96,7 @@ export async function GET(request: Request) {
           userAgent: row.user_agent,
           viewport: row.viewport,
           appCommit: row.app_commit,
-          recentErrors: row.recent_errors ?? [],
+          recentErrors: bufferedErrors,
           screenshotUrl,
           issueNumber: row.github_issue_number,
           issueUrl: row.github_issue_url,
