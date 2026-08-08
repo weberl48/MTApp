@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { createReportGate, consoleArgsToMessage, type ErrorReportPayload } from '@/lib/errors/report'
 import { clientErrorBuffer } from '@/lib/errors/client-buffer'
+import { isIgnorableClientError } from '@/lib/errors/noise'
 
 /**
  * Captures browser errors — window errors, unhandled promise rejections, and
@@ -27,6 +28,11 @@ export function ErrorReporter() {
     const shouldReport = createReportGate()
 
     const post = (payload: ErrorReportPayload) => {
+      // Framework/browser noise is dropped before it touches the buffer OR the
+      // network. It is not an app signal, so putting it in a bug report would be
+      // as misleading as putting it in the feed.
+      if (isIgnorableClientError(payload.message)) return
+
       // The buffer is local and cheap, so it records every occurrence even when
       // the network gate suppresses the report — "this happened 40 times" is
       // precisely the signal a bug report wants.

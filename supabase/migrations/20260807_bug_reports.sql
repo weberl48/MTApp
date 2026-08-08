@@ -116,6 +116,14 @@ VALUES (
 -- is triaged, so they go first and the row survives them. The row itself lasts a
 -- year — long enough to still resolve a GitHub issue's deep link, short enough
 -- not to accumulate encrypted PHI indefinitely.
+--
+-- THIS FUNCTION DELETES ROWS ONLY. It deliberately does NOT null
+-- screenshot_path: a screenshot is reachable only through that pointer, so
+-- clearing it for a file that was not actually deleted strands client PHI in the
+-- bucket with nothing referencing it. Only the cleanup cron can talk to storage,
+-- so only the cron may clear a pointer — and only for paths storage confirmed it
+-- removed. An earlier version of this function nulled pointers on a timer, which
+-- made exactly that orphan possible.
 CREATE OR REPLACE FUNCTION public.prune_bug_reports()
 RETURNS void
 LANGUAGE plpgsql
@@ -123,15 +131,12 @@ SECURITY DEFINER
 SET search_path TO 'public'
 AS $$
 BEGIN
-    -- Storage objects themselves are removed by the caller (the cleanup cron
-    -- has the service client); here we drop the pointer so nothing tries to
-    -- mint a signed URL for a file that is on its way out.
-    UPDATE public.bug_reports
-       SET screenshot_path = NULL
-     WHERE screenshot_path IS NOT NULL
-       AND created_at < NOW() - INTERVAL '90 days';
-
+    -- `screenshot_path IS NULL` is the guard, not an optimisation: a year-old
+    -- row that still points at a file means deletion has been failing, and
+    -- dropping the row would lose the only reference to it. Leave it — the row
+    -- persisting is the visible symptom, which is what we want.
     DELETE FROM public.bug_reports
-     WHERE created_at < NOW() - INTERVAL '1 year';
+     WHERE created_at < NOW() - INTERVAL '1 year'
+       AND screenshot_path IS NULL;
 END;
 $$;
