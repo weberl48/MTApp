@@ -3,6 +3,18 @@ import type { ServiceType } from '@/types/database'
 /** @deprecated Use organization.settings.pricing.no_show_fee instead (default: 60) */
 const DEFAULT_NO_SHOW_FEE = 60
 
+/**
+ * Which rule in the contractor-pay priority chain produced `contractorPay`.
+ * Mirrors the priority order documented on `calculateSessionPricing`.
+ */
+export type ContractorPaySource =
+  | 'group_matrix'
+  | 'custom_rate_increment'
+  | 'custom_rate_schedule_offset'
+  | 'custom_rate_scaled'
+  | 'pay_schedule'
+  | 'formula'
+
 export interface PricingCalculation {
   totalAmount: number
   perPersonCost: number
@@ -12,6 +24,12 @@ export interface PricingCalculation {
   rentAmount: number
   scholarshipDiscount?: number
   isNoShow?: boolean
+  /** Which branch of the contractor-pay priority chain produced `contractorPay`. */
+  contractorPaySource?: ContractorPaySource
+  /** True when `serviceType.contractor_cap` clamped the formula-branch contractor pay. */
+  contractorCapApplied?: boolean
+  /** True when `serviceType.total_cap` clamped the billed total. */
+  totalCapApplied?: boolean
 }
 
 /**
@@ -92,8 +110,10 @@ export function calculateSessionPricing(
   let totalAmount = baseAmount * durationMultiplier
 
   // Apply total amount cap if specified (before MCA/contractor calculations)
+  let totalCapApplied = false
   if (serviceType.total_cap != null && totalAmount > serviceType.total_cap) {
     totalAmount = serviceType.total_cap
+    totalCapApplied = true
   }
 
   // Rent is no longer used - keeping field for backwards compatibility
@@ -106,6 +126,8 @@ export function calculateSessionPricing(
   // Priority: 0) group contractor pay matrix, 1) custom rate + increment,
   // 2) custom rate + schedule offset, 3) pay schedule, 4) formula
   let contractorPay: number
+  let contractorPaySource: ContractorPaySource
+  let contractorCapApplied = false
 
   const schedule = serviceType.contractor_pay_schedule
   const scheduleKey = String(durationMinutes)
@@ -122,10 +144,12 @@ export function calculateSessionPricing(
   if (groupMatrixPay !== undefined) {
     contractorPay = groupMatrixPay
     mcaCut = totalAmount - contractorPay
+    contractorPaySource = 'group_matrix'
   } else if (effectiveOverrides?.customContractorPay !== undefined) {
     if (durationMinutes === durationBase) {
       // At base duration: use custom rate directly
       contractorPay = effectiveOverrides.customContractorPay
+      contractorPaySource = 'custom_rate_increment'
     } else if (effectiveOverrides.durationIncrement !== undefined) {
       // Explicit increment provided (number or null)
       const increment = effectiveOverrides.durationIncrement
@@ -133,31 +157,38 @@ export function calculateSessionPricing(
       if (increment != null) {
         const steps = (durationMinutes - durationBase) / 15
         contractorPay = effectiveOverrides.customContractorPay + (increment * steps)
+        contractorPaySource = 'custom_rate_increment'
       } else {
         // No increment and no schedule: scale proportionally
         contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
+        contractorPaySource = 'custom_rate_scaled'
       }
     } else if (schedulePay !== undefined && scheduleBase !== undefined) {
       // Fallback: custom rate + schedule offset from base
       contractorPay = effectiveOverrides.customContractorPay + (schedulePay - scheduleBase)
+      contractorPaySource = 'custom_rate_schedule_offset'
     } else {
       // No schedule, no increment: scale linearly from custom rate
       contractorPay = effectiveOverrides.customContractorPay * durationMultiplier
+      contractorPaySource = 'custom_rate_scaled'
     }
     mcaCut = totalAmount - contractorPay
   } else if (schedulePay !== undefined) {
     // No custom rate: use pay schedule amount for this duration
     contractorPay = schedulePay
     mcaCut = totalAmount - contractorPay
+    contractorPaySource = 'pay_schedule'
   } else {
     // Default: total - MCA cut
     contractorPay = totalAmount - mcaCut
+    contractorPaySource = 'formula'
 
     // Apply contractor cap if specified
     if (serviceType.contractor_cap !== null && contractorPay > serviceType.contractor_cap) {
       const excess = contractorPay - serviceType.contractor_cap
       contractorPay = serviceType.contractor_cap
       mcaCut += excess
+      contractorCapApplied = true
     }
   }
 
@@ -191,10 +222,19 @@ export function calculateSessionPricing(
     mcaCut: round(mcaCut),
     contractorPay: round(contractorPay),
     rentAmount: round(rentAmount),
+    contractorPaySource,
   }
 
   if (scholarshipDiscount > 0) {
     result.scholarshipDiscount = scholarshipDiscount
+  }
+
+  if (contractorCapApplied) {
+    result.contractorCapApplied = true
+  }
+
+  if (totalCapApplied) {
+    result.totalCapApplied = true
   }
 
   return result

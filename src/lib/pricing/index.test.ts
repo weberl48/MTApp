@@ -1209,3 +1209,78 @@ describe('billing rules: MCA cut invariant', () => {
     expect(result.mcaCut).toBe(result.totalAmount - result.contractorPay)
   })
 })
+
+describe('contractor pay source attribution', () => {
+  const makeService = (over: Partial<ServiceType> = {}): ServiceType => ({
+    id: '1',
+    name: 'Test Service',
+    category: 'music_individual',
+    location: 'in_home',
+    base_rate: 50,
+    per_person_rate: 0,
+    mca_percentage: 23,
+    contractor_cap: null,
+    total_cap: null,
+    rent_percentage: 0,
+    minimum_attendees: 1,
+    scholarship_discount_percentage: 0,
+    scholarship_rate: null,
+    contractor_pay_schedule: null,
+    group_contractor_pay: null,
+    is_active: true,
+    is_scholarship: false,
+    requires_client: true,
+    allowed_contractor_ids: null,
+    admin_only: false,
+    requires_classroom: false,
+    display_order: 0,
+    organization_id: 'org-1',
+    created_at: '',
+    updated_at: '',
+    ...over,
+  })
+
+  it('group matrix wins for group services', () => {
+    const st = makeService({ per_person_rate: 10, group_contractor_pay: { '3_30': 50 } })
+    const r = calculateSessionPricing(st, 3, 30)
+    expect(r.contractorPaySource).toBe('group_matrix')
+  })
+
+  it('custom rate + explicit increment', () => {
+    const r = calculateSessionPricing(makeService({}), 1, 45, { customContractorPay: 40, durationIncrement: 5 })
+    expect(r.contractorPaySource).toBe('custom_rate_increment')
+  })
+
+  it('custom rate at base duration is custom_rate_increment source too', () => {
+    const r = calculateSessionPricing(makeService({}), 1, 30, { customContractorPay: 40 })
+    expect(r.contractorPaySource).toBe('custom_rate_increment')
+  })
+
+  it('custom rate + schedule offset', () => {
+    const st = makeService({ contractor_pay_schedule: { '30': 38, '45': 50 } })
+    const r = calculateSessionPricing(st, 1, 45, { customContractorPay: 40 })
+    expect(r.contractorPaySource).toBe('custom_rate_schedule_offset')
+  })
+
+  it('custom rate scaled linearly with no schedule', () => {
+    const r = calculateSessionPricing(makeService({}), 1, 60, { customContractorPay: 40 })
+    expect(r.contractorPaySource).toBe('custom_rate_scaled')
+  })
+
+  it('pay schedule', () => {
+    const st = makeService({ contractor_pay_schedule: { '45': 50 } })
+    expect(calculateSessionPricing(st, 1, 45).contractorPaySource).toBe('pay_schedule')
+  })
+
+  it('formula, with cap flag when clamped', () => {
+    const st = makeService({ base_rate: 100, mca_percentage: 20, contractor_cap: 50 })
+    const r = calculateSessionPricing(st, 1, 30)
+    expect(r.contractorPaySource).toBe('formula')
+    expect(r.contractorCapApplied).toBe(true)
+  })
+
+  it('total cap flag', () => {
+    const st = makeService({ base_rate: 100, total_cap: 80 })
+    expect(calculateSessionPricing(st, 1, 30).totalCapApplied).toBe(true)
+  })
+})
