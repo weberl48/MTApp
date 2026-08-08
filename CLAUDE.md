@@ -236,12 +236,14 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | `/api/invoices/[id]/pdf` | GET | Generate PDF |
 | `/api/invoices/[id]/send` | POST | Email invoice |
 | `/api/invoices/[id]/square` | POST | Create Square invoice |
+| `/api/invoices/[id]/square/link` | POST/DELETE | Link/unlink a dashboard-created Square invoice (adopts Square status forward-only; unlink resets to pending) |
 | `/api/payroll/annual-summary/pdf` | GET | Contractor annual earnings summary PDF (contractor: own; owner: any in org via `contractorId`) |
 | `/api/payroll/tax-summary` | GET | Cash-basis annual contractor totals CSV (`?year=`, `&detail=1` for per-session rows) |
 | `/api/portal/*` | Various | Client portal endpoints (validate, sessions, goals, resources, session-requests, request-link) |
 | `/api/session-requests/[id]/approve` | POST | Approve a session request |
 | `/api/session-requests/[id]/decline` | POST | Decline a session request |
 | `/api/sessions/export` | GET | Export sessions data |
+| `/api/square/invoices/candidates` | GET | Recent unlinked Square invoices for the "Link Square invoice" picker (`?invoiceId=`) |
 | `/api/square/status` | GET | Check Square connection status |
 | `/api/webhooks/square` | POST | Square payment webhooks |
 
@@ -344,6 +346,7 @@ Three sinks, one review surface (the dev portal — there is deliberately no in-
 - `src/lib/session-form/create-session.ts` — `createNewSession()`: session + attendees + per-client invoice creation, shared by `SessionForm` and `QuickLogDrawer`
 - `src/lib/square/invoices.ts` — Square invoice creation with deterministic idempotency keys (based on local invoice id) and optional processing-fee service charge; sandbox sends to `SQUARE_DEV_EMAIL`
 - `src/lib/square/auto-send.ts` — `autoSendInvoicesViaSquare()`: post-approval Square auto-send (never throws; returns a summary)
+- `src/lib/square/link.ts` — manual linking of dashboard-created Square invoices: `squareInvoiceToCandidate()`/`sortCandidates()` (picker DTOs, suggested = exact amount or known Square customer) and `linkStatusUpdate()` (webhook mapping made forward-only in BOTH directions — linking never regresses any local status, where the webhook rule only protects `paid`). Unique partial index on `invoices.square_invoice_id` (`20260808_square_invoice_id_unique.sql`) keeps one Square invoice from linking to two rows
 - `src/lib/square/webhook-status.ts` — `resolveSquareWebhookStatus()`: FORWARD-ONLY status mapping — out-of-order/retried Square webhooks must never un-pay a paid invoice
 - `src/lib/help/ai.ts` — AI help assistant: `buildHelpCorpus()` (role-filtered articles+FAQs for the system prompt) and `buildOrgContext()` (WHITELISTED non-PHI org config — never add client/session/invoice/team data; that is the compliance boundary), `streamHelpAnswer()` (Claude streaming with prompt caching)
 - `src/lib/help/citations.ts` — `extractSources()`: splits an AI answer into display text + cited article slugs (`[[slug]]` markers)

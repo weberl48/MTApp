@@ -21,9 +21,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Send, CheckCircle, XCircle, Download, Mail, CreditCard, ExternalLink, Smartphone, Trash2, Link2, Unlink } from 'lucide-react'
 import { toast } from 'sonner'
 import { downloadFromUrl } from '@/lib/download'
+import { LinkSquareInvoiceDialog } from '@/components/invoices/link-square-invoice-dialog'
 import type { Invoice } from '@/types/database'
 
 interface InvoiceActionsProps {
@@ -45,6 +46,8 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false, pro
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [unlinkOpen, setUnlinkOpen] = useState(false)
 
   async function downloadPdf() {
     setLoading(true)
@@ -130,6 +133,31 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false, pro
   function openSquarePaymentLink() {
     if (invoice.square_payment_url) {
       window.open(invoice.square_payment_url, '_blank')
+    }
+  }
+
+  async function handleUnlinkSquare() {
+    const request = fetch(`/api/invoices/${invoice.id}/square/link/`, {
+      method: 'DELETE',
+    }).then(async (response) => {
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to unlink Square invoice')
+      }
+      setUnlinkOpen(false)
+      onStatusChange?.()
+    })
+
+    toast.promise(request, {
+      loading: 'Unlinking Square invoice…',
+      success: 'Square invoice unlinked — status reset to pending',
+      error: (error) => (error instanceof Error ? error.message : 'Failed to unlink Square invoice'),
+    })
+
+    try {
+      await request
+    } catch {
+      // toast.promise already surfaced the failure
     }
   }
 
@@ -246,10 +274,35 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false, pro
               Send via Square
             </DropdownMenuItem>
           )}
+          {/* Linking needs no client email — the Square invoice already exists. */}
+          {!invoice.square_invoice_id && invoice.status !== 'paid' && (
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault()
+                setMenuOpen(false)
+                setLinkOpen(true)
+              }}
+            >
+              <Link2 className="mr-2 h-4 w-4" />
+              Link Square Invoice…
+            </DropdownMenuItem>
+          )}
           {invoice.square_payment_url && (
             <DropdownMenuItem onClick={openSquarePaymentLink}>
               <ExternalLink className="mr-2 h-4 w-4" />
               View Square Invoice
+            </DropdownMenuItem>
+          )}
+          {invoice.square_invoice_id && (
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault()
+                setMenuOpen(false)
+                setUnlinkOpen(true)
+              }}
+            >
+              <Unlink className="mr-2 h-4 w-4" />
+              Unlink Square Invoice
             </DropdownMenuItem>
           )}
           {canDelete && (
@@ -293,6 +346,30 @@ export function InvoiceActions({ invoice, onStatusChange, canDelete = false, pro
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    <AlertDialog open={unlinkOpen} onOpenChange={setUnlinkOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unlink Square Invoice</AlertDialogTitle>
+          <AlertDialogDescription>
+            This disconnects the Square invoice and resets this invoice to pending — use it to
+            undo a wrong link. Nothing changes in Square, and payment updates from Square will
+            no longer sync here until it is linked again.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleUnlinkSquare}>Unlink</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <LinkSquareInvoiceDialog
+      invoiceId={invoice.id}
+      open={linkOpen}
+      onOpenChange={setLinkOpen}
+      onLinked={onStatusChange}
+    />
     </>
   )
 }

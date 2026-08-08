@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { errorRateLimit } from '@/lib/rate-limit'
+import { apiRateLimit, errorRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/errors/ — production sink for browser errors.
@@ -58,10 +58,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 401 })
   }
 
-  // Keyed by user, not IP — see the header comment. Absent Upstash config this
-  // is null and we fall through, matching every other limiter in the app.
-  if (errorRateLimit) {
-    const { success } = await errorRateLimit.limit(user.id)
+  // Keyed by user, not IP — see the header comment.
+  //
+  // The `?? apiRateLimit` fallback guards a coupling that is currently implicit:
+  // this route is excluded from the proxy's shared bucket on the assumption that
+  // it throttles itself, and both limiters are built from the same `redis`
+  // handle, so today they are both present or both absent. If a future edit ever
+  // makes errorRateLimit conditional on something else, this route would
+  // otherwise become the one unthrottled authenticated endpoint in the app.
+  // Falling back to apiRateLimit — still keyed by user id, so it cannot collide
+  // with the IP-keyed entries — keeps that from being silent.
+  const limiter = errorRateLimit ?? apiRateLimit
+  if (limiter) {
+    const { success } = await limiter.limit(user.id)
     if (!success) {
       // 204, not 429: the caller is fire-and-forget telemetry that ignores the
       // response, and a 429 body would only add noise to a tab that is already

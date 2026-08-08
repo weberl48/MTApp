@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { verifyBearerSecret } from '@/lib/auth/bearer'
+import { logger } from '@/lib/logger'
 
 // Fail closed, in every environment. The previous form fell through to
 // `NODE_ENV !== 'production'` when CRON_SECRET was unset, so on any non-Vercel
@@ -67,10 +68,16 @@ export async function GET(request: NextRequest) {
     // 4. Bug report retention.
     //
     // Screenshots are the PHI-densest thing this app stores outside the
-    // database, so they expire well before the report does. The storage objects
-    // must be collected BEFORE prune_bug_reports() runs — that function nulls
-    // screenshot_path, and once the pointer is gone the file is unreachable and
-    // would sit in the bucket forever.
+    // database, so they expire well before the report does.
+    //
+    // THE ORDER AND THE ERROR CHECK ARE BOTH LOAD-BEARING. A screenshot is only
+    // reachable through its `screenshot_path`, so nulling that pointer for a
+    // file that did NOT actually delete strands client PHI in the bucket
+    // permanently, with nothing left pointing at it. So: delete first, then null
+    // ONLY what storage confirms it removed, and report the failures rather than
+    // the attempts. An earlier version ignored the delete result and reported
+    // `paths.length` as the deleted count — a retention job that reports success
+    // while silently keeping PHI is worse than one that fails loudly.
     const screenshotCutoff = new Date(
       Date.now() - BUG_SCREENSHOT_DAYS * 24 * 60 * 60 * 1000
     ).toISOString()
@@ -84,12 +91,35 @@ export async function GET(request: NextRequest) {
       .map((r: { screenshot_path: string | null }) => r.screenshot_path)
       .filter((p: string | null): p is string => Boolean(p))
 
+    let removedPaths: string[] = []
     if (paths.length > 0) {
-      await db.storage.from('bug-screenshots').remove(paths)
-    }
-    results.bug_screenshots_deleted = paths.length
+      const { data: removed, error: removeError } = await db.storage
+        .from('bug-screenshots')
+        .remove(paths)
 
-    // Nulls the now-dangling paths and drops reports past a year.
+      removedPaths = (removed ?? [])
+        .map((o: { name?: string }) => o.name)
+        .filter((n: string | undefined): n is string => Boolean(n))
+
+      if (removeError) {
+        logger.error('Bug screenshot deletion failed during cleanup', removeError)
+      }
+
+      // Only the confirmed-deleted lose their pointer. A path that failed keeps
+      // it, so the next run retries instead of orphaning the file.
+      if (removedPaths.length > 0) {
+        await db
+          .from('bug_reports')
+          .update({ screenshot_path: null })
+          .in('screenshot_path', removedPaths)
+      }
+    }
+
+    results.bug_screenshots_deleted = removedPaths.length
+    results.bug_screenshots_failed = paths.length - removedPaths.length
+
+    // Drops reports past a year. Deliberately refuses any row that still has a
+    // screenshot_path — deleting it would strand the file (see above).
     await db.rpc('prune_bug_reports')
 
     return NextResponse.json({
