@@ -887,7 +887,13 @@ export const RECALCULATE_PRICING_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'Recalculate Pricing',
-      description: 'Selecting sessions reveals the blue action bar. "Recalculate pricing" re-prices them against your CURRENT service rates and contractor rates. Select at least one session to see the button.',
+      description: 'We have selected the submitted sessions for you so you can see the blue action bar. "Recalculate pricing" re-prices everything selected against your CURRENT service rates and contractor rates. Your selection is only on screen — nothing has been changed.',
+      // The bulk bar (and this button inside it) only mount once something is
+      // selected, so the tour ticks "Select all submitted" itself. Without this
+      // the step had no element to point at and fell back to a centered popover.
+      // The provider fires preClick at most once per step wait, so toggling the
+      // checkbox off again is not a risk.
+      preClick: '[data-tour="sessions-select-all"] button[role="checkbox"]',
       element: '[data-tour="sessions-reprice"], [data-tour="sessions-bulk-actions"]',
       popoverSide: 'bottom',
       ctaLabel: 'Next',
