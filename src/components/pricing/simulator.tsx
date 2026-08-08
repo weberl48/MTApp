@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import {
@@ -41,22 +41,16 @@ export function Simulator({ serviceTypes, contractors, rates }: SimulatorProps) 
   const { settings } = useOrganization()
   const durations = resolveDurationOptions(settings?.session?.duration_options)
 
-  const [serviceTypeId, setServiceTypeId] = useState(serviceTypes[0]?.id ?? '')
+  const [serviceTypeId, setServiceTypeId] = useState('')
   const [contractorId, setContractorId] = useState(DEFAULT_CONTRACTOR)
   const [duration, setDuration] = useState(settings?.session?.default_duration ?? 30)
   const [headcount, setHeadcount] = useState(2)
   const [scholarship, setScholarship] = useState(false)
   const [noShow, setNoShow] = useState(false)
 
-  // Service types load asynchronously on the hub page — pick a default once
-  // the first one arrives rather than being permanently stuck on ''.
-  useEffect(() => {
-    if (!serviceTypeId && serviceTypes.length > 0) {
-      setServiceTypeId(serviceTypes[0].id)
-    }
-  }, [serviceTypeId, serviceTypes])
-
-  const serviceType = serviceTypes.find((st) => st.id === serviceTypeId)
+  // Service types load asynchronously on the hub page — derive the selection so
+  // the first service becomes the default the moment the list arrives.
+  const serviceType = serviceTypes.find((st) => st.id === serviceTypeId) ?? serviceTypes[0]
 
   if (!serviceType) {
     return (
@@ -100,7 +94,7 @@ export function Simulator({ serviceTypes, contractors, rates }: SimulatorProps) 
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="sim_service">Service</Label>
-          <Select value={serviceTypeId} onValueChange={setServiceTypeId}>
+          <Select value={serviceType.id} onValueChange={setServiceTypeId}>
             <SelectTrigger id="sim_service" className="w-full">
               <SelectValue />
             </SelectTrigger>
