@@ -293,7 +293,7 @@ Only **Pending** invoices can be deleted. Once an invoice has been **Sent** or *
     description: 'How sending invoices through Square works, including processing fees and automatic payment updates.',
     adminOnly: true,
     relatedArticles: ['sending-invoices', 'invoice-lifecycle', 'billing-and-pay-rules', 'client-billing-controls'],
-    keywords: ['square', 'credit card', 'processing fee', 'webhook', 'online payment'],
+    keywords: ['square', 'credit card', 'processing fee', 'webhook', 'online payment', 'link square invoice', 'square dashboard', 'unlink'],
     content: `
 ## Square Integration
 
@@ -316,6 +316,14 @@ You can pass along Square's card processing cost to the client as a separate "On
 When a client pays a Square invoice, Square sends MCA Manager a webhook notification and the invoice is marked **Paid** with no manual action needed. Because Square doesn't guarantee webhook delivery order and can retry events, this update is forward-only: once an invoice is Paid, a later or out-of-order webhook can never move it back to Sent or Pending, even if it reports an unpaid/canceled status. A paid invoice only changes if you change it yourself (for example, **Mark as Unpaid**).
 
 Square invoices also carry their own built-in reminder emails around the due date — separate from, and in addition to, MCA Manager's own invoice reminders (see **The Invoice Lifecycle**), which are sent regardless of how an invoice was delivered.
+
+### Linking an Invoice Created in Square
+
+If you created an invoice directly in your Square Dashboard instead of sending it from MCA Manager, the app doesn't know which invoice it belongs to — so sent and paid updates from Square won't appear until you connect the two. Choose **Link Square Invoice** from the invoice's actions menu, and pick the matching Square invoice from the list. Likely matches — same amount, or a Square customer the app already knows belongs to this client — are labeled **Suggested** at the top, and you can search by invoice number, customer, or title.
+
+Linking immediately adopts the Square invoice's current state (an unpaid sent invoice becomes **Sent** here; an already-paid one becomes **Paid**), and from then on payment updates sync automatically, exactly as if the invoice had been sent via Square from the app. Linking never changes anything in Square, and it never moves a local invoice backward — an invoice you already emailed stays Sent even if the Square copy is still a draft.
+
+Picked the wrong one? **Unlink Square Invoice** in the same menu disconnects it and resets the invoice to Pending so you can re-link or send it normally. Each Square invoice can only be linked to one invoice in the app, and invoices that are canceled in Square (or already linked elsewhere) don't appear in the picker.
 
 ### Sandbox vs. Production
 
