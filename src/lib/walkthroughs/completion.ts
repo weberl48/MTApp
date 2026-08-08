@@ -30,6 +30,7 @@ export const RECOMMENDED_WALKTHROUGH_ORDER = [
   'my-earnings',
   'invite-contractor',
   'contractor-rates',
+  'recalculate-pricing',
   'configure-services',
   'edit-service-type',
   'view-as',

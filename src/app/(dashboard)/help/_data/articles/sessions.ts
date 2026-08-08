@@ -287,4 +287,83 @@ A request can only be acted on once - after it's approved or declined, its statu
 For the client-facing side of requesting a session, see **Client Portal**.
     `,
   },
+  {
+    slug: 'recalculating-pricing',
+    title: 'Recalculating Session Pricing',
+    category: 'sessions',
+    description: 'How to update already-logged sessions after you change a service rate, a contractor rate, or fix a pricing mistake.',
+    walkthrough: 'recalculate-pricing',
+    adminOnly: true,
+    relatedArticles: ['managing-contractor-rates', 'editing-service-types', 'approving-sessions'],
+    keywords: ['recalculate', 'reprice', 'wrong price', 'fix pricing', 'update rate', 'rate change', 'bulk update', 'corrected formula', 'retroactive'],
+    content: `
+## Recalculating Session Pricing
+
+When a session is saved, its pricing is **written down and kept** - the total, the MCA cut, and the contractor pay are stored on the session as a snapshot. The same is true of the invoice created from it.
+
+This is deliberate: it means an approved session always shows what it was actually approved at, and an invoice never changes underneath a client who already received it.
+
+But it has a consequence that surprises people:
+
+> Changing a rate does **not** update sessions you have already logged - including the ones sitting in your approvals queue.
+
+A session waiting for approval was priced when the contractor saved it. Approving it does not re-price it. So if you correct a rate on Monday and approve Friday's queue on Tuesday, those sessions are approved at the **old** rate unless you recalculate them.
+
+**Recalculate pricing** is the tool for that.
+
+### When You Need It
+
+- You corrected a service type's base rate, MCA percentage, or pay schedule.
+- You gave a contractor a raise, or fixed a rate that was entered wrong.
+- You discovered a formula was set up incorrectly and sessions were priced from it.
+
+### How to Recalculate
+
+1. Go to **Sessions**.
+2. Tick the checkbox on each session you want to fix, or use **Select all submitted** to take the whole queue at once.
+3. Click **Recalculate pricing** in the blue bar that appears.
+4. Review the preview. Every session that would change is listed with its old and new figures side by side.
+5. Click **Apply** to save, or **Cancel** to walk away with nothing changed.
+
+**Nothing is saved until you confirm.** Opening the dialog only calculates - it does not write. This matters: if you mistyped a rate, the preview is where you will notice, and once applied it is much harder to spot.
+
+### Reading the Preview
+
+Sessions are grouped by what will happen to them:
+
+- **Will change** - a table of old to new values for the total, the MCA cut, and the contractor pay.
+- **Already correct** - a count of sessions that already match your current rates. Nothing to do.
+- **Skipped** - sessions that cannot be recalculated, each with the reason.
+
+A session can be correct on the total and still change on the split. If you raise a contractor's rate, the client pays the same and the MCA cut shrinks - that shows as a change even though the total holds steady.
+
+### What Gets Skipped, and Why
+
+| Reason | What it means |
+|---|---|
+| Invoice already sent | The client has the invoice. Changing the amount now would leave you and them holding different numbers. |
+| Invoice already paid | It is a financial record. |
+| Invoice exists in Square | Square holds the real invoice; editing only your copy would put the two permanently out of step. |
+| Billed on a batch invoice | The session is a line on a monthly batch invoice, which needs its header recalculated too. |
+| Status cannot be re-priced | Drafts (they re-price when the contractor saves), cancelled sessions, and no-shows - a no-show uses your flat no-show fee, not the normal formula, so the standard calculation would wipe it out. |
+
+If **any** invoice for a session is beyond pending, the whole session is skipped. A session split across two clients cannot have one half re-priced while the other is already paid.
+
+### Invoices Are Updated Too
+
+Recalculating a session also updates its **unsent** invoices to match, so the session and its invoice never disagree. Where a session is billed to more than one client, the new amount is split across those invoices exactly as it was originally - never written in full to each.
+
+### Sent and Paid Invoices
+
+These are deliberately out of reach. Correcting an invoice a client has already received is a different job - it may mean re-sending, issuing a credit, or a phone call - and it should be a decision you make invoice by invoice, not a side effect of a bulk action.
+
+### Who Can Do This
+
+Recalculating is **owner only**. It rewrites contractor pay, which is owner business throughout the app, and it is not one of the permissions an owner can hand to an admin.
+
+### It Is All Recorded
+
+Every recalculated session and invoice is written to the audit log, so you can always see what changed, when, and who did it. See **Audit Log** under Settings.
+    `,
+  },
 ]

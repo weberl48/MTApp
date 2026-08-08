@@ -590,6 +590,7 @@ export default function SessionsPage() {
                 </Button>
                 {canReprice && (
                   <Button
+                    data-tour="sessions-reprice"
                     variant="outline"
                     size="sm"
                     onClick={() => setRepriceOpen(true)}

@@ -11,7 +11,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 // route or settings tab, add its row here — this test is the coverage guard.
 const COVERAGE_MATRIX: Record<string, string[]> = {
   '/dashboard': ['getting-started'],
-  '/sessions': ['logging-a-session', 'session-workflow', 'approving-sessions'],
+  '/sessions': ['logging-a-session', 'session-workflow', 'approving-sessions', 'recalculating-pricing'],
   '/sessions/new': ['logging-a-session', 'group-sessions'],
   '/sessions/[id]': ['session-workflow', 'no-shows-and-cancellations'],
   '/sessions/[id]/edit': ['logging-a-session', 'session-workflow'],

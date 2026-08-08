@@ -279,4 +279,14 @@ To exit, open the same **View As** menu again and choose **Owner (actual)** at t
     category: 'getting-started',
     adminOnly: false,
   },
+  {
+    id: 'rate-change-not-applied',
+    question: "I changed a rate, but my sessions still show the old price. Why?",
+    answer: `Session pricing is written down when the session is saved and then kept, so changing a service rate or a contractor rate only affects sessions logged **after** the change. This includes sessions sitting in your approvals queue — approving one does not re-price it, so it gets approved at the price it was saved with.
+
+If you were correcting a mistake and want already-logged sessions moved onto the new pricing, go to **Sessions**, tick the ones you want, and click **Recalculate pricing**. You will see every old and new figure before anything is saved. Sessions whose invoice has already been sent or paid are deliberately left alone.`,
+    articleSlug: 'recalculating-pricing',
+    category: 'sessions',
+    adminOnly: true,
+  },
 ]

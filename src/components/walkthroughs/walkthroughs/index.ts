@@ -847,9 +847,63 @@ export const CONTRACTOR_RATES_WALKTHROUGH: Walkthrough = {
     },
     {
       title: 'When Rates Apply',
-      description: 'Rate changes affect sessions logged from then on — approved and paid sessions keep the pay they were priced at. To spot-check a contractor\'s pay on a real session, open any of their sessions and review the pricing breakdown.',
+      description: 'Rate changes affect sessions logged from then on — sessions already saved keep the pay they were priced at, including ones waiting for approval. To pull those onto the new rate, select them on the Sessions page and use "Recalculate pricing" (there is a separate tour for it). Sessions whose invoice is already sent or paid stay as they are.',
       ctaLabel: 'Finish',
       href: '/team/',
+    },
+  ],
+}
+
+export const RECALCULATE_PRICING_WALKTHROUGH: Walkthrough = {
+  id: 'recalculate-pricing',
+  name: 'Recalculate Session Pricing',
+  description: 'Update already-logged sessions after you change a rate or fix a pricing mistake',
+  // Owner-only: the Recalculate pricing button rides on `settings:edit`, which admins
+  // never hold and cannot be granted.
+  audience: 'owner',
+  steps: [
+    {
+      title: 'Why This Exists',
+      description: 'Session pricing is written down when the session is saved and kept — so changing a rate does NOT update sessions you have already logged, including the ones waiting for approval. Approving them does not re-price them either. This tour shows you how to fix that.',
+      ctaLabel: 'Next',
+      href: '/sessions/',
+    },
+    {
+      title: 'Go to Sessions',
+      description: 'Recalculating happens from the Sessions list, where you can pick exactly which sessions to fix.',
+      element: 'nav a[href="/sessions/"]',
+      popoverSide: 'right',
+      ctaLabel: 'Next',
+      href: '/sessions/',
+      mobileNav: true,
+    },
+    {
+      title: 'Select the Sessions',
+      description: 'Tick the checkbox on any submitted session. To take the whole approvals queue at once, use "Select all submitted" at the top of the list.',
+      element: '[data-tour="sessions-select-all"], [data-tour="sessions-list"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/sessions/',
+    },
+    {
+      title: 'Recalculate Pricing',
+      description: 'Selecting sessions reveals the blue action bar. "Recalculate pricing" re-prices them against your CURRENT service rates and contractor rates. Select at least one session to see the button.',
+      element: '[data-tour="sessions-reprice"], [data-tour="sessions-bulk-actions"]',
+      popoverSide: 'bottom',
+      ctaLabel: 'Next',
+      href: '/sessions/',
+    },
+    {
+      title: 'Nothing Saves Until You Confirm',
+      description: 'The dialog only calculates — it writes nothing. You see every session that would change, with old and new figures side by side, plus a list of any that were skipped and why. If you mistyped a rate, this is where you catch it. Apply saves; Cancel walks away with nothing changed.',
+      ctaLabel: 'Next',
+      href: '/sessions/',
+    },
+    {
+      title: 'What Gets Skipped',
+      description: 'Sessions whose invoice is already sent, paid, or in Square are never touched — those are financial records the client already has. No-shows are skipped too, since they use your flat no-show fee rather than the normal formula. Every skip is explained in the dialog. Unsent invoices ARE updated to match, so a session and its invoice never disagree.',
+      ctaLabel: 'Finish',
+      href: '/sessions/',
     },
   ],
 }
@@ -1120,6 +1174,7 @@ export const ALL_WALKTHROUGHS: Walkthrough[] = [
   AUTOMATION_WALKTHROUGH,
   CUSTOM_LISTS_WALKTHROUGH,
   CONTRACTOR_RATES_WALKTHROUGH,
+  RECALCULATE_PRICING_WALKTHROUGH,
   ANALYTICS_WALKTHROUGH,
   CLIENT_PORTAL_WALKTHROUGH,
   MFA_SETUP_WALKTHROUGH,

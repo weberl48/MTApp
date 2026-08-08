@@ -289,7 +289,7 @@ Result: When logging a session, the form asks "Who did this work?" instead of as
 
 - **Start simple**: set the base rate and MCA percentage first. You can always add caps, schedules, and restrictions later.
 - **Use the pricing preview**: when creating or editing a service type, the form shows an "auto" calculation next to each duration in the pay schedule. Use this to verify the numbers make sense before saving.
-- **Changes are forward-only**: editing a service type does not retroactively change existing sessions or invoices. You can safely adjust rates without worrying about past records.
+- **Changes are forward-only by default**: editing a service type does not automatically change existing sessions or invoices, so you can adjust rates without disturbing past records. If you were correcting a mistake and want already-logged sessions moved onto the new pricing, do it deliberately with **Recalculate pricing** on the Sessions page - sessions whose invoice is already sent or paid are left alone either way. See **Recalculating Session Pricing**.
 - **Combine with custom rates**: service type pricing sets the default. Per-contractor custom rates (Team > Rates) override the default for individual contractors. Both systems work together.
 - **Test with View As**: after making changes, use View As mode to simulate a contractor's experience and confirm they see the right service types and pricing.
     `,
