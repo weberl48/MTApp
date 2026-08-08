@@ -13,7 +13,9 @@ Run it next to `npm run dev`. It works standalone too (production checks don't n
 - **Environment health** — Local Dev, Cert and Production side by side: liveness/readiness probes, the `/api/health` aggregate with per-check detail (database, auth, encryption, Square, email), latency, and quick links to the app, Supabase dashboard, and Vercel.
 - **Pulse strip** — health/latency history per environment (bar height = latency, color = status), sampled every 5 minutes while the portal runs. Persisted in `data/history.json`.
 - **Endpoint sweep** — on-demand smoke test of every API route against either environment, unauthenticated. A protected route answering 401/404 is a PASS; 5xx or a timeout is a FAIL. Side-effect routes (e.g. `/api/health/restore`) are skipped.
-- **Captured errors** — while the app runs in dev mode it forwards browser errors (window errors, unhandled rejections, `console.error`) and server-side `logger.error` calls here. Filter by source, expand for stack traces, clear at will. Persisted in `data/errors.json` (gitignored — stack traces stay local). Production errors are *not* captured; use Vercel logs.
+- **Captured errors** — browser errors (window errors, unhandled rejections, `console.error`), React error-boundary crashes, and server-side `logger.error` calls. In dev the app forwards them straight here; in production they are written to `app_errors` in Supabase and *pulled* from there (Vercel can't reach this LAN box), then merged newest-first. Filter by source, expand for stack traces, clear at will. Local ones persist in `data/errors.json` (gitignored — stack traces stay local); production rows are pruned at 30 days.
+  Expect framework noise: Next.js's own `console.error` calls (e.g. `Failed to fetch RSC payload`) land here too. Scan for what repeats, not for what is present.
+- **Bug reports** — user-filed reports from the app's **Report a Bug** dialog, merged across local and production (ids restart per database, so each row is tagged with its origin). Descriptions and buffered error messages are encrypted in Supabase and decrypted on the way here; screenshots come through signed URLs that expire after 10 minutes. Each report links to its auto-filed GitHub issue in the private `mca-bugs` tracker — that issue deliberately carries no user text (see `src/lib/bug-reports/github-issue.ts`).
 - **Cert environment** — a dedicated panel for the cert database. Cert is a faithful copy of production *including real PHI*, refreshed with `scripts/cert-refresh`. Vercel Preview URLs are per-deployment, so there is no stable host to probe — the panel reports on the database instead: staleness, the active branch overlay, row volumes, and the safety invariants (PHI still decrypts, no real address has crept back in, auth rows are well-formed, `require_mfa` on). It mirrors `scripts/cert-refresh/verify-cert.mts` — that script is the gate, this is the always-on view; keep the two in step.
 - **Supabase project status** — live status of both Supabase projects via the Management API, with a one-click **Restore** button when the free-tier dev project has auto-paused.
 - **CI & deploy** — latest GitHub Actions runs on `main` plus the Vercel deploy state of the latest commit (needs the `gh` CLI authenticated as `weberl48`).
@@ -21,12 +23,18 @@ Run it next to `npm run dev`. It works standalone too (production checks don't n
 ## How the pieces connect
 
 ```
-browser errors ─▶ DevErrorReporter ─▶ POST /api/dev/errors/ (same-origin, dev-only)
-                                            │ forwards
-server logger.error ────────────────────────▶ portal :4321 /api/errors
+DEV      browser errors ─▶ ErrorReporter ─▶ POST /api/dev/errors/ ─┐ forwards
+         server logger.error ─────────────────────────────────────┴─▶ portal :4321
+
+PROD     browser errors ─▶ ErrorReporter ─▶ POST /api/errors/ ─┐
+         server logger.error ──────────────────────────────────┴─▶ app_errors ─┐
+                                                                                │ pulled
+         Report a Bug ─▶ submitBugReport() ─▶ bug_reports ──────────────────────┤
+                                    └──▶ GitHub issue (pointer only)            │
+                                                                     portal ◀───┘
 ```
 
-The reporter posts same-origin because the app's CSP `connect-src` doesn't allow the portal's port. Both hooks are inert in production builds: the relay route 404s, the logger forward is gated on `NODE_ENV === 'development'`.
+The reporter posts same-origin because the app's CSP `connect-src` doesn't allow the portal's port. Production can't push to this portal at all — it's LAN-only and Vercel can't reach it — so prod errors are pulled from `app_errors` via the Management API, and bug reports are pulled from the app's own `/api/bug-reports/` (they need decryption and signed URLs, which the app already has the key for).
 
 ## Configuration
 
@@ -35,7 +43,7 @@ Everything is optional — the portal degrades gracefully:
 | Source | Unlocks |
 |---|---|
 | `.env.local` `SUPABASE_ACCESS_TOKEN` | Supabase project status + restore button |
-| `.env.local` `CRON_SECRET` (matching Vercel's value) | Per-check health detail for production |
+| `.env.local` `CRON_SECRET` (matching Vercel's value) | Per-check health detail for production **and the Bug reports panel** (it bearer-authenticates to `/api/bug-reports/`). Without it that panel is permanently empty rather than erroring — check here first if reports aren't showing |
 | `.env.local` `CERT_ENCRYPTION_KEY` | The Cert panel's "PHI decrypts" probe (server-side only, never sent to the browser) |
 | `CERT_APP_URL` (portal env) | Pins a Preview URL so cert also gets HTTP probes and endpoint sweeps. Without it cert shows `Not probed`, which is expected |
 | `gh` CLI authenticated | CI & deploy panel |
