@@ -19,7 +19,8 @@ import {
 import Link from 'next/link'
 import { Plus, Calendar, List, Search, X, Filter, Loader2, CheckCircle, ArrowUpDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
-import { sessionDisplayTotal } from '@/lib/sessions/total'
+import { sessionDisplayTotal, sessionDisplayBreakdown } from '@/lib/sessions/total'
+import { SessionMoneyBreakdown } from '@/components/sessions/session-money-breakdown'
 import { parseLocalDate } from '@/lib/dates'
 import { Checkbox } from '@/components/ui/checkbox'
 import { approveSession, bulkApproveSessions } from '@/app/actions/sessions'
@@ -42,6 +43,8 @@ interface Session {
   created_at: string
   group_headcount: number | null
   total_amount: number | null
+  mca_cut: number | null
+  contractor_pay: number | null
   rejection_reason: string | null
   service_type: { id: string; name: string; base_rate: number; per_person_rate: number } | null
   contractor: { id: string; name: string } | null
@@ -180,6 +183,8 @@ export default function SessionsPage() {
           created_at,
           group_headcount,
           total_amount,
+          mca_cut,
+          contractor_pay,
           rejection_reason,
           service_type:service_types(id, name, base_rate, per_person_rate),
           contractor:users(id, name),
@@ -630,6 +635,7 @@ export default function SessionsPage() {
               <div className="space-y-2">
                 {paginatedSessions.map((session) => {
                   const totalCost = sessionDisplayTotal(session)
+                  const breakdown = sessionDisplayBreakdown(session)
 
                   return (
                     <Link
@@ -670,8 +676,11 @@ export default function SessionsPage() {
                             <div className="hidden lg:block shrink-0 w-4 pt-0.5" aria-hidden="true" />
                           )}
                           <div className="flex-1 min-w-0">
-                            {/* Row 1: Service type + status badge + amount */}
-                            <div className="flex items-center justify-between gap-2 mb-1">
+                            {/* Row 1: Service type + status badge + amount.
+                                items-start, not items-center: the money column is two lines
+                                when the cut/pay breakdown shows, and centering would drag the
+                                service name off the card's top edge. */}
+                            <div className="flex items-start justify-between gap-2 mb-1">
                               <div className="flex items-center gap-2 min-w-0">
                                 <span className="font-medium truncate">
                                   {session.service_type?.name || 'Unknown Service'}
@@ -687,9 +696,12 @@ export default function SessionsPage() {
                                 </Badge>
                               </div>
                               {showFinancialDetails && (
-                                <span className="font-medium shrink-0">
-                                  {totalCost === null ? '—' : formatCurrency(totalCost)}
-                                </span>
+                                <div className="shrink-0 text-right">
+                                  <span className="font-medium">
+                                    {totalCost === null ? '—' : formatCurrency(totalCost)}
+                                  </span>
+                                  <SessionMoneyBreakdown breakdown={breakdown} />
+                                </div>
                               )}
                             </div>
                             {/* Row 2: Date · duration · attendees · contractor */}

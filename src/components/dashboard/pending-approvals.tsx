@@ -12,7 +12,8 @@ import { useOrganization } from '@/contexts/organization-context'
 import { toast } from 'sonner'
 import { parseLocalDate } from '@/lib/dates'
 import { formatCurrency } from '@/lib/pricing'
-import { sessionDisplayTotal } from '@/lib/sessions/total'
+import { sessionDisplayTotal, sessionDisplayBreakdown } from '@/lib/sessions/total'
+import { SessionMoneyBreakdown } from '@/components/sessions/session-money-breakdown'
 import Link from 'next/link'
 
 interface SubmittedSession {
@@ -20,6 +21,8 @@ interface SubmittedSession {
   date: string
   duration_minutes: number
   total_amount: number | null
+  mca_cut: number | null
+  contractor_pay: number | null
   contractor: { id: string; name: string } | null
   service_type: { name: string } | null
   attendees: { individual_cost: number | null; client: { name: string } | null }[]
@@ -52,7 +55,7 @@ export function PendingApprovals() {
       const { data, error: queryError } = await supabase
         .from('sessions')
         .select(`
-          id, date, duration_minutes, total_amount,
+          id, date, duration_minutes, total_amount, mca_cut, contractor_pay,
           contractor:users!sessions_contractor_id_fkey(id, name),
           service_type:service_types(name),
           attendees:session_attendees(individual_cost, client:clients(name))
@@ -192,6 +195,7 @@ export function PendingApprovals() {
                 .join(', ')
               const extraClients = session.attendees?.length > 2 ? ` +${session.attendees.length - 2}` : ''
               const total = sessionDisplayTotal(session)
+              const breakdown = sessionDisplayBreakdown(session)
               const isLeaving = leavingIds.has(session.id)
 
               return (
@@ -217,14 +221,19 @@ export function PendingApprovals() {
                           aria-label={`Select ${session.service_type?.name || 'session'} on ${parseLocalDate(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                         />
                         <Link href={`/sessions/${session.id}/`} className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
+                          {/* items-start: the money column runs to two lines once the
+                              cut/pay breakdown shows. */}
+                          <div className="flex items-start justify-between gap-2">
                             <span className="font-medium text-sm truncate">
                               {session.service_type?.name || 'Unknown'}
                             </span>
                             {showFinancialDetails && (
-                              <span className="font-medium text-sm shrink-0">
-                                {total === null ? '—' : formatCurrency(total)}
-                              </span>
+                              <div className="shrink-0 text-right">
+                                <span className="font-medium text-sm">
+                                  {total === null ? '—' : formatCurrency(total)}
+                                </span>
+                                <SessionMoneyBreakdown breakdown={breakdown} />
+                              </div>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
