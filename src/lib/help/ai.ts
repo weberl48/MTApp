@@ -102,6 +102,14 @@ Rules:
 - Keep answers short and practical. Use markdown. Refer to UI elements in bold, e.g. **Settings > Business Rules**.
 - Never ask the user for client names or health information; if they include any, answer generally without repeating those details.`
 
+/** Output budget for one answer. It covers the model's THINKING as well as the
+ *  visible text: Claude 5 models think by default, and thinking is drawn from
+ *  the same `max_tokens` pool. Budgeted at 1024 (enough for the answer alone),
+ *  a ~500-token thinking block left too little for the answer and every reply
+ *  stopped mid-sentence with `stop_reason: max_tokens` — sometimes before a
+ *  single word was written. Keep the headroom; help answers need ~600 tokens. */
+export const HELP_AI_MAX_TOKENS = 4096
+
 export function streamHelpAnswer(opts: {
   apiKey: string
   messages: { role: 'user' | 'assistant'; content: string }[]
@@ -112,7 +120,12 @@ export function streamHelpAnswer(opts: {
   return anthropic.messages.stream({
     // No temperature: Claude 5 models reject the deprecated parameter.
     model: process.env.HELP_AI_MODEL || 'claude-sonnet-5',
-    max_tokens: 1024,
+    max_tokens: HELP_AI_MAX_TOKENS,
+    // Answers are short lookups against a documentation corpus that is already
+    // in the prompt, so keep the reasoning shallow: low effort cuts both the
+    // latency and the share of the budget thinking can claim.
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'low' },
     system: [
       { type: 'text', text: HELP_AI_SYSTEM_RULES },
       {

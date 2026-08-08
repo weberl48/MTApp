@@ -224,6 +224,7 @@ For the same reason, **don't include client names or health details in your ques
 
 - Each person can ask up to 20 questions per hour.
 - Answers come from the documentation — if something isn't documented, the helper says so rather than guessing.
+- Very broad questions can run past the length limit for a single answer. When that happens the helper labels it **"This answer stopped early"** — ask about one thing at a time to get the rest.
 - Owners can turn the helper off for the whole organization at **Settings > Business Rules > Features** with the **AI help assistant** toggle.
 
 ### Your questions improve the docs

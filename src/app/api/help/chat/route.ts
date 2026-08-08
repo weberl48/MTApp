@@ -100,6 +100,12 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       try {
         for await (const event of stream) {
+          // Thinking deltas are deliberately not forwarded — only the answer is
+          // shown — but they DO spend the same max_tokens budget, so watch the
+          // stop reason and tell the client when the answer was cut short.
+          if (event.type === 'message_delta' && event.delta.stop_reason === 'max_tokens') {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ truncated: true })}\n\n`))
+          }
           if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`))
           }

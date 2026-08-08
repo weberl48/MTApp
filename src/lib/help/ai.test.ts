@@ -1,5 +1,24 @@
-import { describe, it, expect } from 'vitest'
-import { buildHelpCorpus, buildOrgContext, HELP_AI_SYSTEM_RULES } from './ai'
+import { describe, it, expect, vi } from 'vitest'
+
+const sdk = vi.hoisted(() => ({ params: null as Record<string, unknown> | null }))
+vi.mock('@anthropic-ai/sdk', () => ({
+  default: class {
+    messages = {
+      stream: (params: Record<string, unknown>) => {
+        sdk.params = params
+        return {}
+      },
+    }
+  },
+}))
+
+import {
+  buildHelpCorpus,
+  buildOrgContext,
+  HELP_AI_SYSTEM_RULES,
+  HELP_AI_MAX_TOKENS,
+  streamHelpAnswer,
+} from './ai'
 import { DEFAULT_SETTINGS } from '@/lib/organization/settings'
 import type { ServiceType } from '@/types/database'
 
@@ -78,5 +97,27 @@ describe('HELP_AI_SYSTEM_RULES', () => {
   it('mandates sources and forbids invention', () => {
     expect(HELP_AI_SYSTEM_RULES).toMatch(/Sources:/)
     expect(HELP_AI_SYSTEM_RULES).toMatch(/\[\[/)
+  })
+})
+
+describe('streamHelpAnswer', () => {
+  const call = () => {
+    sdk.params = null
+    streamHelpAnswer({ apiKey: 'k', messages: [{ role: 'user', content: 'hi' }], includeAdminOnly: true, orgContext: '' })
+    return sdk.params!
+  }
+
+  // Regression: thinking is on by default on Claude 5 models and is billed out
+  // of max_tokens. At 1024 the thinking block starved the answer and every
+  // reply stopped mid-sentence — see HELP_AI_MAX_TOKENS.
+  it('budgets enough output for thinking AND a full answer', () => {
+    expect(HELP_AI_MAX_TOKENS).toBeGreaterThanOrEqual(4096)
+    expect(call().max_tokens).toBe(HELP_AI_MAX_TOKENS)
+  })
+
+  it('pins thinking depth rather than inheriting the model default', () => {
+    const params = call()
+    expect(params.thinking).toEqual({ type: 'adaptive' })
+    expect(params.output_config).toEqual({ effort: 'low' })
   })
 })

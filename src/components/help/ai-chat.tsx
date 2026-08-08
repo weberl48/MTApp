@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input'
 import { useOrganization } from '@/contexts/organization-context'
 import { isFeatureEnabled } from '@/lib/features'
 import { extractSources } from '@/lib/help/citations'
+import { isAnswerComplete, parseHelpStream } from '@/lib/help/stream'
 import { getArticleBySlug } from '@/app/(dashboard)/help/_data/help-articles'
 
-type ChatMessage = { role: 'user' | 'assistant'; content: string }
+type ChatMessage = { role: 'user' | 'assistant'; content: string; incomplete?: boolean }
 
 // Key presence never changes within a session — probe once per page load.
 let configuredCache: boolean | null = null
@@ -46,12 +47,17 @@ const aiMarkdown: Components = {
   li: ({ children }) => <li className="leading-6">{children}</li>,
 }
 
-function AssistantMessage({ content }: { content: string }) {
+function AssistantMessage({ content, incomplete }: { content: string; incomplete?: boolean }) {
   const { text, slugs } = extractSources(content)
   const articles = slugs.map(getArticleBySlug).filter(a => a != null)
   return (
     <div>
       <ReactMarkdown components={aiMarkdown}>{text}</ReactMarkdown>
+      {incomplete && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          This answer stopped early. Try asking about one thing at a time.
+        </p>
+      )}
       {articles.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {articles.map(a => (
@@ -110,26 +116,30 @@ export function AiChat() {
       const decoder = new TextDecoder()
       let acc = ''
       let buffer = ''
+      let sawDone = false
+      let truncated = false
+      let failed = false
       for (;;) {
         const { done, value } = await reader.read()
         if (done) break
         buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() ?? ''
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const payload = line.slice(6)
-          if (payload === '[DONE]') continue
-          const parsed = JSON.parse(payload) as { text?: string; error?: string }
-          if (parsed.error) {
-            setError('The answer was interrupted — try again.')
-            continue
-          }
-          acc += parsed.text ?? ''
-          setMessages([...history, { role: 'assistant', content: acc }])
+        const parsed = parseHelpStream(buffer)
+        buffer = parsed.rest
+        for (const event of parsed.events) {
+          if (event.type === 'text') acc += event.text
+          else if (event.type === 'truncated') truncated = true
+          else if (event.type === 'done') sawDone = true
+          else if (event.type === 'error') failed = true
         }
+        setMessages([...history, { role: 'assistant', content: acc }])
       }
+      if (failed) setError('The answer was interrupted — try again.')
       if (!acc) setMessages(history)
+      // A cut-off answer stays on screen — it is usually still useful — but it
+      // is labelled, so a mid-sentence stop never reads as a finished answer.
+      else if (!isAnswerComplete({ sawDone, truncated })) {
+        setMessages([...history, { role: 'assistant', content: acc, incomplete: true }])
+      }
     } catch {
       setMessages(prev => (prev[prev.length - 1]?.content === '' ? prev.slice(0, -1) : prev))
       setError('Something went wrong — try again.')
@@ -157,7 +167,7 @@ export function AiChat() {
               {m.content === '' && busy ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : (
-                <AssistantMessage content={m.content} />
+                <AssistantMessage content={m.content} incomplete={m.incomplete} />
               )}
             </div>
           )
