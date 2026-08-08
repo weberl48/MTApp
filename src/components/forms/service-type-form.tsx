@@ -26,13 +26,16 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import type { ServiceType, ServiceCategory, LocationType } from '@/types/database'
 import { useOrganization } from '@/contexts/organization-context'
-import { calculateSessionPricing, formatCurrency } from '@/lib/pricing'
 
 interface ServiceTypeFormProps {
   serviceType?: ServiceType | null
   isOpen: boolean
   onClose: () => void
   onSaved: () => void
+  // Passed by the pricing hub so a newly created service sorts after the
+  // existing ones. Omitted elsewhere — the insert then relies on the
+  // database default for display_order.
+  nextDisplayOrder?: number
 }
 
 const SERVICE_CATEGORIES: { value: ServiceCategory; label: string }[] = [
@@ -48,34 +51,9 @@ const LOCATION_TYPES: { value: LocationType; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
-export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: ServiceTypeFormProps) {
+export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved, nextDisplayOrder }: ServiceTypeFormProps) {
   const { organization } = useOrganization()
   const [loading, setLoading] = useState(false)
-  const durationOptions = organization?.settings?.session?.duration_options || [30, 45, 60, 90]
-
-  // Initialize pay schedule from existing data, or empty strings for all durations
-  const initPaySchedule = (): Record<string, string> => {
-    const schedule: Record<string, string> = {}
-    for (const dur of durationOptions) {
-      const existing = serviceType?.contractor_pay_schedule?.[String(dur)]
-      schedule[String(dur)] = existing !== undefined ? String(existing) : ''
-    }
-    return schedule
-  }
-
-  // Initialize group contractor pay matrix from existing data
-  const GROUP_HEADCOUNTS = [1, 2, 3, 4, 5, 6]
-  const initGroupPay = (): Record<string, string> => {
-    const matrix: Record<string, string> = {}
-    for (const h of GROUP_HEADCOUNTS) {
-      for (const dur of durationOptions) {
-        const key = `${h}_${dur}`
-        const existing = serviceType?.group_contractor_pay?.[key]
-        matrix[key] = existing !== undefined ? String(existing) : ''
-      }
-    }
-    return matrix
-  }
 
   const [formData, setFormData] = useState({
     name: serviceType?.name || '',
@@ -83,19 +61,13 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
     location: serviceType?.location || ('in_home' as LocationType),
     base_rate: serviceType?.base_rate?.toString() || '',
     per_person_rate: serviceType?.per_person_rate?.toString() || '0',
-    mca_percentage: serviceType?.mca_percentage?.toString() || '0',
-    contractor_cap: serviceType?.contractor_cap?.toString() || '',
-    total_cap: serviceType?.total_cap?.toString() || '',
-    rent_percentage: serviceType?.rent_percentage?.toString() || '0',
-    scholarship_rate: serviceType?.scholarship_rate?.toString() || '',
+    mca_percentage: serviceType?.mca_percentage?.toString() || '',
     is_active: serviceType?.is_active ?? true,
     is_scholarship: serviceType?.is_scholarship ?? false,
     requires_client: serviceType?.requires_client ?? true,
     admin_only: serviceType?.admin_only ?? false,
     requires_classroom: serviceType?.requires_classroom ?? false,
     allowed_contractor_ids: serviceType?.allowed_contractor_ids || ([] as string[]),
-    pay_schedule: initPaySchedule(),
-    group_pay: initGroupPay(),
   })
 
   // Fetch contractors for restriction selector. Must be org-scoped explicitly:
@@ -122,61 +94,38 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
 
     const supabase = createClient()
 
-    // Build contractor_pay_schedule from form values (only include filled-in durations)
-    const paySchedule: Record<string, number> = {}
-    let hasAnyScheduleValue = false
-    for (const [dur, val] of Object.entries(formData.pay_schedule)) {
-      const parsed = parseFloat(val)
-      if (!isNaN(parsed) && parsed > 0) {
-        paySchedule[dur] = parsed
-        hasAnyScheduleValue = true
-      }
-    }
-
-    // Build group_contractor_pay from form values (only include filled-in cells)
-    const groupPay: Record<string, number> = {}
-    let hasAnyGroupPay = false
-    for (const [key, val] of Object.entries(formData.group_pay)) {
-      const parsed = parseFloat(val)
-      if (!isNaN(parsed) && parsed > 0) {
-        groupPay[key] = parsed
-        hasAnyGroupPay = true
-      }
-    }
-
-    const data = {
+    // Identity & behavior fields only. Money fields (base_rate, per_person_rate,
+    // mca_percentage, contractor_cap, total_cap, pay schedule, group matrix, etc.)
+    // are edited on the Pricing page's rate tables now — an edit-mode save here
+    // must never touch them, or it would clobber a table edit made elsewhere.
+    const identityData = {
       name: formData.name,
       category: formData.category,
       location: formData.location,
-      base_rate: parseFloat(formData.base_rate),
-      per_person_rate: parseFloat(formData.per_person_rate) || 0,
-      mca_percentage: parseFloat(formData.mca_percentage),
-      contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
-      total_cap: formData.total_cap ? parseFloat(formData.total_cap) : null,
-      rent_percentage: parseFloat(formData.rent_percentage) || 0,
-      scholarship_rate: formData.scholarship_rate ? parseFloat(formData.scholarship_rate) : null,
       is_active: formData.is_active,
       is_scholarship: formData.is_scholarship,
       requires_client: formData.requires_client,
       admin_only: formData.admin_only,
       requires_classroom: formData.requires_classroom,
       allowed_contractor_ids: formData.allowed_contractor_ids.length > 0 ? formData.allowed_contractor_ids : null,
-      contractor_pay_schedule: hasAnyScheduleValue ? paySchedule : null,
-      group_contractor_pay: hasAnyGroupPay ? groupPay : null,
     }
 
     try {
       if (isEditing && serviceType) {
         const { error } = await supabase
           .from('service_types')
-          .update(data)
+          .update(identityData)
           .eq('id', serviceType.id)
 
         if (error) throw error
         toast.success('Service type updated')
       } else {
         const { error } = await supabase.from('service_types').insert({
-          ...data,
+          ...identityData,
+          base_rate: parseFloat(formData.base_rate),
+          per_person_rate: parseFloat(formData.per_person_rate) || 0,
+          mca_percentage: parseFloat(formData.mca_percentage),
+          ...(nextDisplayOrder !== undefined ? { display_order: nextDisplayOrder } : {}),
           organization_id: organization!.id,
         })
 
@@ -208,7 +157,9 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Service Type' : 'Add Service Type'}</DialogTitle>
           <DialogDescription>
-            Configure pricing rules for this service type. Changes affect new sessions only.
+            {isEditing
+              ? "Update this service type's identity and behavior. Changes affect new sessions only."
+              : "Set up a new service type's identity and behavior. Changes affect new sessions only."}
           </DialogDescription>
         </DialogHeader>
 
@@ -267,212 +218,58 @@ export function ServiceTypeForm({ serviceType, isOpen, onClose, onSaved }: Servi
             </div>
           </div>
 
-          {/* Pricing */}
-          <div className="grid grid-cols-2 gap-4" data-tour="pricing-rates">
-            <div className="space-y-2">
-              <Label htmlFor="base_rate">Base Rate ($) *</Label>
-              <Input
-                id="base_rate"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.base_rate}
-                onChange={(e) => setFormData({ ...formData, base_rate: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="per_person_rate">Per Person Rate ($)</Label>
-              <Input
-                id="per_person_rate"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.per_person_rate}
-                onChange={(e) => setFormData({ ...formData, per_person_rate: e.target.value })}
-                placeholder="0 for individual"
-              />
-            </div>
-          </div>
-
-          {/* Contractor Cap */}
-          <div className="space-y-2">
-            <Label htmlFor="contractor_cap">Contractor Cap ($)</Label>
-            <Input
-              id="contractor_cap"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.contractor_cap}
-              onChange={(e) => setFormData({ ...formData, contractor_cap: e.target.value })}
-              placeholder="Leave empty for no cap"
-            />
+          {/* Pricing: create only. Editing a service's rates happens on the
+              Pricing page's rate tables, never in this dialog. */}
+          {isEditing ? (
             <p className="text-xs text-muted-foreground">
-              Maximum contractor pay per session. Leave empty for no cap.
+              Rates for this service are edited on the Pricing page.
             </p>
-          </div>
+          ) : (
+            <div className="space-y-4 rounded-lg border p-4">
+              <Label className="text-sm font-medium">Pricing</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="base_rate">Base Rate ($) *</Label>
+                  <Input
+                    id="base_rate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.base_rate}
+                    onChange={(e) => setFormData({ ...formData, base_rate: e.target.value })}
+                    required
+                  />
+                </div>
 
-          {/* Total Cap */}
-          <div className="space-y-2">
-            <Label htmlFor="total_cap">Total Cap ($)</Label>
-            <Input
-              id="total_cap"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.total_cap}
-              onChange={(e) => setFormData({ ...formData, total_cap: e.target.value })}
-              placeholder="Leave empty for no cap"
-            />
-            <p className="text-xs text-muted-foreground">
-              Maximum total billed amount per session. Leave empty for no cap.
-            </p>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="per_person_rate">Per Person Rate ($)</Label>
+                  <Input
+                    id="per_person_rate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.per_person_rate}
+                    onChange={(e) => setFormData({ ...formData, per_person_rate: e.target.value })}
+                    placeholder="0 for individual"
+                  />
+                </div>
+              </div>
 
-          {/* Rent */}
-          <div className="space-y-2">
-            <Label htmlFor="rent_percentage">Rent Percentage (%)</Label>
-            <Input
-              id="rent_percentage"
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              value={formData.rent_percentage}
-              onChange={(e) => setFormData({ ...formData, rent_percentage: e.target.value })}
-              placeholder="0"
-            />
-            <p className="text-xs text-muted-foreground">
-              Percentage of session that goes to rent (e.g., for Matt&apos;s Music location)
-            </p>
-          </div>
-
-          {/* Scholarship Rate */}
-          <div className="space-y-2">
-            <Label htmlFor="scholarship_rate">Scholarship Rate ($)</Label>
-            <Input
-              id="scholarship_rate"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.scholarship_rate}
-              onChange={(e) => setFormData({ ...formData, scholarship_rate: e.target.value })}
-              placeholder="Leave empty to use normal rate"
-            />
-            <p className="text-xs text-muted-foreground">
-              Flat rate charged to scholarship clients. Contractor still gets normal pay; MCA absorbs the discount.
-            </p>
-          </div>
-
-          {/* Contractor Pay by Duration (hidden for group services — use group matrix instead) */}
-          {!(parseFloat(formData.per_person_rate) > 0) && <div className="space-y-2" data-tour="pay-schedule">
-            <Label>Contractor Pay by Duration</Label>
-            <p className="text-xs text-muted-foreground">
-              Set the default contractor pay for each session duration. Leave empty to calculate automatically from MCA %.
-            </p>
-            <div className="border rounded-lg divide-y">
-              {durationOptions.map((dur) => {
-                const durKey = String(dur)
-                // Calculate what auto-formula would give
-                const autoCalc = calculateSessionPricing(
-                  {
-                    ...({} as ServiceType),
-                    base_rate: parseFloat(formData.base_rate) || 0,
-                    per_person_rate: 0,
-                    mca_percentage: parseFloat(formData.mca_percentage) || 0,
-                    contractor_cap: formData.contractor_cap ? parseFloat(formData.contractor_cap) : null,
-                    total_cap: formData.total_cap ? parseFloat(formData.total_cap) : null,
-                    contractor_pay_schedule: null,
-                    rent_percentage: 0,
-                    scholarship_rate: null,
-                    scholarship_discount_percentage: 0,
-                    minimum_attendees: 1,
-                  } as ServiceType,
-                  1,
-                  dur
-                )
-                return (
-                  <div key={dur} className="flex items-center justify-between px-3 py-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium w-14">{dur} min</span>
-                      <span className="text-xs text-muted-foreground">
-                        auto: {formatCurrency(autoCalc.contractorPay)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm text-muted-foreground">$</span>
-                      <Input
-                        type="number"
-                        step="0.50"
-                        min="0"
-                        value={formData.pay_schedule[durKey] || ''}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            pay_schedule: { ...formData.pay_schedule, [durKey]: e.target.value },
-                          })
-                        }
-                        placeholder={autoCalc.contractorPay.toFixed(2)}
-                        className="w-24 h-8 text-sm"
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>}
-
-          {/* Group Contractor Pay Matrix */}
-          {parseFloat(formData.per_person_rate) > 0 && (
-            <div className="space-y-2" data-tour="group-pay-matrix">
-              <Label>Group Contractor Pay by Headcount</Label>
-              <p className="text-xs text-muted-foreground">
-                Set contractor pay based on group size and duration. The last row (6+) applies to groups of 6 or more. Leave empty to use the default pay schedule or formula.
-              </p>
-              <div className="border rounded-lg overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted">
-                      <th className="px-2 py-1.5 text-left font-medium text-muted-foreground w-16">Clients</th>
-                      {durationOptions.map((dur) => (
-                        <th key={dur} className="px-2 py-1.5 text-center font-medium text-muted-foreground">
-                          {dur}m
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {GROUP_HEADCOUNTS.map((h) => (
-                      <tr key={h}>
-                        <td className="px-2 py-1.5 text-sm font-medium text-foreground">
-                          {h === 6 ? '6+' : h}
-                        </td>
-                        {durationOptions.map((dur) => {
-                          const key = `${h}_${dur}`
-                          return (
-                            <td key={dur} className="px-1 py-1">
-                              <Input
-                                type="number"
-                                step="0.50"
-                                min="0"
-                                value={formData.group_pay[key] || ''}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    group_pay: { ...formData.group_pay, [key]: e.target.value },
-                                  })
-                                }
-                                placeholder="—"
-                                className="w-full h-7 text-sm text-center px-1"
-                              />
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-2">
+                <Label htmlFor="mca_percentage">MCA Percentage (%) *</Label>
+                <Input
+                  id="mca_percentage"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={formData.mca_percentage}
+                  onChange={(e) => setFormData({ ...formData, mca_percentage: e.target.value })}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  The organization&apos;s cut. Contractor pay defaults to total minus this.
+                </p>
               </div>
             </div>
           )}
