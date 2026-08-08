@@ -29,6 +29,21 @@ interface ContractorRate {
   duration_increment: number | null
 }
 
+/** One stop on the money-flow rail: a numbered chip aligned to the rail at its left. */
+function FlowStop({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      <span
+        aria-hidden="true"
+        className="absolute -left-10 top-4 flex h-8 w-8 items-center justify-center rounded-full border bg-card text-sm font-semibold text-muted-foreground"
+      >
+        {n}
+      </span>
+      {children}
+    </div>
+  )
+}
+
 export default function PricingHubPage() {
   const { organization, can, settings } = useOrganization()
   const { activeWalkthrough, stepIndex } = useWalkthrough()
@@ -196,7 +211,10 @@ export default function PricingHubPage() {
     : 0
 
   return (
-    <div className="space-y-6">
+    // pb-24 below lg: the owner-onboarding pill floats at bottom-20 on phones and
+    // must never end up permanently covering the last card's money fields — same
+    // reasoning as the dashboard layout's right gutter for the AI bubble.
+    <div className="space-y-6 pb-24 lg:pb-0">
       <div className="flex items-center gap-4">
         <Link href="/settings/">
           <Button variant="ghost" size="icon" aria-label="Back to settings">
@@ -225,7 +243,12 @@ export default function PricingHubPage() {
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_340px] items-start">
-          <div className="space-y-6 min-w-0">
+          {/* pl-10 reserves the rail column; the line itself connects the four
+              numbered stops — the sequence IS the pricing story, so the structure
+              draws it. */}
+          <div className="relative space-y-6 min-w-0 pl-10">
+            <div aria-hidden="true" className="absolute left-4 top-5 bottom-5 w-px bg-border" />
+            <FlowStop n={1}>
             <BillingTable
               serviceTypes={serviceTypes}
               canEdit={canEdit}
@@ -234,10 +257,12 @@ export default function PricingHubPage() {
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
+            </FlowStop>
 
+            <FlowStop n={2}>
             <Card data-tour="pay-rate-matrix-section">
               <CardHeader>
-                <CardTitle>2 · What the contractor earns</CardTitle>
+                <CardTitle>What the contractor earns</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <PayScheduleGrid
@@ -266,15 +291,20 @@ export default function PricingHubPage() {
                 </div>
               </CardContent>
             </Card>
+            </FlowStop>
 
+            <FlowStop n={3}>
             <BusinessCutTable
               serviceTypes={serviceTypes}
               canEdit={canEdit}
               onUpdate={onUpdate}
               durationBase={durationBase}
             />
+            </FlowStop>
 
+            <FlowStop n={4}>
             <PoliciesForm />
+            </FlowStop>
           </div>
 
           {/* order-first on mobile so the calculator is reachable without scrolling

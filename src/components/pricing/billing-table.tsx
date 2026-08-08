@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { formatCurrency } from '@/lib/pricing'
 import type { ServiceType } from '@/types/database'
 import { EditableCell } from './editable-cell'
@@ -40,7 +46,7 @@ export function BillingTable({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>1 · What the client pays</CardTitle>
+        <CardTitle>What the client pays</CardTitle>
         {canEdit && (
           <Button size="sm" onClick={onAdd} data-tour="pricing-add-service">
             <Plus className="w-4 h-4" />
@@ -61,36 +67,21 @@ export function BillingTable({
                 <TableHead className="text-center">Per-person</TableHead>
                 <TableHead className="text-center">Total cap</TableHead>
                 <TableHead className="text-center">Scholarship rate</TableHead>
+                {canEdit && (
+                  <TableHead className="w-10">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {serviceTypes.map((st) => (
-                <TableRow key={st.id} className={st.is_active ? undefined : 'opacity-60'}>
+                <TableRow key={st.id} className={`group ${st.is_active ? '' : 'opacity-60'}`}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{st.name}</span>
                       {!st.is_active && <Badge variant="secondary">Inactive</Badge>}
                     </div>
-                    {canEdit && (
-                      <div className="flex items-center gap-0.5 mt-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => onEdit(st)}
-                        >
-                          <Pencil className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => onDelete(st)}
-                        >
-                          <Trash2 className="w-3 h-3 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     <EditableCell
@@ -106,7 +97,8 @@ export function BillingTable({
                   <TableCell className="text-center">
                     <EditableCell
                       value={st.per_person_rate}
-                      display={formatCurrency(st.per_person_rate)}
+                      // 0 means "not a group service" — a dash reads cleaner than $0.00.
+                      display={st.per_person_rate > 0 ? formatCurrency(st.per_person_rate) : '—'}
                       canEdit={canEdit}
                       nullable={false}
                       onSave={async (v) => {
@@ -132,6 +124,42 @@ export function BillingTable({
                       onSave={(v) => onUpdate(st.id, { scholarship_rate: v })}
                     />
                   </TableCell>
+                  {canEdit && (
+                    <TableCell className="text-right p-1">
+                      <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          aria-label={`Edit ${st.name}`}
+                          onClick={() => onEdit(st)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              aria-label={`More actions for ${st.name}`}
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => onDelete(st)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete service
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

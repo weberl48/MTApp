@@ -29,7 +29,7 @@ export function BusinessCutTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>3 · What the business keeps</CardTitle>
+        <CardTitle>What the business keeps</CardTitle>
       </CardHeader>
       <CardContent>
         <div

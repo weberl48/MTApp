@@ -54,7 +54,7 @@ export function PoliciesForm() {
   return (
     <Card data-tour="pricing-policies">
       <CardHeader>
-        <CardTitle>4 · Policies &amp; fees</CardTitle>
+        <CardTitle>Policies &amp; fees</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
