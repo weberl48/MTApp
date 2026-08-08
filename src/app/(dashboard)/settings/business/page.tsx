@@ -1,10 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,86 +10,35 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageHelp } from '@/components/help/page-help'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { ServiceTypeForm } from '@/components/forms/service-type-form'
 import { useOrganization } from '@/contexts/organization-context'
-import { useWalkthrough } from '@/components/walkthroughs/walkthrough-provider'
 import {
   ArrowLeft,
-  DollarSign,
   FileText,
   Settings2,
   Bell,
   ToggleLeft,
-  Plus,
-  Pencil,
-  Trash2,
   Loader2,
   Save,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog'
 import type {
-  ServiceType,
   OrganizationSettings,
   FeatureFlags,
 } from '@/types/database'
 import { FEATURE_DEFINITIONS } from '@/lib/features'
-import { clampSettingNumber, parseSettingNumber } from '@/lib/settings/input'
+import { clampSettingNumber } from '@/lib/settings/input'
 
 export default function BusinessSettingsPage() {
   const { organization, can, settings, feature, updateSettings } = useOrganization()
-  const { activeWalkthrough, stepIndex } = useWalkthrough()
-  const searchParams = useSearchParams()
   const isOwner = can('settings:edit')
   const isAdmin = can('session:view-all')
   const [saving, setSaving] = useState(false)
-  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([])
-  const [editingServiceType, setEditingServiceType] = useState<ServiceType | null>(null)
-  const [isServiceTypeFormOpen, setIsServiceTypeFormOpen] = useState(false)
   const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(settings)
-  const { dialogProps: confirmDialogProps, confirm: openConfirm } = useConfirmDialog()
-
-  // Hold the service type form open for the walkthrough that tours its fields.
-  // Re-asserted while the tour is live rather than once per mount: dismissing
-  // the dialog (its X, a click outside) used to be unrecoverable — the tour kept
-  // advancing through steps whose fields no longer existed, so every remaining
-  // step showed the "can't see a highlight?" note. Gated on the tour being
-  // active, so closing the form once it ends still sticks.
-  const editServiceTourActive = activeWalkthrough?.id === 'edit-service-type'
-  useEffect(() => {
-    if (!editServiceTourActive) return
-    if (searchParams.get('tour') !== 'edit-service') return
-    if (serviceTypes.length === 0) return
-    setEditingServiceType((current) => current ?? serviceTypes[0])
-    setIsServiceTypeFormOpen(true)
-  }, [editServiceTourActive, stepIndex, isServiceTypeFormOpen, searchParams, serviceTypes])
 
   useEffect(() => {
     if (settings) setLocalSettings(settings)
   }, [settings])
-
-  const loadData = useCallback(async () => {
-    if (!organization) return
-    const supabase = createClient()
-    const { data: types } = await supabase
-      .from('service_types')
-      .select('*')
-      .eq('organization_id', organization.id)
-      .order('display_order', { ascending: true })
-    setServiceTypes(types || [])
-  }, [organization])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
 
   async function saveSettings() {
     if (!localSettings) return
@@ -105,25 +51,6 @@ export default function BusinessSettingsPage() {
     } finally {
       setSaving(false)
     }
-  }
-
-  function handleDeleteServiceType(serviceType: ServiceType) {
-    openConfirm({
-      title: 'Delete Service Type',
-      description: `Are you sure you want to delete "${serviceType.name}"? This cannot be undone.`,
-      confirmLabel: 'Delete',
-      onConfirm: async () => {
-        const supabase = createClient()
-        try {
-          const { error } = await supabase.from('service_types').delete().eq('id', serviceType.id)
-          if (error) throw error
-          toast.success('Service type deleted')
-          loadData()
-        } catch {
-          toast.error('Failed to delete service type. It may be in use by existing sessions.')
-        }
-      },
-    })
   }
 
   if (!organization) {
@@ -153,22 +80,29 @@ export default function BusinessSettingsPage() {
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-2xl font-bold text-foreground">Business Rules</h1>
-            <PageHelp article="pricing-deep-dive" />
+            <PageHelp article="generating-invoices" />
           </div>
-          <p className="text-muted-foreground">Services, invoicing, sessions, notifications, and features</p>
+          <p className="text-muted-foreground">Invoicing, sessions, notifications, and features</p>
         </div>
       </div>
 
-      <Tabs defaultValue={isOwner ? 'services' : 'invoices'} className="space-y-4">
+      {isOwner && (
+        <Card>
+          <CardContent className="flex items-center justify-between gap-4 py-4">
+            <div>
+              <p className="font-medium">Service pricing has moved</p>
+              <p className="text-sm text-muted-foreground">Rates, contractor pay, and fees now live on the Pricing page.</p>
+            </div>
+            <Link href="/settings/pricing/">
+              <Button variant="outline">Open Pricing</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="invoices" className="space-y-4">
         <div className="relative">
           <TabsList className="h-auto w-full justify-start overflow-x-auto">
-            {/* Service pricing carries contractor pay (schedule, cap, MCA cut) — owner only. */}
-            {isOwner && (
-              <TabsTrigger value="services" className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Services
-              </TabsTrigger>
-            )}
             <TabsTrigger value="invoices" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Invoices
@@ -196,73 +130,6 @@ export default function BusinessSettingsPage() {
             className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-(--canvas) to-transparent sm:hidden"
           />
         </div>
-
-        {/* Services Tab — owner only, see the trigger above */}
-        {isOwner && (
-        <TabsContent value="services">
-          <Card>
-            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle>Service Types</CardTitle>
-                <CardDescription>Configure pricing rules for each service type</CardDescription>
-              </div>
-              <Button data-tour="services-add-button" onClick={() => { setEditingServiceType(null); setIsServiceTypeFormOpen(true) }} className="w-full sm:w-auto">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Service Type
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3" data-tour="services-list">
-                {serviceTypes.map((st) => (
-                  <div
-                    key={st.id}
-                    data-tour="service-type-row"
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
-                      st.is_active ? 'bg-card' : 'bg-muted opacity-60'
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{st.name}</p>
-                        {!st.is_active && <Badge variant="secondary">Inactive</Badge>}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        ${st.base_rate}
-                        {st.per_person_rate > 0 && ` + $${st.per_person_rate}/person`}
-                        {st.mca_percentage > 0 && ` | ${st.mca_percentage}% cut`}
-                        {st.contractor_cap && ` | Max $${st.contractor_cap}`}
-                        {st.rent_percentage > 0 && ` | ${st.rent_percentage}% rent`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{st.location.replace('_', ' ')}</Badge>
-                      <Button variant="ghost" size="icon" onClick={() => { setEditingServiceType(st); setIsServiceTypeFormOpen(true) }}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteServiceType(st)} className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {serviceTypes.length === 0 && (
-                  <p className="text-center py-8 text-muted-foreground">
-                    No service types configured. Add your first service type to get started.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <ServiceTypeForm
-            key={editingServiceType?.id || 'new'}
-            serviceType={editingServiceType}
-            isOpen={isServiceTypeFormOpen}
-            onClose={() => setIsServiceTypeFormOpen(false)}
-            onSaved={loadData}
-          />
-        </TabsContent>
-        )}
 
         {/* Invoice Settings Tab */}
         {localSettings && (
@@ -357,116 +224,9 @@ export default function BusinessSettingsPage() {
                   </div>
                 )}
                 <Separator />
-                <h3 className="text-sm font-medium text-foreground">Square Processing Fee</h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Add Processing Fee to Square Invoices</Label>
-                    <p className="text-xs text-muted-foreground">Automatically add a service charge to cover Square processing fees</p>
-                  </div>
-                  <Switch
-                    checked={localSettings.pricing?.square_processing_fee_enabled ?? false}
-                    onCheckedChange={(checked) =>
-                      setLocalSettings({
-                        ...localSettings,
-                        pricing: { ...localSettings.pricing, square_processing_fee_enabled: checked },
-                      })
-                    }
-                  />
-                </div>
-
-                {localSettings.pricing?.square_processing_fee_enabled && (
-                  <div className="ml-6 space-y-4">
-                    <div className="space-y-2">
-                      <Label>Fee Type</Label>
-                      <Select
-                        value={localSettings.pricing?.square_processing_fee_type ?? 'fixed'}
-                        onValueChange={(val) =>
-                          setLocalSettings({
-                            ...localSettings,
-                            pricing: {
-                              ...localSettings.pricing,
-                              square_processing_fee_type: val as 'fixed' | 'percentage',
-                            },
-                          })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fixed">Fixed Dollar Amount</SelectItem>
-                          <SelectItem value="percentage">Percentage</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {(localSettings.pricing?.square_processing_fee_type ?? 'fixed') === 'percentage' ? (
-                      <>
-                        <div className="space-y-2">
-                          <Label htmlFor="sq_fee_pct">Percentage (%)</Label>
-                          <Input
-                            id="sq_fee_pct"
-                            type="number"
-                            min="0"
-                            max="20"
-                            step="0.1"
-                            value={localSettings.pricing?.square_processing_fee_percentage ?? 0}
-                            onChange={(e) =>
-                              setLocalSettings({
-                                ...localSettings,
-                                pricing: {
-                                  ...localSettings.pricing,
-                                  square_processing_fee_percentage: parseFloat(e.target.value) || 0,
-                                },
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="sq_fee_fixed_cents">+ Fixed Amount (cents)</Label>
-                          <Input
-                            id="sq_fee_fixed_cents"
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={localSettings.pricing?.square_processing_fee_fixed_cents ?? 0}
-                            onChange={(e) =>
-                              setLocalSettings({
-                                ...localSettings,
-                                pricing: {
-                                  ...localSettings.pricing,
-                                  square_processing_fee_fixed_cents: parseInt(e.target.value) || 0,
-                                },
-                              })
-                            }
-                          />
-                          <p className="text-xs text-muted-foreground">e.g., 30 for $0.30 (Square standard is 2.9% + 30 cents)</p>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="space-y-2">
-                        <Label htmlFor="sq_fee_amount">Fee Amount ($)</Label>
-                        <Input
-                          id="sq_fee_amount"
-                          type="number"
-                          min="0"
-                          step="0.25"
-                          value={localSettings.pricing?.square_processing_fee_amount ?? 0}
-                          onChange={(e) =>
-                            setLocalSettings({
-                              ...localSettings,
-                              pricing: {
-                                ...localSettings.pricing,
-                                square_processing_fee_amount: parseFloat(e.target.value) || 0,
-                              },
-                            })
-                          }
-                        />
-                        <p className="text-xs text-muted-foreground">Fixed dollar amount added as a service charge on each Square invoice</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground">
+                  Square processing fee settings moved to <Link href="/settings/pricing/" className="underline">Settings › Pricing</Link>.
+                </p>
 
                 <Button onClick={saveSettings} disabled={saving}>
                   <Loader2
@@ -582,35 +342,9 @@ export default function BusinessSettingsPage() {
                   </div>
                 )}
                 <Separator />
-                <h3 className="text-sm font-medium text-foreground">Pricing</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="no_show_fee">No-Show Fee ($)</Label>
-                  <Input
-                    id="no_show_fee"
-                    type="number"
-                    min="0"
-                    step="5"
-                    value={localSettings.pricing?.no_show_fee ?? 60}
-                    onChange={(e) =>
-                      setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, no_show_fee: parseSettingNumber(e.target.value, 60) } })
-                    }
-                  />
-                  <p className="text-xs text-muted-foreground">Flat fee charged for no-show sessions</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="duration_base_minutes">Base Duration for Rate Scaling (minutes)</Label>
-                  <Input
-                    id="duration_base_minutes"
-                    type="number"
-                    min="15"
-                    max="120"
-                    value={localSettings.pricing?.duration_base_minutes ?? 30}
-                    onChange={(e) =>
-                      setLocalSettings({ ...localSettings, pricing: { ...localSettings.pricing, duration_base_minutes: parseInt(e.target.value) || 30 } })
-                    }
-                  />
-                  <p className="text-xs text-muted-foreground">Service type base rates are for this many minutes</p>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  No-show fee and rate scaling moved to <Link href="/settings/pricing/" className="underline">Settings › Pricing</Link>.
+                </p>
 
                 {feature('client_portal') && (
                   <>
@@ -748,7 +482,6 @@ export default function BusinessSettingsPage() {
           </TabsContent>
         )}
       </Tabs>
-      <ConfirmDialog {...confirmDialogProps} />
     </div>
   )
 }

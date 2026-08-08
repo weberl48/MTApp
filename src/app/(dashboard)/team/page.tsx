@@ -1,8 +1,10 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { PageHelp } from '@/components/help/page-help'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/pricing'
 import { can, canWithGrants, type AdminGrants } from '@/lib/auth/permissions'
 import { fetchAdminGrants } from '@/lib/auth/admin-grants'
@@ -53,11 +55,15 @@ export default async function TeamPage() {
     redirect('/dashboard/')
   }
 
-  const canManage = can(currentUserRole as UserRole, 'team:manage')
   const canInvite = can(currentUserRole as UserRole, 'team:invite')
   // Admins reach this page via team:view but must not see contractor pay rates —
   // or, below, what each contractor has earned. The owner can grant this back.
   const canViewRates = canWithGrants(currentUserRole as UserRole, 'team:view-rates', adminGrants)
+  // Pay rates are edited on the Pricing hub now, not here — this gates the
+  // pointer button only, never PayRateMatrix's canEdit (that stays false on
+  // Team unconditionally). settings:edit is owner/developer only and cannot be
+  // admin-granted, so this deliberately uses can(), not canWithGrants().
+  const canEditPricing = can(currentUserRole as UserRole, 'settings:edit')
 
   // Fetch all users with their session and invoice stats
   const { data: users, error: usersError } = await supabase
@@ -232,10 +238,18 @@ export default async function TeamPage() {
               canViewRates
                 ? users?.[0]?.organization_id
                   ? (
-                    <div>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-sm text-muted-foreground">Pay rates are view-only here.</p>
+                        {canEditPricing && (
+                          <Link href="/settings/pricing/">
+                            <Button variant="outline" size="sm">Edit rates in Settings › Pricing</Button>
+                          </Link>
+                        )}
+                      </div>
                       <PayRateMatrix
                         organizationId={users[0].organization_id}
-                        canEdit={canManage}
+                        canEdit={false}
                       />
                     </div>
                   )
