@@ -289,4 +289,14 @@ If you were correcting a mistake and want already-logged sessions moved onto the
     category: 'sessions',
     adminOnly: true,
   },
+  {
+    id: 'how-to-report-a-bug',
+    question: 'Something is broken — how do I report it?',
+    answer: `Open the **avatar menu** in the top-right corner and choose **Report a Bug**. Describe what you were trying to do and what happened instead. If a page has crashed outright, use the **Report this** button on the error screen instead — it attaches a reference code that points straight at the failure.
+
+You don't need to explain your setup. The page you were on, your browser, the app version, and any errors your browser recorded are all attached automatically. A screenshot is optional but usually the fastest way to show a visual problem — note that a screenshot of most pages will include client information, so it's stored securely and deleted after 90 days.`,
+    articleSlug: 'reporting-a-bug',
+    category: 'getting-started',
+    adminOnly: false,
+  },
 ]

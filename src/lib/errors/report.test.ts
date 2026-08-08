@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createReportGate, formatConsoleArg, consoleArgsToMessage } from './error-report'
+import { createReportGate, formatConsoleArg, consoleArgsToMessage } from './report'
 
 describe('createReportGate', () => {
   it('lets a fresh key through and suppresses an immediate repeat', () => {

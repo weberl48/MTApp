@@ -62,9 +62,22 @@
           <button class="btn btn-quiet" id="clear-errors">Clear</button>
         </div>
       </div>
-      <p class="section-note">The local app forwards browser errors and server <span class="mono">logger.error</span> calls here while it runs in dev mode. Production errors are not captured — check Vercel logs for those.</p>
+      <p class="section-note">In dev the app forwards browser errors and server <span class="mono">logger.error</span> calls straight here. Production writes to <span class="mono">app_errors</span> instead — Vercel can&rsquo;t reach this LAN box — and those rows are pulled in and merged below.</p>
       <div id="error-feed">
         <p class="muted empty">No errors captured yet.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="bugs-heading">
+      <div class="section-head">
+        <p class="eyebrow" id="bugs-heading">Bug reports</p>
+        <div class="section-actions">
+          <button class="btn btn-quiet" id="refresh-bugs">Refresh</button>
+        </div>
+      </div>
+      <p class="section-note">Filed by staff from inside the app, merged newest-first across local and production (ids restart per database, so each row is tagged with its origin). Descriptions and screenshots stay in Supabase and are decrypted on the way here &mdash; the auto-filed GitHub issue carries only the route pattern and browser, never the user&rsquo;s words. Screenshot links are signed and expire after 10 minutes.</p>
+      <div id="bug-feed">
+        <p class="muted empty">Loading…</p>
       </div>
     </section>
 

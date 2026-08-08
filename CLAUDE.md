@@ -215,12 +215,14 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/auth/lockout` | POST | Account lockout check/record |
+| `/api/bug-reports` | GET | Dev-portal read of user-filed bug reports (CRON_SECRET bearer; decrypts descriptions, mints signed screenshot URLs) |
 | `/api/clients/[id]/access-token` | POST | Generate client portal access token |
 | `/api/clients/[id]/resources` | GET/POST | List/upload client resources |
 | `/api/clients/[id]/resources/[resourceId]/download` | GET | Download a client resource |
 | `/api/clients/[id]/resources/upload` | POST | Upload client resource file |
 | `/api/clients/[id]/send-invite` | POST | Send portal invite to client |
-| `/api/cron/cleanup` | GET | Periodic data cleanup |
+| `/api/cron/cleanup` | GET | Periodic data cleanup (also expires bug-report screenshots at 90d, reports at 1y) |
+| `/api/errors` | POST | Frontend error sink — authed staff only, writes `app_errors` with the service client |
 | `/api/cron/scholarship-batches` | GET | Generate monthly scholarship invoices |
 | `/api/cron/send-invoice-reminders` | GET | Invoice payment reminder cron (daily 2PM UTC) |
 | `/api/cron/send-reminders` | GET | Session reminder cron |
@@ -271,6 +273,18 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/logger.ts` — Use instead of raw `console.error` for anything that might contain PHI
 - Strips error objects to `{ name, message }` only — never logs stack traces or request bodies
 
+### Error Capture & Bug Reports
+
+Three sinks, one review surface (the dev portal — there is deliberately no in-app UI):
+
+- **Backend** — `logger.error()` writes PHI-safe `{name, message}` rows to `app_errors` in production (`20260803_app_errors.sql`), and mirrors to the dev portal in development.
+- **Frontend** — `ErrorReporter` (`src/components/errors/error-reporter.tsx`, mounted unconditionally in the root layout) hooks `window.onerror`, `unhandledrejection` and `console.error`. It posts to `/api/dev/errors/` in dev and `/api/errors/` in production, and feeds `clientErrorBuffer` either way. `createReportGate()` in `src/lib/errors/report.ts` caps each tab at 20 reports/min with a 5s dedupe — **do not remove it**, one render loop would otherwise write thousands of rows. `/api/errors/` requires an authenticated staff session on purpose: the client portal and login page are NOT covered, because an anonymous ingest endpoint on a public URL is a spam sink.
+- **Error boundaries** — all four (`global-error`, dashboard, auth, portal) render `<BoundaryErrorReporter>`. `window.onerror` can't see these: a boundary catching the error is exactly what stops it reaching the global handler.
+
+**Bug reports** (`bug_reports` + the private `bug-screenshots` bucket, `20260807_bug_reports.sql`) are a separate table on purpose — attributed and voluntary, where `app_errors` is anonymous ambient telemetry. `submitBugReport()` (`src/app/actions/bug-reports.ts`) is the only write path: `description` is PHI-encrypted, so a browser can never insert directly and there is no INSERT policy.
+
+**The PHI boundary is the load-bearing rule here.** Each report auto-files a GitHub issue in a private repo (`GITHUB_BUG_REPO`), and **that issue is a pointer, not a copy**: `IssueFacts` in `src/lib/bug-reports/github-issue.ts` structurally cannot hold the description, the raw URL, or an error *message* — only the route pattern from `toRoutePattern()`, the role, browser, commit, and error **kinds with counts**. Kinds are machine-generated; messages are not (`console.error('Failed to save ' + clientName)` is ordinary code). Never widen `IssueFacts` — put anything new behind the portal link instead.
+
 ### Next.js 16 Proxy (Middleware)
 - **File must be `src/proxy.ts`** exporting `proxy` function (NOT `middleware.ts`)
 - Next.js 16 renamed middleware to "proxy" — using the old convention triggers a deprecation warning
@@ -307,6 +321,10 @@ Both lists are customizable per-organization via `settings.custom_lists` (labels
 - `src/lib/invoices/client-search.ts` — `clientSearchFilterIds()`: turn a client-name search into a `client_id` `.in()` filter (an embedded-resource filter can't live in a top-level PostgREST `.or()`)
 - `src/lib/settings/input.ts` — `parseSettingNumber()` (allows `0`, unlike `x || fallback`) and `resolveDurationOptions()` (never returns an empty list)
 - `src/lib/health/detail-auth.ts` — `isHealthDetailAuthorized()`: gates `/api/health` per-check detail behind `CRON_SECRET` in production
+- `src/lib/bug-reports/route-pattern.ts` — `toRoutePattern()`: `/invoices/<uuid>/` → `/invoices/[id]/`. **Fails closed** — anything it can't classify becomes `[id]`, because this is what keeps record ids out of GitHub
+- `src/lib/bug-reports/github-issue.ts` — `buildIssueTitle()`/`buildIssueBody()`/`fileBugIssue()`. `IssueFacts` is the PHI allow-list by construction; `fileBugIssue()` never throws, so a GitHub outage costs an issue and never the report
+- `src/lib/errors/report.ts` — `createReportGate()` (dedupe + per-minute cap) and `consoleArgsToMessage()`. Moved out of `src/lib/dev/` when the reporter went to production
+- `src/lib/errors/client-buffer.ts` — `clientErrorBuffer`: in-memory ring of this session's JS errors so a bug report can attach what just broke. `snapshot()` has full messages (Supabase only); `summarizeKinds()` is the GitHub-safe view
 - `src/app/actions/session-requests.ts` — `getPendingSessionRequests()`: staff read of pending session requests with the client-submitted notes decrypted
 - Atomic payroll mark-paid: `markSessionsPaid()` in `src/app/actions/sessions.ts` → the `mark_sessions_paid(uuid[], date)` Postgres function (one statement, only touches not-yet-paid rows, snapshots each session's `contractor_pay`)
 - `src/lib/organization/settings.ts` — `DEFAULT_SETTINGS` + `mergeOrganizationSettings()` (see Configurable Organization Settings above), plus `ADMIN_WRITABLE_SETTING_SECTIONS` / `applySettingsUpdate()`: the section allow-list an admin may write (`invoice`, `session`, `notification`, `custom_lists`, `pricing`) — `security`, `portal`, `features`, `automation` and `permissions` are owner-only. Also `adminGrantsFromSettings()`: the ONLY place `settings.permissions` flags become permissions (see Owner-only money surfaces)
@@ -402,8 +420,18 @@ UPSTASH_REDIS_REST_TOKEN=
 ANTHROPIC_API_KEY=
 HELP_AI_MODEL=            # optional model override; defaults to claude-sonnet-5
 
-# Cron job authentication
+# Cron job authentication. Also gates /api/health detail and /api/bug-reports/
+# (the dev portal reads both with this bearer).
 CRON_SECRET=secret-for-vercel-cron-jobs
+
+# Bug reports → auto-filed GitHub issues. MUST be a PRIVATE repo: MTApp itself is
+# public. The issue body carries no user text, but the backlog and route
+# structure still shouldn't be world-readable. Unset = reports still save, no
+# issue is filed.
+GITHUB_BUG_REPO=weberl48/mca-bugs
+GITHUB_BUG_TOKEN=          # fine-grained PAT, issues:write on that repo only
+# Where the auto-filed issue tells you to go to read the description/screenshot.
+DEV_PORTAL_PUBLIC_URL=http://192.168.1.160:4321
 
 # Local-only auto-login (never set in Vercel): middleware signs unauthenticated requests
 # in as dev-owner@maycreativearts.test using TEST_USER_PASSWORD. Requires dev build AND

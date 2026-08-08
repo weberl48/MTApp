@@ -13,7 +13,7 @@ import "./globals.css";
 import { NON_DEFAULT_THEME_IDS, THEME_STORAGE_KEY } from "@/lib/themes";
 import { ServiceWorkerProvider } from "@/components/providers/service-worker-provider";
 import { PWAInstallPrompt } from "@/components/pwa/install-prompt";
-import { DevErrorReporter } from "@/components/dev/dev-error-reporter";
+import { ErrorReporter } from "@/components/errors/error-reporter";
 import { ThemeProvider } from "next-themes";
 import { validateEnv } from "@/lib/env";
 
@@ -115,7 +115,11 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <ServiceWorkerProvider />
           <PWAInstallPrompt />
-          {process.env.NODE_ENV === "development" ? <DevErrorReporter /> : null}
+          {/* Mounted in every environment on purpose — it being dev-only is why
+              production frontend crashes went unrecorded. It picks its own sink:
+              the dev portal locally, `app_errors` in production. */}
+          <ErrorReporter />
+
           {children}
         </ThemeProvider>
       </body>

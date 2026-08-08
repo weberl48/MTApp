@@ -1,9 +1,14 @@
 /**
- * Helpers for the dev-only error reporter that forwards browser errors to the
- * local dev portal (tools/dev-portal). Nothing here runs in production.
+ * Helpers for the browser error reporter.
+ *
+ * This used to live under `dev/` and run only in development, forwarding to the
+ * local dev portal. It now runs in production too, posting to /api/errors/ which
+ * writes to `app_errors` — so treat everything here as production code. The
+ * throttle below is what stands between one broken render loop and a few
+ * thousand rows.
  */
 
-export interface DevErrorPayload {
+export interface ErrorReportPayload {
   source: 'frontend' | 'backend'
   kind: string
   message: string

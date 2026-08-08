@@ -14,6 +14,7 @@ import { PORT, ENVIRONMENTS, GLOBAL_LINKS, ENDPOINTS, POLL_INTERVAL_MS } from '.
 import { loadRepoEnv } from './lib/env.mjs'
 import { addError, listErrors, clearErrors, addHistoryPoint, getHistory } from './lib/store.mjs'
 import { prodErrors } from './lib/prod-errors.mjs'
+import { bugReports } from './lib/bug-reports.mjs'
 import { checkEnvironmentHealth, sweepEndpoints } from './lib/checks.mjs'
 import { supabaseProjectStatuses, restoreSupabaseProject, ciStatus } from './lib/external.mjs'
 import { certStatus } from './lib/cert.mjs'
@@ -131,6 +132,13 @@ async function handleApi(req, res, url) {
     case 'DELETE /api/errors': {
       clearErrors()
       json(res, 200, { ok: true })
+      return
+    }
+    case 'GET /api/bug-reports': {
+      // Pulled from the app rather than Supabase — descriptions are encrypted
+      // and screenshots need signed URLs. See lib/bug-reports.mjs.
+      const force = url.searchParams.get('refresh') === '1'
+      json(res, 200, { reports: await bugReports(repoEnv, { force }) })
       return
     }
     case 'GET /api/history': {

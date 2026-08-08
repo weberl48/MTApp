@@ -9,6 +9,7 @@ const state = {
   cert: null,
   errors: [],
   errorFilter: 'all',
+  bugs: null,
   sweeping: false,
   lastSweep: null,
 }
@@ -350,6 +351,50 @@ function wireErrorControls() {
   })
 }
 
+// ---- Bug reports ----
+
+function renderBugs() {
+  const feed = $('#bug-feed')
+  if (state.bugs === null) {
+    feed.innerHTML = `<p class="muted empty">Loading…</p>`
+    return
+  }
+  if (!state.bugs.length) {
+    // Distinguish "nothing filed" from "can't reach prod" — an empty panel that
+    // actually means "misconfigured" is how you miss reports for a week.
+    feed.innerHTML = `<p class="muted empty">No bug reports. (Needs <span class="mono">CRON_SECRET</span> in <span class="mono">.env.local</span> and a deployed <span class="mono">/api/bug-reports/</span>.)</p>`
+    return
+  }
+  feed.innerHTML = state.bugs
+    .map(b => {
+      const kinds = (b.recentErrors || []).map(e => e.kind)
+      const uniqueKinds = [...new Set(kinds)]
+      return `<div class="error-item source-frontend">
+      <div class="error-item-head">
+        <span class="error-source">${esc(b.origin || 'prod')} #${esc(String(b.id))}</span>
+        <span class="error-time">${fmtTime(b.createdAt)}</span>
+        <span class="error-kind">${esc(b.reporter || 'unknown')}${b.role ? ' · ' + esc(b.role) : ''}</span>
+        ${b.issueUrl ? `<a class="mono" style="color:var(--accent);text-decoration:none" href="${esc(b.issueUrl)}" target="_blank" rel="noreferrer">issue #${esc(String(b.issueNumber))} ↗</a>` : '<span class="muted">no issue filed</span>'}
+      </div>
+      <p class="error-message" style="white-space:pre-wrap">${esc(b.description)}</p>
+      <p class="error-url">${esc(b.routePattern || '—')}${b.viewport ? ' · ' + esc(b.viewport) : ''}${b.appCommit ? ' · ' + esc(b.appCommit.slice(0, 8)) : ''}</p>
+      ${uniqueKinds.length ? `<p class="error-url">JS errors: ${esc(uniqueKinds.join(', '))}</p>` : ''}
+      ${b.screenshotUrl ? `<details><summary>Screenshot (may contain client information)</summary><a href="${esc(b.screenshotUrl)}" target="_blank" rel="noreferrer"><img src="${esc(b.screenshotUrl)}" alt="Screenshot attached to bug report ${esc(String(b.id))}" style="max-width:100%;border-radius:6px;margin-top:8px"></a></details>` : ''}
+      ${b.url ? `<details><summary>Full URL &amp; browser</summary><pre>${esc(b.url)}\n${esc(b.userAgent || '')}</pre></details>` : ''}
+    </div>`
+    })
+    .join('')
+}
+
+async function refreshBugs(force = false) {
+  try {
+    state.bugs = (await fetchJson(`/api/bug-reports${force ? '?refresh=1' : ''}`)).reports || []
+  } catch {
+    state.bugs = []
+  }
+  renderBugs()
+}
+
 // ---- CI panel ----
 
 function renderCi() {
@@ -499,17 +544,22 @@ async function init() {
     .join('')
   renderSweepActions()
   wireErrorControls()
+  $('#refresh-bugs').addEventListener('click', () => refreshBugs(true))
   $('#refresh-now').addEventListener('click', () => {
     refreshOverview()
     refreshErrors()
     refreshExternal()
+    refreshBugs(true)
   })
 
-  await Promise.all([refreshOverview(), refreshErrors(), refreshExternal()])
+  await Promise.all([refreshOverview(), refreshErrors(), refreshExternal(), refreshBugs()])
 
   setInterval(() => { if (!document.hidden) refreshOverview() }, 60000)
   setInterval(() => { if (!document.hidden) refreshErrors() }, 10000)
   setInterval(() => { if (!document.hidden) refreshExternal() }, 5 * 60000)
+  // Reports are filed by humans, so a slow poll is plenty — and each one costs
+  // a round trip to production.
+  setInterval(() => { if (!document.hidden) refreshBugs() }, 2 * 60000)
 }
 
 init().catch(err => {

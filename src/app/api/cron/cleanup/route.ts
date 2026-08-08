@@ -14,6 +14,7 @@ function verifyCronSecret(request: NextRequest): boolean {
 const LOGIN_ATTEMPTS_DAYS = 90
 const SESSION_REMINDERS_DAYS = 90
 const AUDIT_LOGS_YEARS = 7
+const BUG_SCREENSHOT_DAYS = 90
 
 /**
  * GET /api/cron/cleanup
@@ -22,6 +23,7 @@ const AUDIT_LOGS_YEARS = 7
  * - login_attempts older than 90 days
  * - sent/failed session_reminders older than 90 days
  * - audit_logs older than 7 years (HIPAA requires 6-year minimum)
+ * - bug report screenshots older than 90 days, and reports older than 1 year
  */
 export async function GET(request: NextRequest) {
   if (!verifyCronSecret(request)) {
@@ -61,6 +63,34 @@ export async function GET(request: NextRequest) {
       .delete({ count: 'exact' })
       .lt('created_at', auditCutoff.toISOString())
     results.audit_logs_deleted = auditCount ?? 0
+
+    // 4. Bug report retention.
+    //
+    // Screenshots are the PHI-densest thing this app stores outside the
+    // database, so they expire well before the report does. The storage objects
+    // must be collected BEFORE prune_bug_reports() runs — that function nulls
+    // screenshot_path, and once the pointer is gone the file is unreachable and
+    // would sit in the bucket forever.
+    const screenshotCutoff = new Date(
+      Date.now() - BUG_SCREENSHOT_DAYS * 24 * 60 * 60 * 1000
+    ).toISOString()
+    const { data: expiring } = await db
+      .from('bug_reports')
+      .select('screenshot_path')
+      .not('screenshot_path', 'is', null)
+      .lt('created_at', screenshotCutoff)
+
+    const paths = (expiring ?? [])
+      .map((r: { screenshot_path: string | null }) => r.screenshot_path)
+      .filter((p: string | null): p is string => Boolean(p))
+
+    if (paths.length > 0) {
+      await db.storage.from('bug-screenshots').remove(paths)
+    }
+    results.bug_screenshots_deleted = paths.length
+
+    // Nulls the now-dangling paths and drops reports past a year.
+    await db.rpc('prune_bug_reports')
 
     return NextResponse.json({
       message: 'Cleanup completed',

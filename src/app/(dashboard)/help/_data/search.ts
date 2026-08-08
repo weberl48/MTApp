@@ -35,6 +35,11 @@ export const SYNONYMS: Record<string, string[]> = {
   building: ['location', 'classroom'], facility: ['location', 'classroom'],
   dayhab: ['location', 'classroom'], 'day-hab': ['location', 'classroom'],
   school: ['classroom', 'location'], schools: ['classroom', 'location'],
+  // Almost nobody searches the word "bug" — they describe the symptom.
+  broken: ['bug', 'error'], break: ['bug', 'error'], crash: ['bug', 'error'],
+  crashed: ['bug', 'error'], glitch: ['bug', 'error'], stuck: ['bug', 'error'],
+  wrong: ['bug', 'error'], failed: ['bug', 'error'], failing: ['bug', 'error'],
+  report: ['bug'], feedback: ['bug'],
 }
 
 /** Words that carry question structure but no search meaning. */

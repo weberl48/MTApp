@@ -18,10 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, ChevronLeft, ChevronRight, Code2, Eye, Users, ExternalLink, HelpCircle, Palette } from 'lucide-react'
+import { Bug, Check, LogOut, User as UserIcon, Settings, Building2, ChevronDown, ChevronLeft, ChevronRight, Code2, Eye, Users, ExternalLink, HelpCircle, Palette } from 'lucide-react'
 import { useOrganization } from '@/contexts/organization-context'
 import { useHydrated, useIsMobile } from '@/lib/hooks/use-is-mobile'
 import { AppearanceMenu, AppearanceMenuContent } from '@/components/ui/appearance-menu'
+import { BugReportDialog } from '@/components/bug-report/bug-report-dialog'
 import { cn } from '@/lib/utils'
 import type { User } from '@/types/database'
 
@@ -95,6 +96,7 @@ export function Header({ user }: HeaderProps) {
   // former submenus render as in-place pages instead (reachable only via
   // lg:hidden rows — desktop never leaves 'root').
   const [menuPage, setMenuPage] = useState<'root' | 'org' | 'viewAs' | 'portal' | 'appearance'>('root')
+  const [bugReportOpen, setBugReportOpen] = useState(false)
 
   /**
    * Mint a fresh portal token for this client and open it.
@@ -642,6 +644,10 @@ export function Header({ user }: HeaderProps) {
                 <HelpCircle className="mr-2 h-4 w-4" />
                 Help
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setBugReportOpen(true)}>
+                <Bug className="mr-2 h-4 w-4" />
+                Report a Bug
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -651,6 +657,10 @@ export function Header({ user }: HeaderProps) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Lives outside the menu so closing the menu doesn't unmount the dialog
+          mid-submit. */}
+      <BugReportDialog open={bugReportOpen} onOpenChange={setBugReportOpen} />
     </header>
   )
 }

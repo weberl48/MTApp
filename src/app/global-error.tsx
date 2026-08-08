@@ -1,6 +1,9 @@
 'use client'
 
+import { BoundaryErrorReporter } from '@/components/errors/boundary-reporter'
+
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -9,6 +12,10 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
+        {/* This boundary replaces the root layout, so ErrorReporter is not
+            mounted and nothing else can record this crash. It is also the most
+            severe one there is — the whole tree failed. */}
+        <BoundaryErrorReporter error={error} boundary="global" />
         <div style={{
           display: 'flex',
           flexDirection: 'column',

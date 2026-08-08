@@ -111,6 +111,11 @@ export const ENDPOINTS = [
   { method: 'POST', path: `/api/clients/${FAKE_ID}/send-invite/`, expect: [401, 403, 404], group: 'clients' },
   // Dev-only relay: rejects the empty probe locally (400), hard 404 in production.
   { method: 'POST', path: '/api/dev/errors/', expect: [400, 404], group: 'dev' },
+  // Frontend error sink. Rejects the empty probe body before it ever checks
+  // auth, so 400 is the healthy answer here.
+  { method: 'POST', path: '/api/errors/', expect: [400, 401], group: 'errors' },
+  // Portal read path — CRON_SECRET bearer, so unauthenticated must be 401.
+  { method: 'GET', path: '/api/bug-reports/', expect: [401], group: 'errors' },
   { method: 'GET', path: '/api/cron/cleanup/', expect: [401], group: 'cron' },
   { method: 'GET', path: '/api/cron/scholarship-batches/', expect: [401], group: 'cron' },
   { method: 'GET', path: '/api/cron/send-invoice-reminders/', expect: [401], group: 'cron' },

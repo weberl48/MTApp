@@ -232,4 +232,47 @@ For the same reason, **don't include client names or health details in your ques
 The question text you ask (and any Help Center search that finds nothing) is recorded so the practice owner can see what people are looking for and fill documentation gaps — owners see this as the **Help gaps** card on the Help Center page. That's one more reason to keep client names and health details out of your questions: they'd end up in that log.
     `,
   },
+  {
+    slug: 'reporting-a-bug',
+    title: 'Reporting a Bug',
+    category: 'getting-started',
+    description: 'How to report something that is broken, and what gets sent with your report.',
+    relatedArticles: ['getting-started', 'ai-helper'],
+    keywords: ['bug', 'report a bug', 'broken', 'error', 'not working', 'crash', 'problem', 'issue', 'glitch', 'something went wrong', 'screenshot', 'feedback'],
+    content: `
+## When something is broken
+
+If a page won't load, a number looks wrong, or a button does nothing, you can report it from inside the app. Reports go straight to the developer — you don't need to email or text anyone.
+
+### How to report
+
+Open the **avatar menu** in the top-right corner and choose **Report a Bug**. Describe what you were trying to do and what happened instead. The more specific the better: "I clicked Send on the invoice for a client and got a red error message" is far more useful than "invoices are broken."
+
+If a page crashes outright, the error screen has its own **Report this** button. Use that one — it automatically includes a reference code that ties your report to the exact failure in the logs.
+
+### What gets sent automatically
+
+You don't need to describe your setup. Every report includes:
+
+- **Which page you were on** and the exact address, so the problem can be found without guesswork.
+- **Your browser and screen size** — many bugs only happen on phones, or only in one browser.
+- **The app version** you were using, so a bug that's already fixed can be spotted immediately.
+- **Any errors your browser recorded** during your visit, even ones you never saw on screen.
+- **Your name and role**, so you can be asked a follow-up question if something is unclear.
+
+The report dialog has a **What gets sent with this report** section you can expand to see this before you send.
+
+### Screenshots
+
+Attaching a screenshot is optional and often the fastest way to explain a visual problem. Take a screenshot the way you normally would on your phone or computer, then attach it in the dialog. You'll see a preview and can remove it before sending.
+
+**Be aware that a screenshot of most pages in this app will show client information.** That's allowed — screenshots are stored securely, only staff can view them, and they're automatically deleted after 90 days. But it's worth a moment's thought: if the client details on screen aren't relevant to the bug, consider closing or scrolling past them first.
+
+### What happens next
+
+Your report is logged and a tracking item is created for the developer. Your description and any screenshot stay inside the app's own secure database — they are never copied into that tracking item, so no client information leaves the system.
+
+You won't get an automatic reply. If a bug is blocking your work right now, report it and then tell the practice owner directly so it can be prioritized.
+    `,
+  },
 ]
