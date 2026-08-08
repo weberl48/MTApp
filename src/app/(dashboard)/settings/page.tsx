@@ -10,6 +10,7 @@ import {
   History,
   Sliders,
   Loader2,
+  DollarSign,
 } from 'lucide-react'
 import { SquareStatusBadge } from '@/components/square/status-badge'
 
@@ -42,6 +43,13 @@ const settingsCards: SettingsCard[] = [
     href: '/settings/business/',
     icon: Settings2,
     adminOnly: true,
+  },
+  {
+    title: 'Pricing',
+    description: 'Service rates, contractor pay, fees — and a price simulator',
+    href: '/settings/pricing/',
+    icon: DollarSign,
+    ownerOnly: true,
   },
   {
     title: 'Customize & Automate',
